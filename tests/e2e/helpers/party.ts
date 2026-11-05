@@ -1,9 +1,12 @@
 // Outils pour piloter une soirée de test : une TV (1920x1080) + des téléphones (un contexte navigateur chacun).
-import { expect, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { expect, type Browser, type BrowserContext, type BrowserContextOptions, type Locator, type Page } from "@playwright/test";
 import type { TestServer } from "./server";
 
-export type GameId = "qui-est-le-plus" | "oui-non";
-export const GAME_NAMES: Record<GameId, string> = { "qui-est-le-plus": "Qui est le plus… ?", "oui-non": "Oui ou Non" };
+export type GameId = "qui-est-le-plus" | "ceci-ou-cela";
+export const GAME_NAMES: Record<GameId, string> = { "qui-est-le-plus": "Qui est le plus… ?", "ceci-ou-cela": "Ceci ou Cela" };
+
+/** Téléphone par défaut (les projets Playwright imposent le leur : Android, Firefox mobile, iPhone). */
+export const DEFAULT_PHONE: BrowserContextOptions = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 };
 
 export interface Phone {
   context: BrowserContext;
@@ -17,6 +20,8 @@ export interface Phone {
 export interface JoinOptions {
   /** Prend la photo avec la caméra factice au lieu d'un avatar prédéfini. */
   photo?: boolean;
+  /** Taille d'écran de ce téléphone (ex : 360x640, le plus petit à supporter). */
+  viewport?: { width: number; height: number };
 }
 
 export class Party {
@@ -27,6 +32,7 @@ export class Party {
   constructor(
     private browser: Browser,
     readonly server: TestServer,
+    private phoneOptions: BrowserContextOptions = DEFAULT_PHONE,
   ) {}
 
   // ───────────── Ouverture des écrans ─────────────
@@ -47,15 +53,8 @@ export class Party {
   }
 
   /** Ouvre /play dans un contexte neuf (localStorage séparé), sans créer le profil. */
-  async openPhonePage(): Promise<{ context: BrowserContext; page: Page }> {
-    const context = await this.browser.newContext({
-      viewport: { width: 390, height: 844 },
-      isMobile: true,
-      hasTouch: true,
-      deviceScaleFactor: 2,
-      ignoreHTTPSErrors: true,
-      permissions: ["camera"],
-    });
+  async openPhonePage(overrides: BrowserContextOptions = {}): Promise<{ context: BrowserContext; page: Page }> {
+    const context = await this.browser.newContext({ ...this.phoneOptions, ignoreHTTPSErrors: true, ...overrides });
     this.contexts.push(context);
     const page = await context.newPage();
     await page.goto(this.server.playUrl);
@@ -67,7 +66,7 @@ export class Party {
   async addPhone(name: string, opts: JoinOptions = {}): Promise<Phone> {
     const inLobby = (await this.tv.locator("[data-phase]").getAttribute("data-phase")) === "lobby";
     const before = inLobby ? await this.tvPlayerIds() : [];
-    const { context, page } = await this.openPhonePage();
+    const { context, page } = await this.openPhonePage(opts.viewport ? { viewport: opts.viewport } : {});
     const phone: Phone = { context, page, name, id: null, t: (id) => page.getByTestId(id) };
 
     if (inLobby) {
@@ -86,6 +85,13 @@ export class Party {
   async addPhones(...names: string[]) {
     const out: Phone[] = [];
     for (const n of names) out.push(await this.addPhone(n));
+    return out;
+  }
+
+  /** Plusieurs téléphones avec les mêmes options (ex : 8 joueurs sur un petit écran). */
+  async addPhonesWith(opts: JoinOptions, ...names: string[]) {
+    const out: Phone[] = [];
+    for (const n of names) out.push(await this.addPhone(n, opts));
     return out;
   }
 
@@ -131,24 +137,26 @@ export class Party {
 
   /** Quel mini-jeu est affiché sur ce téléphone (pendant la phase "playing") ? */
   async gameOf(phone: Phone): Promise<GameId> {
-    const yes = phone.t("answer-yes");
+    const choice = phone.t("choice-0");
     const vote = phone.page.locator('[data-testid^="vote-option-"]').first();
-    await expect(yes.or(vote)).toBeVisible();
-    return (await yes.isVisible()) ? "oui-non" : "qui-est-le-plus";
+    await expect(choice.or(vote)).toBeVisible();
+    return (await choice.isVisible()) ? "ceci-ou-cela" : "qui-est-le-plus";
   }
 
   /**
    * Tout le monde répond à la manche en cours.
    * - qui-est-le-plus : le 1er joueur vote pour le 2e, tous les autres votent pour le 1er.
-   * - oui-non : tout le monde répond OUI (ou NON si `yes: false`).
+   * - ceci-ou-cela : tout le monde choisit la 1re réponse (ou la 2e avec `choice: 1`).
+   * Avec `spread`, les réponses sont réparties : chacun vote pour le suivant (tout le monde reçoit une voix) /
+   * les joueurs pairs choisissent la 1re réponse, les impairs la 2e.
    */
-  async answerRound(phones: Phone[] = this.phones, opts: { yes?: boolean } = {}): Promise<GameId> {
+  async answerRound(phones: Phone[] = this.phones, opts: { choice?: 0 | 1; spread?: boolean } = {}): Promise<GameId> {
     const game = await this.gameOf(phones[0]!);
     for (const [i, p] of phones.entries()) {
-      if (game === "oui-non") {
-        await p.t(opts.yes === false ? "answer-no" : "answer-yes").click();
+      if (game === "ceci-ou-cela") {
+        await p.t(`choice-${opts.spread ? i % 2 : (opts.choice ?? 0)}`).click();
       } else {
-        const target = i === 0 ? phones[1]! : phones[0]!;
+        const target = opts.spread ? phones[(i + 1) % phones.length]! : i === 0 ? phones[1]! : phones[0]!;
         await p.t(`vote-option-${target.id}`).click();
       }
     }
@@ -185,6 +193,26 @@ export class Party {
     return game;
   }
 
+  // ───────────── Mise en page ─────────────
+
+  /**
+   * Éléments dont le contenu est coupé (débordement caché) dans une zone de la TV : signe d'un écran qui ne tient pas.
+   * Les textes tronqués par « … » (pseudos longs) sont tolérés.
+   */
+  async clippedIn(testId: string, page: Page = this.tv): Promise<string[]> {
+    return page.getByTestId(testId).evaluate((root) => {
+      const out: string[] = [];
+      for (const el of [root, ...root.querySelectorAll<HTMLElement>("*")] as HTMLElement[]) {
+        const cs = getComputedStyle(el);
+        if (cs.textOverflow === "ellipsis") continue;
+        const clipsY = cs.overflowY !== "visible" && el.scrollHeight > el.clientHeight + 2;
+        const clipsX = cs.overflowX !== "visible" && el.scrollWidth > el.clientWidth + 2;
+        if (clipsX || clipsY) out.push(`${el.tagName.toLowerCase()}.${String(el.className).slice(0, 60)} ${el.scrollWidth}x${el.scrollHeight} > ${el.clientWidth}x${el.clientHeight}`);
+      }
+      return out;
+    });
+  }
+
   // ───────────── Fin ─────────────
 
   async close() {
@@ -192,7 +220,7 @@ export class Party {
   }
 }
 
-/** Photo de profil avec la caméra factice de Chromium. */
+/** Photo de profil avec la caméra factice (Chromium : args du lanceur ; Firefox : prefs `media.navigator.*`). */
 export async function takePhoto(page: Page) {
   await page.getByTestId("take-photo").click();
   await page.getByTestId("capture-photo").click();

@@ -1,0 +1,84 @@
+# Mini-jeu "Ceci ou Cela" — doc : src/minigames/ceci-ou-cela/README.md
+# Une question, deux réponses (Oui/Non ou deux choix libres : "Mer" / "Montagne").
+#  - Question normale : on gagne si on est dans le camp majoritaire.
+#  - Question avec {joueur} : un invité tiré au sort répond pour de vrai, les autres devinent sa réponse.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "Ceci ou Cela"
+description: "Deux réponses possibles : suivez la majorité… ou devinez un invité"
+
+# Temps pour répondre, en secondes (la manche s'arrête plus tôt si tout le monde a répondu)
+duree: 20
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 12
+
+# Les deux réponses des questions écrites en texte simple. Exactement 2 choix.
+# Gardez-les courts (14 caractères max conseillés) : ce sont de gros boutons sur les téléphones.
+choix_par_defaut: [Oui, Non]
+
+points:
+  bonne_reponse: 100  # points pour chaque joueur du camp majoritaire / qui devine la réponse de l'invité
+  cible: 0            # mode {joueur} : points donnés à l'invité pour chaque personne qui l'a bien deviné (0 = rien)
+
+# Une question = une ligne commençant par "- ". Trois formes possibles :
+#   1. Texte seul : utilise les choix_par_defaut (Oui / Non).
+#        - "L'ananas sur la pizza ?"
+#   2. Objet avec "texte" + "choix" (exactement 2 réponses) + "duree" optionnelle (secondes) :
+#        - texte: "Plutôt…"
+#          choix: [Mer, Montagne]
+#          duree: 25
+#   3. Mode {joueur} (dans l'une ou l'autre forme) : {joueur} est remplacé par un invité tiré au sort.
+#      Il répond pour de vrai ; les autres devinent. Sans lui (absent), c'est la majorité qui compte.
+#        - "Est-ce que {joueur} aime l'ananas sur la pizza ?"
+# Mettez les questions entre guillemets si elles contiennent {joueur}, ": " ou " #".
+# Maximum conseillé : 25 questions (les manches sont tirées au hasard parmi elles).
+questions:
+  # --- Dilemmes à deux réponses (majorité) ---
+  - texte: "Plutôt…"
+    choix: [Mer, Montagne]
+  - texte: "Pour trinquer à minuit :"
+    choix: [Champagne, Mojito]
+  - texte: "Le réveillon idéal :"
+    choix: [À la maison, En boîte]
+  - texte: "Plutôt…"
+    choix: [Lève-tôt, Couche-tard]
+  - texte: "Les voeux de minuit :"
+    choix: [Sincères, Pour rire]
+  - texte: "Pour le dessert :"
+    choix: [Bûche, Galette]
+  - texte: "Plutôt…"
+    choix: [Chat, Chien]
+  - texte: "En soirée, on préfère :"
+    choix: [Danser, Discuter]
+  - texte: "Plutôt…"
+    choix: [Sucré, Salé]
+  - texte: "Pour une soirée pyjama :"
+    choix: [Film, Jeux de société]
+  - texte: "Pour 2027, il vaut mieux :"
+    choix: [Planifier, Improviser]
+  # --- Oui / Non (majorité) ---
+  - "L'ananas sur la pizza ?"
+  - "Tu as déjà embrassé quelqu'un à minuit ?"
+  - "Tu tiendras ta résolution jusqu'à février ?"
+  - "Tu serais capable de chanter au karaoké ce soir ?"
+  # --- Mode {joueur} : on devine sa réponse ---
+  - texte: "Pour {joueur}, le meilleur moment du réveillon :"
+    choix: [Le repas, Minuit]
+  - texte: "{joueur} préfère plutôt…"
+    choix: [Mer, Montagne]
+  - texte: "{joueur} est plutôt…"
+    choix: [Lève-tôt, Couche-tard]
+  - texte: "{joueur} boirait plutôt…"
+    choix: [Champagne, Bière]
+  - texte: "Pour {joueur}, la meilleure part :"
+    choix: [Bûche, Galette]
+  - "Est-ce que {joueur} aime l'ananas sur la pizza ?"
+  - "Est-ce que {joueur} a déjà pleuré devant un film de Noël ?"
+  - "Est-ce que {joueur} fait des résolutions chaque année ?"
+  - "Est-ce que {joueur} chante sous la douche ?"
+  - "Est-ce que {joueur} a déjà raté un train ou un avion ?"

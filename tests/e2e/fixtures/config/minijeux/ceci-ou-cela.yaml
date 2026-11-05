@@ -1,0 +1,20 @@
+# Config de test E2E : mélange de questions Oui/Non par défaut, de choix personnalisés et de questions sur un invité ({joueur}).
+actif: true
+nom: "Ceci ou Cela"
+description: "Deux réponses possibles : suivez la majorité… ou devinez un invité"
+duree: 8
+temps_resultats: 5
+choix_par_defaut: ["Oui", "Non"]
+points:
+  bonne_reponse: 100
+  cible: 0
+questions:
+  - "L'ananas sur la pizza, c'est acceptable ?"
+  - "Le champagne est meilleur que le crémant ?"
+  - texte: "Plutôt mer ou montagne ?"
+    choix: ["Mer", "Montagne"]
+  - "Est-ce que {joueur} aime le karaoké ?"
+  - texte: "{joueur} est plutôt…"
+    choix: ["Se coucher tôt", "Finir à l'aube"]
+  - texte: "Que choisirait {joueur} ?"
+    choix: ["Galette", "Bûche"]

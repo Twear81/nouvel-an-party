@@ -51,7 +51,7 @@ function prepareConfig(tmp: string, opts: ServerOptions): string {
   if (opts.introSeconds !== undefined) patch("partie.yaml", "intro_secondes", opts.introSeconds);
   if (opts.duree !== undefined) {
     patch("minijeux/qui-est-le-plus.yaml", "duree", opts.duree);
-    patch("minijeux/oui-non.yaml", "duree", opts.duree);
+    patch("minijeux/ceci-ou-cela.yaml", "duree", opts.duree);
   }
   return dir;
 }

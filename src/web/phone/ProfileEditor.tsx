@@ -65,9 +65,16 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
   if (camera) return <CameraCapture onPhoto={onPhoto} onClose={() => setCamera(false)} />;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center gap-4 pb-2">
-        <PlayerAvatar profile={previewProfile} size="lg" />
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!busy && profile.name) void submit();
+      }}
+      // Tout défile (même l'en-tête) pour que le bouton, collé en bas, reste visible sur les très petits écrans.
+      className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
+    >
+      <div className="flex shrink-0 items-center gap-4 pb-2 pt-1">
+        <PlayerAvatar profile={previewProfile} size="md" />
         <div className="min-w-0 flex-1">
           <label htmlFor="pseudo" className="text-sm font-bold uppercase tracking-widest text-ink-muted">
             {initial ? "Ton profil" : "Crée ton profil"}
@@ -80,15 +87,20 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
             onChange={(e) => setName(e.target.value)}
             placeholder="Ton pseudo"
             autoComplete="off"
-            className="mt-1 w-full rounded-btn border border-line bg-surface-strong px-4 py-3 text-xl font-bold text-ink outline-none placeholder:text-ink-muted/60 focus:border-accent"
+            autoCapitalize="words"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="go"
+            className="mt-1 w-full rounded-btn border-2 border-line bg-surface-strong px-4 py-2.5 text-xl font-bold text-ink outline-none placeholder:text-ink-muted/60 focus:border-accent"
           />
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-3">
+      <div className="px-1.5 pb-2">
         <SectionTitle>Avatar</SectionTitle>
         <div className="grid grid-cols-5 gap-2">
           <button
+            type="button"
             data-testid="take-photo"
             onClick={() => setCamera(true)}
             className={`flex aspect-square flex-col items-center justify-center rounded-full border-2 border-dashed text-2xl ${avatar.kind === "photo" ? "border-accent bg-accent/20" : "border-line bg-surface"}`}
@@ -101,6 +113,7 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
             const selected = avatar.kind === "preset" && avatar.id === a.id;
             return (
               <button
+                type="button"
                 key={a.id}
                 data-testid="avatar-option"
                 aria-label={a.label}
@@ -118,6 +131,7 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
         <div className="grid grid-cols-6 gap-2">
           {FRAMES.map((f) => (
             <button
+              type="button"
               key={f.id}
               data-testid="frame-option"
               aria-label={f.label}
@@ -135,6 +149,7 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
         <div className="grid grid-cols-6 gap-3 px-1">
           {COLORS.map((c) => (
             <button
+              type="button"
               key={c}
               data-testid="color-option"
               aria-label={c}
@@ -147,17 +162,20 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
         </div>
       </div>
 
-      <div className="shrink-0 space-y-2 pt-2">
+      {/* Toujours visible : collé en bas de la zone qui défile. */}
+      <div className="sticky bottom-0 -mx-1 mt-auto space-y-1 bg-gradient-to-t from-bg from-70% to-transparent px-1 pb-2 pt-5">
         {error && <p className="text-center text-sm font-semibold text-bad">{error}</p>}
-        <Button data-testid="profile-submit" size="md" block disabled={busy || !name.trim()} onClick={submit}>
-          {initial ? "Enregistrer" : "C'est parti !"}
-        </Button>
-        {onCancel && (
-          <Button variant="ghost" size="sm" block className="!py-1" onClick={onCancel}>
-            Annuler
+        <div className="flex items-center gap-2">
+          {onCancel && (
+            <Button type="button" variant="secondary" size="md" onClick={onCancel}>
+              Annuler
+            </Button>
+          )}
+          <Button type="submit" data-testid="profile-submit" size="md" block disabled={busy || !name.trim()}>
+            {!name.trim() ? "Choisis un pseudo" : initial ? "Enregistrer" : "C'est parti !"}
           </Button>
-        )}
+        </div>
       </div>
-    </div>
+    </form>
   );
 }

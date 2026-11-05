@@ -5,3 +5,5 @@ export * from "./Panel";
 export * from "./PlayerAvatar";
 export * from "./Stage";
 export * from "./confetti";
+export * from "./ConfirmDialog";
+export * from "./Icons";

@@ -5,7 +5,7 @@ test.describe("Reconnexion", () => {
     const { tv } = party;
     const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
     const idsBefore = (await party.tvPlayerIds()).sort();
-    await party.startGame({ "qui-est-le-plus": 1, "oui-non": 0 });
+    await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 0 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
     await expect(b!.t("phone-playing")).toBeVisible();
 
@@ -43,7 +43,7 @@ test.describe("Reconnexion", () => {
   test("un joueur déconnecté ne bloque pas « Continuer »", async ({ party }) => {
     const { tv } = party;
     const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
-    await party.startGame({ "qui-est-le-plus": 0, "oui-non": 2 });
+    await party.startGame({ "qui-est-le-plus": 0, "ceci-ou-cela": 2 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
     await party.answerRound();
     await expect(tv.getByTestId("tv-results")).toBeVisible();
@@ -66,7 +66,7 @@ test.describe("Reconnexion", () => {
   test("un joueur qui se déconnecte pendant les résultats n'empêche pas d'avancer", async ({ party }) => {
     const { tv } = party;
     const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
-    await party.startGame({ "qui-est-le-plus": 0, "oui-non": 2 });
+    await party.startGame({ "qui-est-le-plus": 0, "ceci-ou-cela": 2 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
     await party.answerRound();
     await expect(tv.getByTestId("tv-results")).toBeVisible();

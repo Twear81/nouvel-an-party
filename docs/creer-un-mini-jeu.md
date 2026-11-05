@@ -11,7 +11,7 @@ src/minigames/<id>/
 config/minijeux/<id>.yaml      contenu et réglages
 tests/unit/<id>.test.ts        tests de la logique
 ```
-`<id>` (ex. `plus-rapide`) = nom du dossier = nom du yaml = `id` dans `game.ts`. Inspirez-vous de `qui-est-le-plus` et `oui-non`.
+`<id>` (ex. `plus-rapide`) = nom du dossier = nom du yaml = `id` dans `game.ts`. Inspirez-vous de `qui-est-le-plus` et `ceci-ou-cela`.
 
 ## 2. game.ts : le contrat `MiniGame<Cfg, Item, State>`
 - `Cfg` : contenu validé du yaml. `Item` : un élément tirable (une question…). `State` : l'état interne d'une manche, jamais envoyé tel quel.
@@ -68,7 +68,7 @@ Deux listes à compléter, sinon le jeu n'apparaît pas (ou plante) :
 ```ts
 // src/minigames/registry.server.ts
 import plusRapide from "./plus-rapide/game";
-export const serverGames: MiniGame[] = [quiEstLePlus, ouiNon, plusRapide];
+export const serverGames: MiniGame[] = [quiEstLePlus, ceciOuCela, plusRapide];
 ```
 ```ts
 // src/minigames/registry.web.ts : même id, vues React
@@ -82,7 +82,7 @@ export const webGames: Record<string, MiniGameViews> = {
 Si `config/minijeux/<id>.yaml` est absent, le jeu est désactivé avec un avertissement. `actif: false` dans le yaml le désactive aussi.
 
 ## 5. yaml et README
-- Le yaml documente **chaque option en commentaire** (voir `config/minijeux/oui-non.yaml`) et commence par `actif: true`.
+- Le yaml documente **chaque option en commentaire** (voir `config/minijeux/ceci-ou-cela.yaml`) et commence par `actif: true`.
 - Le README (en français, pour l'organisateur) : principe, déroulé TV / téléphones, points avec exemple, tableau des options, comment écrire du contenu, pièges YAML, `actif: false`, redémarrage de NouvelAn.exe.
 
 ## 6. Tests

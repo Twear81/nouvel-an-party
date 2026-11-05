@@ -15,8 +15,9 @@ export function Backdrop({ stars = 46 }: { stars?: number }) {
   );
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden bg-night">
-      <div className="absolute -left-1/4 top-[-20%] h-[70%] w-[70%] animate-float rounded-full bg-hot/25 blur-[8rem]" />
-      <div className="absolute -right-1/4 bottom-[-25%] h-[70%] w-[70%] animate-float rounded-full bg-accent/15 blur-[8rem]" style={{ animationDelay: "-3s" }} />
+      {/* Halos en dégradé radial (pas de filtre blur : trop lourd pour Safari iOS et Firefox Android) */}
+      <div className="absolute -left-1/4 top-[-20%] h-[80%] w-[80%] animate-float" style={{ background: "radial-gradient(closest-side, rgb(255 79 154 / 0.28), transparent)" }} />
+      <div className="absolute -right-1/4 bottom-[-25%] h-[80%] w-[80%] animate-float" style={{ background: "radial-gradient(closest-side, rgb(246 205 114 / 0.17), transparent)", animationDelay: "-3s" }} />
       {dots.map((d, i) => (
         <span
           key={i}

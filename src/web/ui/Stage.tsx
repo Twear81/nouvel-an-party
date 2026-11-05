@@ -17,7 +17,7 @@ export function PhoneStage({ phase, children }: { phase?: string; children: Reac
   return (
     <div data-phase={phase} className="relative mx-auto h-full w-full max-w-[34rem] overflow-hidden">
       <div className="fixed inset-0 -z-0"><Backdrop stars={24} /></div>
-      <div className="relative z-10 flex h-[100dvh] min-h-0 flex-col pb-[env(safe-area-inset-bottom)] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <div className="relative z-10 flex h-app min-h-0 flex-col pb-[env(safe-area-inset-bottom)] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.75rem,env(safe-area-inset-top))]">
         {children}
       </div>
     </div>

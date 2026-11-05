@@ -1,13 +1,13 @@
 import { expect, test } from "./helpers/fixtures";
 
-// Le fixture contient 5 questions "qui-est-le-plus" et 6 "oui-non".
+// Le fixture contient 5 questions "qui-est-le-plus" et 6 "ceci-ou-cela".
 const QUI = "qui-est-le-plus";
-const OUI = "oui-non";
+const CECI = "ceci-ou-cela";
 
 test.describe("Écran de lancement", () => {
   test("les compteurs de manches sont bornés entre 0 et le nombre de questions", async ({ party }) => {
     const { tv } = party;
-    for (const [id, max] of [[QUI, 5], [OUI, 6]] as const) {
+    for (const [id, max] of [[QUI, 5], [CECI, 6]] as const) {
       await expect(tv.getByTestId(`setup-row-${id}`)).toContainText(`sur ${max}`);
       // Descendre jusqu'à 0 : le bouton "−" se désactive.
       await party.setCounts({ [id]: 0 });
@@ -23,15 +23,15 @@ test.describe("Écran de lancement", () => {
 
   test("le total des manches se met à jour", async ({ party }) => {
     const total = party.tv.getByTestId("setup-total");
-    await party.setCounts({ [QUI]: 0, [OUI]: 0 });
+    await party.setCounts({ [QUI]: 0, [CECI]: 0 });
     await expect(total).toContainText("0 manche");
     await party.setCounts({ [QUI]: 2 });
     await expect(total).toContainText("2 manches");
-    await party.setCounts({ [OUI]: 3 });
+    await party.setCounts({ [CECI]: 3 });
     await expect(total).toContainText("5 manches");
     await party.setCounts({ [QUI]: 1 });
     await expect(total).toContainText("4 manches");
-    await party.setCounts({ [QUI]: 0, [OUI]: 1 });
+    await party.setCounts({ [QUI]: 0, [CECI]: 1 });
     await expect(total).toContainText("1 manche");
     await expect(total).not.toContainText("manches");
   });
@@ -39,7 +39,7 @@ test.describe("Écran de lancement", () => {
   test("le bouton Lancer est désactivé sans joueur prêt puis sans manche", async ({ party }) => {
     const { tv } = party;
     const start = tv.getByTestId("start-game");
-    await party.setCounts({ [QUI]: 1, [OUI]: 0 });
+    await party.setCounts({ [QUI]: 1, [CECI]: 0 });
     // Personne.
     await expect(start).toBeDisabled();
     await expect(tv.getByTestId("start-blocked")).toContainText("joueur prêt");
@@ -54,10 +54,10 @@ test.describe("Écran de lancement", () => {
     await expect(start).toBeEnabled();
 
     // …sauf s'il n'y a aucune manche.
-    await party.setCounts({ [QUI]: 0, [OUI]: 0 });
+    await party.setCounts({ [QUI]: 0, [CECI]: 0 });
     await expect(start).toBeDisabled();
     await expect(tv.getByTestId("start-blocked")).toContainText("au moins une manche");
-    await party.setCounts({ [OUI]: 1 });
+    await party.setCounts({ [CECI]: 1 });
     await expect(start).toBeEnabled();
   });
 
@@ -68,7 +68,7 @@ test.describe("Écran de lancement", () => {
     test("la partie lancée contient le nombre de manches configuré", async ({ party }) => {
       const { tv } = party;
       const [alice] = await party.addPhones("Alice", "Bob");
-      await party.startGame({ [QUI]: 2, [OUI]: 1 });
+      await party.startGame({ [QUI]: 2, [CECI]: 1 });
       await expect(alice!.t("phone-intro")).toContainText("Manche 1 / 3");
 
       // On déroule les manches avec « Passer » et on compte : exactement 3 manches puis le classement.

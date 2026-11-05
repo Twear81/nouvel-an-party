@@ -58,17 +58,22 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
 
   switch (snapshot.phase) {
     case "lobby": {
-      const ready = snapshot.players.filter((p) => p.profile).length;
+      const others = snapshot.players.filter((p) => p.profile && p.id !== me.id);
       return (
         <Center testId="phone-lobby-ready">
           <motion.div initial={{ scale: 0.3, rotate: -20 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 150, damping: 10 }}>
-            <PlayerAvatar profile={me.profile} size="2xl" />
+            <PlayerAvatar profile={me.profile} size="xl" />
           </motion.div>
           <h1 className="font-display text-4xl text-gold-gradient">Tu es prêt !</h1>
-          <p className="text-xl font-bold">{me.profile!.name}</p>
-          <p className="text-ink-muted">
-            {ready} joueur{ready > 1 ? "s" : ""} dans la partie. Regarde la TV, ça va bientôt commencer.
-          </p>
+          <p className="max-w-full truncate text-xl font-bold">{me.profile!.name}</p>
+          {others.length > 0 && (
+            <div className="flex max-w-full flex-wrap items-center justify-center gap-2">
+              {others.map((p) => (
+                <PlayerAvatar key={p.id} profile={p.profile} size="sm" dimmed={!p.connected} />
+              ))}
+            </div>
+          )}
+          <p className="animate-pulse-soft text-ink-muted">En attente du lancement…</p>
           <Button data-testid="edit-profile" variant="secondary" size="md" onClick={onEdit}>
             Modifier mon profil
           </Button>

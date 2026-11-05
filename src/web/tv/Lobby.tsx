@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 import { useEffect, useRef, useState } from "react";
 import type { GameSnapshot } from "../../shared/types";
 import type { GameActions } from "../net/useGame";
-import { Button, Panel, PlayerAvatar } from "../ui";
+import { Button, CloseIcon, ConfirmDialog, Panel, PlayerAvatar, type AvatarSize } from "../ui";
 
 export function formatDuration(seconds: number): string {
   const min = Math.round(seconds / 60);
@@ -35,6 +35,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   const latestSetup = useRef(setup);
   latestSetup.current = setup;
   const [error, setError] = useState<string | null>(null);
+  const [kicking, setKicking] = useState<{ id: string; name: string } | null>(null);
 
   const totalRounds = catalog.reduce((n, g) => n + (setup.counts[g.id] ?? 0), 0);
   const totalSeconds = catalog.reduce((n, g) => n + (setup.counts[g.id] ?? 0) * g.secondsPerRound, 0);
@@ -48,15 +49,15 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
 
   let blocked: string | null = null;
   if (!host) blocked = "Seul le PC du maître du jeu peut lancer";
-  else if (ready === 0) blocked = "Il faut au moins un joueur prêt";
+  else if (ready === 0) blocked = "En attente d'un joueur prêt";
   else if (totalRounds === 0) blocked = "Choisis au moins une manche";
 
-  const kick = (id: string, name: string) => {
-    if (window.confirm(`Retirer ${name} de la partie ?`)) void actions.kick(id).catch(() => {});
-  };
+  // Peu de joueurs : grands avatars pour que le lobby ne paraisse pas vide ; 8 et plus : tout tient sur deux rangées.
+  const avatarSize: AvatarSize = players.length <= 3 ? "2xl" : players.length <= 8 ? "xl" : "lg";
+  const tileWidth = players.length <= 3 ? "w-[17rem]" : "w-[14rem]";
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-5 px-12 py-8">
+    <div data-testid="tv-lobby" className="flex min-h-0 flex-1 flex-col gap-5 px-12 py-8">
       <div className="flex min-h-0 flex-1 gap-10">
         {/* Inscription */}
         <div className="flex w-[26rem] shrink-0 flex-col items-center gap-4 text-center">
@@ -64,9 +65,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
           <QrCode url={snapshot.joinUrl} />
           <div className="rounded-chip bg-surface-strong px-5 py-2 font-mono text-2xl font-bold text-accent">{snapshot.joinUrl}</div>
           <p className="text-xl leading-snug text-ink-muted">
-            Scanne le code avec ton téléphone.
-            <br />
-            <span className="text-ink">Accepte l'alerte de certificat</span> du navigateur pour continuer.
+            Accepte l'alerte de certificat du navigateur pour continuer.
           </p>
         </div>
 
@@ -78,8 +77,8 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
               {ready} prêt{ready > 1 ? "s" : ""} · {players.length} connecté{players.length > 1 ? "s" : ""}
             </span>
           </div>
-          <div className="grid min-h-0 flex-1 grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] content-start gap-x-4 gap-y-3 overflow-hidden">
-            {players.length === 0 && <p className="col-span-full pt-10 text-center text-3xl text-ink-muted animate-pulse-soft">En attente des premiers invités…</p>}
+          <div className="flex min-h-0 flex-1 flex-wrap content-center items-start justify-center gap-x-6 gap-y-6 overflow-hidden pt-2">
+            {players.length === 0 && <p className="w-full text-center text-3xl text-ink-muted animate-pulse-soft">En attente des premiers invités…</p>}
             <AnimatePresence>
               {players.map((p) => (
                 <motion.div
@@ -90,20 +89,21 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.2 }}
                   transition={{ type: "spring", stiffness: 220, damping: 16 }}
-                  className="group relative flex flex-col items-center gap-1.5"
+                  className={`relative flex ${tileWidth} flex-col items-center gap-1.5`}
                 >
-                  <PlayerAvatar profile={p.profile} size={players.length <= 8 ? "xl" : "lg"} dimmed={!p.connected} />
+                  <PlayerAvatar profile={p.profile} size={avatarSize} dimmed={!p.connected} />
                   <span className={`max-w-full truncate text-2xl font-bold ${p.connected ? "" : "text-ink-muted"}`}>
                     {p.profile ? p.profile.name : <i className="font-normal text-ink-muted">crée son profil…</i>}
                   </span>
                   {host && (
                     <button
                       data-testid={`kick-${p.id}`}
-                      onClick={() => kick(p.id, p.profile?.name ?? "ce joueur")}
+                      onClick={() => setKicking({ id: p.id, name: p.profile?.name ?? "ce joueur" })}
+                      aria-label={`Retirer ${p.profile?.name ?? "ce joueur"}`}
                       title="Retirer ce joueur"
-                      className="absolute right-1 top-0 flex h-9 w-9 items-center justify-center rounded-full bg-bad text-lg font-bold text-bg opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100"
+                      className="absolute right-0 top-0 flex h-10 w-10 items-center justify-center rounded-full border-[0.2rem] border-bg bg-bad text-bg shadow-card transition-transform hover:scale-110"
                     >
-                      ✕
+                      <CloseIcon />
                     </button>
                   )}
                 </motion.div>
@@ -161,6 +161,18 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
           </div>
         </div>
       </Panel>
+      {kicking && (
+        <ConfirmDialog
+          title={`Retirer ${kicking.name} ?`}
+          detail="Son téléphone reviendra à la création de profil."
+          confirmLabel="Retirer"
+          onCancel={() => setKicking(null)}
+          onConfirm={() => {
+            void actions.kick(kicking.id).catch(() => {});
+            setKicking(null);
+          }}
+        />
+      )}
     </div>
   );
 }

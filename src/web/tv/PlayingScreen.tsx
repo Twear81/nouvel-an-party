@@ -22,7 +22,7 @@ export function PlayingScreen({ snapshot, round }: { snapshot: GameSnapshot; rou
       <RoundHeader round={round}>
         <Countdown round={round} size="tv" />
       </RoundHeader>
-      <div className="flex min-h-0 flex-1 flex-col px-14 pb-10 pt-4">
+      <div className="flex min-h-0 flex-1 flex-col px-14 pb-4 pt-4">
         <TvGameView snapshot={snapshot} round={round} kind="Tv" />
       </div>
     </div>

@@ -15,7 +15,8 @@ export default defineConfig({
   root: "src/web",
   publicDir: "public",
   plugins: [react(), tailwindcss()],
-  build: { outDir: "../../dist/web", emptyOutDir: true },
+  // Téléphones visés : iOS Safari 16.4+, Firefox et Chrome Android récents.
+  build: { outDir: "../../dist/web", emptyOutDir: true, target: ["safari16.4", "firefox115", "chrome111"] },
   server: {
     host: true,
     port: 5173,

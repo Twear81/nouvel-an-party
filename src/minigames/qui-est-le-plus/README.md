@@ -53,7 +53,7 @@ Il n'y a pas de `{joueur}` ici : la question parle de « qui », les invités so
 ## Conseils
 - Gardez les questions **courtes** : elles s'affichent en grand sur la TV (une ligne ou deux).
 - Les blagues d'initiés fonctionnent très bien, tant que tous les invités ont la référence.
-- Sur la TV, on choisit le **nombre de manches par mini-jeu** ; les questions sont **tirées au hasard** parmi celles du fichier. Prévoyez donc au moins 2 à 3 fois plus de questions que de manches voulues.
+- Sur la TV, on choisit le **nombre de manches par mini-jeu** ; les questions sont **tirées au hasard** parmi celles du fichier. Une vingtaine de questions (25 au maximum) suffisent largement pour une soirée.
 - Durée : une manche dure environ `duree` + `temps_resultats`, soit ~45 s au maximum avec les valeurs par défaut (souvent moins, car la manche s'arrête quand tout le monde a voté). Avec 10 manches, comptez 5 à 8 minutes.
 
 ## Désactiver le jeu

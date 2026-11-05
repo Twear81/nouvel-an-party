@@ -12,7 +12,7 @@ Fonctionne en local sur le wifi, sans internet ni installation sur les télépho
 | Mini-jeu | Principe | Doc |
 |---|---|---|
 | Qui est le plus… ? | On vote pour l'invité qui correspond le mieux | [README](src/minigames/qui-est-le-plus/README.md) |
-| Oui ou Non | On devine la majorité… ou la vraie réponse d'un invité tiré au sort | [README](src/minigames/oui-non/README.md) |
+| Ceci ou Cela | Deux réponses (Oui/Non ou Mer/Montagne…) : on suit la majorité… ou on devine la vraie réponse d'un invité tiré au sort | [README](src/minigames/ceci-ou-cela/README.md) |
 
 Créer un nouveau mini-jeu : [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md).
 

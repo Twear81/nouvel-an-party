@@ -21,7 +21,7 @@ function tmpConfig(files: Record<string, string>) {
   return dir;
 }
 
-const OUI_NON = "questions:\n  - Une question ?\n";
+const CECI = "questions:\n  - Une question ?\n";
 const QUI = "questions:\n  - Qui est le plus fou ?\n";
 
 let warn: ReturnType<typeof spyOn>;
@@ -44,12 +44,12 @@ describe("loadConfig", () => {
   it("charge le vrai dossier config/ sans erreur", () => {
     const { settings, games } = loadConfig(realConfig);
     expect(settings.titre.length).toBeGreaterThan(0);
-    expect(games.map((g) => g.game.id).sort()).toEqual(["oui-non", "qui-est-le-plus"]);
+    expect(games.map((g) => g.game.id).sort()).toEqual(["ceci-ou-cela", "qui-est-le-plus"]);
     for (const g of games) expect(g.game.items(g.cfg).length).toBeGreaterThan(0);
   });
 
   it("partie.yaml absent : réglages par défaut", () => {
-    const dir = tmpConfig({ "minijeux/oui-non.yaml": OUI_NON, "minijeux/qui-est-le-plus.yaml": QUI });
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": CECI, "minijeux/qui-est-le-plus.yaml": QUI });
     const { settings, games } = loadConfig(dir);
     expect(settings).toEqual({
       titre: "Soirée du Nouvel An",
@@ -65,34 +65,34 @@ describe("loadConfig", () => {
   });
 
   it("partie.yaml vide : défauts également", () => {
-    const dir = tmpConfig({ "partie.yaml": "# rien\n", "minijeux/oui-non.yaml": OUI_NON });
+    const dir = tmpConfig({ "partie.yaml": "# rien\n", "minijeux/ceci-ou-cela.yaml": CECI });
     expect(loadConfig(dir).settings.duree_cible_minutes).toBe(60);
   });
 
   it("lit les valeurs de partie.yaml", () => {
-    const dir = tmpConfig({ "partie.yaml": "titre: Test\nordre: groupe\nintro_secondes: 0\n", "minijeux/oui-non.yaml": OUI_NON });
+    const dir = tmpConfig({ "partie.yaml": "titre: Test\nordre: groupe\nintro_secondes: 0\n", "minijeux/ceci-ou-cela.yaml": CECI });
     expect(loadConfig(dir).settings).toMatchObject({ titre: "Test", ordre: "groupe", intro_secondes: 0 });
   });
 
   it("actif: false désactive le mini-jeu", () => {
-    const dir = tmpConfig({ "minijeux/oui-non.yaml": "actif: false\n" + OUI_NON, "minijeux/qui-est-le-plus.yaml": QUI });
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": "actif: false\n" + CECI, "minijeux/qui-est-le-plus.yaml": QUI });
     expect(loadConfig(dir).games.map((g) => g.game.id)).toEqual(["qui-est-le-plus"]);
   });
 
   it("actif: false dispense de contenu valide", () => {
-    const dir = tmpConfig({ "minijeux/oui-non.yaml": "actif: false\n", "minijeux/qui-est-le-plus.yaml": QUI });
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": "actif: false\n", "minijeux/qui-est-le-plus.yaml": QUI });
     expect(loadConfig(dir).games).toHaveLength(1);
   });
 
   it("un yaml de mini-jeu absent désactive le jeu avec un avertissement", () => {
-    const dir = tmpConfig({ "minijeux/oui-non.yaml": OUI_NON });
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": CECI });
     const { games } = loadConfig(dir);
-    expect(games.map((g) => g.game.id)).toEqual(["oui-non"]);
+    expect(games.map((g) => g.game.id)).toEqual(["ceci-ou-cela"]);
     expect(warn).toHaveBeenCalled();
   });
 
   it("applique les défauts du mini-jeu et retire la clé actif de la cfg", () => {
-    const dir = tmpConfig({ "minijeux/oui-non.yaml": "actif: true\n" + OUI_NON });
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": "actif: true\n" + CECI });
     const cfg = loadConfig(dir).games[0]!.cfg;
     expect(cfg.duree).toBe(20);
     expect("actif" in cfg).toBe(false);
@@ -101,9 +101,9 @@ describe("loadConfig", () => {
 
 describe("loadConfig : erreurs lisibles", () => {
   it("yaml cassé : le message donne le fichier", () => {
-    const dir = tmpConfig({ "minijeux/oui-non.yaml": "questions: [oups\n  - ça\n" });
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": "questions: [oups\n  - ça\n" });
     const e = errorOf(() => loadConfig(dir));
-    expect(e.message).toContain(path.join(dir, "minijeux", "oui-non.yaml"));
+    expect(e.message).toContain(path.join(dir, "minijeux", "ceci-ou-cela.yaml"));
     expect(e.message).toContain("YAML invalide");
   });
 
@@ -114,9 +114,9 @@ describe("loadConfig : erreurs lisibles", () => {
   });
 
   it("mauvais type : fichier et champ dans le message", () => {
-    const dir = tmpConfig({ "minijeux/oui-non.yaml": 'duree: "beaucoup"\n' + OUI_NON });
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": 'duree: "beaucoup"\n' + CECI });
     const e = errorOf(() => loadConfig(dir));
-    expect(e.message).toContain(path.join(dir, "minijeux", "oui-non.yaml"));
+    expect(e.message).toContain(path.join(dir, "minijeux", "ceci-ou-cela.yaml"));
     expect(e.message).toContain("duree");
   });
 
@@ -134,17 +134,17 @@ describe("loadConfig : erreurs lisibles", () => {
   });
 
   it("liste de questions vide ou absente", () => {
-    const dir = tmpConfig({ "minijeux/oui-non.yaml": "questions: []\n", "minijeux/qui-est-le-plus.yaml": "nom: x\n" });
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": "questions: []\n", "minijeux/qui-est-le-plus.yaml": "nom: x\n" });
     const e = errorOf(() => loadConfig(dir));
     expect(e.message).toContain("questions");
     expect(e.message).toContain("Ajoute au moins une question");
-    expect(e.message).toContain(path.join(dir, "minijeux", "oui-non.yaml"));
+    expect(e.message).toContain(path.join(dir, "minijeux", "ceci-ou-cela.yaml"));
     // les erreurs de plusieurs fichiers sont rassemblées
     expect(e.message).toContain(path.join(dir, "minijeux", "qui-est-le-plus.yaml"));
   });
 
   it("question vide refusée, avec son index", () => {
-    const dir = tmpConfig({ "minijeux/oui-non.yaml": 'questions:\n  - ""\n' });
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": 'questions:\n  - ""\n' });
     expect(errorOf(() => loadConfig(dir)).message).toContain("questions.0");
   });
 });

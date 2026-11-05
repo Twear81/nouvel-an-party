@@ -23,7 +23,7 @@ test.describe("Sécurité de base", () => {
     // La vraie TV (locale) et un joueur prêt : le maître du jeu pourrait lancer la partie.
     const alice = await party.addPhone("Alice");
     await expect(party.tv.getByTestId("start-game")).toBeEnabled();
-    await expect(party.tv.getByTestId("host-bar")).toHaveCount(1);
+    await expect(party.tv.getByTestId(`kick-${alice.id}`)).toBeVisible();
 
     // Même page /tv, mais vue depuis une autre adresse : lecture seule.
     const remote = await party.newContextPage(`${party.server.tvUrl}`, { "x-forwarded-for": REMOTE_IP });
@@ -31,8 +31,8 @@ test.describe("Sécurité de base", () => {
     await remote.waitForTimeout(500); // laisse le temps à la réponse « tv:hello » d'arriver
     await expect(remote.getByTestId("start-game")).toBeDisabled();
     await expect(remote.getByTestId("start-blocked")).toContainText("Seul le PC du maître du jeu");
-    await expect(remote.getByTestId("setup-inc-oui-non")).toBeDisabled();
-    await expect(remote.getByTestId("setup-dec-oui-non")).toBeDisabled();
+    await expect(remote.getByTestId("setup-inc-ceci-ou-cela")).toBeDisabled();
+    await expect(remote.getByTestId("setup-dec-ceci-ou-cela")).toBeDisabled();
     await expect(remote.getByTestId("host-bar")).toHaveCount(0);
     await expect(remote.locator('[data-testid^="kick-"]')).toHaveCount(0);
   });
@@ -40,7 +40,7 @@ test.describe("Sécurité de base", () => {
   test("un appareil distant ne peut envoyer aucune action de maître du jeu", async ({ party }) => {
     const { tv, server } = party;
     const [a] = await party.addPhones("Alice", "Bob");
-    await party.startGame({ "qui-est-le-plus": 1, "oui-non": 0 });
+    await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 0 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
 
     const rogue = await connect(`http://localhost:${server.httpPort}`, { "x-forwarded-for": REMOTE_IP });
@@ -48,7 +48,7 @@ test.describe("Sécurité de base", () => {
       const hello = (await call(rogue, "tv:hello")) as Ack & { host: boolean };
       expect(hello.host).toBe(false);
       for (const [event, args] of [
-        ["host:setup", [{ counts: { "oui-non": 3 } }]],
+        ["host:setup", [{ counts: { "ceci-ou-cela": 3 } }]],
         ["host:start", []],
         ["host:skip", []],
         ["host:pause", []],
@@ -85,7 +85,7 @@ test.describe("Sécurité de base", () => {
   test("un téléphone sans profil ne peut ni répondre ni continuer", async ({ party }) => {
     const { tv, server } = party;
     await party.addPhones("Alice", "Bob");
-    await party.startGame({ "qui-est-le-plus": 1, "oui-non": 0 });
+    await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 0 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
 
     // Une connexion qui n'a jamais rejoint (pas de player:join) est refusée.

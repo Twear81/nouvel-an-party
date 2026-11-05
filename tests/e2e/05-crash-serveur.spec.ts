@@ -4,7 +4,7 @@ test.describe("Crash du serveur", () => {
   test("la partie peut être reprise après un redémarrage, les téléphones se reconnectent seuls", async ({ party }) => {
     const { tv, server } = party;
     const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
-    await party.startGame({ "qui-est-le-plus": 1, "oui-non": 1 });
+    await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 1 });
 
     // Manche 1 jusqu'aux résultats.
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
@@ -50,7 +50,7 @@ test.describe("Crash du serveur", () => {
   test("un serveur redémarré après la fin de la partie ne propose rien à reprendre", async ({ party }) => {
     const { tv, server } = party;
     await party.addPhones("Alice", "Bob");
-    await party.startGame({ "qui-est-le-plus": 1, "oui-non": 0 });
+    await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 0 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
     await tv.getByTestId("host-skip").click(); // fin du chrono
     await expect(tv.getByTestId("tv-results")).toBeVisible();

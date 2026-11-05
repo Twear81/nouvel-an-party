@@ -7,7 +7,7 @@ test.describe("Joueur en retard", () => {
   test("un profil créé pendant une manche attend la manche suivante", async ({ party }) => {
     const { tv } = party;
     const [a, b] = await party.addPhones("Alice", "Bob");
-    await party.startGame({ "qui-est-le-plus": 2, "oui-non": 0 });
+    await party.startGame({ "qui-est-le-plus": 2, "ceci-ou-cela": 0 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
     for (const p of [a!, b!]) await expect(p.t(`vote-option-${p === a ? b!.id : a!.id}`)).toBeVisible();
 

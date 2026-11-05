@@ -1,5 +1,6 @@
 # CI : vérifie chaque push (toutes branches) et chaque pull request.
-# Enchaîne : installation (lockfile figé), typecheck, tests unitaires, build web, tests E2E (Playwright/Chromium).
+# Enchaîne : installation (lockfile figé), typecheck, tests unitaires, build web, tests E2E (Playwright sur Chromium, Firefox et WebKit :
+# les téléphones de la soirée sont des Chrome/Firefox Android et des Safari iPhone).
 # En cas d'échec, le rapport Playwright et les résultats de test sont remontés en artefacts (onglet "Artifacts" du run).
 # Déclenchement : automatique à chaque push ou pull request, rien à faire.
 name: CI
@@ -13,7 +14,7 @@ jobs:
   test:
     name: Typecheck, tests et build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Récupérer le code
         uses: actions/checkout@v4
@@ -35,10 +36,10 @@ jobs:
       - name: Build web
         run: bun run build:web
 
-      - name: Installer Chromium pour Playwright
-        run: bunx playwright install --with-deps chromium
+      - name: Installer Chromium, Firefox et WebKit pour Playwright
+        run: bunx playwright install --with-deps chromium firefox webkit
 
-      - name: Tests E2E
+      - name: Tests E2E (les 3 projets : chromium, firefox, webkit)
         run: bun run test:e2e
 
       - name: Remonter le rapport Playwright en cas d'échec

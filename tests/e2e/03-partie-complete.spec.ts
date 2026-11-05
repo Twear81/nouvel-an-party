@@ -5,7 +5,7 @@ test.describe("Partie complète à 3 téléphones", () => {
     const { tv } = party;
     const phones = await party.addPhones("Alice", "Bob", "Chloé");
     const [a, b, c] = phones as [typeof phones[0], typeof phones[0], typeof phones[0]];
-    await party.startGame({ "qui-est-le-plus": 1, "oui-non": 1 });
+    await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 1 });
 
     const expected: Record<string, number> = { [a.id!]: 0, [b.id!]: 0, [c.id!]: 0 };
     const played = new Set<string>();
@@ -26,11 +26,11 @@ test.describe("Partie complète à 3 téléphones", () => {
       if (game === "qui-est-le-plus") {
         // Bob et Chloé votent pour Alice (élue), Alice vote pour Bob.
         expect(deltas).toEqual({ [a.id!]: 50, [b.id!]: 100, [c.id!]: 100 });
-      } else if (await tv.getByTestId("tv-results").getByText("La majorité a répondu OUI").count()) {
+      } else if ((await tv.getByTestId("ceci-results").getAttribute("data-mode")) === "majorite") {
         // Question d'opinion : tout le monde est dans le camp majoritaire.
         expect(deltas).toEqual({ [a.id!]: 100, [b.id!]: 100, [c.id!]: 100 });
       } else {
-        // Question sur un invité : la cible (0 point) répond OUI, les deux autres l'ont bien deviné.
+        // Question sur un invité : la cible (0 point) répond la 1re réponse, les deux autres l'ont bien deviné.
         expect(Object.values(deltas).sort()).toEqual([0, 100, 100]);
       }
       for (const [id, d] of Object.entries(deltas)) expected[id]! += d;
@@ -54,7 +54,7 @@ test.describe("Partie complète à 3 téléphones", () => {
     }
 
     // Les deux mini-jeux ont bien été joués (un de chaque).
-    expect([...played].sort()).toEqual(["oui-non", "qui-est-le-plus"]);
+    expect([...played].sort()).toEqual(["ceci-ou-cela", "qui-est-le-plus"]);
 
     // Classement final.
     await expect(tv.getByTestId("tv-final")).toBeVisible();
@@ -79,7 +79,7 @@ test.describe("Partie complète à 3 téléphones", () => {
 
   test("qui-est-le-plus : on peut changer son vote avant la fin de la manche", async ({ party }) => {
     const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
-    await party.startGame({ "qui-est-le-plus": 1, "oui-non": 0 });
+    await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 0 });
     await expect(party.tv.getByTestId("tv-playing")).toBeVisible();
     // Alice vote d'abord pour Chloé, puis change d'avis pour Bob.
     await a!.t(`vote-option-${c!.id}`).click();
@@ -97,13 +97,13 @@ test.describe("Partie complète à 3 téléphones", () => {
     await expect(a!.t("phone-results")).toContainText("élu");
   });
 
-  test("oui-non : si le chrono se termine, les non-répondants ne marquent pas", async ({ party }) => {
+  test("ceci-ou-cela : si le chrono se termine, les non-répondants ne marquent pas", async ({ party }) => {
     const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
-    await party.startGame({ "qui-est-le-plus": 0, "oui-non": 1 });
+    await party.startGame({ "qui-est-le-plus": 0, "ceci-ou-cela": 1 });
     await expect(party.tv.getByTestId("tv-playing")).toBeVisible();
-    // Seuls Alice et Bob répondent OUI ; Chloé laisse le chrono (8 s) aller au bout.
-    await a!.t("answer-yes").click();
-    await b!.t("answer-yes").click();
+    // Seuls Alice et Bob répondent (1re réponse) ; Chloé laisse le chrono (8 s) aller au bout.
+    await a!.t("choice-0").click();
+    await b!.t("choice-0").click();
     await expect(c!.t("phone-playing")).toBeVisible();
     await expect(party.tv.getByTestId("tv-results")).toBeVisible({ timeout: 15_000 });
     const deltas = await party.tvDeltas();

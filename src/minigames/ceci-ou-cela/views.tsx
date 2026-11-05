@@ -1,0 +1,240 @@
+// Écrans de "Ceci ou Cela" : deux réponses face à face (couleurs neutres bleu / rose : ce n'est pas "bien / mal").
+// N'utilise que les primitives de src/web/ui et les jetons du thème.
+import { motion } from "motion/react";
+import { CheckIcon, PlayerAvatar } from "../../web/ui";
+import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
+import type { Priv, Pub, Results } from "./game";
+
+// Classes écrites en toutes lettres pour que Tailwind les repère.
+const TONES = [
+  { solid: "bg-cool text-bg", soft: "border-cool bg-cool/15", text: "text-cool", glow: "shadow-[0_0_3.5rem_rgb(90_209_255/0.5)]" },
+  { solid: "bg-hot text-bg", soft: "border-hot bg-hot/15", text: "text-hot", glow: "shadow-[0_0_3.5rem_rgb(255_79_154/0.5)]" },
+] as const;
+
+/** Taille de police (rem) pour qu'un libellé de `availRem` de large tienne sur une ligne (Bungee ≈ 0.8em par lettre). */
+const fit = (label: string, availRem: number, min: number, max: number) => Math.max(min, Math.min(max, availRem / (Math.max(label.length, 1) * 0.8)));
+
+const GuessIcon = () => <span aria-hidden>🎯</span>;
+
+/** Bandeau du mode : "il répond pour de vrai" (avec son avatar) ou "la majorité gagne". */
+function ModeChip({ pub, playerById }: Pick<MiniGameViewProps<Pub>, "pub" | "playerById">) {
+  const target = pub.targetId ? playerById(pub.targetId) : undefined;
+  if (target) {
+    return (
+      <motion.div data-testid="mode-cible" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-5 rounded-chip border-[0.25rem] border-accent bg-accent/15 py-2 pl-3 pr-10 shadow-glow">
+        <PlayerAvatar profile={target.profile} size="md" badge={<GuessIcon />} />
+        <div className="text-left leading-tight">
+          <div className="text-4xl font-extrabold text-accent">{target.profile?.name}</div>
+          <div className="text-2xl text-ink-muted">répond pour de vrai, devinez sa réponse</div>
+        </div>
+      </motion.div>
+    );
+  }
+  return (
+    <motion.div data-testid="mode-majorite" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className="glass flex items-center gap-4 rounded-chip px-10 py-3 text-3xl font-bold">
+      <span aria-hidden>👥</span> Rejoignez le camp majoritaire
+    </motion.div>
+  );
+}
+
+const Tv = ({ pub, round, playerById, players }: MiniGameViewProps<Pub>) => {
+  const voters = players.filter((p) => round.participants.includes(p.id) && p.profile);
+  const answered = voters.filter((p) => pub.answeredIds.includes(p.id)).length;
+  const crowd = voters.length > 5;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-between gap-4 text-center">
+      <ModeChip pub={pub} playerById={playerById} />
+      <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-[90rem] text-balance text-[4.75rem] font-extrabold leading-[1.05]">
+        {pub.question}
+      </motion.h1>
+
+      <div className="relative flex w-full max-w-[96rem] items-stretch gap-8">
+        {pub.choices.map((label, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, x: i === 0 ? -120 : 120 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15, type: "spring", stiffness: 140, damping: 16 }}
+            className={`flex min-h-[13rem] flex-1 items-center justify-center rounded-card px-6 py-8 shadow-card ${TONES[i]!.solid}`}
+          >
+            <span data-testid={`tv-choice-${i}`} className="text-balance break-words font-display leading-tight" style={{ fontSize: `${fit(label, 38, 3, 8)}rem` }}>
+              {label}
+            </span>
+          </motion.div>
+        ))}
+        <div className="absolute left-1/2 top-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[0.4rem] border-bg bg-gold font-display text-4xl text-accent-ink shadow-glow">
+          VS
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-1">
+      <div data-testid="tv-answered-count" className="font-display text-4xl text-ink-muted">
+        <span className="text-accent">{answered}</span> / {voters.length}
+      </div>
+      <div className="flex flex-wrap items-start justify-center gap-x-2 gap-y-2" data-testid="tv-answered">
+        {voters.map((p) => {
+          const has = pub.answeredIds.includes(p.id);
+          const isTarget = p.id === pub.targetId;
+          return (
+            <div key={p.id} className="flex w-[11rem] flex-col items-center gap-0.5">
+              <PlayerAvatar profile={p.profile} size={crowd ? "md" : "lg"} dimmed={!has} badge={has ? <CheckIcon /> : isTarget ? <GuessIcon /> : undefined} className={isTarget ? "drop-shadow-[0_0_1rem_var(--color-accent)]" : ""} />
+              <span className={`w-full truncate font-bold ${crowd ? "text-lg" : "text-xl"} ${isTarget ? "text-accent" : has ? "text-ink" : "text-ink-muted"}`}>{p.profile!.name}</span>
+            </div>
+          );
+        })}
+      </div>
+      </div>
+    </div>
+  );
+};
+
+const Phone = ({ pub, priv, sendInput, playerById }: MiniGameViewProps<Pub, Priv>) => {
+  const choice = priv?.choice ?? null;
+  const target = pub.targetId ? playerById(pub.targetId) : undefined;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight">{pub.question}</h1>
+      {priv?.isTarget ? (
+        <div data-testid="phone-mode-cible" className="flex shrink-0 items-center justify-center gap-2 text-balance rounded-chip border-2 border-accent bg-accent/15 px-3 py-1.5 text-base font-bold text-accent">
+          <GuessIcon /> Tu réponds pour de vrai !
+        </div>
+      ) : (
+        target && (
+          <div data-testid="phone-mode-devine" className="flex shrink-0 items-center justify-center gap-2 rounded-chip bg-surface-strong px-3 py-1 text-base font-bold">
+            <PlayerAvatar profile={target.profile} size="xs" />
+            <span className="min-w-0 truncate">Devine la réponse de <span className="text-accent">{target.profile?.name}</span></span>
+          </div>
+        )
+      )}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 pb-2">
+        {pub.choices.map((label, i) => {
+          const selected = choice === i;
+          return (
+            <motion.button
+              key={i}
+              type="button"
+              data-testid={`choice-${i}`}
+              whileTap={{ scale: 0.96 }}
+              animate={{ scale: selected ? 1.02 : 1, opacity: choice !== null && !selected ? 0.4 : 1 }}
+              onClick={() => void sendInput({ choice: i }).catch(() => {})}
+              aria-pressed={selected}
+              className={`relative flex min-h-[6rem] flex-1 items-center justify-center rounded-card px-4 shadow-card ${TONES[i]!.solid} ${selected ? "ring-[0.4rem] ring-ink" : ""}`}
+            >
+              <span className="text-balance break-words font-display leading-tight" style={{ fontSize: `${fit(label, 17, 1.5, 3.75)}rem` }}>
+                {label}
+              </span>
+              {selected && (
+                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xl text-bg">
+                  <CheckIcon />
+                </motion.span>
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+function Camp({ index, label, ids, winner, tie, total, results, playerById }: { index: 0 | 1; total: number; label: string; ids: string[]; winner: boolean; tie: boolean; results: Results; playerById: MiniGameViewProps["playerById"] }) {
+  const tone = TONES[index];
+  const lit = winner || (tie && ids.length > 0);
+  const most = Math.max(results.picks[0].length, results.picks[1].length);
+  const avatarSize = most <= 3 ? "xl" : most <= 5 ? "lg" : "md";
+  const tileWidth = { xl: "w-[12rem]", lg: "w-[9.5rem]", md: "w-[8rem]" }[avatarSize];
+  return (
+    <motion.div
+      data-testid={`camp-${index}`}
+      data-winner={winner ? "true" : "false"}
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: lit || total === 0 ? 1 : 0.5, y: 0, scale: winner ? 1.02 : 1 }}
+      className={`flex min-h-0 flex-1 flex-col items-center gap-3 rounded-card border-[0.3rem] p-5 ${lit ? `${tone.soft} ${tone.glow}` : "border-line bg-surface"}`}
+    >
+      <div className={`w-full rounded-btn px-4 py-3 text-center ${tone.solid}`}>
+        <span className="text-balance break-words font-display leading-tight" style={{ fontSize: `${fit(label, 34, 2.5, 5)}rem` }}>
+          {label}
+        </span>
+      </div>
+      <div className="flex items-center gap-4">
+        <span className={`font-display text-6xl ${tone.text}`}>{ids.length}</span>
+        {winner && (
+          <span className="rounded-chip bg-gold px-5 py-1 text-2xl font-extrabold text-accent-ink">
+            {results.mode === "cible" ? "✓ Bonne réponse" : "👑 Majorité"}
+          </span>
+        )}
+      </div>
+      <div className="flex min-h-0 flex-1 flex-wrap content-center items-center justify-center gap-x-3 gap-y-2">
+        {ids.map((id, i) => {
+          const isTarget = id === results.targetId && results.mode === "cible";
+          return (
+            <motion.div key={id} initial={{ opacity: 0, x: index === 0 ? -160 : 160 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.12, type: "spring" }} className={`flex flex-col items-center ${tileWidth}`}>
+              <PlayerAvatar profile={playerById(id)?.profile ?? null} size={avatarSize} badge={isTarget ? <GuessIcon /> : undefined} />
+              <span className={`w-full truncate text-center text-lg font-bold ${isTarget ? "text-accent" : ""}`}>{playerById(id)?.profile?.name}</span>
+            </motion.div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+}
+
+const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
+  if (!results) return null;
+  const total = results.picks[0].length + results.picks[1].length;
+  const tie = results.winner === null && total > 0;
+  const target = results.targetId ? playerById(results.targetId) : undefined;
+  let explain: string;
+  if (total === 0) explain = "Personne n'a répondu…";
+  else if (tie) explain = "Égalité : tout le monde marque !";
+  else if (results.mode === "cible") explain = `${target?.profile?.name ?? "L'invité"} a répondu « ${results.choices[results.winner!]} » : ceux qui ont deviné juste gagnent !`;
+  else explain = `La majorité a choisi « ${results.choices[results.winner!]} » : ce camp gagne !`;
+  return (
+    <div data-testid="ceci-results" data-mode={results.mode} className="flex min-h-0 flex-1 flex-col gap-3">
+      <h1 className="text-balance text-center text-5xl font-extrabold leading-tight">{results.question}</h1>
+      <div className="relative flex min-h-0 flex-1 gap-8">
+        {([0, 1] as const).map((i) => (
+          <Camp key={i} index={i} label={results.choices[i]} ids={results.picks[i]} winner={results.winner === i} tie={tie} total={total} results={results} playerById={playerById} />
+        ))}
+        <div className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[0.4rem] border-bg bg-gold font-display text-4xl text-accent-ink shadow-glow">
+          {tie ? "=" : "VS"}
+        </div>
+      </div>
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="text-balance text-center text-3xl font-bold text-accent">
+        {explain}
+      </motion.p>
+    </div>
+  );
+};
+
+const PhoneResults = ({ results, snapshot }: MiniGameViewProps<Pub, Priv, Results>) => {
+  const myId = snapshot.me?.id;
+  if (!results || !myId) return null;
+  const mine: 0 | 1 | null = results.picks[0].includes(myId) ? 0 : results.picks[1].includes(myId) ? 1 : null;
+  const isTarget = results.targetId === myId && results.mode === "cible";
+  const tie = results.winner === null;
+  if (mine === null) return <p className="text-center text-xl text-ink-muted">Tu n'as pas répondu</p>;
+
+  const ok = isTarget || tie || results.winner === mine;
+  let text: string;
+  if (isTarget) text = "Tu as répondu pour de vrai !";
+  else if (tie) text = "Égalité : tu marques !";
+  else if (results.mode === "majorite") text = ok ? "Avec la majorité !" : "Pas avec la majorité…";
+  else text = ok ? "Bien deviné !" : "Raté !";
+  return (
+    <div data-testid="phone-ceci-result" data-ok={ok ? "true" : "false"} className="flex flex-col items-center gap-3 text-center">
+      <p className={`text-balance font-display text-2xl ${ok ? "text-good" : "text-bad"}`}>{text}</p>
+      <div className="flex items-center gap-2 text-ink-muted">
+        Ta réponse
+        <span className={`rounded-chip px-4 py-1 font-display text-lg ${TONES[mine].solid}`}>{results.choices[mine]}</span>
+      </div>
+      {!tie && !ok && (
+        <div className="flex items-center gap-2 text-ink-muted">
+          {results.mode === "cible" ? "Bonne réponse" : "Majorité"}
+          <span className={`rounded-chip px-4 py-1 font-display text-lg ${TONES[results.winner!].solid}`}>{results.choices[results.winner!]}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;

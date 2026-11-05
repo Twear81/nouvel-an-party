@@ -82,6 +82,11 @@
   background-clip: text;
   color: transparent;
 }
+/* Hauteur d'écran : 100vh en repli pour les navigateurs sans dvh, puis 100dvh (barre d'URL mobile). */
+@utility h-app {
+  height: 100vh;
+  height: 100dvh;
+}
 @utility glass {
   background-image: var(--gradient-glass);
   background-color: var(--color-surface);
@@ -94,6 +99,13 @@
 /* ── Base (dans @layer base pour ne pas écraser les classes Tailwind) */
 @layer base {
 html, body, #root { height: 100%; }
+html {
+  /* Pas de pull-to-refresh ni de rebond pendant la partie ; pas de zoom au double-tap. */
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 body {
   margin: 0;
   background: var(--color-bg);
@@ -104,12 +116,25 @@ body {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
-input { user-select: text; -webkit-user-select: text; }
+/* iOS zoome sur les champs dont la police est < 16px. */
+input, textarea, select { font-size: 16px; user-select: text; -webkit-user-select: text; -webkit-touch-callout: default; }
 /* La TV est dessinée en 1920×1080 : 1rem = 16px à cette taille, et tout suit la fenêtre. */
 html[data-app="tv"] { font-size: min(calc(100vw / 120), calc(100vh / 67.5)); }
-button { font: inherit; color: inherit; cursor: pointer; }
+button, [role="button"], a {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+button { appearance: none; -webkit-appearance: none; }
 button:disabled { cursor: not-allowed; }
+img { -webkit-touch-callout: none; }
 }
 
 /* ── Cadres d'avatar (choisis dans profile-options.ts ; --p = couleur du joueur ; 1em = 1/10 de la taille) */
@@ -120,9 +145,9 @@ button:disabled { cursor: not-allowed; }
 .frame-double { box-shadow: inset 0 0 0 0.25em var(--p), inset 0 0 0 0.5em var(--color-bg), inset 0 0 0 0.75em var(--color-accent); }
 .frame-dashed { border: 0.35em dashed var(--p); animation: spin-slow 14s linear infinite; }
 .frame-sparkle {
-  background: conic-gradient(from var(--angle), var(--color-accent-strong), var(--p), var(--color-ink), var(--color-accent), var(--color-accent-strong));
+  background: conic-gradient(from var(--angle, 0deg), var(--color-accent-strong), var(--p), var(--color-ink), var(--color-accent), var(--color-accent-strong));
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 0.45em), #000 calc(100% - 0.4em));
   mask: radial-gradient(farthest-side, transparent calc(100% - 0.45em), #000 calc(100% - 0.4em));
-  animation: angle-spin 3s linear infinite;
+  animation: angle-spin 3s linear infinite; /* sans @property (très vieux navigateurs) le cadre reste fixe */
   filter: drop-shadow(0 0 0.3em var(--color-accent));
 }

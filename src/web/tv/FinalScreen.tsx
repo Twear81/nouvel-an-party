@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { GameSnapshot, PublicPlayer } from "../../shared/types";
 import { fireConfetti, PlayerAvatar } from "../ui";
 
-const STEP_MS = 1700;
+const STEP_MS = 1700; // suspense pour le podium
+const FAST_STEP_MS = 1000; // du dernier au 4e : plus vite
 
 function rankOf(sorted: PublicPlayer[], i: number) {
   // Ex æquo : même rang que le premier joueur ayant le même score.
@@ -21,7 +22,9 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
 
   useEffect(() => {
     if (step >= total) return;
-    const id = setTimeout(() => setStep((s) => s + 1), step === 0 ? 1800 : STEP_MS);
+    // Le prochain joueur révélé a l'index total - step - 1 : le podium (index 0..2) prend son temps.
+    const nextIndex = total - step - 1;
+    const id = setTimeout(() => setStep((s) => s + 1), step === 0 ? 1800 : nextIndex >= 3 ? FAST_STEP_MS : STEP_MS);
     return () => clearTimeout(id);
   }, [step, total]);
 
@@ -35,25 +38,25 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   const rest = sorted.slice(3);
   // Ordre visuel du podium : 2e, 1er, 3e
   const podiumOrder = [1, 0, 2].filter((i) => i < podium.length);
-  const heights = ["h-[22rem]", "h-[16rem]", "h-[12rem]"];
+  const heights = ["h-[17rem]", "h-[12rem]", "h-[9rem]"];
 
   return (
-    <div data-testid="tv-final" className="flex min-h-0 flex-1 flex-col items-center gap-4 px-12 py-8">
-      <motion.h1 initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} className="font-display text-7xl text-gold-gradient">
+    <div data-testid="tv-final" className="flex min-h-0 flex-1 flex-col items-center gap-2 px-12 pt-6">
+      <motion.h1 initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} className="font-display text-6xl text-gold-gradient">
         {done ? "Bonne année !" : "Le classement…"}
       </motion.h1>
 
       {total === 0 && <p className="mt-20 text-4xl text-ink-muted">Personne n'a joué…</p>}
 
-      <div className="flex min-h-0 w-full flex-1 items-end justify-center gap-16">
+      <div className="flex min-h-0 w-full flex-1 items-end justify-center gap-12">
         {/* Podium */}
-        <div className="flex items-end gap-6">
+        <div className="flex items-end gap-5">
           {podiumOrder.map((i) => {
             const p = podium[i]!;
             const shown = revealed(i);
             return (
-              <div key={p.id} data-testid={`podium-${i + 1}`} className="flex w-[17rem] flex-col items-center">
-                <div className="mb-3 flex min-h-[14rem] flex-col items-center justify-end gap-2">
+              <div key={p.id} data-testid={`podium-${i + 1}`} className="flex w-[19rem] flex-col items-center">
+                <div className="mb-3 flex min-h-[19rem] flex-col items-center justify-end gap-2">
                   <AnimatePresence>
                     {shown && (
                       <motion.div
@@ -64,7 +67,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                       >
                         {i === 0 && <motion.span animate={{ rotate: [-8, 8, -8] }} transition={{ repeat: Infinity, duration: 2 }} className="text-7xl">👑</motion.span>}
                         <PlayerAvatar profile={p.profile} size={i === 0 ? "xl" : "lg"} />
-                        <span className="max-w-full truncate text-4xl font-bold">{p.profile!.name}</span>
+                        <span className="max-w-full truncate text-3xl font-bold">{p.profile!.name}</span>
                         <span className="font-display text-4xl text-accent">{p.score}</span>
                       </motion.div>
                     )}
@@ -86,7 +89,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
 
         {/* Autres joueurs : apparaissent du dernier vers le 4e */}
         {rest.length > 0 && (
-          <div className="flex h-full w-[30rem] flex-col justify-end gap-2 overflow-hidden pb-2">
+          <div className="flex h-full w-[28rem] shrink-0 flex-col justify-end gap-2 overflow-hidden pb-2">
             <AnimatePresence initial={false}>
               {rest.map((p, k) => {
                 const i = k + 3;

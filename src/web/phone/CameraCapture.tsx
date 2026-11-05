@@ -21,9 +21,18 @@ export function CameraCapture({ onPhoto, onClose }: Props) {
     (async () => {
       if (!navigator.mediaDevices?.getUserMedia) return fallback();
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+        // Contraintes "idéales" (jamais "exact") : Firefox Android et Safari refusent sinon quand la caméra n'a pas de facingMode.
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "user" }, width: { ideal: 720 }, height: { ideal: 720 } }, audio: false });
+        } catch (e) {
+          if ((e as Error).name === "NotAllowedError" || (e as Error).name === "SecurityError") throw e;
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        }
         if (cancelled) return stream.getTracks().forEach((t) => t.stop());
         const v = videoRef.current!;
+        // iOS exige muted + playsinline posés avant play() (React ne rend pas toujours l'attribut muted).
+        v.muted = true;
+        v.setAttribute("playsinline", "");
         v.srcObject = stream;
         await v.play().catch(() => {});
         setReady(true);
@@ -37,9 +46,13 @@ export function CameraCapture({ onPhoto, onClose }: Props) {
       setError("Caméra indisponible : utilise l'appareil photo de ton téléphone.");
       fileRef.current?.click();
     }
+    const stop = () => stream?.getTracks().forEach((t) => t.stop());
+    window.addEventListener("pagehide", stop);
     return () => {
       cancelled = true;
-      stream?.getTracks().forEach((t) => t.stop());
+      window.removeEventListener("pagehide", stop);
+      stop();
+      if (videoRef.current) videoRef.current.srcObject = null;
     };
   }, []);
 
