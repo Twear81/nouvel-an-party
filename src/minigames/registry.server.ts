@@ -3,5 +3,6 @@
 import type { MiniGame } from "./contract";
 import ceciOuCela from "./ceci-ou-cela/game";
 import quiEstLePlus from "./qui-est-le-plus/game";
+import tierList from "./tier-list/game";
 
-export const serverGames: MiniGame[] = [quiEstLePlus, ceciOuCela];
+export const serverGames: MiniGame[] = [quiEstLePlus, ceciOuCela, tierList];

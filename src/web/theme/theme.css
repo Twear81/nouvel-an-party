@@ -151,3 +151,15 @@ img { -webkit-touch-callout: none; }
   animation: angle-spin 3s linear infinite; /* sans @property (très vieux navigateurs) le cadre reste fixe */
   filter: drop-shadow(0 0 0.3em var(--color-accent));
 }
+
+/* ─── mini-jeu tier-list ─── */
+/* Couleurs des étages, du plus haut (1) au plus bas (6) : classes bg-tier-1, text-tier-1, border-tier-1… */
+@theme static {
+  --color-tier-1: #ff5d73;
+  --color-tier-2: #ff9f4a;
+  --color-tier-3: #ffd84d;
+  --color-tier-4: #7be495;
+  --color-tier-5: #5ad1ff;
+  --color-tier-6: #b58cff;
+}
+/* ─── fin mini-jeu tier-list ─── */

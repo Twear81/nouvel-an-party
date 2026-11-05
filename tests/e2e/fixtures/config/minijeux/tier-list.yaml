@@ -1,0 +1,13 @@
+actif: true
+nom: "Tier list"
+description: "Rangez chaque invité de S à C"
+duree: 25
+temps_resultats: 5
+noter_soi_meme: true
+tiers: [S, A, B, C]
+points:
+  consensus: 25
+questions:
+  - "Qui est le meilleur cuisinier ?"
+  - "Qui est le meilleur danseur ?"
+  - "Qui est le meilleur conducteur ?"
