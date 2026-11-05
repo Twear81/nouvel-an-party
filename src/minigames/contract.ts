@@ -63,6 +63,11 @@ export interface MiniGame<Cfg = any, Item = any, State = any> {
   input: (state: State, playerId: PlayerId, payload: unknown, ctx: RoundContext<Cfg>) => void;
   /** Ce que voient la TV et tous les téléphones. Ne rien y mettre de secret. */
   publicView: (state: State, ctx: RoundContext<Cfg>) => unknown;
+  /**
+   * Optionnel : vue publique réservée à la TV (remplace publicView pour la TV uniquement).
+   * Pour ce que les téléphones ne doivent pas recevoir, même caché (ex : la suite de couleurs de Simon).
+   */
+  tvView?: (state: State, ctx: RoundContext<Cfg>) => unknown;
   /** Ce que voit un seul téléphone (ex : "tu as voté pour X"). */
   privateView?: (state: State, playerId: PlayerId, ctx: RoundContext<Cfg>) => unknown;
   /** Fin de manche : calcule résultats et points. */

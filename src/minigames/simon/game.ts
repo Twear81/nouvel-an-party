@@ -80,7 +80,7 @@ export interface Pub {
   doneIds: string[];
   /** Nombre de touches justes de chacun sur l'étape en cours (pas lesquelles). */
   progress: Record<string, number>;
-  /** Uniquement pendant que la TV joue la suite (les téléphones ne l'affichent jamais). */
+  /** Pendant que la TV joue la suite. `sequence` n'est remplie que pour la TV (tvView). */
   show: { startAt: number; noteMs: number; sequence: number[] } | null;
   winners: string[];
 }
@@ -247,9 +247,15 @@ const game = defineMiniGame<Cfg, Item, State>({
       out: state.out.map(({ id, length }) => ({ id, length })),
       doneIds: [...state.done],
       progress: Object.fromEntries(state.progress),
-      show: state.stage === "show" && state.show ? { ...state.show, sequence: [...state.seq] } : null,
+      // La suite elle-même n'est envoyée qu'à la TV (voir tvView) : un téléphone ne peut pas la lire.
+      show: state.stage === "show" && state.show ? { ...state.show, sequence: [] } : null,
       winners: state.over ? state.winners : [],
     };
+  },
+
+  tvView(state, ctx): Pub {
+    const pub = this.publicView(state, ctx) as Pub;
+    return pub.show ? { ...pub, show: { ...pub.show, sequence: [...state.seq] } } : pub;
   },
 
   privateView(state, playerId): Priv {

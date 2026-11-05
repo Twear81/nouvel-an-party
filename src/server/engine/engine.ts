@@ -393,7 +393,7 @@ export class GameEngine {
         deadline: this.paused ? null : fireAt,
         pausedRemainingMs: this.paused && c.mainTimer !== null ? c.timers.remaining(c.mainTimer) : null,
         timerTotalMs: this.phase === "playing" ? c.timerTotalMs : null,
-        public: safe(() => g.publicView(c.state, c.ctx)),
+        public: safe(() => (viewer === null && g.tvView ? g.tvView(c.state, c.ctx) : g.publicView(c.state, c.ctx))),
         results: this.phase === "results" ? c.results : null,
         deltas: this.phase === "results" ? c.deltas : null,
       };

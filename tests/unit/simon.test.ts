@@ -76,7 +76,9 @@ describe("simon : déroulé", () => {
     game.onPlay!(t.state, t.ctx);
     const p = t.pub();
     expect(p.stage).toBe("show");
-    expect(p.show!.sequence).toEqual(t.seq());
+    // Les téléphones ne reçoivent pas la suite : seule la TV l'a.
+    expect(p.show!.sequence).toEqual([]);
+    expect((game.tvView!(t.state, t.ctx) as typeof p).show!.sequence).toEqual(t.seq());
     expect(p.show!.startAt).toBeGreaterThan(t.ctx.now());
     expect(t.ctx.countdownState).toBeNull();
     expect(t.priv("p1").status).toBe("watch");
