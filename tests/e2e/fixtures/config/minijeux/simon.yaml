@@ -1,0 +1,14 @@
+# Config de test E2E : suites courtes et rapides.
+actif: true
+nom: "Simon"
+description: "Mémorisez la suite de couleurs et reproduisez-la : le dernier debout gagne"
+temps_resultats: 5
+vitesse_ms: 200
+longueur_depart: 2
+longueur_max: 6
+temps_par_note: 3
+points:
+  par_etape: 20
+  vainqueur: 150
+variantes:
+  - "Test"

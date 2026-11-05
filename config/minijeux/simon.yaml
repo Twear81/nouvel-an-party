@@ -1,0 +1,47 @@
+# Mini-jeu "Simon" — doc : src/minigames/simon/README.md
+# La TV joue une suite de couleurs, chacun la reproduit sur les 4 pastilles de son téléphone.
+# À chaque étape la suite s'allonge d'une note. Une faute (ou le temps écoulé) élimine. Le dernier debout gagne.
+# Une manche = une partie de Simon complète.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "Simon"
+description: "Mémorisez la suite de couleurs et reproduisez-la : le dernier debout gagne"
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 15
+
+# Durée d'une note sur la TV, en millisecondes (100 minimum). Plus petit = plus rapide.
+# La suite accélère un peu à chaque note ajoutée (jusqu'à 2 fois plus vite au maximum).
+vitesse_ms: 650
+
+# Nombre de notes de la première suite
+longueur_depart: 3
+
+# Longueur maximale : si des joueurs réussissent une suite de cette longueur, ils gagnent tous
+longueur_max: 20
+
+# Temps pour reproduire la suite sur le téléphone : secondes par note (+ 3 s de marge)
+# Exemple : 1.2 et une suite de 5 notes → 9 secondes
+temps_par_note: 1.2
+
+points:
+  par_etape: 20    # points pour chaque suite réussie
+  vainqueur: 150   # bonus du dernier joueur debout (ou de chacun des ex æquo)
+
+# Variantes : une manche tire une variante au hasard (25 maximum).
+# Texte seul = réglages ci-dessus. Objet = "nom" + n'importe lesquels de ces réglages à changer :
+#   vitesse_ms, longueur_depart, longueur_max, temps_par_note
+#     - nom: "Rapide"
+#       vitesse_ms: 420
+# Le nom de la variante est affiché sur la TV.
+variantes:
+  - "Classique"
+  - nom: "Rapide"
+    vitesse_ms: 420
+    temps_par_note: 0.9
+  - nom: "Longue"
+    longueur_depart: 5

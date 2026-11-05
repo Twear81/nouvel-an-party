@@ -163,3 +163,21 @@ img { -webkit-touch-callout: none; }
   --color-tier-6: #b58cff;
 }
 /* ─── fin mini-jeu tier-list ─── */
+/* ─── mini-jeu simon ───
+ * Les 4 pastilles : couleur au repos, couleur allumée (éclat) et ombre "épaisseur" des boutons du téléphone.
+ * Doivent rester bien distinctes entre elles (y compris vert / rouge : chaque pastille a aussi sa forme). */
+@theme static {
+  --color-simon-green: #12a150;
+  --color-simon-green-lit: #6dffaa;
+  --color-simon-green-deep: #0a6632;
+  --color-simon-red: #d92a42;
+  --color-simon-red-lit: #ff7d8e;
+  --color-simon-red-deep: #8a1426;
+  --color-simon-yellow: #e6b30f;
+  --color-simon-yellow-lit: #fff17d;
+  --color-simon-yellow-deep: #906d05;
+  --color-simon-blue: #2a63e8;
+  --color-simon-blue-lit: #84b6ff;
+  --color-simon-blue-deep: #173a94;
+}
+/* ─── fin mini-jeu simon ─── */
