@@ -1,0 +1,20 @@
+SOIRÉE DU NOUVEL AN — version portable Windows
+==============================================
+
+1. Connecte le PC au même wifi que les téléphones.
+2. Double-clique sur NouvelAn.exe.
+   - Windows peut afficher "Windows a protégé votre ordinateur" : clique sur
+     "Informations complémentaires" puis "Exécuter quand même".
+   - Le pare-feu demande l'autorisation : coche "Réseaux privés" et autorise.
+3. Le navigateur s'ouvre sur l'écran TV (sinon : http://localhost:3000/tv).
+   Mets-le en plein écran (F11) et duplique l'écran sur la TV.
+4. Les invités scannent le QR code. Leur téléphone affiche un avertissement
+   de sécurité (certificat local) : "Paramètres avancés" → "Continuer".
+   C'est normal, c'est ce qui permet la caméra et l'écran toujours allumé.
+
+Modifier les questions : dossier config/minijeux/*.yaml (Bloc-notes suffit),
+puis relancer NouvelAn.exe.
+
+En cas de souci de téléphone : il suffit de rouvrir la page / rescanner,
+le joueur retrouve son profil et ses points.
+Si le PC plante : relance NouvelAn.exe, l'écran TV propose de reprendre la partie.

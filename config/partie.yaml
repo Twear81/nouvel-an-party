@@ -1,0 +1,19 @@
+# Réglages généraux de la soirée.
+# Le nombre de manches par mini-jeu se choisit sur l'écran TV avant de lancer la partie.
+
+titre: "Nouvel An 2027"
+
+# Durée visée par le réglage par défaut de l'écran de lancement (chaque mini-jeu au moins une fois).
+duree_cible_minutes: 60
+
+# melange = on alterne les mini-jeux ; groupe = toutes les manches d'un mini-jeu à la suite
+ordre: melange
+
+# Durée de l'écran d'annonce avant chaque manche
+intro_secondes: 4
+
+# Réseau (à ne changer que si nécessaire)
+port_http: 3000
+port_https: 3443
+ip: auto            # ou une IP forcée, ex "192.168.1.42", si le QR code pointe sur la mauvaise
+ouvrir_navigateur: true

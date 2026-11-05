@@ -1,0 +1,14 @@
+# Mini-jeu "Qui est le plus… ?" — doc : src/minigames/qui-est-le-plus/README.md
+actif: true
+nom: "Qui est le plus… ?"
+duree: 30
+temps_resultats: 15
+vote_pour_soi: false
+points:
+  majorite: 100
+  elu: 50
+questions:
+  - Qui est le plus gourmand ?
+  - Qui est le plus susceptible d'arriver en retard à son propre mariage ?
+  - texte: Qui serait le premier à survivre sur une île déserte ?
+    duree: 45

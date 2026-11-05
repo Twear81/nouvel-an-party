@@ -1,0 +1,12 @@
+# Mini-jeu "Oui ou Non" — doc : src/minigames/oui-non/README.md
+actif: true
+nom: "Oui ou Non"
+duree: 20
+temps_resultats: 12
+points:
+  bonne_reponse: 100
+  cible: 0
+questions:
+  - L'ananas sur la pizza, c'est acceptable ?
+  - Est-ce que {joueur} a déjà pleuré devant un Disney ?
+  - Est-ce que {joueur} sera encore debout à 4h du matin ?
