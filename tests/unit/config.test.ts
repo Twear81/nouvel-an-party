@@ -2,6 +2,7 @@ import { afterAll, beforeEach, afterEach, describe, expect, it, spyOn } from "bu
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { serverGames } from "../../src/minigames/registry.server";
 import { ConfigError, loadConfig } from "../../src/server/config";
 
 const realConfig = path.resolve(import.meta.dir, "../../config");
@@ -44,7 +45,8 @@ describe("loadConfig", () => {
   it("charge le vrai dossier config/ sans erreur", () => {
     const { settings, games } = loadConfig(realConfig);
     expect(settings.titre.length).toBeGreaterThan(0);
-    expect(games.map((g) => g.game.id).sort()).toEqual(["ceci-ou-cela", "qui-est-le-plus"]);
+    // Chaque mini-jeu enregistré a son fichier yaml dans config/minijeux.
+    expect(games.map((g) => g.game.id).sort()).toEqual(serverGames.map((g) => g.id).sort());
     for (const g of games) expect(g.game.items(g.cfg).length).toBeGreaterThan(0);
   });
 
