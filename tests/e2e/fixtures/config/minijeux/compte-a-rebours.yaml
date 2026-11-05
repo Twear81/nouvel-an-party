@@ -1,0 +1,14 @@
+# Config de test E2E : cible courte, tours très rapides. `duree` n'est pas utilisée par le jeu (clé requise par le patch des tests).
+actif: true
+nom: "Compte à rebours chaotique"
+description: "Arrêtez le compteur pile à l'heure"
+duree: 8
+delai_depart: 6
+duree_revelation: 3
+temps_resultats: 5
+points: [150, 100, 70, 50, 30, 20, 10, 0]
+variantes:
+  - titre: "Pile à minuit"
+    cible: 2
+    visible: 1
+    decompte: true

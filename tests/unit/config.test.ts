@@ -44,7 +44,7 @@ describe("loadConfig", () => {
   it("charge le vrai dossier config/ sans erreur", () => {
     const { settings, games } = loadConfig(realConfig);
     expect(settings.titre.length).toBeGreaterThan(0);
-    expect(games.map((g) => g.game.id).sort()).toEqual(["ceci-ou-cela", "qui-est-le-plus"]);
+    expect(games.map((g) => g.game.id).sort()).toEqual(["ceci-ou-cela", "compte-a-rebours", "qui-est-le-plus"]);
     for (const g of games) expect(g.game.items(g.cfg).length).toBeGreaterThan(0);
   });
 
