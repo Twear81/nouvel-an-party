@@ -1,0 +1,61 @@
+# Mini-jeu "Tier list" — doc : src/minigames/tier-list/README.md
+# Une question s'affiche (« Qui est le meilleur cuisinier ? »). Chacun range TOUS les invités dans des étages
+# (S, A, B, C…) sur son téléphone. L'étage d'un invité = la moyenne des notes reçues, arrondie.
+# On marque des points pour chaque invité placé dans le même étage que le consensus.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "Tier list"
+description: "Rangez chaque invité de S à C : gagnez en pensant comme les autres"
+
+# Temps pour noter, en secondes (la manche s'arrête plus tôt quand tout le monde a noté tout le monde).
+# Comptez environ 6 secondes par invité à noter. Les notes déjà données comptent même si le chrono se termine.
+duree: 60
+
+# Temps (en secondes) estimé pour lire les résultats (la TV révèle les invités un par un, ~10 s) ;
+# sert uniquement au calcul de durée de la soirée
+temps_resultats: 30
+
+# true = chacun se note aussi lui-même ; false = on ne note que les autres
+noter_soi_meme: true
+
+# Les étages, du plus haut au plus bas. Entre 2 et 6 étages, 6 caractères maximum chacun, tous différents.
+# Exemples : [S, A, B, C]   [Top, Moyen, Nul]   [A, B, C, D, E]
+tiers: [S, A, B, C]
+
+points:
+  consensus: 25   # points par invité que vous avez placé dans son étage final (celui de la moyenne)
+
+# Une question = une ligne commençant par "- ".
+# Forme simple : le texte seul. Forme objet : "texte" + "duree" (secondes) pour surcharger la durée.
+# Mettez les questions entre guillemets si elles contiennent ": " ou " #".
+# Gardez-les courtes (une ligne sur la TV, deux sur un téléphone).
+# Maximum conseillé : 25 questions (les manches sont tirées au hasard parmi elles).
+questions:
+  - "Qui est le meilleur cuisinier ?"
+  - "Qui est le meilleur danseur ?"
+  - "Qui est le meilleur conducteur ?"
+  - "Qui est le meilleur au karaoké ?"
+  - "Qui est le meilleur public pour une blague nulle ?"
+  - "Qui est le meilleur pour garder un secret ?"
+  - "Qui est le meilleur pour remonter le moral ?"
+  - "Qui est le meilleur pour organiser un voyage ?"
+  - "Qui est le meilleur pour retenir les anniversaires ?"
+  - "Qui est le meilleur joueur de société ?"
+  - "Qui est le meilleur perdant ?"
+  - "Qui est le meilleur pour mettre l'ambiance ?"
+  - "Qui est le meilleur pour improviser un discours ?"
+  - "Qui est le meilleur pour réparer n'importe quoi ?"
+  - "Qui est le meilleur pour se réveiller tôt ?"
+  - "Qui est le meilleur pour tenir l'alcool ?"
+  - "Qui est le meilleur menteur ?"
+  - "Qui est le meilleur pour s'habiller ?"
+  - "Qui est le meilleur à Mario Kart ?"
+  - "Qui est le meilleur pour écouter ?"
+  - "Qui est le meilleur coloc ?"
+  - "Qui est le meilleur pour faire la fête jusqu'au bout ?"
+  - texte: "Qui est le meilleur ami de toute la bande ?"
+    duree: 75

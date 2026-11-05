@@ -2,8 +2,10 @@
 import type { MiniGameViews } from "./views-contract";
 import ceciOuCela from "./ceci-ou-cela/views";
 import quiEstLePlus from "./qui-est-le-plus/views";
+import tierList from "./tier-list/views";
 
 export const webGames: Record<string, MiniGameViews> = {
   "qui-est-le-plus": quiEstLePlus,
   "ceci-ou-cela": ceciOuCela,
+  "tier-list": tierList,
 };
