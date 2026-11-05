@@ -151,3 +151,11 @@ img { -webkit-touch-callout: none; }
   animation: angle-spin 3s linear infinite; /* sans @property (très vieux navigateurs) le cadre reste fixe */
   filter: drop-shadow(0 0 0.3em var(--color-accent));
 }
+
+/* ─── mini-jeu le-bon-prix ─── */
+@theme static {
+  /* Faisceau du projecteur sur l'objet et piédestal de la vitrine */
+  --gradient-spotlight: linear-gradient(180deg, color-mix(in srgb, var(--color-accent-strong) 55%, transparent) 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 100%);
+  --gradient-pedestal: linear-gradient(180deg, var(--color-bg-3) 0%, var(--color-bg-2) 100%);
+  --gradient-pedestal-top: linear-gradient(180deg, var(--color-accent-strong) 0%, var(--color-accent-deep) 100%);
+}

@@ -1,0 +1,68 @@
+# Mini-jeu "Le bon prix" — doc : src/minigames/le-bon-prix/README.md
+# Un objet s'affiche sur la TV ; chacun tape son prix (en euros) sur son téléphone. Le plus proche gagne.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "Le bon prix"
+description: "Devinez le prix de l'objet : le plus proche gagne !"
+
+# Temps pour répondre, en secondes (la manche s'arrête plus tôt si tout le monde a validé).
+# Peut être changé pour un objet précis avec "duree:" (voir plus bas).
+duree: 30
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 20
+
+points:
+  # Points par rang d'écart avec le vrai prix : 1er = le plus proche, 2e, 3e…
+  # Les joueurs suivants gagnent 0. Deux joueurs à égalité d'écart partagent le même rang et les mêmes points.
+  classement: [150, 100, 60, 30]
+  # Bonus ajouté quand on tombe pile sur le prix
+  bonus_prix_exact: 100
+  # Écart (en CENTIMES) accepté pour compter « prix exact » : 0 = au centime près, 100 = à 1 € près
+  tolerance_centimes: 0
+
+# Les objets à deviner : un objet = un bloc commençant par "- nom:". Maximum conseillé : 25.
+#   nom      (obligatoire) ce qui s'affiche en grand sur la TV
+#   prix     (obligatoire) le vrai prix en EUROS, centimes avec un POINT : 3.49  (pas de virgule, pas de signe €)
+#   emoji    affiché sur le piédestal quand il n'y a pas de photo
+#   image    une photo (voir ci-dessous) ; elle remplace l'emoji
+#   details  un indice affiché sous le nom (contenance, taille, année…)
+#   duree    temps de réponse propre à cet objet, en secondes
+#
+# Ajouter une VRAIE PHOTO : copiez le fichier (jpg, png, webp) dans le dossier config/medias/
+# puis indiquez simplement son nom :
+#     - nom: "Ma montre de grand-père"
+#       prix: 350
+#       image: montre.jpg
+# Si le fichier est introuvable, l'emoji (ou 🎁) s'affiche à la place. Évitez les photos de plus de 1 Mo.
+#
+# Prix indicatifs France 2026 : changez-les à votre goût !
+objets:
+  - { nom: "Une baguette tradition", prix: 1.40, emoji: "🥖", details: "Chez le boulanger du coin" }
+  - { nom: "Un expresso au comptoir", prix: 2.00, emoji: "☕", details: "Au zinc du café, en province" }
+  - { nom: "Une boîte de 6 œufs bio", prix: 3.30, emoji: "🥚", details: "Plein air, supermarché" }
+  - { nom: "Un pot de Nutella", prix: 4.90, emoji: "🍫", details: "Le grand pot de 750 g" }
+  - { nom: "Une pizza surgelée", prix: 4.50, emoji: "🍕", details: "Marque nationale, 4 fromages" }
+  - { nom: "Une place de cinéma", prix: 12.50, emoji: "🎬", details: "Tarif plein, séance du soir, en ville" }
+  - { nom: "Un ticket de métro parisien", prix: 2.50, emoji: "🚇", details: "Le ticket à l'unité" }
+  - { nom: "Un Big Mac", prix: 6.20, emoji: "🍔", details: "Le sandwich seul, sans le menu" }
+  - { nom: "Un plein d'essence", prix: 85, emoji: "⛽", details: "50 litres de SP95" }
+  - { nom: "Une bouteille de champagne", prix: 38, emoji: "🍾", details: "Brut, grande marque, 75 cl" }
+  - { nom: "Une bûche de Noël de pâtissier", prix: 42, emoji: "🎂", details: "Pour 6 personnes" }
+  - { nom: "Un jeu de Monopoly", prix: 32, emoji: "🎲", details: "Édition classique" }
+  - { nom: "Un sapin de Noël naturel", prix: 55, emoji: "🎄", details: "Nordmann de 1,50 m" }
+  - { nom: "Un ticket pour la Tour Eiffel", prix: 36.10, emoji: "🗼", details: "Accès au sommet, par l'ascenseur, adulte" }
+  - { nom: "Une entrée à Disneyland Paris", prix: 94, emoji: "🏰", details: "Un jour, un parc, plein tarif" }
+  - { nom: "Une paire de Converse", prix: 80, emoji: "👟", details: "Chuck Taylor All Star montantes" }
+  - { nom: "Une console PlayStation 5", prix: 480, emoji: "🎮", details: "Modèle standard avec lecteur" }
+  - { nom: "Un iPhone", prix: 969, emoji: "📱", details: "Dernier modèle de base, 128 Go" }
+  - { nom: "Un MacBook Air", prix: 1199, emoji: "💻", details: "13 pouces, 256 Go" }
+  - { nom: "Une montre de luxe d'entrée de gamme", prix: 6500, emoji: "⌚", details: "Une grande marque suisse" }
+  - { nom: "Un aller-retour Paris – New York", prix: 620, emoji: "✈️", details: "En classe éco, en basse saison" }
+  - { nom: "Un kilo de truffe noire", prix: 1100, emoji: "🍄", details: "Truffe du Périgord" }
+  - { nom: "Un vélo électrique", prix: 1800, emoji: "🚲", details: "Vélo de ville, milieu de gamme" }
+  - { nom: "Une Twingo neuve", prix: 20000, emoji: "🚗", details: "Citadine électrique, entrée de gamme", duree: 40 }
