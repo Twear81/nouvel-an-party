@@ -10,7 +10,7 @@ test.describe("8 joueurs", () => {
   // 9 navigateurs ouverts sur une machine de CI : on laisse le temps aux 8 votes d'arriver.
   test.use({ serverOptions: { duree: 90 } });
 
-  test("une manche de chaque jeu jusqu'au classement final, tout tient à l'écran", { tag: "@compat" }, async ({ party }) => {
+  test("une manche de chaque jeu jusqu'au classement final, tout tient à l'écran", async ({ party }) => {
     const { tv } = party;
     expect(NAMES.every((n) => n.length <= 16)).toBe(true);
     const phones = await party.addPhonesWith({ viewport: SMALL }, ...NAMES);

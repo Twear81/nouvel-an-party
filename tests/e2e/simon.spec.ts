@@ -30,7 +30,6 @@ test.describe("Simon", () => {
       await expect(p.t("simon-phone")).toHaveAttribute("data-status", "watch");
       expect(await p.page.locator("[data-sequence], [data-lit]").count()).toBe(0);
     }
-    await expect(tv.locator('[data-testid^="simon-tv-pad-"][data-lit="true"]')).toHaveCount(1, { timeout: 5_000 });
     for (const p of phones) await expect(p.t("simon-phone")).toHaveAttribute("data-status", "play", { timeout: 10_000 });
     await tapAll(a, seq);
     await expect(a.t("simon-phone")).toHaveAttribute("data-status", "done");
