@@ -1,7 +1,8 @@
 // "Le bon prix" : un objet s'affiche sur la TV, chacun devine son prix sur son téléphone.
 // Les plus proches (écart absolu) gagnent des points par rang ; bonus si on tombe pile sur le prix.
 import { z } from "zod";
-import { defineMiniGame } from "../contract";
+import { defineMiniGame, type RoundContext } from "../contract";
+import { allConnectedDone } from "../helpers";
 import { MAX_CENTS } from "./amount";
 
 const objetSchema = z.object({
@@ -82,6 +83,11 @@ export interface Results {
   missingIds: string[];
 }
 
+/** Fin anticipée : tous les joueurs connectés ont répondu. */
+function checkAllGuessed(state: State, ctx: RoundContext<Cfg>) {
+  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.guesses.has(id))) ctx.end();
+}
+
 export default defineMiniGame<Cfg, Item, State>({
   id: "le-bon-prix",
   configSchema,
@@ -98,8 +104,10 @@ export default defineMiniGame<Cfg, Item, State>({
     const cents = (payload as { cents?: unknown } | null)?.cents;
     if (typeof cents !== "number" || !Number.isInteger(cents) || cents < 0 || cents > MAX_CENTS) return;
     state.guesses.set(playerId, cents);
-    if (ctx.players.every((p) => state.guesses.has(p.id))) ctx.end();
+    checkAllGuessed(state, ctx);
   },
+
+  onPresenceChange: checkAllGuessed,
 
   publicView: (state): Pub => ({
     nom: state.item.nom,

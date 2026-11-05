@@ -92,8 +92,8 @@ function nextTurn(s: State, ctx: Ctx) {
     }
     s.turnNo++;
     s.startedAt = null;
-    const here = ctx.players.find((p) => p.id === t.id);
-    if (!here || !here.connected) {
+    // Présence en direct : un absent est passé tout de suite, mais s'il revient avant son tour il joue.
+    if (!ctx.isConnected(t.id)) {
       t.status = "missed";
       t.reason = "absent";
       continue;
@@ -152,6 +152,15 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 
   onPlay: (s, ctx) => nextTurn(s, ctx),
+
+  // Le joueur dont c'est le tour (pas encore parti) se déconnecte : on ne lui laisse pas le délai de départ.
+  onPresenceChange(s, ctx) {
+    const t = current(s);
+    if (!t || s.phase !== "waiting" || ctx.isConnected(t.id)) return;
+    t.status = "missed";
+    t.reason = "absent";
+    nextTurn(s, ctx);
+  },
 
   input(s, playerId, payload, ctx) {
     const who = current(s);

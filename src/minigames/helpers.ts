@@ -2,6 +2,16 @@
 import { z } from "zod";
 import type { PublicPlayer } from "../shared/types";
 
+/**
+ * Règle « tout le monde a répondu » : vrai quand tous les joueurs CONNECTÉS parmi `ids` sont servis par `done`.
+ * Un joueur déconnecté (téléphone planté) ne bloque pas la fin anticipée ; si personne n'est connecté on n'arrête rien
+ * (le chrono s'en charge). À rappeler dans `onPresenceChange`.
+ */
+export function allConnectedDone(ctx: { isConnected: (id: string) => boolean }, ids: string[], done: (id: string) => boolean): boolean {
+  const here = ids.filter((id) => ctx.isConnected(id));
+  return here.length > 0 && here.every(done);
+}
+
 /** Une question peut s'écrire en texte simple, ou en objet pour surcharger la durée. */
 export const questionSchema = z.union([
   z.string().min(1),

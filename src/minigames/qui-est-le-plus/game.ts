@@ -1,8 +1,8 @@
 // "Qui est le plus… ?" : chacun vote pour l'invité qui correspond le mieux à la question.
 // Points : ceux qui ont voté comme la majorité + bonus pour la/les personne(s) élue(s).
 import { z } from "zod";
-import { defineMiniGame } from "../contract";
-import { argmaxAll, normalizeQuestion, questionSchema } from "../helpers";
+import { defineMiniGame, type RoundContext } from "../contract";
+import { allConnectedDone, argmaxAll, normalizeQuestion, questionSchema } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Qui est le plus… ?"),
@@ -42,6 +42,11 @@ export interface Results {
   winners: string[];
 }
 
+/** Fin anticipée : tous les joueurs connectés ont voté. */
+function checkAllVoted(state: State, ctx: RoundContext<Cfg>) {
+  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.votes.has(id))) ctx.end();
+}
+
 export default defineMiniGame<Cfg, Item, State>({
   id: "qui-est-le-plus",
   configSchema,
@@ -58,8 +63,10 @@ export default defineMiniGame<Cfg, Item, State>({
     if (typeof target !== "string" || !ctx.players.some((p) => p.id === target)) return;
     if (!ctx.cfg.vote_pour_soi && target === playerId) return;
     state.votes.set(playerId, target); // on peut changer d'avis tant que la manche n'est pas finie
-    if (state.votes.size >= ctx.players.length) ctx.end();
+    checkAllVoted(state, ctx);
   },
+
+  onPresenceChange: checkAllVoted,
 
   publicView: (state, ctx): Pub => ({
     question: state.question,

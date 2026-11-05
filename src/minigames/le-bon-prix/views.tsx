@@ -7,7 +7,7 @@ import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { centsToDraft, draftToCents, formatCents, formatDraft, pressKey } from "./amount";
 import type { Priv, Pub, Results } from "./game";
 import { ItemVisual, Showcase } from "./Showcase";
-import { gapLabel, TvResults } from "./TvReveal";
+import { gapLabel, revealSeconds, TvResults } from "./TvReveal";
 
 /** Taille de police (rem) pour qu'un texte de `availRem` de large tienne sur une ligne (Bungee ≈ 0.8em par lettre). */
 const fit = (label: string, availRem: number, min: number, max: number) => Math.max(min, Math.min(max, availRem / (Math.max(label.length, 1) * 0.8)));
@@ -187,4 +187,4 @@ const PhoneResults = ({ results, snapshot }: MiniGameViewProps<Pub, Priv, Result
   );
 };
 
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds: ({ results }) => (results ? revealSeconds(results.ranking.length) : 0) } satisfies MiniGameViews;

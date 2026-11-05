@@ -112,6 +112,36 @@ describe("ceci-ou-cela : réponses", () => {
   });
 });
 
+describe("ceci-ou-cela : présence", () => {
+  it("un déconnecté ne bloque pas la fin anticipée ; sa réponse reste acceptée", () => {
+    const { ctx, state, answer } = round(PLAIN);
+    answer("p1", 0);
+    ctx.setConnected("p3", false);
+    game.onPresenceChange!(state, ctx);
+    expect(ctx.ended).toBe(false);
+    answer("p2", 1);
+    expect(ctx.ended).toBe(true);
+    answer("p3", 0); // accepté quand même
+    expect(state.answers.get("p3")).toBe(0);
+  });
+
+  it("la déconnexion du dernier qui n'avait pas répondu termine la manche tout de suite", () => {
+    const { ctx, state, answer } = round(PLAIN);
+    answer("p1", 0);
+    answer("p2", 1);
+    ctx.setConnected("p3", false);
+    game.onPresenceChange!(state, ctx);
+    expect(ctx.ended).toBe(true);
+  });
+
+  it("personne de connecté : on n'arrête rien (le chrono s'en charge)", () => {
+    const { ctx, state } = round(PLAIN);
+    for (const id of ["p1", "p2", "p3"]) ctx.setConnected(id, false);
+    game.onPresenceChange!(state, ctx);
+    expect(ctx.ended).toBe(false);
+  });
+});
+
 describe("ceci-ou-cela : mode cible", () => {
   it("les joueurs qui devinent la réponse de la cible gagnent, la cible est exclue", () => {
     const { answer, finish } = round(TARGETED);

@@ -2,7 +2,8 @@
 // Les duels d'un même tour se jouent en même temps, chacun sur son téléphone ; l'égalité se rejoue.
 // Logique de l'arbre dans bracket.ts (pure, testée à part) ; ici : étapes, chronos, vues publiques/privées, points.
 import { z } from "zod";
-import { defineMiniGame } from "../contract";
+import { defineMiniGame, type RoundContext } from "../contract";
+import { allConnectedDone } from "../helpers";
 import {
   advanceWinners,
   applyThrow,
@@ -47,6 +48,7 @@ const configSchema = z.object({
 
 type Cfg = z.infer<typeof configSchema>;
 type Item = { title: string; winsNeeded: number; duration: number };
+type Ctx = RoundContext<Cfg>;
 
 /** Étapes d'une manche, dans l'ordre : tirage → (lancer → révélation)* → avancée → … → champion. */
 export type Step = "draw" | "pick" | "reveal" | "advance" | "done";
@@ -162,6 +164,15 @@ function statusOf(s: State, playerId: string): Priv {
   return out;
 }
 
+/** Tous les joueurs connectés des duels actifs ont choisi : inutile d'attendre la fin du chrono. */
+function checkAllPicked(s: State, ctx: Ctx) {
+  if (s.step !== "pick") return;
+  const ids = pendingDuels(s.bracket, s.round)
+    .filter(({ index }) => s.active.has(index))
+    .flatMap(({ duel: d }) => [d.a!, d.b!]);
+  if (allConnectedDone(ctx, ids, (id) => s.picks.has(id))) s.revealNow?.();
+}
+
 export default defineMiniGame<Cfg, Item, State>({
   id: "pierre-feuille-ciseaux",
   configSchema,
@@ -257,12 +268,10 @@ export default defineMiniGame<Cfg, Item, State>({
     const duel = pendingDuels(s.bracket, s.round).find(({ index, duel: d }) => s.active.has(index) && (d.a === playerId || d.b === playerId));
     if (!duel || !ctx.players.some((p) => p.id === playerId)) return;
     s.picks.set(playerId, choice);
-    // Tous les joueurs des duels actifs ont choisi : inutile d'attendre la fin du chrono.
-    const everyone = pendingDuels(s.bracket, s.round)
-      .filter(({ index }) => s.active.has(index))
-      .every(({ duel: d }) => s.picks.has(d.a!) && s.picks.has(d.b!));
-    if (everyone) s.revealNow?.();
+    checkAllPicked(s, ctx);
   },
+
+  onPresenceChange: checkAllPicked,
 
   publicView: (s): Pub => ({
     variant: s.item.title,

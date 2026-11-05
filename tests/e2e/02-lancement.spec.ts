@@ -23,7 +23,7 @@ test.describe("Écran de lancement", () => {
 
   test("le total des manches se met à jour", async ({ party }) => {
     const total = party.tv.getByTestId("setup-total");
-    await party.setCounts({ [QUI]: 0, [CECI]: 0 });
+    await party.setOnly({});
     await expect(total).toContainText("0 manche");
     await party.setCounts({ [QUI]: 2 });
     await expect(total).toContainText("2 manches");
@@ -39,7 +39,7 @@ test.describe("Écran de lancement", () => {
   test("le bouton Lancer est désactivé sans joueur prêt puis sans manche", async ({ party }) => {
     const { tv } = party;
     const start = tv.getByTestId("start-game");
-    await party.setCounts({ [QUI]: 1, [CECI]: 0 });
+    await party.setOnly({ [QUI]: 1 });
     // Personne.
     await expect(start).toBeDisabled();
     await expect(tv.getByTestId("start-blocked")).toContainText("joueur prêt");
@@ -54,7 +54,7 @@ test.describe("Écran de lancement", () => {
     await expect(start).toBeEnabled();
 
     // …sauf s'il n'y a aucune manche.
-    await party.setCounts({ [QUI]: 0, [CECI]: 0 });
+    await party.setOnly({});
     await expect(start).toBeDisabled();
     await expect(tv.getByTestId("start-blocked")).toContainText("au moins une manche");
     await party.setCounts({ [CECI]: 1 });

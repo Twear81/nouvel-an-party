@@ -309,6 +309,24 @@ const PODIUM = {
   3: { bar: "h-[8rem] bg-surface-strong text-ink", delay: 0.4 },
 } as const;
 
+// Rythme de la révélation (s) : le podium monte 3e, 2e, 1er, puis la liste des suivants arrive.
+const CONFETTI_S = 2.2;
+const LIST_DELAY_S = 2.2;
+const MISSED_DELAY_S = 2.4;
+const LIST_STEP_S = 0.12;
+const SETTLE_S = 0.9;
+
+/** Durée totale (s) de l'animation des résultats. */
+export const revealSeconds = (results: Results) => {
+  const top = Math.min(results.ranking.length, 3);
+  const rest = results.ranking.length - top;
+  // Le 1er arrive en dernier : sa barre part à `delay`, son avatar tombe 0,3 s plus tard.
+  const podium = top === 0 ? 0 : PODIUM[1].delay + 0.3 + SETTLE_S;
+  const list = rest > 0 ? LIST_DELAY_S + (rest - 1) * LIST_STEP_S : 0;
+  const missed = results.missed.length > 0 ? MISSED_DELAY_S + (rest + results.missed.length - 1) * LIST_STEP_S : 0;
+  return Math.max(podium, list, missed) + 0.4;
+};
+
 function PodiumColumn({ entry, playerById }: { entry: Results["ranking"][number]; playerById: PlayerOf }) {
   const p = playerById(entry.playerId);
   const tier = PODIUM[Math.min(entry.rank, 3) as 1 | 2 | 3];
@@ -332,7 +350,7 @@ function PodiumColumn({ entry, playerById }: { entry: Results["ranking"][number]
 const TvResults = ({ results, playerById }: Props) => {
   useEffect(() => {
     if (!results?.ranking.length) return;
-    const id = setTimeout(() => fireConfetti("big"), 2200);
+    const id = setTimeout(() => fireConfetti("big"), CONFETTI_S * 1000);
     return () => clearTimeout(id);
   }, [results]);
   if (!results) return null;
@@ -359,7 +377,7 @@ const TvResults = ({ results, playerById }: Props) => {
       {(rest.length > 0 || results.missed.length > 0) && (
         <div className="glass flex w-[30rem] shrink-0 flex-col justify-center gap-2 rounded-card p-4">
           {rest.map((e, i) => (
-            <motion.div key={e.playerId} data-testid={`cabr-rank-${e.rank}`} initial={{ opacity: 0, x: 80 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 2.2 + i * 0.12 }} className="flex h-[4.6rem] items-center gap-3 rounded-btn bg-surface px-3">
+            <motion.div key={e.playerId} data-testid={`cabr-rank-${e.rank}`} initial={{ opacity: 0, x: 80 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: LIST_DELAY_S + i * LIST_STEP_S }} className="flex h-[4.6rem] items-center gap-3 rounded-btn bg-surface px-3">
               <span className="w-9 text-center font-display text-3xl text-ink-muted">{e.rank}</span>
               <PlayerAvatar profile={playerById(e.playerId)?.profile ?? null} size="sm" />
               <span className="min-w-0 flex-1 truncate text-2xl font-bold">{playerById(e.playerId)?.profile?.name}</span>
@@ -367,7 +385,7 @@ const TvResults = ({ results, playerById }: Props) => {
             </motion.div>
           ))}
           {results.missed.map((m, i) => (
-            <motion.div key={m.playerId} data-testid={`cabr-missed-${m.playerId}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.4 + (rest.length + i) * 0.12 }} className="flex h-[4.6rem] items-center gap-3 rounded-btn bg-surface px-3">
+            <motion.div key={m.playerId} data-testid={`cabr-missed-${m.playerId}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: MISSED_DELAY_S + (rest.length + i) * LIST_STEP_S }} className="flex h-[4.6rem] items-center gap-3 rounded-btn bg-surface px-3">
               <span className="w-9 text-center font-display text-3xl text-bad">✕</span>
               <PlayerAvatar profile={playerById(m.playerId)?.profile ?? null} size="sm" dimmed />
               <span className="min-w-0 flex-1 truncate text-2xl font-bold text-ink-muted">{playerById(m.playerId)?.profile?.name}</span>
@@ -392,4 +410,4 @@ const PhoneResults = ({ results, snapshot }: Props) => {
   );
 };
 
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds: ({ results }) => (results ? revealSeconds(results) : 0) } satisfies MiniGameViews;

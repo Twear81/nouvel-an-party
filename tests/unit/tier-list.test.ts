@@ -86,6 +86,22 @@ describe("tier-list : notes", () => {
     expect(r.ctx.ended).toBe(true);
   });
 
+  it("présence : seuls les votants connectés doivent avoir fini de noter", () => {
+    const { ctx, state, rate } = round(3);
+    ctx.setConnected("p3", false);
+    for (const v of ["p1", "p2"]) for (const t of ["p1", "p2", "p3"]) rate(v, t, 0);
+    expect(ctx.ended).toBe(true);
+
+    const r = round(3);
+    for (const v of ["p1", "p2"]) for (const t of ["p1", "p2", "p3"]) r.rate(v, t, 0);
+    expect(r.ctx.ended).toBe(false);
+    r.ctx.setConnected("p3", false);
+    game.onPresenceChange!(r.state, r.ctx);
+    expect(r.ctx.ended).toBe(true);
+    r.rate("p3", "p1", 1); // un absent peut encore noter
+    expect(r.state.ratings.get("p3")!.get("p1")).toBe(1);
+  });
+
   it("vues : avancement public sans les notes, notes privées", () => {
     const { ctx, state, rate } = round(3);
     rate("p1", "p2", 1);

@@ -70,6 +70,16 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
   );
 };
 
+// Rythme de la révélation (s) : les barres se remplissent l'une après l'autre, la couronne arrive en dernier.
+const ROW_STEP_S = 0.18;
+const BAR_DELAY_S = 0.3;
+const BAR_DURATION_S = 0.9;
+const CROWN_DELAY_S = 0.8;
+const SETTLE_S = 0.5;
+
+/** Durée totale (s) de l'animation pour `n` lignes. */
+export const revealSeconds = (n: number) => (n === 0 ? 0 : Math.max(BAR_DELAY_S + BAR_DURATION_S, CROWN_DELAY_S) + (n - 1) * ROW_STEP_S + SETTLE_S);
+
 const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
   if (!results) return null;
   const max = Math.max(1, ...results.tally.map((t) => t.votes));
@@ -86,9 +96,9 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
           const player = playerById(t.playerId);
           const winner = results.winners.includes(t.playerId);
           return (
-            <motion.div key={t.playerId} data-testid={`tally-${t.playerId}`} initial={{ opacity: 0, x: -80 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.18, type: "spring" }} className="flex items-center gap-5">
+            <motion.div key={t.playerId} data-testid={`tally-${t.playerId}`} initial={{ opacity: 0, x: -80 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * ROW_STEP_S, type: "spring" }} className="flex items-center gap-5">
               <div className="relative">
-                {winner && <motion.span initial={{ scale: 0, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ delay: 0.8 + i * 0.18, type: "spring" }} className="absolute -left-2 -top-3 z-10 -rotate-[18deg] text-3xl">👑</motion.span>}
+                {winner && <motion.span initial={{ scale: 0, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ delay: CROWN_DELAY_S + i * ROW_STEP_S, type: "spring" }} className="absolute -left-2 -top-3 z-10 -rotate-[18deg] text-3xl">👑</motion.span>}
                 <PlayerAvatar profile={player?.profile ?? null} size={size} />
               </div>
               <div className={`shrink-0 truncate font-bold ${n > 4 ? "w-[16rem] text-2xl" : "w-[14rem] text-3xl"}`}>{player?.profile?.name ?? "?"}</div>
@@ -96,7 +106,7 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${(t.votes / max) * 100}%` }}
-                  transition={{ delay: 0.3 + i * 0.18, duration: 0.9, ease: "easeOut" }}
+                  transition={{ delay: BAR_DELAY_S + i * ROW_STEP_S, duration: BAR_DURATION_S, ease: "easeOut" }}
                   className={`flex h-full min-w-[3rem] items-center gap-1.5 rounded-btn px-3 ${winner ? "bg-gold shadow-glow" : "bg-hot-gradient"}`}
                 >
                   {t.voters.map((v) => (
@@ -139,4 +149,4 @@ const PhoneResults = ({ results, snapshot, playerById }: MiniGameViewProps<Pub, 
   );
 };
 
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds: ({ results }) => (results ? revealSeconds(results.tally.length) : 0) } satisfies MiniGameViews;

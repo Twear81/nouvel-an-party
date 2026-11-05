@@ -565,6 +565,9 @@ const Phone = ({ pub, priv, sendInput, playerById, snapshot }: MiniGameViewProps
 
 // ───────────── Résultats ─────────────
 
+/** Durée (s) de l'animation des résultats : le champion arrive en ressort (le tournoi s'est joué pendant la manche). */
+export const REVEAL_SECONDS = 1.5;
+
 const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
   useEffect(() => {
     if (results?.champion) fireConfetti("small");
@@ -603,4 +606,4 @@ const PhoneResults = ({ results, snapshot }: MiniGameViewProps<Pub, Priv, Result
   );
 };
 
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds: () => REVEAL_SECONDS } satisfies MiniGameViews;

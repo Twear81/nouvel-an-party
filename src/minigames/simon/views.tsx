@@ -296,21 +296,33 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
 
 const BAR_MAX_REM = 21;
 
+// Rythme de la révélation (s) : les colonnes montent l'une après l'autre, la couronne puis la phrase arrivent ensuite.
+const COLUMN_STEP_S = 0.15;
+const BAR_DELAY_S = 0.3;
+const BAR_SETTLE_S = 1.4; // ressort lent de la barre
+const CROWN_DELAY_S = 0.9;
+const CROWN_STEP_S = 0.1;
+const TEXT_DELAY_S = 1.2;
+
+/** Durée totale (s) de l'animation pour `n` colonnes. */
+export const revealSeconds = (n: number) =>
+  n === 0 ? 0 : Math.max(BAR_DELAY_S + COLUMN_STEP_S * (n - 1) + BAR_SETTLE_S, CROWN_DELAY_S + CROWN_STEP_S * (n - 1) + 0.6, TEXT_DELAY_S + 0.4);
+
 function Column({ row, rank, max, count, playerById }: { row: PlayerResult; rank: number; max: number; count: number; playerById: MiniGameViewProps["playerById"] }) {
   const p = playerById(row.playerId);
   const crowd = count > 5;
   const height = 3 + (max > 0 ? (row.mastered / max) * (BAR_MAX_REM - 3) : 0);
   return (
-    <motion.div data-testid={`simon-col-${row.playerId}`} data-winner={row.winner ? "true" : "false"} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 * rank }} className="flex w-[11rem] flex-col items-center justify-end gap-2">
+    <motion.div data-testid={`simon-col-${row.playerId}`} data-winner={row.winner ? "true" : "false"} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: COLUMN_STEP_S * rank }} className="flex w-[11rem] flex-col items-center justify-end gap-2">
       <div className="relative">
         {row.winner && (
-          <motion.span initial={{ y: -40, opacity: 0, rotate: -30 }} animate={{ y: 0, opacity: 1, rotate: -8 }} transition={{ delay: 0.9 + 0.1 * rank, type: "spring", stiffness: 200, damping: 10 }} className="absolute -top-[3rem] left-1/2 -translate-x-1/2 text-[3.5rem] leading-none">
+          <motion.span initial={{ y: -40, opacity: 0, rotate: -30 }} animate={{ y: 0, opacity: 1, rotate: -8 }} transition={{ delay: CROWN_DELAY_S + CROWN_STEP_S * rank, type: "spring", stiffness: 200, damping: 10 }} className="absolute -top-[3rem] left-1/2 -translate-x-1/2 text-[3.5rem] leading-none">
             👑
           </motion.span>
         )}
         <PlayerAvatar profile={p?.profile ?? null} size={crowd ? "md" : "lg"} dimmed={!row.winner && row.mastered === 0} />
       </div>
-      <motion.div initial={{ height: "3rem" }} animate={{ height: `${height}rem` }} transition={{ delay: 0.3 + 0.15 * rank, type: "spring", stiffness: 70, damping: 14 }} className={`flex w-[7.5rem] items-start justify-center rounded-t-card pt-2 font-display text-4xl ${row.winner ? "bg-gold text-accent-ink shadow-glow" : "bg-surface-strong text-ink"}`}>
+      <motion.div initial={{ height: "3rem" }} animate={{ height: `${height}rem` }} transition={{ delay: BAR_DELAY_S + COLUMN_STEP_S * rank, type: "spring", stiffness: 70, damping: 14 }} className={`flex w-[7.5rem] items-start justify-center rounded-t-card pt-2 font-display text-4xl ${row.winner ? "bg-gold text-accent-ink shadow-glow" : "bg-surface-strong text-ink"}`}>
         {row.mastered}
       </motion.div>
       <span className="w-full truncate text-center text-xl font-bold">{p?.profile?.name}</span>
@@ -339,7 +351,7 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
           <Column key={r.playerId} row={r} rank={i} max={max} count={rows.length} playerById={playerById} />
         ))}
       </div>
-      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="max-w-[100rem] truncate text-center text-4xl font-bold text-accent">
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: TEXT_DELAY_S }} className="max-w-[100rem] truncate text-center text-4xl font-bold text-accent">
         {text}
       </motion.p>
     </div>
@@ -367,4 +379,4 @@ const PhoneResults = ({ results, snapshot }: MiniGameViewProps<Pub, Priv, Result
   );
 };
 
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds: ({ results }) => (results ? revealSeconds(results.rows.length) : 0) } satisfies MiniGameViews;

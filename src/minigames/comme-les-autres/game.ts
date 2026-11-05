@@ -1,8 +1,8 @@
 // "Comme les autres" : tout le monde répond à la même consigne ("Cite un truc qu'on trouve dans un frigo").
 // On marque quand sa réponse est la même que celle d'autres joueurs ; la plus répandue rapporte un bonus.
 import { z } from "zod";
-import { defineMiniGame } from "../contract";
-import { normalizeAnswer, normalizeQuestion, questionSchema } from "../helpers";
+import { defineMiniGame, type RoundContext } from "../contract";
+import { allConnectedDone, normalizeAnswer, normalizeQuestion, questionSchema } from "../helpers";
 
 export const MAX_LENGTH = 40;
 
@@ -145,6 +145,11 @@ export function groupAnswers(byPlayer: Map<string, string[]>, tolerance: boolean
   return groups.sort((a, b) => b.playerIds.length - a.playerIds.length || a.label.localeCompare(b.label, "fr"));
 }
 
+/** Fin anticipée : tous les joueurs connectés ont répondu. */
+function checkAllAnswered(state: State, ctx: RoundContext<Cfg>) {
+  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.answers.has(id))) ctx.end();
+}
+
 export default defineMiniGame<Cfg, Item, State>({
   id: "comme-les-autres",
   configSchema,
@@ -174,8 +179,10 @@ export default defineMiniGame<Cfg, Item, State>({
     // Pas de réponse valable : on retire la réponse précédente (le joueur peut se rétracter).
     if (cleaned.length === 0) state.answers.delete(playerId);
     else state.answers.set(playerId, cleaned);
-    if (state.answers.size >= ctx.players.length) ctx.end();
+    checkAllAnswered(state, ctx);
   },
+
+  onPresenceChange: checkAllAnswered,
 
   publicView: (state, ctx): Pub => ({ question: state.question, perPlayer: ctx.cfg.reponses, answeredIds: [...state.answers.keys()] }),
   privateView: (state, playerId): Priv => ({ answers: state.answers.get(playerId) ?? [] }),

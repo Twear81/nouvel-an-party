@@ -293,6 +293,32 @@ describe("pfc : déroulé d'une manche (6 joueurs)", () => {
     expect(t.priv(duel.a!).myPick).toBe(ROCK);
   });
 
+  it("présence : un duel dont un joueur est déconnecté se révèle dès que l'autre a choisi", () => {
+    const t = setup(6);
+    t.ctx.advance(TIMINGS.draw);
+    const duels = t.pub().bracket[0]!.filter((m) => m.active);
+    // Tous les duels répondent sauf le dernier, dont l'un des joueurs part.
+    for (const m of duels.slice(0, -1)) {
+      t.pick(m.a!, ROCK);
+      t.pick(m.b!, ROCK);
+    }
+    const last = duels.at(-1)!;
+    t.ctx.setConnected(last.b!, false);
+    t.pick(last.a!, ROCK);
+    expect(t.pub().step).toBe("reveal");
+  });
+
+  it("présence : la déconnexion du dernier joueur attendu déclenche la révélation", () => {
+    const t = setup(6);
+    t.ctx.advance(TIMINGS.draw);
+    const duels = t.pub().bracket[0]!.filter((m) => m.active);
+    for (const m of duels) t.pick(m.a!, ROCK);
+    expect(t.pub().step).toBe("pick");
+    for (const m of duels) t.ctx.setConnected(m.b!, false);
+    game.onPresenceChange!(t.state, t.ctx);
+    expect(t.pub().step).toBe("reveal");
+  });
+
   it("tout le monde a choisi : révélation immédiate, puis avancée, puis tour suivant", () => {
     const t = setup(6);
     t.ctx.advance(TIMINGS.draw);

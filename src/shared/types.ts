@@ -60,6 +60,8 @@ export interface RoundInfo {
   results: unknown;
   /** Points gagnés pendant cette manche, présents en phase "results". */
   deltas: Record<PlayerId, number> | null;
+  /** Heure serveur (ms) à laquelle la phase "results" a commencé ; null avant. Sert à synchroniser les révélations. */
+  resultsAt: number | null;
 }
 
 /** Ce que chaque écran reçoit à chaque changement (événement "state"). */

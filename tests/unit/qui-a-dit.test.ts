@@ -117,6 +117,52 @@ describe("qui-a-dit : écriture", () => {
   });
 });
 
+describe("qui-a-dit : présence", () => {
+  it("écriture : le délai de grâce démarre quand tous les connectés ont écrit", () => {
+    const r = round(4);
+    r.ctx.setConnected("p4", false);
+    writeAll(r, ["p1", "p2"]);
+    expect(r.ctx.countdownState!.seconds).not.toBe(GRACE_SECONDS);
+    r.write("p3", "tp3");
+    expect(r.ctx.countdownState!.seconds).toBe(GRACE_SECONDS);
+    expect(r.pub().allWritten).toBe(true);
+  });
+
+  it("écriture : la déconnexion du dernier qui manquait lance le délai de grâce", () => {
+    const r = round(3);
+    writeAll(r, ["p1", "p2"]);
+    r.ctx.setConnected("p3", false);
+    game.onPresenceChange!(r.state, r.ctx);
+    expect(r.ctx.countdownState!.seconds).toBe(GRACE_SECONDS);
+  });
+
+  it("vote : on révèle quand tous les votants connectés (hors auteur) ont voté", () => {
+    const r = round(4);
+    writeAll(r, ["p1", "p2", "p3", "p4"]);
+    r.ctx.finishCountdown();
+    const author = r.currentAuthor();
+    const voters = ["p1", "p2", "p3", "p4"].filter((p) => p !== author);
+    r.ctx.setConnected(voters[2]!, false);
+    game.onPresenceChange!(r.state, r.ctx);
+    r.guess(voters[0]!, author);
+    expect(r.pub().step).toBe("guess");
+    r.guess(voters[1]!, author);
+    expect(r.pub().step).toBe("reveal");
+  });
+
+  it("vote : la déconnexion du dernier votant manquant déclenche la révélation", () => {
+    const r = round(3);
+    writeAll(r, ["p1", "p2", "p3"]);
+    r.ctx.finishCountdown();
+    const author = r.currentAuthor();
+    const [v1, v2] = ["p1", "p2", "p3"].filter((p) => p !== author) as [string, string];
+    r.guess(v1, author);
+    r.ctx.setConnected(v2, false);
+    game.onPresenceChange!(r.state, r.ctx);
+    expect(r.pub().step).toBe("reveal");
+  });
+});
+
 describe("qui-a-dit : devinettes", () => {
   it("l'auteur n'est jamais dans la vue publique avant la révélation", () => {
     const r = round(3);

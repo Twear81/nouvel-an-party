@@ -3,8 +3,8 @@
 //  - avec {joueur} : un invité tiré au sort répond pour de vrai, les autres devinent sa réponse.
 //  - sans {joueur} : on gagne si on est dans le camp majoritaire (égalité : tout le monde gagne).
 import { z } from "zod";
-import { defineMiniGame } from "../contract";
-import { fillPlayer } from "../helpers";
+import { defineMiniGame, type RoundContext } from "../contract";
+import { allConnectedDone, fillPlayer } from "../helpers";
 
 const choicesSchema = z.tuple([z.string().min(1), z.string().min(1)]);
 
@@ -62,6 +62,11 @@ export interface Results {
   winner: Choice | null;
 }
 
+/** Fin anticipée : tous les joueurs connectés ont répondu. */
+function checkAllAnswered(state: State, ctx: RoundContext<Cfg>) {
+  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.answers.has(id))) ctx.end();
+}
+
 export default defineMiniGame<Cfg, Item, State>({
   id: "ceci-ou-cela",
   configSchema,
@@ -85,8 +90,10 @@ export default defineMiniGame<Cfg, Item, State>({
     const choice = (payload as { choice?: unknown })?.choice;
     if (choice !== 0 && choice !== 1) return;
     state.answers.set(playerId, choice);
-    if (state.answers.size >= ctx.players.length) ctx.end();
+    checkAllAnswered(state, ctx);
   },
+
+  onPresenceChange: checkAllAnswered,
 
   publicView: (state): Pub => ({
     question: state.question,

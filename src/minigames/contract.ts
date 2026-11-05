@@ -9,6 +9,13 @@ export interface RoundContext<Cfg> {
   cfg: Cfg;
   /** Joueurs participant à la manche (profil validé au début de la manche). */
   players: PublicPlayer[];
+  /**
+   * Le joueur a-t-il au moins un écran connecté en ce moment ? (présence en direct, à lire au moment de décider.)
+   * Sert aux fins anticipées : « tout le monde a répondu » ne doit compter que les joueurs connectés
+   * (un téléphone planté ne bloque pas la manche), tout en acceptant les réponses de chacun.
+   * Voir `allConnectedDone` (helpers.ts).
+   */
+  isConnected: (playerId: PlayerId) => boolean;
   /** Aléatoire déterministe en test. Toujours l'utiliser à la place de Math.random. */
   rng: () => number;
   /** Heure du serveur (ms). */
@@ -59,6 +66,12 @@ export interface MiniGame<Cfg = any, Item = any, State = any> {
   start: (item: Item, ctx: RoundContext<Cfg>) => State;
   /** Optionnel : appelé quand le chrono démarre (fin de l'intro). */
   onPlay?: (state: State, ctx: RoundContext<Cfg>) => void;
+  /**
+   * Optionnel : un participant de la manche vient de se connecter ou déconnecter (pendant le jeu uniquement).
+   * À utiliser pour rejouer les règles « tout le monde a répondu » ou passer le tour d'un absent
+   * (lire `ctx.isConnected`). Les vues sont renvoyées ensuite ; `ctx.end()` et les timers fonctionnent comme dans `input`.
+   */
+  onPresenceChange?: (state: State, ctx: RoundContext<Cfg>) => void;
   /** Réponse d'un joueur. `payload` vient du réseau : à valider ! */
   input: (state: State, playerId: PlayerId, payload: unknown, ctx: RoundContext<Cfg>) => void;
   /** Ce que voient la TV et tous les téléphones. Ne rien y mettre de secret. */

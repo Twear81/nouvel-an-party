@@ -66,6 +66,7 @@ interface CurrentRound {
   endRequested: boolean;
   results: unknown;
   deltas: Record<PlayerId, number> | null;
+  resultsAt: number | null;
 }
 
 export class GameEngine {
@@ -103,6 +104,7 @@ export class GameEngine {
       this.players.set(p.id, p);
     }
     p.sockets++;
+    if (p.sockets === 1) this.presenceChanged(p.id);
     this.changed();
     return { playerId: p.id, token: p.token };
   }
@@ -110,7 +112,9 @@ export class GameEngine {
   disconnect(playerId: PlayerId) {
     const p = this.players.get(playerId);
     if (!p) return;
+    const was = p.sockets;
     p.sockets = Math.max(0, p.sockets - 1);
+    if (was > 0 && p.sockets === 0) this.presenceChanged(playerId);
     this.checkAllContinued();
     this.changed();
   }
@@ -185,6 +189,8 @@ export class GameEngine {
     if (!this.current || !this.paused) return;
     this.paused = false;
     this.current.timers.resume();
+    // Les arrivées/départs survenus pendant la pause n'ont pas été signalés au jeu.
+    this.notifyPresence();
     this.changed();
   }
 
@@ -257,9 +263,11 @@ export class GameEngine {
       endRequested: false,
       results: null,
       deltas: null,
+      resultsAt: null,
       ctx: {
         cfg: loaded.cfg,
         players: this.publicPlayers().filter((p) => p.profile),
+        isConnected: (id) => (this.players.get(id)?.sockets ?? 0) > 0,
         rng: this.rng,
         now: () => this.clock.now(),
         setTimeout: (ms, fn) => {
@@ -347,6 +355,7 @@ export class GameEngine {
       c.results = null;
       c.deltas = {};
     }
+    c.resultsAt = this.clock.now();
     this.phase = "results";
     this.save();
     this.changed();
@@ -362,6 +371,20 @@ export class GameEngine {
       console.error(`[${c?.loaded.game.id}] erreur :`, err);
     }
     if (c && c === this.current && c.endRequested && this.phase === "playing") this.endRound();
+  }
+
+  /** Un participant de la manche en cours se (dé)connecte : le jeu peut rejouer ses règles de fin anticipée. */
+  private presenceChanged(playerId: PlayerId) {
+    const c = this.current;
+    if (!c || this.phase !== "playing" || this.paused) return;
+    if (!c.ctx.players.some((p) => p.id === playerId)) return;
+    this.notifyPresence();
+  }
+
+  private notifyPresence() {
+    const c = this.current;
+    if (!c || this.phase !== "playing" || !c.loaded.game.onPresenceChange) return;
+    this.runGame(() => c.loaded.game.onPresenceChange!(c.state, c.ctx));
   }
 
   private checkAllContinued() {
@@ -396,6 +419,7 @@ export class GameEngine {
         public: safe(() => (viewer === null && g.tvView ? g.tvView(c.state, c.ctx) : g.publicView(c.state, c.ctx))),
         results: this.phase === "results" ? c.results : null,
         deltas: this.phase === "results" ? c.deltas : null,
+        resultsAt: this.phase === "results" ? c.resultsAt : null,
       };
       if (viewer && g.privateView) priv = safe(() => g.privateView!(c.state, viewer, c.ctx));
     }

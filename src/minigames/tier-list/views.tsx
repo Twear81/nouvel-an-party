@@ -118,6 +118,9 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
 
 // ───────────────────────────── TV résultats : la tier list se remplit ─────────────────────────────
 
+/** Ordre de révélation : du plus bas étage vers le S, le meilleur arrive en dernier. */
+const revealOrder = (placements: Results["placements"]) => [...placements].sort((a, b) => b.tier - a.tier || a.percent - b.percent);
+
 /** Pause (ms) avant de révéler le n-ième invité : plus longue pour le suspense en haut du classement. */
 function pauseBefore(order: Results["placements"], k: number): number {
   if (k === 0) return 1500;
@@ -125,9 +128,19 @@ function pauseBefore(order: Results["placements"], k: number): number {
   return 1200;
 }
 
+/** Délai (ms) entre l'arrivée du dernier invité et la fin de l'animation (chute, confettis, pourcentage). */
+const SETTLE_MS = 1300;
+
+/** Durée totale (s) de la révélation : somme des pauses avant chaque invité, plus la chute du dernier. */
+export function revealSeconds(placements: Results["placements"]): number {
+  const order = revealOrder(placements);
+  if (order.length === 0) return 0;
+  return (order.reduce((sum, _, k) => sum + pauseBefore(order, k), 0) + SETTLE_MS) / 1000;
+}
+
 const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
   // Du plus bas étage vers le S : le meilleur arrive en dernier.
-  const order = useMemo(() => (results ? [...results.placements].sort((a, b) => b.tier - a.tier || a.percent - b.percent) : []), [results]);
+  const order = useMemo(() => (results ? revealOrder(results.placements) : []), [results]);
   const [revealed, setRevealed] = useState(0);
 
   useEffect(() => {
@@ -224,4 +237,4 @@ const PhoneResults = ({ results, snapshot, playerById }: MiniGameViewProps<Pub, 
   );
 };
 
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds: ({ results }) => (results ? revealSeconds(results.placements) : 0) } satisfies MiniGameViews;
