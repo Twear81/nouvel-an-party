@@ -1,0 +1,15 @@
+actif: true
+nom: "Qui a dit ça ?"
+description: "Écrivez une réponse, puis devinez qui a écrit quoi"
+duree_ecriture: 30
+duree_vote: 15
+duree_revelation: 2
+temps_resultats: 5
+longueur_max: 80
+points:
+  bonne_reponse: 100
+  auteur_piegeur: 50
+consignes:
+  - "Ta résolution la plus irréaliste pour 2027"
+  - "Le pire cadeau de Noël"
+  - "Ton talent caché le plus inutile"

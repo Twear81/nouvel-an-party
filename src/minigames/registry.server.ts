@@ -2,6 +2,7 @@
 // (et dans registry.web.ts). Voir docs/creer-un-mini-jeu.md.
 import type { MiniGame } from "./contract";
 import ceciOuCela from "./ceci-ou-cela/game";
+import quiAdit from "./qui-a-dit/game";
 import quiEstLePlus from "./qui-est-le-plus/game";
 
-export const serverGames: MiniGame[] = [quiEstLePlus, ceciOuCela];
+export const serverGames: MiniGame[] = [quiEstLePlus, ceciOuCela, quiAdit];
