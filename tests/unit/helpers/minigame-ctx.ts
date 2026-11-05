@@ -14,6 +14,9 @@ export function makePlayers(n: number): PublicPlayer[] {
 
 export type TestCtx<Cfg> = RoundContext<Cfg> & {
   ended: boolean;
+  /** Joueurs connectés (tous au départ) : modifier avec setConnected, puis appeler game.onPresenceChange. */
+  connected: Set<string>;
+  setConnected: (id: string, on: boolean) => void;
   /** Chrono visible en cours : secondes demandées et heure de fin, null si aucun. */
   countdownState: { seconds: number; endsAt: number } | null;
   /** Avance le temps simulé et déclenche les timers dus, dans l'ordre. */
@@ -30,6 +33,12 @@ export function makeCtx<Cfg>(cfg: Cfg, players: PublicPlayer[], rng: () => numbe
   const ctx: TestCtx<Cfg> = {
     cfg,
     players,
+    isConnected: (id) => ctx.connected.has(id),
+    connected: new Set(players.map((p) => p.id)),
+    setConnected: (id, on) => {
+      if (on) ctx.connected.add(id);
+      else ctx.connected.delete(id);
+    },
     rng,
     now: () => now,
     setTimeout: (ms, fn) => {

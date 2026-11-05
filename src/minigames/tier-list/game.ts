@@ -2,8 +2,8 @@
 // L'étage "consensus" d'un invité = moyenne des notes reçues, arrondie. Chaque votant gagne des points
 // pour chaque invité qu'il a placé dans son étage consensus.
 import { z } from "zod";
-import { defineMiniGame } from "../contract";
-import { normalizeQuestion, questionSchema } from "../helpers";
+import { defineMiniGame, type RoundContext } from "../contract";
+import { allConnectedDone, normalizeQuestion, questionSchema } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Tier list"),
@@ -69,6 +69,11 @@ const targetsOf = (voter: string, ctx: { players: { id: string }[]; cfg: Cfg }) 
 const isComplete = (state: State, voter: string, ctx: { players: { id: string }[]; cfg: Cfg }) =>
   state.ratings.get(voter)?.size === targetsOf(voter, ctx).length;
 
+/** Fin anticipée : tous les joueurs connectés ont fini de noter. */
+function checkAllRated(state: State, ctx: RoundContext<Cfg>) {
+  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => isComplete(state, id, ctx))) ctx.end();
+}
+
 export default defineMiniGame<Cfg, Item, State>({
   id: "tier-list",
   configSchema,
@@ -88,8 +93,10 @@ export default defineMiniGame<Cfg, Item, State>({
     let mine = state.ratings.get(playerId);
     if (!mine) state.ratings.set(playerId, (mine = new Map()));
     mine.set(target, tier); // on peut changer d'avis tant que la manche n'est pas finie
-    if (ctx.players.every((p) => isComplete(state, p.id, ctx))) ctx.end();
+    checkAllRated(state, ctx);
   },
+
+  onPresenceChange: checkAllRated,
 
   publicView: (state, ctx): Pub => ({
     question: state.question,

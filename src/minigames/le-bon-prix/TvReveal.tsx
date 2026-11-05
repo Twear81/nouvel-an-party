@@ -90,6 +90,12 @@ function useBox() {
   return { ref, ...box };
 }
 
+/** Rythme de la révélation (ms) : prix des joueurs un par un, roulement de tambour, vrai prix, écarts. */
+const REVEAL = { first: 400, step: 500, beforeDrum: 600, drum: 1700, price: 1100, settle: 900 };
+
+/** Durée totale (s) de la révélation pour `n` réponses : tout est en place, vainqueur compris. */
+export const revealSeconds = (n: number) => (REVEAL.first + n * REVEAL.step + REVEAL.beforeDrum + REVEAL.drum + REVEAL.price + REVEAL.settle) / 1000;
+
 const MEDALS = ["🥇", "🥈", "🥉"] as const;
 
 function GuessMarker({ g, left, big, stage, playerById }: { g: GuessResult; left: number; big: boolean; stage: Stage; playerById: MiniGameViewProps["playerById"] }) {
@@ -130,12 +136,11 @@ export function TvResults({ results, playerById }: MiniGameViewProps<Pub, Priv, 
     if (!hasResults) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const at = (ms: number, fn: () => void) => timers.push(setTimeout(fn, ms));
-    const STEP = 500;
-    for (let i = 1; i <= n; i++) at(400 + i * STEP, () => setShown(i));
-    const tDrum = 400 + n * STEP + 600;
+    for (let i = 1; i <= n; i++) at(REVEAL.first + i * REVEAL.step, () => setShown(i));
+    const tDrum = REVEAL.first + n * REVEAL.step + REVEAL.beforeDrum;
     at(tDrum, () => setStage("drum"));
-    at(tDrum + 1700, () => setStage("price"));
-    at(tDrum + 2800, () => {
+    at(tDrum + REVEAL.drum, () => setStage("price"));
+    at(tDrum + REVEAL.drum + REVEAL.price, () => {
       setStage("done");
       if (n > 0) fireConfetti(exactWin ? "big" : "small");
     });

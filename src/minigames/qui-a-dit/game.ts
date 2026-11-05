@@ -2,6 +2,7 @@
 // Une manche, deux étapes : écrire (chrono 1), puis une citation à la fois : vote (chrono 2) + révélation (chrono 3).
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
+import { allConnectedDone } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Qui a dit ça ?"),
@@ -135,11 +136,7 @@ export default defineMiniGame<Cfg, Item, State>({
       const text = cleanQuote(p.text, ctx.cfg.longueur_max);
       if (text) state.texts.set(playerId, text);
       else state.texts.delete(playerId); // vide = pas de citation
-      // Tout le monde a écrit : court délai pour corriger, puis on enchaîne.
-      if (!state.graceStarted && state.texts.size >= ctx.players.length) {
-        state.graceStarted = true;
-        ctx.countdown(GRACE_SECONDS, () => startGuessing(state, ctx));
-      }
+      checkWritten(state, ctx);
       return;
     }
 
@@ -150,8 +147,13 @@ export default defineMiniGame<Cfg, Item, State>({
       if (playerId === quote.authorId || target === playerId) return; // l'auteur ne vote pas, pas de vote pour soi
       if (!state.texts.has(target)) return; // seuls ceux qui ont écrit sont des auteurs possibles
       quote.votes.set(playerId, target); // on peut changer d'avis jusqu'à la fin du chrono
-      if (quote.votes.size >= ctx.players.length - 1) reveal(state, ctx);
+      checkVoted(state, ctx);
     }
+  },
+
+  onPresenceChange(state, ctx) {
+    checkWritten(state, ctx);
+    checkVoted(state, ctx);
   },
 
   publicView(state, ctx): Pub {
@@ -162,7 +164,7 @@ export default defineMiniGame<Cfg, Item, State>({
       prompt: state.prompt,
       maxLength: ctx.cfg.longueur_max,
       writtenIds: [...state.texts.keys()],
-      allWritten: state.texts.size >= ctx.players.length,
+      allWritten: allWritten(state, ctx),
       index: state.index,
       total: state.quotes.length,
       quote: quote?.text ?? null,
@@ -212,6 +214,23 @@ export default defineMiniGame<Cfg, Item, State>({
     return { results, scores: state.scores };
   },
 });
+
+const allWritten = (state: State, ctx: Ctx) => allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.texts.has(id));
+
+/** Tous les joueurs connectés ont écrit : court délai pour corriger, puis on enchaîne. */
+function checkWritten(state: State, ctx: Ctx) {
+  if (state.step !== "write" || state.graceStarted || !allWritten(state, ctx)) return;
+  state.graceStarted = true;
+  ctx.countdown(GRACE_SECONDS, () => startGuessing(state, ctx));
+}
+
+/** Tous les votants connectés (tout le monde sauf l'auteur) ont voté : on révèle sans attendre le chrono. */
+function checkVoted(state: State, ctx: Ctx) {
+  const quote = state.quotes[state.index];
+  if (state.step !== "guess" || !quote) return;
+  const voters = ctx.players.map((p) => p.id).filter((id) => id !== quote.authorId);
+  if (allConnectedDone(ctx, voters, (id) => quote.votes.has(id))) reveal(state, ctx);
+}
 
 function shuffle<T>(list: T[], rng: () => number): T[] {
   const a = [...list];

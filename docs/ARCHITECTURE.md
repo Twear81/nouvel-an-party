@@ -28,8 +28,10 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
 - **lobby** : les joueurs rejoignent et créent leur profil ; la TV règle le nombre de manches par mini-jeu.
 - **intro** : annonce de la manche (`intro_secondes`).
 - **playing** : chrono du mini-jeu (ou fin anticipée quand tout le monde a répondu).
-- **results** : résultats + bouton "Continuer" ; on avance quand tous les joueurs connectés ont cliqué
-  (la TV peut forcer avec "Passer").
+- **results** : animation de révélation sur la TV (`revealSeconds` du mini-jeu), puis les points et le bouton
+  "Continuer" apparaissent ; on avance quand tous les joueurs connectés ont cliqué (la TV peut forcer avec "Passer").
+  Avant la fin de l'animation les téléphones affichent « Regarde la TV » pour ne rien spoiler. Tous les écrans
+  comptent depuis `round.resultsAt` (heure serveur) : un téléphone qui recharge en pleine révélation est resynchronisé.
 - **final** : classement.
 
 ## Mini-jeux (`src/minigames/<id>/`)
@@ -41,6 +43,11 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
 | `config/minijeux/<id>.yaml` | contenu et réglages |
 
 Enregistrés dans `registry.server.ts` et `registry.web.ts`. Voir `docs/creer-un-mini-jeu.md`.
+
+## Présence en direct
+Le moteur compte les connexions de chaque joueur. Un mini-jeu lit `ctx.isConnected(id)` et reçoit `onPresenceChange`
+quand un participant se (dé)connecte pendant `playing` : les règles « tout le monde a répondu » ne comptent que les
+joueurs connectés (`allConnectedDone`, `helpers.ts`), un téléphone planté ne bloque donc pas la manche.
 
 ## Front (`src/web`)
 - `/tv` : écran TV (pensé 16:9, lisible de loin) + contrôles maître du jeu (souris/clavier sur le PC).

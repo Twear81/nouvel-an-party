@@ -78,6 +78,32 @@ describe("le-bon-prix : réponses", () => {
   });
 });
 
+describe("le-bon-prix : présence", () => {
+  it("la manche s'arrête quand tous les joueurs connectés ont validé", () => {
+    const { ctx, state, guess } = round(3);
+    guess("p1", 100);
+    ctx.setConnected("p3", false);
+    game.onPresenceChange!(state, ctx);
+    expect(ctx.ended).toBe(false);
+    guess("p2", 90);
+    expect(ctx.ended).toBe(true);
+  });
+
+  it("un déconnecté qui a déjà répondu garde sa réponse ; reconnecté, il bloque de nouveau", () => {
+    const { ctx, state, guess } = round(3);
+    guess("p3", 100);
+    ctx.setConnected("p3", false);
+    ctx.setConnected("p2", false);
+    game.onPresenceChange!(state, ctx);
+    expect(ctx.ended).toBe(false); // p1 (connecté) n'a pas répondu
+    ctx.setConnected("p2", true);
+    guess("p1", 80);
+    expect(ctx.ended).toBe(false); // p2 est revenu et n'a pas répondu
+    guess("p2", 90);
+    expect(ctx.ended).toBe(true);
+  });
+});
+
 describe("le-bon-prix : points", () => {
   it("classe par écart absolu (au-dessus ou en dessous), points par rang", () => {
     const { guess, finish } = round(4); // prix = 100 €

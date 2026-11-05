@@ -223,6 +223,39 @@ describe("simon : déroulé", () => {
   });
 });
 
+describe("simon : présence", () => {
+  it("l'étape se termine quand tous les survivants connectés ont fini (l'absent est éliminé au temps)", () => {
+    const t = setup(3);
+    t.toPlay();
+    t.ctx.setConnected("p3", false);
+    t.playAll("p1");
+    expect(t.pub().stage).toBe("play");
+    t.playAll("p2");
+    expect(t.pub().stage).not.toBe("play");
+    expect(t.pub().out.map((o) => o.id)).toEqual(["p3"]);
+  });
+
+  it("la déconnexion du dernier survivant qui n'avait pas fini termine l'étape", () => {
+    const t = setup(3);
+    t.toPlay();
+    t.playAll("p1");
+    t.playAll("p2");
+    expect(t.pub().stage).toBe("play");
+    t.ctx.setConnected("p3", false);
+    game.onPresenceChange!(t.state, t.ctx);
+    expect(t.pub().stage).not.toBe("play");
+  });
+
+  it("personne de connecté : l'étape continue jusqu'au chrono", () => {
+    const t = setup(2);
+    t.toPlay();
+    t.ctx.setConnected("p1", false);
+    t.ctx.setConnected("p2", false);
+    game.onPresenceChange!(t.state, t.ctx);
+    expect(t.pub().stage).toBe("play");
+  });
+});
+
 describe("simon : avec le moteur", () => {
   it("une partie complète jusqu'aux résultats", () => {
     const cfg = parse({ longueur_depart: 2 });

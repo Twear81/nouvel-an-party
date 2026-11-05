@@ -135,6 +135,28 @@ describe("qui-est-le-plus : votes", () => {
   });
 });
 
+describe("qui-est-le-plus : présence", () => {
+  it("un déconnecté ne bloque pas la fin anticipée, son vote reste accepté", () => {
+    const { ctx, state, vote } = round(3);
+    ctx.setConnected("p3", false);
+    vote("p1", "p2");
+    expect(ctx.ended).toBe(false);
+    vote("p2", "p1");
+    expect(ctx.ended).toBe(true);
+    vote("p3", "p1");
+    expect(state.votes.get("p3")).toBe("p1");
+  });
+
+  it("la déconnexion du dernier votant manquant termine la manche", () => {
+    const { ctx, state, vote } = round(3);
+    vote("p1", "p2");
+    vote("p2", "p1");
+    ctx.setConnected("p3", false);
+    game.onPresenceChange!(state, ctx);
+    expect(ctx.ended).toBe(true);
+  });
+});
+
 describe("qui-est-le-plus : via le moteur", () => {
   it("tout le monde vote → fin anticipée, points visibles dans les deltas", () => {
     const cfg = parse();

@@ -30,6 +30,8 @@ tests/unit/<id>.test.ts        tests de la logique
 | `input(state, playerId, payload, ctx)` | réponse d'un joueur. **`payload` vient du réseau : validez-le** (type, valeur, joueur existant) et ignorez le reste silencieusement |
 | `publicView(state, ctx)` | ce que voient TV et tous les téléphones. **Rien de secret** (les réponses des autres !) |
 | `privateView?(state, playerId, ctx)` | ce que voit un seul téléphone (« tu as voté pour X ») |
+| `tvView?(state, ctx)` | optionnel : remplace `publicView` pour la TV seulement. Pour ce que les téléphones ne doivent pas recevoir, même caché (ex : la suite de Simon) |
+| `onPresenceChange?(state, ctx)` | optionnel : un participant se connecte ou se déconnecte pendant le jeu (voir ci-dessous) |
 | `finish(state, ctx)` | fin de manche : renvoie `{ results, scores }`. `results` est libre (affiché par `TvResults`), `scores` = points gagnés **dans cette manche** par `playerId` (absents = 0) |
 
 Le moteur envoie `publicView` / `privateView` à chaque changement (après un `input` ou un `ctx.update()`).
@@ -44,13 +46,21 @@ Le moteur envoie `publicView` / `privateView` à chaque changement (après un `i
 | `setTimeout(ms, fn)` | timer annulé en fin de manche, **figé pendant une pause**. Jamais le `setTimeout` global |
 | `update()` | à appeler après une modification d'état **faite hors d'un `input`** (typiquement dans un timer), pour renvoyer les vues |
 | `end()` | termine la manche tout de suite (ex. tout le monde a répondu) |
+| `isConnected(id)` | le joueur a-t-il un écran connecté **maintenant** ? (présence en direct, à lire au moment de décider) |
+
+### Présence : `isConnected` et `onPresenceChange`
+`ctx.players` est figé au début de la manche ; un téléphone planté y reste. Pour une règle « tout le monde a répondu → `ctx.end()` » :
+- comptez seulement les joueurs connectés avec `allConnectedDone(ctx, ids, (id) => aRépondu(id))` (`helpers.ts`) : vrai si tous les connectés parmi `ids` sont servis, et jamais si personne n'est connecté (le chrono s'en charge) ;
+- continuez à **accepter** les réponses de tous (un déconnecté peut revenir) ;
+- exportez la même vérification dans `onPresenceChange: (state, ctx) => ...` : le moteur l'appelle quand un participant se connecte/déconnecte pendant `playing` (et à la reprise après une pause), puis renvoie les vues. Dans ce hook, `ctx.end()`, `ctx.countdown` et les timers marchent comme dans `input`. C'est aussi là qu'un jeu au tour par tour passe le tour d'un absent (voir `compte-a-rebours`).
+En test, `makeCtx` expose `ctx.setConnected(id, false)` ; appelez ensuite `game.onPresenceChange!(state, ctx)`.
 
 ### Aides (`src/minigames/helpers.ts`)
-`questionSchema` / `normalizeQuestion` (question en texte ou objet avec `duree`), `fillPlayer` (joker `{joueur}`), `argmaxAll` (vainqueurs ex æquo).
+`questionSchema` / `normalizeQuestion` (question en texte ou objet avec `duree`), `fillPlayer` (joker `{joueur}`), `argmaxAll` (vainqueurs ex æquo), `allConnectedDone` (fin anticipée sur les joueurs connectés).
 
 ## 3. views.tsx : `MiniGameViews`
 ```tsx
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds } satisfies MiniGameViews;
 ```
 | Vue | Affichée | Notes |
 |---|---|---|
@@ -58,6 +68,10 @@ export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
 | `Phone` | téléphone pendant le jeu | portrait, gros boutons, usage à une main |
 | `TvResults` | TV pendant les résultats | |
 | `PhoneResults?` | téléphone, au-dessus du bouton « Continuer » | optionnel |
+| `revealSeconds?(props)` | durée (s) de l'animation de `TvResults`, 0 par défaut | voir ci-dessous |
+
+### Ne pas spoiler la révélation : `revealSeconds`
+Si `TvResults` joue une animation (prix qui arrivent un par un, podium…), déclarez sa durée avec `revealSeconds`. Tant qu'elle dure, la TV cache les « +N » de la bande du bas et les téléphones affichent « Regarde la TV ! » (ni points, ni `PhoneResults`, ni bouton Continuer) ; ensuite tout apparaît. Calculez la durée avec les **constantes réelles** de l'animation (exportées par `views.tsx`, utilisées par l'animation elle-même) pour qu'elles ne divergent pas : `revealSeconds: ({ results }) => results ? revealSeconds(results.ranking.length) : 0`. Le compte part de `round.resultsAt` (heure serveur, `RoundInfo`) : TV et téléphones sont synchronisés, même après un rechargement. Le hook `useRevealed(props)` (`src/web/net/useReveal.ts`) donne l'état « révélation terminée » si une vue en a besoin. Si votre `TvResults` démarre une animation, elle doit aussi se lancer depuis le début au montage (pas depuis `resultsAt`).
 
 Props (`MiniGameViewProps`) : `snapshot`, `round` (infos de la manche), `pub` (= `publicView`), `priv` (= `privateView`, `null` sur la TV), `results` (= `finish().results`, phase résultats seulement), `players`, `playerById(id)`, `sendInput(payload)` (téléphone : appelle `input` côté serveur).
 
@@ -239,5 +253,6 @@ Ajoutez le jeu aux deux registres (section 4), créez le README et le yaml, puis
 | Savoir où on en est côté écrans | mettre l'étape dans `publicView` (ex : `step: "ecrire" \| "voter"`) |
 | Comparer des réponses tapées au clavier | `normalizeAnswer()` (`helpers.ts`) : minuscules, sans accents, sans article, sans pluriel |
 | Images/sons dans la config | fichiers dans `config/medias/`, servis à l'adresse `/medias/<fichier>` |
-| Joueurs de la manche | `ctx.players` côté serveur, `round.participants` côté écrans |
+| Joueurs de la manche | `ctx.players` côté serveur, `round.participants` côté écrans ; connectés maintenant : `ctx.isConnected` |
+| Heure de début des résultats | `round.resultsAt` (heure serveur, `null` avant la phase résultats) ; heure serveur côté écran : `serverNow()` (`src/web/net/socket.ts`) |
 | Tester sans moteur | `makeCtx()` (`tests/unit/helpers/minigame-ctx.ts`) : `ctx.advance(ms)` fait avancer le temps, `ctx.finishCountdown()` saute à la fin du chrono |

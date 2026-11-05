@@ -13,6 +13,13 @@ Fonctionne en local sur le wifi, sans internet ni installation sur les télépho
 |---|---|---|
 | Qui est le plus… ? | On vote pour l'invité qui correspond le mieux | [README](src/minigames/qui-est-le-plus/README.md) |
 | Ceci ou Cela | Deux réponses (Oui/Non ou Mer/Montagne…) : on suit la majorité… ou on devine la vraie réponse d'un invité tiré au sort | [README](src/minigames/ceci-ou-cela/README.md) |
+| Tier list | Chacun range tous les invités dans des étages S/A/B/C ; on marque quand on a placé quelqu'un comme la tablée | [README](src/minigames/tier-list/README.md) |
+| Comme les autres | Chacun tape une réponse libre : on marque quand d'autres ont tapé la même chose | [README](src/minigames/comme-les-autres/README.md) |
+| Le bon prix | Un objet s'affiche : le prix le plus proche gagne (bonus si pile le bon) | [README](src/minigames/le-bon-prix/README.md) |
+| Qui a dit ça ? | Chacun écrit une phrase anonyme ; on devine qui l'a écrite, les piégeurs marquent | [README](src/minigames/qui-a-dit/README.md) |
+| Compte à rebours chaotique | Chacun son tour, on arrête un compteur devenu fou pile à l'heure cible | [README](src/minigames/compte-a-rebours/README.md) |
+| Simon | La TV joue une suite de couleurs qui s'allonge ; le dernier à la reproduire sans faute gagne | [README](src/minigames/simon/README.md) |
+| Pierre-feuille-ciseaux | Tournoi à élimination directe, duels sur les téléphones | [README](src/minigames/pierre-feuille-ciseaux/README.md) |
 
 Créer un nouveau mini-jeu : [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md).
 

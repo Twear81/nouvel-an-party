@@ -201,6 +201,13 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
 
 const REVEAL_FIRST_MS = 900; // avant la 1re révélation
 const REVEAL_STEP_MS = 1900; // entre deux groupes
+const REVEAL_SETTLE_MS = 1000; // ressort de la dernière carte + confettis
+
+/** Durée totale (s) : réponses isolées, puis un groupe de plus à chaque étape (au moins 2 joueurs). */
+export const revealSeconds = (groups: Results["groups"]) => {
+  const steps = 1 + groups.filter((g) => g.playerIds.length >= 2).length;
+  return (REVEAL_FIRST_MS + (steps - 1) * REVEAL_STEP_MS + REVEAL_SETTLE_MS) / 1000;
+};
 
 function GroupCard({ group, revealed, cols, rows, playerById }: { group: AnswerGroup; revealed: boolean; cols: number; rows: number; playerById: MiniGameViewProps["playerById"] }) {
   const colRem = cols <= 1 ? 54 : cols === 2 ? 42 : cols === 3 ? 30 : 22;
@@ -356,4 +363,4 @@ const PhoneResults = ({ results, snapshot, playerById }: MiniGameViewProps<Pub, 
   );
 };
 
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds: ({ results }) => (results ? revealSeconds(results.groups) : 0) } satisfies MiniGameViews;

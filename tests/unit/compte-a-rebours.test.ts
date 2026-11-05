@@ -10,9 +10,10 @@ const VARIANT = { titre: "Pile à minuit", cible: 10, visible: 3, decompte: fals
 const parse = (extra: Record<string, unknown> = {}) => game.configSchema.parse({ variantes: [VARIANT], ...extra });
 
 /** Une manche à `n` joueurs ; rng fixe donc ordre de passage déterministe (lu dans la vue publique). */
-function round(n = 3, extra: Record<string, unknown> = {}, players = makePlayers(n)) {
+function round(n = 3, extra: Record<string, unknown> = {}, players = makePlayers(n), offline: string[] = []) {
   const cfg = parse(extra);
   const ctx = makeCtx(cfg, players);
+  for (const id of offline) ctx.setConnected(id, false);
   const state = game.start(game.items(cfg)[0]!, ctx);
   game.onPlay!(state, ctx);
   const pub = () => game.publicView(state, ctx) as Pub;
@@ -109,15 +110,51 @@ describe("compte-a-rebours : déroulé d'un tour", () => {
   });
 
   it("un joueur déconnecté est sauté, et la manche s'arrête si plus personne ne joue", () => {
-    const players = makePlayers(3);
-    players[0]!.connected = false;
-    const r = round(3, {}, players);
+    const r = round(3, {}, undefined, ["p1"]);
     expect(r.pub().turns.find((t) => t.id === "p1")).toMatchObject({ status: "missed", reason: "absent" });
     expect(r.pub().currentId).not.toBe("p1");
 
-    const all = makePlayers(2).map((p) => ({ ...p, connected: false }));
-    const r2 = round(2, {}, all);
+    const r2 = round(2, {}, undefined, ["p1", "p2"]);
     expect(r2.ctx.ended).toBe(true);
+  });
+
+  it("le joueur dont c'est le tour se déconnecte : sauté tout de suite, sans attendre le délai de départ", () => {
+    const r = round(3);
+    const first = r.pub().currentId!;
+    r.ctx.setConnected(first, false);
+    game.onPresenceChange!(r.state, r.ctx);
+    expect(r.pub().turns.find((t) => t.id === first)).toMatchObject({ status: "missed", reason: "absent" });
+    expect(r.pub().currentId).toBe(r.order[1]!);
+    expect(r.pub().phase).toBe("waiting");
+  });
+
+  it("un absent à venir est sauté à son tour, mais joue s'il s'est reconnecté entre-temps", () => {
+    const r = round(3);
+    const [, second, third] = r.order as [string, string, string];
+    r.ctx.setConnected(second, false);
+    game.onPresenceChange!(r.state, r.ctx); // pas son tour : rien ne change
+    expect(r.pub().currentId).toBe(r.order[0]!);
+    r.ctx.setConnected(second, true);
+    r.play(10_000);
+    expect(r.pub().currentId).toBe(second);
+
+    const r2 = round(3);
+    r2.ctx.setConnected(r2.order[1]!, false);
+    r2.play(10_000);
+    expect(r2.pub().turns.find((t) => t.id === r2.order[1])).toMatchObject({ status: "missed", reason: "absent" });
+    expect(r2.pub().currentId).toBe(third);
+  });
+
+  it("un joueur qui se déconnecte en plein tour (déjà parti) garde son tour", () => {
+    const r = round(2);
+    const id = r.pub().currentId!;
+    r.start();
+    r.ctx.setConnected(id, false);
+    game.onPresenceChange!(r.state, r.ctx);
+    expect(r.pub().phase).toBe("running");
+    r.ctx.advance(10_000);
+    r.stop(10_000);
+    expect(r.pub().turns.find((t) => t.id === id)!.status).toBe("done");
   });
 
   it("la manche se termine après le dernier tour", () => {

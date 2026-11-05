@@ -4,6 +4,7 @@
 //   { v: number }        enregistre une valeur (points = valeur à la fin)
 //   { end: true }        appelle ctx.end()
 //   { timer: ms }        planifie ctx.setTimeout → incrémente state.fired
+//   { endWhenAlone: true } onPresenceChange termine la manche s'il reste au plus 1 joueur connecté
 //   { boom: true }       lève une Error ordinaire (bug du mini-jeu)
 //   { gameError: true }  lève une GameError
 import { z } from "zod";
@@ -15,6 +16,10 @@ export interface FakeState {
   item: string;
   inputs: Map<string, number>;
   fired: number;
+  /** Joueurs connectés vus au dernier onPresenceChange. */
+  presence: string[];
+  /** Termine la manche quand il reste au plus un joueur connecté. */
+  endWhenAlone?: boolean;
 }
 
 export interface FakeGameOptions {
@@ -46,11 +51,16 @@ export function makeFakeGame(opts: FakeGameOptions = {}) {
     start(item) {
       calls.push("start");
       if (opts.failStart?.(item)) throw new Error("start cassé");
-      const s: FakeState = { item, inputs: new Map(), fired: 0 };
+      const s: FakeState = { item, inputs: new Map(), fired: 0, presence: [] };
       states.push(s);
       return s;
     },
     onPlay: () => void calls.push("onPlay"),
+    onPresenceChange(state, ctx) {
+      calls.push("presence");
+      state.presence = ctx.players.filter((p) => ctx.isConnected(p.id)).map((p) => p.id);
+      if (state.endWhenAlone && state.presence.length <= 1) ctx.end();
+    },
     input(state, playerId, payload, ctx) {
       const p = payload as Record<string, unknown>;
       if (p.boom) throw new Error("input cassé");
@@ -58,6 +68,7 @@ export function makeFakeGame(opts: FakeGameOptions = {}) {
       if (typeof p.v === "number") state.inputs.set(playerId, p.v);
       if (typeof p.timer === "number") ctx.setTimeout(p.timer, () => void state.fired++);
       if (p.end) ctx.end();
+      if (p.endWhenAlone) state.endWhenAlone = true;
     },
     publicView: (s) => ({ item: s.item, n: s.inputs.size }),
     privateView: (s, pid) => ({ mine: s.inputs.get(pid) ?? null }),

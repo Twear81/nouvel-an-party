@@ -1,17 +1,20 @@
 import { motion } from "motion/react";
 import type { GameSnapshot, RoundInfo } from "../../shared/types";
 import { waitingPlayers } from "../net/helpers";
+import { useRevealed } from "../net/useReveal";
 import { CheckIcon, PlayerAvatar } from "../ui";
-import { TvGameView } from "./GameView";
+import { TvGameView, tvViewProps } from "./GameView";
 import { RoundHeader } from "./PlayingScreen";
 
 export function ResultsScreen({ snapshot, round }: { snapshot: GameSnapshot; round: RoundInfo }) {
   const deltas = round.deltas ?? {};
   const waiting = waitingPlayers(snapshot);
   const missing = waiting.filter((p) => !snapshot.continued.includes(p.id));
+  // Les points n'apparaissent (et le classement ne se trie) qu'après l'animation des résultats : pas de spoil.
+  const revealed = useRevealed(tvViewProps(snapshot, round));
   const strip = snapshot.players
     .filter((p) => p.profile)
-    .sort((a, b) => (deltas[b.id] ?? 0) - (deltas[a.id] ?? 0));
+    .sort((a, b) => (revealed ? (deltas[b.id] ?? 0) - (deltas[a.id] ?? 0) : 0));
 
   return (
     <div data-testid="tv-results" className="flex min-h-0 flex-1 flex-col">
@@ -31,12 +34,26 @@ export function ResultsScreen({ snapshot, round }: { snapshot: GameSnapshot; rou
                 <motion.div
                   key={p.id}
                   data-testid={`delta-${p.id}`}
+                  layout="position"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.08 }}
+                  transition={{ delay: 0.3 + i * 0.08, layout: { type: "spring", stiffness: 200, damping: 24 } }}
                   className="flex min-w-0 flex-col items-center gap-0.5"
                 >
-                  <span className={`font-display text-3xl ${gained > 0 ? "text-good" : "text-ink-muted"}`}>{gained > 0 ? `+${gained}` : "0"}</span>
+                  {/* Emplacement réservé pour que la bande ne saute pas quand les points arrivent. */}
+                  <span className="flex h-[2.25rem] items-center">
+                    {revealed && (
+                      <motion.span
+                        data-testid={`delta-value-${p.id}`}
+                        initial={{ opacity: 0, scale: 0.2, y: 12 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 12, delay: i * 0.07 }}
+                        className={`font-display text-3xl leading-none ${gained > 0 ? "text-good" : "text-ink-muted"}`}
+                      >
+                        {gained > 0 ? `+${gained}` : "0"}
+                      </motion.span>
+                    )}
+                  </span>
                   <PlayerAvatar
                     profile={p.profile}
                     size="sm"

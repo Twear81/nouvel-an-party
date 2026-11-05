@@ -352,6 +352,14 @@ function Award({ icon, title, ids, detail, playerById, testId }: { icon: string;
   );
 }
 
+// Rythme de la révélation (s) : le récapitulatif arrive carte par carte (le vrai suspense a eu lieu pendant la manche).
+const RECAP_FIRST_S = 0.1;
+const RECAP_STEP_S = 0.1;
+const SETTLE_S = 0.8;
+
+/** Durée totale (s) de l'animation pour `n` citations. */
+export const revealSeconds = (n: number) => RECAP_FIRST_S + Math.max(0, n - 1) * RECAP_STEP_S + SETTLE_S;
+
 const TvResults = ({ results, playerById }: Props) => {
   if (!results) return null;
   const n = results.quotes.length;
@@ -370,7 +378,7 @@ const TvResults = ({ results, playerById }: Props) => {
           const author = playerById(q.authorId);
           const good = q.votes.filter((v) => v.targetId === q.authorId).length;
           return (
-            <motion.div key={q.authorId} data-testid={`recap-${q.authorId}`} initial={{ opacity: 0, x: i % 2 ? 60 : -60 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.1, type: "spring" }} className="glass flex min-h-0 items-center gap-4 rounded-card px-4 py-2">
+            <motion.div key={q.authorId} data-testid={`recap-${q.authorId}`} initial={{ opacity: 0, x: i % 2 ? 60 : -60 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: RECAP_FIRST_S + i * RECAP_STEP_S, type: "spring" }} className="glass flex min-h-0 items-center gap-4 rounded-card px-4 py-2">
               <div className="flex w-[7.5rem] shrink-0 flex-col items-center gap-0.5">
                 <PlayerAvatar profile={author?.profile ?? null} size="sm" />
                 <span className="w-full truncate text-center text-lg font-bold">{author?.profile?.name}</span>
@@ -411,4 +419,4 @@ const PhoneResults = ({ results, snapshot }: Props) => {
   );
 };
 
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds: ({ results }) => (results ? revealSeconds(results.quotes.length) : 0) } satisfies MiniGameViews;

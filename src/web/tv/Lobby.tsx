@@ -37,6 +37,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   const [error, setError] = useState<string | null>(null);
   const [kicking, setKicking] = useState<{ id: string; name: string } | null>(null);
 
+  const many = catalog.length > 4;
   const totalRounds = catalog.reduce((n, g) => n + (setup.counts[g.id] ?? 0), 0);
   const totalSeconds = catalog.reduce((n, g) => n + (setup.counts[g.id] ?? 0) * g.secondsPerRound, 0);
   const ready = players.filter((p) => p.profile && p.connected).length;
@@ -123,28 +124,29 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
             </Button>
           </div>
         )}
-        <div className="flex flex-col gap-2">
+        {/* Beaucoup de mini-jeux : deux colonnes, pour laisser la place aux invités. */}
+        <div className={many ? "grid grid-cols-2 gap-x-12 gap-y-2" : "flex flex-col gap-2"}>
           {catalog.map((g) => {
             const count = setup.counts[g.id] ?? 0;
             return (
-              <div key={g.id} data-testid={`setup-row-${g.id}`} className="flex items-center gap-6">
+              <div key={g.id} data-testid={`setup-row-${g.id}`} className={`flex items-center ${many ? "gap-4" : "gap-6"}`}>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-display text-3xl">{g.name}</div>
-                  <div className="truncate text-xl text-ink-muted">{g.description}</div>
+                  <div className={`truncate font-display ${many ? "text-2xl" : "text-3xl"}`}>{g.name}</div>
+                  <div className={`truncate text-ink-muted ${many ? "text-lg" : "text-xl"}`}>{g.description}</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Button data-testid={`setup-dec-${g.id}`} variant="secondary" size="md" disabled={!host || count <= 0} onClick={() => setCount(g.id, count - 1, g.available)} aria-label="Moins">
                     −
                   </Button>
-                  <div className="w-24 text-center">
-                    <span data-testid={`setup-count-${g.id}`} className="font-display text-5xl text-accent">{count}</span>
+                  <div className={many ? "w-16 text-center" : "w-24 text-center"}>
+                    <span data-testid={`setup-count-${g.id}`} className={`font-display text-accent ${many ? "text-4xl" : "text-5xl"}`}>{count}</span>
                     <span className="block text-base text-ink-muted">sur {g.available}</span>
                   </div>
                   <Button data-testid={`setup-inc-${g.id}`} variant="secondary" size="md" disabled={!host || count >= g.available} onClick={() => setCount(g.id, count + 1, g.available)} aria-label="Plus">
                     +
                   </Button>
                 </div>
-                <div className="w-32 text-right text-2xl text-ink-muted">{formatDuration(count * g.secondsPerRound)}</div>
+                <div className={`text-right text-ink-muted ${many ? "w-20 text-xl" : "w-32 text-2xl"}`}>{formatDuration(count * g.secondsPerRound)}</div>
               </div>
             );
           })}

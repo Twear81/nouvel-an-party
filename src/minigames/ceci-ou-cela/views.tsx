@@ -136,6 +136,16 @@ const Phone = ({ pub, priv, sendInput, playerById }: MiniGameViewProps<Pub, Priv
   );
 };
 
+// Rythme de la révélation (s) : les avatars arrivent un par un, puis la phrase d'explication.
+const AVATAR_FIRST_S = 0.3;
+const AVATAR_STEP_S = 0.12;
+const EXPLAIN_DELAY_S = 1;
+const SETTLE_S = 0.7;
+
+/** Durée totale (s) de l'animation des résultats. */
+export const revealSeconds = (results: Results) =>
+  Math.max(EXPLAIN_DELAY_S, AVATAR_FIRST_S + (Math.max(results.picks[0].length, results.picks[1].length) - 1) * AVATAR_STEP_S) + SETTLE_S;
+
 function Camp({ index, label, ids, winner, tie, total, results, playerById }: { index: 0 | 1; total: number; label: string; ids: string[]; winner: boolean; tie: boolean; results: Results; playerById: MiniGameViewProps["playerById"] }) {
   const tone = TONES[index];
   const lit = winner || (tie && ids.length > 0);
@@ -167,7 +177,7 @@ function Camp({ index, label, ids, winner, tie, total, results, playerById }: { 
         {ids.map((id, i) => {
           const isTarget = id === results.targetId && results.mode === "cible";
           return (
-            <motion.div key={id} initial={{ opacity: 0, x: index === 0 ? -160 : 160 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.12, type: "spring" }} className={`flex flex-col items-center ${tileWidth}`}>
+            <motion.div key={id} initial={{ opacity: 0, x: index === 0 ? -160 : 160 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: AVATAR_FIRST_S + i * AVATAR_STEP_S, type: "spring" }} className={`flex flex-col items-center ${tileWidth}`}>
               <PlayerAvatar profile={playerById(id)?.profile ?? null} size={avatarSize} badge={isTarget ? <GuessIcon /> : undefined} />
               <span className={`w-full truncate text-center text-lg font-bold ${isTarget ? "text-accent" : ""}`}>{playerById(id)?.profile?.name}</span>
             </motion.div>
@@ -199,7 +209,7 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
           {tie ? "=" : "VS"}
         </div>
       </div>
-      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} className="text-balance text-center text-3xl font-bold text-accent">
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: EXPLAIN_DELAY_S }} className="text-balance text-center text-3xl font-bold text-accent">
         {explain}
       </motion.p>
     </div>
@@ -237,4 +247,4 @@ const PhoneResults = ({ results, snapshot }: MiniGameViewProps<Pub, Priv, Result
   );
 };
 
-export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
+export default { Tv, Phone, TvResults, PhoneResults, revealSeconds: ({ results }) => (results ? revealSeconds(results) : 0) } satisfies MiniGameViews;

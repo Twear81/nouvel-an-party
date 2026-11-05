@@ -6,6 +6,7 @@ import { webGames } from "../../minigames/registry.web";
 import type { MiniGameViewProps } from "../../minigames/views-contract";
 import { makePlayerById, waitingPlayers } from "../net/helpers";
 import { useGame, type GameActions } from "../net/useGame";
+import { useRevealed } from "../net/useReveal";
 import { Button, Countdown, fireConfetti, PausedOverlay, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
 import { ProfileEditor } from "./ProfileEditor";
 import { useWakeLock } from "./useWakeLock";
@@ -139,7 +140,7 @@ function PlayingPhone({ snapshot, round, actions, late }: Pick<ScreenProps, "sna
   const View = webGames[round.gameId]?.Phone;
   if (late) return <Late testId="phone-playing" />;
   return (
-    <div data-testid="phone-playing" className="flex min-h-0 flex-1 flex-col gap-2">
+    <div data-testid="phone-playing" data-game={round.gameId} className="flex min-h-0 flex-1 flex-col gap-2">
       <div className="shrink-0 pt-1">
         <Countdown round={round} size="phone" />
       </div>
@@ -159,11 +160,25 @@ function PlayingPhone({ snapshot, round, actions, late }: Pick<ScreenProps, "sna
 
 function ResultsPhone({ snapshot, round, me, actions }: Pick<ScreenProps, "snapshot" | "actions" | "me"> & { round: RoundInfo }) {
   const PhoneResults = webGames[round.gameId]?.PhoneResults;
+  const props = viewProps(snapshot, round, actions, () => {});
+  // Tant que la TV joue sa révélation, le téléphone ne dévoile rien (ni points, ni rang) : « regarde la TV ».
+  const revealed = useRevealed(props);
   const gained = round.deltas?.[me.id] ?? 0;
   const done = snapshot.continued.includes(me.id);
   const waiting = waitingPlayers(snapshot);
   const doneCount = waiting.filter((p) => snapshot.continued.includes(p.id)).length;
   const [sending, setSending] = useState(false);
+
+  if (!revealed) {
+    return (
+      <Center testId="phone-results">
+        <motion.span data-testid="phone-reveal-wait" animate={{ scale: [1, 1.15, 1], rotate: [-6, 6, -6] }} transition={{ duration: 1.4, repeat: Infinity }} className="text-8xl">
+          👀
+        </motion.span>
+        <h1 className="font-display text-3xl text-gold-gradient">Regarde la TV !</h1>
+      </Center>
+    );
+  }
 
   return (
     <div data-testid="phone-results" className="flex min-h-0 flex-1 flex-col gap-3">
@@ -176,7 +191,7 @@ function ResultsPhone({ snapshot, round, me, actions }: Pick<ScreenProps, "snaps
         </p>
         {PhoneResults && (
           <div className="mt-2 w-full">
-            <PhoneResults {...viewProps(snapshot, round, actions, () => {})} />
+            <PhoneResults {...props} />
           </div>
         )}
       </div>

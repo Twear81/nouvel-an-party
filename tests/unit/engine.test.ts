@@ -427,6 +427,73 @@ describe("joueurs", () => {
   });
 });
 
+describe("resultsAt", () => {
+  it("vaut null hors des résultats puis l'heure serveur de fin de manche", () => {
+    const t = startPlaying();
+    expect(t.engine.snapshot(null).round!.resultsAt).toBeNull();
+    t.clock.advance(T.round);
+    const at = t.clock.now();
+    expect(t.engine.snapshot(null).round!.resultsAt).toBe(at);
+    t.clock.advance(5000);
+    expect(t.engine.snapshot(t.ids[0]!).round!.resultsAt).toBe(at);
+    t.engine.skip(); // manche suivante
+    expect(t.engine.snapshot(null).round!.resultsAt).toBeNull();
+  });
+
+  it("une fin anticipée (ctx.end) l'horodate aussi", () => {
+    const t = startPlaying();
+    t.clock.advance(1234);
+    t.engine.input(t.ids[0]!, { end: true });
+    expect(t.engine.snapshot(null).round!.resultsAt).toBe(t.clock.now());
+  });
+});
+
+describe("présence en direct", () => {
+  it("ctx.isConnected suit les connexions et onPresenceChange est appelé pendant le jeu", () => {
+    const t = startPlaying();
+    const [a, b, c] = t.ids as [string, string, string];
+    t.engine.input(a, { endWhenAlone: true });
+    t.engine.disconnect(b);
+    expect(t.fake.lastState.presence).toEqual([a, c]);
+    expect(t.engine.snapshot(null).phase).toBe("playing");
+    t.engine.disconnect(c);
+    expect(t.fake.lastState.presence).toEqual([a]);
+    expect(t.engine.snapshot(null).phase).toBe("results"); // ctx.end() dans le hook
+  });
+
+  it("une reconnexion est signalée une seule fois (2e onglet ignoré)", () => {
+    const t = startPlaying();
+    const [a] = t.ids as [string];
+    const token = t.players[0]!.token;
+    t.engine.disconnect(a);
+    const n = t.fake.calls.filter((c) => c === "presence").length;
+    t.engine.join(token);
+    expect(t.fake.calls.filter((c) => c === "presence")).toHaveLength(n + 1);
+    t.engine.join(token); // 2e onglet : déjà connecté
+    expect(t.fake.calls.filter((c) => c === "presence")).toHaveLength(n + 1);
+    expect(t.fake.lastState.presence).toContain(a);
+  });
+
+  it("pas d'appel en intro, ni pour un non-participant, et rattrapage à la reprise après pause", () => {
+    const t = createTestEngine();
+    t.engine.start(); // intro
+    t.engine.disconnect(t.ids[0]!);
+    expect(t.fake.calls).not.toContain("presence");
+    t.clock.advance(T.intro);
+    const late = t.engine.join(null); // arrivé en cours de manche : pas participant
+    t.engine.setProfile(late.playerId, validProfile("Retard"));
+    t.engine.disconnect(late.playerId);
+    expect(t.fake.calls).not.toContain("presence");
+
+    t.engine.pause();
+    t.engine.disconnect(t.ids[1]!);
+    expect(t.fake.calls).not.toContain("presence");
+    t.engine.resume();
+    expect(t.fake.calls).toContain("presence");
+    expect(t.fake.lastState.presence).toEqual([t.ids[2]!]);
+  });
+});
+
 describe("scores et snapshot", () => {
   it("les points s'accumulent et les deltas ne sont visibles qu'en results", () => {
     const t = startPlaying();

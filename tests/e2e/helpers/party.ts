@@ -3,8 +3,21 @@ import { expect, type Browser, type BrowserContext, type BrowserContextOptions, 
 import type { TestServer } from "./server";
 
 /** Id d'un mini-jeu (nom de son dossier dans src/minigames). */
-export type GameId = "qui-est-le-plus" | "ceci-ou-cela" | (string & {});
-export const GAME_NAMES: Record<GameId, string> = { "qui-est-le-plus": "Qui est le plus… ?", "ceci-ou-cela": "Ceci ou Cela" };
+export const GAME_NAMES = {
+  "qui-est-le-plus": "Qui est le plus… ?",
+  "ceci-ou-cela": "Ceci ou Cela",
+  "tier-list": "Tier list",
+  "comme-les-autres": "Comme les autres",
+  "le-bon-prix": "Le bon prix",
+  "qui-a-dit": "Qui a dit ça ?",
+  "compte-a-rebours": "Compte à rebours chaotique",
+  simon: "Simon",
+  "pierre-feuille-ciseaux": "Pierre-feuille-ciseaux : le tournoi",
+} as const;
+export type GameId = keyof typeof GAME_NAMES | (string & {});
+
+/** Délai max (ms) pour que la révélation des résultats se termine (la plus longue : tier list à 8 joueurs, ~15 s). */
+export const REVEAL_TIMEOUT = 45_000;
 
 /** Téléphone par défaut (les projets Playwright imposent le leur : Android, Firefox mobile, iPhone). */
 export const DEFAULT_PHONE: BrowserContextOptions = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 };
@@ -136,10 +149,15 @@ export class Party {
     }
   }
 
-  /** Lance une partie avec exactement ces manches : les mini-jeux non cités sont mis à 0. */
-  async startGame(counts: Partial<Record<GameId, number>>) {
+  /** Règle exactement ces manches : tous les autres mini-jeux du catalogue sont mis à 0. */
+  async setOnly(counts: Partial<Record<GameId, number>>) {
     const rows = await this.tv.locator('[data-testid^="setup-row-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")!.slice("setup-row-".length)));
     await this.setCounts({ ...Object.fromEntries(rows.map((id) => [id, 0])), ...counts });
+  }
+
+  /** Lance une partie avec exactement ces manches : les mini-jeux non cités sont mis à 0. */
+  async startGame(counts: Partial<Record<GameId, number>>) {
+    await this.setOnly(counts);
     await this.tv.getByTestId("start-game").click();
     // L'annonce ne dure qu'une seconde dans la config de test : on vérifie juste qu'on a quitté le lobby.
     await expect(this.tv.locator("[data-phase]")).not.toHaveAttribute("data-phase", "lobby");
@@ -149,21 +167,22 @@ export class Party {
 
   /** Quel mini-jeu est affiché sur ce téléphone (pendant la phase "playing") ? */
   async gameOf(phone: Phone): Promise<GameId> {
-    const choice = phone.t("choice-0");
-    const vote = phone.page.locator('[data-testid^="vote-option-"]').first();
-    await expect(choice.or(vote)).toBeVisible();
-    return (await choice.isVisible()) ? "ceci-ou-cela" : "qui-est-le-plus";
+    const playing = phone.t("phone-playing");
+    await expect(playing).toHaveAttribute("data-game", /.+/);
+    return (await playing.getAttribute("data-game"))!;
   }
 
   /**
    * Tout le monde répond à la manche en cours.
    * - qui-est-le-plus : le 1er joueur vote pour le 2e, tous les autres votent pour le 1er.
    * - ceci-ou-cela : tout le monde choisit la 1re réponse (ou la 2e avec `choice: 1`).
+   * Les autres mini-jeux ont leurs propres tests (leurs écrans sont trop différents) : erreur explicite ici.
    * Avec `spread`, les réponses sont réparties : chacun vote pour le suivant (tout le monde reçoit une voix) /
    * les joueurs pairs choisissent la 1re réponse, les impairs la 2e.
    */
   async answerRound(phones: Phone[] = this.phones, opts: { choice?: 0 | 1; spread?: boolean } = {}): Promise<GameId> {
     const game = await this.gameOf(phones[0]!);
+    if (game !== "ceci-ou-cela" && game !== "qui-est-le-plus") throw new Error(`answerRound ne sait pas jouer « ${game} » : écrire un test dédié`);
     for (const [i, p] of phones.entries()) {
       if (game === "ceci-ou-cela") {
         await p.t(`choice-${opts.spread ? i % 2 : (opts.choice ?? 0)}`).click();
@@ -175,25 +194,32 @@ export class Party {
     return game;
   }
 
-  /** Points gagnés par chacun pendant la manche, lus dans la bande de résultats de la TV. */
+  /** Points gagnés par chacun pendant la manche, lus dans la bande de résultats de la TV (une fois la révélation finie). */
   async tvDeltas(phones: Phone[] = this.phones): Promise<Record<string, number>> {
     const out: Record<string, number> = {};
     for (const p of phones) {
-      const text = await this.tv.getByTestId(`delta-${p.id}`).innerText();
-      out[p.id!] = Number(text.split("\n")[0]!.replace("+", ""));
+      const value = this.tv.getByTestId(`delta-value-${p.id}`);
+      await expect(value).toBeVisible({ timeout: REVEAL_TIMEOUT });
+      out[p.id!] = Number((await value.innerText()).replace("+", ""));
     }
     return out;
   }
 
+  /** Attend la fin de la révélation sur un téléphone : « Regarde la TV » laisse place aux points et au bouton Continuer. */
+  async phoneRevealed(phone: Phone) {
+    await expect(phone.t("points-gained")).toBeVisible({ timeout: REVEAL_TIMEOUT });
+  }
+
   /** Score total affiché sur l'écran de résultats d'un téléphone ("Total : N pts"). */
   async phoneScore(phone: Phone): Promise<number> {
+    await this.phoneRevealed(phone);
     const text = await phone.t("phone-results").innerText();
     return Number(/Total\s*:\s*(\d+)/.exec(text)![1]);
   }
 
   /** Tout le monde clique sur "Continuer". */
   async continueAll(phones: Phone[] = this.phones) {
-    for (const p of phones) await p.t("continue-button").click();
+    for (const p of phones) await p.t("continue-button").click({ timeout: REVEAL_TIMEOUT });
   }
 
   /** Joue une manche complète : réponses, résultats, tout le monde continue. */

@@ -6,6 +6,7 @@
 //  - "over"    : fin de partie (vainqueurs fêtés), puis la manche se termine.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
+import { allConnectedDone } from "../helpers";
 
 const PADS = 4;
 /** Délai avant la 1re note (le temps de lire "Regardez bien !"), puis après la dernière. */
@@ -141,6 +142,12 @@ function eliminate(state: State, id: string, reason: OutReason) {
   state.out.push({ id, length: state.seq.length, reason });
 }
 
+/** Étape terminée dès que tous ceux qui restent (et sont connectés) ont fini, ou qu'il ne reste personne. */
+function checkStepDone(state: State, ctx: Ctx) {
+  if (state.stage !== "play") return;
+  if (state.alive.size === 0 || allConnectedDone(ctx, [...state.alive], (id) => state.done.has(id))) endStep(state, ctx);
+}
+
 function endStep(state: State, ctx: Ctx) {
   if (state.stage !== "play") return;
   for (const id of [...state.alive]) if (!state.done.has(id)) eliminate(state, id, "time");
@@ -234,9 +241,10 @@ const game = defineMiniGame<Cfg, Item, State>({
         state.stepsDone.set(playerId, (state.stepsDone.get(playerId) ?? 0) + 1);
       }
     }
-    // Étape terminée dès que tous ceux qui restent ont fini (ou qu'il ne reste personne).
-    if ([...state.alive].every((id) => state.done.has(id))) endStep(state, ctx);
+    checkStepDone(state, ctx);
   },
+
+  onPresenceChange: checkStepDone,
 
   publicView(state): Pub {
     return {

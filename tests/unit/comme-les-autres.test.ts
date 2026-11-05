@@ -150,6 +150,26 @@ describe("comme-les-autres : réponses", () => {
   });
 });
 
+describe("comme-les-autres : présence", () => {
+  it("seuls les joueurs connectés comptent pour la fin anticipée", () => {
+    const { ctx, state, answer } = round(3);
+    ctx.setConnected("p3", false);
+    answer("p1", "pomme");
+    expect(ctx.ended).toBe(false);
+    answer("p2", "poire");
+    expect(ctx.ended).toBe(true);
+  });
+
+  it("onPresenceChange rejoue la règle quand l'absent part", () => {
+    const { ctx, state, answer } = round(3);
+    answer("p1", "pomme");
+    answer("p2", "poire");
+    ctx.setConnected("p3", false);
+    game.onPresenceChange!(state, ctx);
+    expect(ctx.ended).toBe(true);
+  });
+});
+
 describe("comme-les-autres : points", () => {
   it("50 x autres joueurs du groupe + bonus 50 pour le plus grand groupe", () => {
     const { answer, finish } = round(5);

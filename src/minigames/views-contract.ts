@@ -26,4 +26,10 @@ export interface MiniGameViews {
   TvResults: ComponentType<MiniGameViewProps>;
   /** Téléphone pendant les résultats (au-dessus du bouton Continuer). Optionnel. */
   PhoneResults?: ComponentType<MiniGameViewProps>;
+  /**
+   * Durée (s) de l'animation de révélation de `TvResults`, comptée depuis `round.resultsAt`. Défaut : 0.
+   * Pendant ce temps la TV cache les « +N » et les téléphones affichent « regarde la TV » :
+   * le classement n'est pas dévoilé avant l'animation. À calculer avec les constantes réelles de `TvResults`.
+   */
+  revealSeconds?: (props: MiniGameViewProps) => number;
 }
