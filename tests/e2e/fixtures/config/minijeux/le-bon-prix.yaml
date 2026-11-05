@@ -1,0 +1,15 @@
+# Config de test E2E : un seul objet (prix 100 €, avec photo) pour des résultats prévisibles.
+actif: true
+nom: "Le bon prix"
+description: "Devinez le prix de l'objet : le plus proche gagne !"
+duree: 25
+temps_resultats: 5
+points:
+  classement: [150, 100, 60, 30]
+  bonus_prix_exact: 100
+  tolerance_centimes: 0
+objets:
+  - nom: "Une pièce en or"
+    prix: 100
+    image: piece-test.png
+    details: "Pièce de test"

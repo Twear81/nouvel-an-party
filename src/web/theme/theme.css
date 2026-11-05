@@ -181,3 +181,10 @@ img { -webkit-touch-callout: none; }
   --color-simon-blue-deep: #173a94;
 }
 /* ─── fin mini-jeu simon ─── */
+/* ─── mini-jeu le-bon-prix ─── */
+@theme static {
+  /* Faisceau du projecteur sur l'objet et piédestal de la vitrine */
+  --gradient-spotlight: linear-gradient(180deg, color-mix(in srgb, var(--color-accent-strong) 55%, transparent) 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 100%);
+  --gradient-pedestal: linear-gradient(180deg, var(--color-bg-3) 0%, var(--color-bg-2) 100%);
+  --gradient-pedestal-top: linear-gradient(180deg, var(--color-accent-strong) 0%, var(--color-accent-deep) 100%);
+}
