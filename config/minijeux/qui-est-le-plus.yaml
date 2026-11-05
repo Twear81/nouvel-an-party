@@ -1,14 +1,84 @@
 # Mini-jeu "Qui est le plus… ?" — doc : src/minigames/qui-est-le-plus/README.md
+# Chacun vote sur son téléphone pour l'invité qui correspond le mieux à la question.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
 actif: true
+
+# Titre et phrase d'explication affichés sur la TV
 nom: "Qui est le plus… ?"
+description: "Votez pour l'invité qui correspond le mieux à la question"
+
+# Temps pour voter, en secondes (la manche s'arrête plus tôt si tout le monde a voté)
 duree: 30
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
 temps_resultats: 15
+
+# true = on peut voter pour soi-même ; false = interdit
 vote_pour_soi: false
+
 points:
-  majorite: 100
-  elu: 50
+  majorite: 100   # points pour chaque votant qui a voté pour l'élu (ou un des élus en cas d'égalité)
+  elu: 50         # bonus pour la ou les personnes élues
+
+# Une question = une ligne commençant par "- ".
+# Forme simple : le texte seul. Forme objet : "texte" + "duree" (secondes) pour surcharger la durée.
+# Mettez les questions entre guillemets si elles contiennent ": " ou " #".
 questions:
-  - Qui est le plus gourmand ?
-  - Qui est le plus susceptible d'arriver en retard à son propre mariage ?
-  - texte: Qui serait le premier à survivre sur une île déserte ?
+  - "Qui est le plus gourmand ?"
+  - "Qui est le plus susceptible d'arriver en retard à son propre mariage ?"
+  - texte: "Qui serait le premier à survivre sur une île déserte ?"
     duree: 45
+  - "Qui sera le premier à s'endormir ce soir ?"
+  - "Qui va oublier sa résolution avant le 3 janvier ?"
+  - "Qui tient le mieux l'alcool ?"
+  - "Qui va pleurer en faisant les voeux de minuit ?"
+  - "Qui a le plus de chances de faire un discours improvisé à minuit ?"
+  - "Qui sera le dernier debout ce soir ?"
+  - "Qui est le plus susceptible d'embrasser n'importe qui à minuit ?"
+  - "Qui va ouvrir le champagne en arrosant tout le monde ?"
+  - "Qui prend les résolutions les plus irréalistes ?"
+  - "Qui a déjà fait la pire gueule de bois de sa vie ?"
+  - "Qui est le plus radin ?"
+  - "Qui est le plus susceptible de se perdre avec un GPS ?"
+  - "Qui a le pire sens de l'orientation ?"
+  - "Qui serait le plus mauvais en cuisine ?"
+  - "Qui a le plus grand nombre de photos floues sur son téléphone ?"
+  - "Qui répond toujours « j'arrive dans 5 minutes » en étant encore chez lui ?"
+  - "Qui est le plus susceptible de gagner au loto et de disparaître sans prévenir ?"
+  - "Qui est le plus drôle quand il a bu ?"
+  - "Qui a le plus de chances de devenir célèbre sur les réseaux ?"
+  - "Qui est le plus susceptible de pleurer devant un film de Noël ?"
+  - "Qui serait le premier à se faire éliminer dans un jeu de télé-réalité ?"
+  - "Qui parle le plus fort ?"
+  - "Qui est le plus bordélique ?"
+  - "Qui ronfle sûrement le plus ?"
+  - "Qui est le plus susceptible de rater son train ?"
+  - "Qui a le plus mauvais goût en musique ?"
+  - "Qui danse le plus mal ?"
+  - "Qui va monter sur la table pour danser ?"
+  - "Qui est le plus susceptible de chanter au karaoké sans qu'on lui demande ?"
+  - "Qui serait le meilleur président de la République ?"
+  - "Qui est le plus susceptible de tomber amoureux en vacances ?"
+  - "Qui a le plus de chances d'avoir un enfant en 2027 ?"
+  - "Qui sera le premier à envoyer un message qu'il regrettera demain ?"
+  - "Qui passe le plus de temps sur son téléphone ?"
+  - "Qui oublie le plus souvent l'anniversaire des autres ?"
+  - "Qui est le plus susceptible de parler à son ex ce soir ?"
+  - "Qui a le plus de chances de finir la soirée dans le canapé ?"
+  - "Qui est le plus susceptible de mentir pour éviter une corvée ?"
+  - "Qui serait le plus à l'aise pour présenter le JT ?"
+  - "Qui a déjà dormi dans le plus bizarre des endroits ?"
+  - "Qui est le plus susceptible de manger les restes du buffet à 4h du matin ?"
+  - "Qui serait le plus mauvais coloc ?"
+  - "Qui va tenir sa résolution de faire du sport ?"
+  - "Qui a le plus de chances de faire un régime en janvier... et de craquer le soir même ?"
+  - "Qui est le plus susceptible de rester jusqu'au petit déjeuner ?"
+  - "Qui aurait le plus de mal à garder un secret ?"
+  - "Qui serait le premier à paniquer dans un film d'horreur ?"
+  - "Qui est le plus susceptible de changer de métier en 2027 ?"
+  - texte: "Qui mérite le titre de meilleur ami de l'année ?"
+    duree: 40
+  - texte: "Qui sera la plus grande surprise de l'année 2027 ?"
+    duree: 40

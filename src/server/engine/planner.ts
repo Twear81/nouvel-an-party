@@ -67,6 +67,13 @@ function shuffle<T>(arr: T[], rng: () => number): T[] {
   return a;
 }
 
+/** Après avoir joué `pick`, peut-on ordonner les manches restantes sans répétition consécutive ? */
+function canFinishWithoutRepeat(pools: { items: unknown[] }[], pick: { items: unknown[] }): boolean {
+  const left = pools.map((p) => p.items.length - (p === pick ? 1 : 0));
+  const total = left.reduce((s, n) => s + n, 0);
+  return pools.every((p, i) => (p === pick ? left[i]! <= total - left[i]! : left[i]! <= total - left[i]! + 1));
+}
+
 /**
  * Tire les manches au hasard (sans doublon) puis les ordonne :
  * - "melange" : on évite deux fois de suite le même mini-jeu quand c'est possible
@@ -86,7 +93,11 @@ export function buildPlan(games: LoadedGame[], setup: Setup, order: "melange" | 
   let last: string | null = null;
   while (pools.some((p) => p.items.length)) {
     const candidates = pools.filter((p) => p.items.length && p.gameId !== last);
-    const choices = candidates.length ? candidates : pools.filter((p) => p.items.length);
+    let choices = candidates.length ? candidates : pools.filter((p) => p.items.length);
+    // Un choix glouton peut piéger la fin du plan (ex : b, c, puis a, a). On ne garde que les choix
+    // après lesquels il reste possible d'enchaîner le reste sans répétition.
+    const safe = choices.filter((p) => canFinishWithoutRepeat(pools, p));
+    if (safe.length) choices = safe;
     // Plus un mini-jeu a de manches restantes, plus il a de chances d'être choisi.
     const weight = choices.reduce((s, p) => s + p.items.length, 0);
     let r = rng() * weight;

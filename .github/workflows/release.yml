@@ -1,0 +1,52 @@
+# Release : construit la version portable Windows x64 (release/nouvel-an-party-windows-x64.zip).
+# Le zip est toujours disponible en artefact du run. Si le déclencheur est un tag v*, il est aussi publié
+# dans une GitHub Release (notes générées automatiquement).
+# Pour publier une version :
+#   git tag v1.0.0 && git push origin v1.0.0
+# Lancement manuel possible depuis l'onglet "Actions" (workflow_dispatch) : produit seulement l'artefact, sans Release.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Build et publication Windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+
+      - name: Installer les dépendances (lockfile figé)
+        run: bun install --frozen-lockfile
+
+      - name: Tests unitaires
+        run: bun run test
+
+      - name: Construire la version portable
+        run: bun run release
+
+      - name: Déposer le zip en artefact du run
+        uses: actions/upload-artifact@v4
+        with:
+          name: nouvel-an-party-windows
+          path: release/*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publier la GitHub Release (tags v* uniquement)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.zip
+          generate_release_notes: true
