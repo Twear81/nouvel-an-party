@@ -2,6 +2,7 @@
 import type { MiniGameViews } from "./views-contract";
 import ceciOuCela from "./ceci-ou-cela/views";
 import commeLesAutres from "./comme-les-autres/views";
+import compteARebours from "./compte-a-rebours/views";
 import quiADit from "./qui-a-dit/views";
 import quiEstLePlus from "./qui-est-le-plus/views";
 import simon from "./simon/views";
@@ -13,5 +14,6 @@ export const webGames: Record<string, MiniGameViews> = {
   "tier-list": tierList,
   "comme-les-autres": commeLesAutres,
   "qui-a-dit": quiADit,
+  "compte-a-rebours": compteARebours,
   "simon": simon,
 };

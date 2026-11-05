@@ -1,0 +1,62 @@
+# Mini-jeu "Compte à rebours chaotique" — doc : src/minigames/compte-a-rebours/README.md
+# Chacun son tour, un gros bouton à presser pile à l'heure cible. Le compteur est visible sur la TV
+# pendant quelques secondes, puis il devient fou : il faut finir de compter dans sa tête.
+# Le plus proche de la cible gagne. Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "Compte à rebours chaotique"
+description: "Arrêtez le compteur pile à l'heure… quand il devient fou, comptez dans votre tête !"
+
+# Temps (en secondes) laissé à un joueur pour appuyer sur START. Passé ce délai, son tour est sauté (0 point).
+delai_depart: 10
+
+# Durée (en secondes) d'affichage de l'écart ("+0,23 s trop tard") entre deux joueurs
+duree_revelation: 3.5
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 15
+
+# Points par place : le 1er touche le 1er nombre, le 2e le 2e, etc. Place absente de la liste = 0 point.
+# Égalité (même écart au centième de seconde) : les ex æquo touchent tous les points de la meilleure place.
+# Un joueur qui n'a pas joué (tour sauté, jamais arrêté, déconnecté) ne marque rien.
+points: [150, 100, 70, 50, 30, 20, 10, 0]
+
+# Une manche = UNE variante tirée au hasard ; tous les joueurs jouent la même, chacun leur tour (ordre aléatoire).
+# Chaque variante :
+#   titre:    nom affiché sur la TV
+#   cible:    la seconde à viser, en secondes (au moins 1). Le tour est raté si on n'appuie pas avant 3 × cible.
+#   visible:  pendant combien de secondes le compteur est lisible avant de devenir chaotique (0 = chaotique d'emblée).
+#   decompte: true = le compteur descend de "cible" jusqu'à 0 (effet minuit) ; false (défaut) = il monte de 0 à "cible".
+# Maximum conseillé : 25 variantes.
+variantes:
+  - titre: "Pile à minuit"
+    cible: 10
+    visible: 3
+    decompte: true
+  - titre: "Dix secondes pile"
+    cible: 10
+    visible: 3
+  - titre: "Les douze coups"
+    cible: 12
+    visible: 4
+    decompte: true
+  - titre: "Cinq secondes à l'aveugle"
+    cible: 5
+    visible: 1
+  - titre: "Un petit tour d'horloge"
+    cible: 15
+    visible: 5
+  - titre: "Le dernier souffle de l'année"
+    cible: 8
+    visible: 2
+    decompte: true
+  - titre: "Presque à la seconde"
+    cible: 7
+    visible: 0
+  - titre: "Compte à rebours express"
+    cible: 6
+    visible: 2
+    decompte: true
