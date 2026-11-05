@@ -379,7 +379,7 @@ export class GameEngine {
       setup: this.setup,
       resumable: this.resumable ? { roundIndex: this.resumable.roundIndex, total: this.resumable.plan.length } : null,
       joinUrl: this.opts.joinUrl,
-      me: viewer ? { id: viewer, private: priv } : null,
+      me: viewer ? { id: viewer, private: priv, inRound: !!c?.ctx.players.some((p) => p.id === viewer) } : null,
     };
   }
 

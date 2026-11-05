@@ -73,5 +73,5 @@ export interface GameSnapshot {
   resumable: { roundIndex: number; total: number } | null;
   joinUrl: string;
   /** Uniquement pour un téléphone : son identité et sa vue privée du mini-jeu. */
-  me: { id: PlayerId; private: unknown } | null;
+  me: { id: PlayerId; private: unknown; /** false si arrivé après le début de la manche */ inRound: boolean } | null;
 }

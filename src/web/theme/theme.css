@@ -1,0 +1,128 @@
+/*
+ * THÈME : seul fichier à modifier pour changer l'allure du jeu (couleurs, polices, rayons, ombres, dégradés).
+ * Les variables ci-dessous sont exposées à Tailwind : `bg-surface`, `text-accent`, `font-display`, `rounded-card`, `shadow-glow`…
+ * Voir docs/changer-le-design.md.
+ */
+@import "tailwindcss";
+/* Tailwind ne regarde pas hors de src/web par défaut : on lui indique les écrans des mini-jeux. */
+@source "../../minigames";
+
+@theme static {
+  /* ── Fonds */
+  --color-bg: #080620;
+  --color-bg-2: #1b0f42;
+  --color-bg-3: #321457;
+  --color-surface: rgb(255 255 255 / 0.07);
+  --color-surface-strong: rgb(255 255 255 / 0.14);
+  --color-line: rgb(255 255 255 / 0.16);
+
+  /* ── Textes */
+  --color-ink: #f7f2ff;
+  --color-ink-muted: #b9add9;
+
+  /* ── Accents (or champagne, rose, bleu glacé) */
+  --color-accent: #f6cd72;
+  --color-accent-strong: #ffe3a3;
+  --color-accent-deep: #c8933a;
+  --color-accent-ink: #2b1a02;
+  --color-hot: #ff4f9a;
+  --color-cool: #5ad1ff;
+
+  /* ── États */
+  --color-good: #4fe3a0;
+  --color-good-deep: #178a5c;
+  --color-bad: #ff6b7e;
+  --color-bad-deep: #b02c40;
+  --color-warn: #ffb347;
+
+  /* ── QR code (doit rester très contrasté pour être scanné) */
+  --color-qr-dark: #120a2e;
+  --color-qr-light: #fff8e8;
+
+  /* ── Polices (embarquées via @fontsource, voir main.tsx) */
+  --font-display: "Bungee", "Outfit Variable", system-ui, sans-serif;
+  --font-sans: "Outfit Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* ── Rayons */
+  --radius-card: 1.5rem;
+  --radius-btn: 1.1rem;
+  --radius-chip: 999px;
+
+  /* ── Ombres */
+  --shadow-card: 0 1.5rem 3rem -1rem rgb(0 0 0 / 0.55);
+  --shadow-glow: 0 0 2.5rem rgb(246 205 114 / 0.35);
+  --shadow-btn: 0 0.35rem 0 var(--color-accent-deep), 0 0.8rem 1.6rem rgb(0 0 0 / 0.4);
+
+  /* ── Dégradés */
+  --gradient-bg: radial-gradient(120% 90% at 50% 0%, var(--color-bg-3) 0%, var(--color-bg-2) 38%, var(--color-bg) 78%);
+  --gradient-gold: linear-gradient(180deg, var(--color-accent-strong) 0%, var(--color-accent) 55%, var(--color-accent-deep) 130%);
+  --gradient-hot: linear-gradient(135deg, var(--color-hot), var(--color-bg-3));
+  --gradient-glass: linear-gradient(145deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.04));
+
+  /* ── Animations */
+  --animate-twinkle: twinkle 4s ease-in-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 1.6s ease-in-out infinite;
+}
+
+@keyframes twinkle { 0%, 100% { opacity: 0.15; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+@keyframes float { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(4%, -6%, 0); } }
+@keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes angle-spin { to { --angle: 360deg; } }
+
+/* ── Utilitaires de thème */
+@utility bg-gold { background-image: var(--gradient-gold); }
+@utility bg-night { background-image: var(--gradient-bg); }
+@utility bg-hot-gradient { background-image: var(--gradient-hot); }
+@utility text-gold-gradient {
+  background-image: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility glass {
+  background-image: var(--gradient-glass);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Base (dans @layer base pour ne pas écraser les classes Tailwind) */
+@layer base {
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+input { user-select: text; -webkit-user-select: text; }
+/* La TV est dessinée en 1920×1080 : 1rem = 16px à cette taille, et tout suit la fenêtre. */
+html[data-app="tv"] { font-size: min(calc(100vw / 120), calc(100vh / 67.5)); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+}
+
+/* ── Cadres d'avatar (choisis dans profile-options.ts ; --p = couleur du joueur ; 1em = 1/10 de la taille) */
+.frame { position: absolute; inset: 0; border-radius: 999px; pointer-events: none; }
+.frame-none { box-shadow: inset 0 0 0 0.1em var(--color-line); }
+.frame-gold { box-shadow: inset 0 0 0 0.4em var(--color-accent), inset 0 0 0 0.55em var(--color-accent-deep), 0 0 1.2em rgb(246 205 114 / 0.5); }
+.frame-neon { box-shadow: inset 0 0 0 0.3em var(--p), inset 0 0 0.8em 0.1em var(--p), 0 0 0.6em var(--p), 0 0 1.6em var(--p); }
+.frame-double { box-shadow: inset 0 0 0 0.25em var(--p), inset 0 0 0 0.5em var(--color-bg), inset 0 0 0 0.75em var(--color-accent); }
+.frame-dashed { border: 0.35em dashed var(--p); animation: spin-slow 14s linear infinite; }
+.frame-sparkle {
+  background: conic-gradient(from var(--angle), var(--color-accent-strong), var(--p), var(--color-ink), var(--color-accent), var(--color-accent-strong));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 0.45em), #000 calc(100% - 0.4em));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 0.45em), #000 calc(100% - 0.4em));
+  animation: angle-spin 3s linear infinite;
+  filter: drop-shadow(0 0 0.3em var(--color-accent));
+}

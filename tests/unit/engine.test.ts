@@ -93,7 +93,7 @@ describe("déroulé d'une manche", () => {
     const t = startPlaying();
     t.engine.input(t.ids[0]!, { v: 7 });
     expect(t.engine.snapshot(null).round!.public).toMatchObject({ n: 1 });
-    expect(t.engine.snapshot(t.ids[0]!).me).toEqual({ id: t.ids[0]!, private: { mine: 7 } });
+    expect(t.engine.snapshot(t.ids[0]!).me).toEqual({ id: t.ids[0]!, private: { mine: 7 }, inRound: true });
     expect(t.engine.snapshot(t.ids[1]!).me!.private).toEqual({ mine: null });
   });
 

@@ -1,0 +1,65 @@
+// Avatar d'un joueur : avatar (emoji ou photo) + couleur + cadre. Taille en rem, donc proportionnelle sur la TV.
+import type { CSSProperties, ReactNode } from "react";
+import type { Profile } from "../../shared/types";
+import { avatarById, frameById } from "../theme/profile-options";
+
+export type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+export const AVATAR_REM: Record<AvatarSize, number> = { xs: 2, sm: 3.25, md: 5, lg: 8, xl: 11, "2xl": 15 };
+
+interface Props {
+  profile: Profile | null;
+  size?: AvatarSize;
+  dimmed?: boolean;
+  /** Pastille en bas à droite (✓, +100…). */
+  badge?: ReactNode;
+  className?: string;
+}
+
+export function PlayerAvatar({ profile, size = "md", dimmed, badge, className = "" }: Props) {
+  const px = AVATAR_REM[size];
+  const style = {
+    width: `${px}rem`,
+    height: `${px}rem`,
+    fontSize: `${px / 10}rem`, // 1em = 1/10 de l'avatar : les cadres s'y calent
+    "--p": profile?.color ?? "var(--color-ink-muted)",
+  } as CSSProperties;
+
+  return (
+    <div className={`relative shrink-0 rounded-full transition-[filter,opacity] ${dimmed ? "opacity-45 grayscale" : ""} ${className}`} style={style}>
+      <div
+        className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full"
+        style={{ background: "radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--p) 55%, var(--color-ink)), var(--p))" }}
+      >
+        {!profile ? (
+          <span className="font-display text-[5em] text-bg/60">?</span>
+        ) : profile.avatar.kind === "photo" ? (
+          <img src={profile.avatar.url} alt="" draggable={false} className="h-full w-full object-cover" />
+        ) : (
+          <span className="select-none text-[5.4em] leading-none">{avatarById(profile.avatar.id).emoji}</span>
+        )}
+      </div>
+      <div className={`frame ${frameById(profile?.frame ?? "none").className}`} />
+      {badge != null && (
+        <div className="absolute -bottom-[0.2em] -right-[0.2em] flex min-h-[2.8em] min-w-[2.8em] items-center justify-center rounded-full border-[0.15em] border-bg bg-gold px-[0.5em] text-[1.6em] font-bold leading-none text-accent-ink">
+          {badge}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Avatar + pseudo, en colonne. */
+export function PlayerChip({
+  profile,
+  size = "md",
+  dimmed,
+  badge,
+  nameClass = "text-xl",
+}: Props & { nameClass?: string }) {
+  return (
+    <div className="flex min-w-0 flex-col items-center gap-2">
+      <PlayerAvatar profile={profile} size={size} dimmed={dimmed} badge={badge} />
+      <span className={`max-w-full truncate font-semibold ${nameClass} ${dimmed ? "text-ink-muted" : ""}`}>{profile?.name ?? "…"}</span>
+    </div>
+  );
+}
