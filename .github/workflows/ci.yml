@@ -39,7 +39,7 @@ jobs:
       - name: Installer Chromium, Firefox et WebKit pour Playwright
         run: bunx playwright install --with-deps chromium firefox webkit
 
-      - name: Tests E2E (les 3 projets : chromium, firefox, webkit)
+      - name: "Tests E2E (les 3 projets : chromium, firefox, webkit)"
         run: bun run test:e2e
 
       - name: Remonter le rapport Playwright en cas d'échec
