@@ -24,8 +24,9 @@ function QrCode({ url }: { url: string }) {
     }).then(setSrc, () => setSrc(null));
   }, [url]);
   return (
-    <div className="rounded-card bg-ink p-3 shadow-glow">
-      {src ? <img data-testid="tv-qr" src={src} alt={`QR code ${url}`} className="h-[17rem] w-[17rem] rounded-btn" /> : <div className="h-[17rem] w-[17rem]" />}
+    // Le QR rétrécit quand le panneau des mini-jeux prend de la hauteur.
+    <div className="flex aspect-square min-h-0 max-h-[18.5rem] flex-shrink rounded-card bg-ink p-3 shadow-glow">
+      {src ? <img data-testid="tv-qr" src={src} alt={`QR code ${url}`} className="h-full w-full rounded-btn" /> : <div className="h-full w-full" />}
     </div>
   );
 }
@@ -61,11 +62,11 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
     <div data-testid="tv-lobby" className="flex min-h-0 flex-1 flex-col gap-5 px-12 py-8">
       <div className="flex min-h-0 flex-1 gap-10">
         {/* Inscription */}
-        <div className="flex w-[26rem] shrink-0 flex-col items-center gap-4 text-center">
-          <h1 className="font-display text-5xl leading-tight text-gold-gradient">{snapshot.title}</h1>
+        <div className="flex min-h-0 w-[26rem] shrink-0 flex-col items-center gap-4 text-center">
+          <h1 className="shrink-0 font-display text-5xl leading-tight text-gold-gradient">{snapshot.title}</h1>
           <QrCode url={snapshot.joinUrl} />
-          <div className="rounded-chip bg-surface-strong px-5 py-2 font-mono text-2xl font-bold text-accent">{snapshot.joinUrl}</div>
-          <p className="text-xl leading-snug text-ink-muted">
+          <div className="shrink-0 rounded-chip bg-surface-strong px-5 py-2 font-mono text-2xl font-bold text-accent">{snapshot.joinUrl}</div>
+          <p className="shrink-0 text-xl leading-snug text-ink-muted">
             Accepte l'alerte de certificat du navigateur pour continuer.
           </p>
         </div>

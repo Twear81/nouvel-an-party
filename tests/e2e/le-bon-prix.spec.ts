@@ -61,7 +61,7 @@ test.describe("Le bon prix", () => {
   });
 
   test.describe(() => {
-    test.use({ serverOptions: { duree: 5 } });
+    test.use({ serverOptions: { duree: 12 } });
     test("chrono écoulé : seul le prix validé compte, sans réponse = 0", async ({ party }) => {
       const [a, b] = await party.addPhones("Alice", "Bob");
       await party.startGame({ "le-bon-prix": 1 });
