@@ -19,6 +19,15 @@ export interface RoundContext<Cfg> {
   update: () => void;
   /** Termine la manche tout de suite (ex : tout le monde a répondu). */
   end: () => void;
+  /**
+   * Lance (ou remplace) le chrono affiché sur la TV et les téléphones, pour les jeux en plusieurs étapes
+   * (écrire puis voter, tour par tour…). À appeler pendant le jeu : onPlay, input ou un timer.
+   * À la fin : `onEnd` est appelé, ou la manche se termine si `onEnd` est absent.
+   * Pause et "+10 s" du maître du jeu s'appliquent à ce chrono.
+   */
+  countdown: (seconds: number, onEnd?: () => void) => void;
+  /** Masque le chrono (ex : pendant une animation sur la TV). */
+  clearCountdown: () => void;
 }
 
 export interface RoundOutcome {
@@ -41,7 +50,7 @@ export interface MiniGame<Cfg = any, Item = any, State = any> {
   description: (cfg: Cfg) => string;
   /** Liste des manches possibles. Le moteur en tire au hasard. */
   items: (cfg: Cfg) => Item[];
-  /** Durée du chrono en secondes, null si la manche se termine toute seule (via ctx.end). */
+  /** Durée du chrono en secondes. null = pas de chrono automatique : le jeu gère ses étapes avec ctx.countdown / ctx.end. */
   roundSeconds: (cfg: Cfg, item: Item) => number | null;
   /** Estimation (s) du jeu + lecture des résultats. Le moteur y ajoute l'intro. */
   estimateSeconds: (cfg: Cfg) => number;

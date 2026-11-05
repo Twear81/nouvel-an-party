@@ -29,3 +29,24 @@ export function argmaxAll(counts: Record<string, number>): string[] {
   if (max === 0) return [];
   return Object.keys(counts).filter((k) => counts[k] === max);
 }
+
+/**
+ * Normalise une réponse libre pour comparer celles des joueurs :
+ * minuscules, sans accents ni ponctuation, espaces réduits, sans article au début, sans "s" final.
+ * "Les Œufs !" → "oeuf" ; "  du   Beurre" → "beurre"
+ */
+export function normalizeAnswer(text: string): string {
+  let s = text
+    .toLowerCase()
+    .replace(/œ/g, "oe")
+    .replace(/æ/g, "ae")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  s = s.replace(/^(le|la|les|l|un|une|des|du|de la|de l|de|d)\s+/, "");
+  return s
+    .split(" ")
+    .map((w) => (w.length > 3 && /[sx]$/.test(w) ? w.slice(0, -1) : w))
+    .join(" ");
+}

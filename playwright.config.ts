@@ -1,7 +1,9 @@
 // Tests E2E : la TV (HTTP) et plusieurs téléphones (HTTPS auto-signé) pilotés par un vrai navigateur.
 // Chaque test lance son propre serveur (voir tests/e2e/helpers/server.ts).
 // Trois projets = les trois moteurs des téléphones d'une soirée : Chromium (Android/Chrome), Firefox (Android), WebKit (iPhone/Safari).
-// La TV (un navigateur de PC) tourne dans le même moteur que le projet.
+// La TV (le PC de la soirée) est toujours un Chromium.
+// Chromium joue toute la suite ; Firefox et WebKit ne rejouent que les tests marqués @compat
+// (profil, caméra, partie complète, reconnexion, réglages tactiles, affichage 8 joueurs) pour garder une CI rapide.
 import { defineConfig, devices } from "@playwright/test";
 import type { TestOptions } from "./tests/e2e/helpers/fixtures";
 
@@ -14,7 +16,7 @@ export default defineConfig<TestOptions>({
   testDir: "tests/e2e",
   globalSetup: "./tests/e2e/global-setup.ts",
   fullyParallel: true,
-  workers: process.env.CI ? 2 : 4,
+  workers: process.env.CI ? 3 : 4,
   timeout: 90_000,
   expect: { timeout: 10_000 },
   retries: process.env.CI ? 1 : 0,
@@ -35,6 +37,7 @@ export default defineConfig<TestOptions>({
     },
     {
       name: "firefox",
+      grep: /@compat/,
       use: {
         browserName: "firefox",
         launchOptions: {
@@ -47,6 +50,7 @@ export default defineConfig<TestOptions>({
     },
     {
       name: "webkit",
+      grep: /@compat/,
       use: {
         browserName: "webkit",
         // iPhone : Safari mobile (user-agent, tactile, isMobile). Pas de caméra factice possible dans WebKit : voir les tests de photo.

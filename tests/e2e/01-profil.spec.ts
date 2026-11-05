@@ -20,7 +20,7 @@ test.describe("Profil", () => {
     await expect(party.tv.getByText("crée son profil…")).toBeVisible();
   });
 
-  test("avatar, cadre et couleur choisis apparaissent sur la TV", async ({ party }) => {
+  test("avatar, cadre et couleur choisis apparaissent sur la TV", { tag: "@compat" }, async ({ party }) => {
     const { page } = await party.openPhonePage();
     await page.getByTestId("profile-name").fill("Camille");
 
@@ -48,7 +48,7 @@ test.describe("Profil", () => {
 
   const NO_FAKE_CAMERA = "WebKit (Playwright) n'a pas de caméra factice : la prise de photo est testée sur Chromium et Firefox, le repli fichier sur les trois.";
 
-  test("profil avec une photo prise à la caméra", async ({ party, browserName }) => {
+  test("profil avec une photo prise à la caméra", { tag: "@compat" }, async ({ party, browserName }) => {
     test.skip(browserName === "webkit", NO_FAKE_CAMERA);
     const phone = await party.addPhone("Photographe", { photo: true });
     const tile = party.tvPlayer(phone.id!);
@@ -75,7 +75,7 @@ test.describe("Profil", () => {
     await expect(page.getByTestId("phone-lobby-ready")).toBeVisible();
   });
 
-  test("sans caméra (refusée, iOS en HTTP…) : repli sur l'appareil photo / la galerie du téléphone", async ({ party }) => {
+  test("sans caméra (refusée, iOS en HTTP…) : repli sur l'appareil photo / la galerie du téléphone", { tag: "@compat" }, async ({ party }) => {
     const { context, page } = await party.openPhonePage();
     await context.addInitScript(() => {
       Object.defineProperty(navigator, "mediaDevices", { value: undefined, configurable: true });

@@ -68,6 +68,15 @@ export async function handleHttp(req: IncomingMessage, res: ServerResponse) {
     return send(res, 404, "not found", ".txt");
   }
 
+  // Images/sons fournis avec la config (config/medias), ex : les objets du "bon prix"
+  if (pathname.startsWith("/medias/")) {
+    const rel = pathname.slice("/medias/".length);
+    const dir = path.join(paths.config, "medias");
+    const file = path.resolve(dir, rel);
+    if (file.startsWith(dir + path.sep) && existsSync(file)) return send(res, 200, readFileSync(file), path.extname(file));
+    return send(res, 404, "not found", ".txt");
+  }
+
   const rel = pathname.replace(/^\/+/, "");
   const ext = path.extname(rel);
   if (ext) {

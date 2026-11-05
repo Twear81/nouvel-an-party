@@ -8,7 +8,7 @@ const TV = { width: 1920, height: 1080 };
 test.describe("8 joueurs", () => {
   test.setTimeout(180_000);
 
-  test("une manche de chaque jeu jusqu'au classement final, tout tient à l'écran", async ({ party }) => {
+  test("une manche de chaque jeu jusqu'au classement final, tout tient à l'écran", { tag: "@compat" }, async ({ party }) => {
     const { tv } = party;
     expect(NAMES.every((n) => n.length <= 16)).toBe(true);
     const phones = await party.addPhonesWith({ viewport: SMALL }, ...NAMES);

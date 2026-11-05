@@ -230,3 +230,14 @@ Comme le temps est mesuré entre l'affichage du GO et le toucher **sur le même 
 Ajoutez le jeu aux deux registres (section 4), créez le README et le yaml, puis les tests : `finish` avec des temps connus (rang, égalités, points planchés à 0), `input` avec des `payload` invalides ou un temps avant le GO.
 
 > Cet exemple est de la documentation : les fichiers du jeu « plus-rapide » n'existent pas dans le dépôt.
+
+## Briques pour les jeux plus riches
+
+| Besoin | Outil |
+|---|---|
+| Plusieurs étapes dans une manche (écrire puis voter, tour par tour, séquences) | `roundSeconds: () => null`, puis `ctx.countdown(secondes, suite)` dans `onPlay` : chaque étape a son chrono visible ; sans `suite`, la manche se termine. `ctx.clearCountdown()` masque le chrono (ex : pendant une animation). Pause et +10 s s'appliquent. |
+| Savoir où on en est côté écrans | mettre l'étape dans `publicView` (ex : `step: "ecrire" \| "voter"`) |
+| Comparer des réponses tapées au clavier | `normalizeAnswer()` (`helpers.ts`) : minuscules, sans accents, sans article, sans pluriel |
+| Images/sons dans la config | fichiers dans `config/medias/`, servis à l'adresse `/medias/<fichier>` |
+| Joueurs de la manche | `ctx.players` côté serveur, `round.participants` côté écrans |
+| Tester sans moteur | `makeCtx()` (`tests/unit/helpers/minigame-ctx.ts`) : `ctx.advance(ms)` fait avancer le temps, `ctx.finishCountdown()` saute à la fin du chrono |

@@ -2,7 +2,7 @@
 actif: true
 nom: "Ceci ou Cela"
 description: "Deux réponses possibles : suivez la majorité… ou devinez un invité"
-duree: 8
+duree: 25
 temps_resultats: 5
 choix_par_defaut: ["Oui", "Non"]
 points:

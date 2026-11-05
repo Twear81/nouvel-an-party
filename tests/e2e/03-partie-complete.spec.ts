@@ -1,7 +1,7 @@
 import { expect, test } from "./helpers/fixtures";
 
 test.describe("Partie complète à 3 téléphones", () => {
-  test("une manche de chaque mini-jeu, scores cohérents, classement final", async ({ party }) => {
+  test("une manche de chaque mini-jeu, scores cohérents, classement final", { tag: "@compat" }, async ({ party }) => {
     const { tv } = party;
     const phones = await party.addPhones("Alice", "Bob", "Chloé");
     const [a, b, c] = phones as [typeof phones[0], typeof phones[0], typeof phones[0]];
@@ -97,18 +97,22 @@ test.describe("Partie complète à 3 téléphones", () => {
     await expect(a!.t("phone-results")).toContainText("élu");
   });
 
-  test("ceci-ou-cela : si le chrono se termine, les non-répondants ne marquent pas", async ({ party }) => {
-    const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
-    await party.startGame({ "qui-est-le-plus": 0, "ceci-ou-cela": 1 });
-    await expect(party.tv.getByTestId("tv-playing")).toBeVisible();
-    // Seuls Alice et Bob répondent (1re réponse) ; Chloé laisse le chrono (8 s) aller au bout.
-    await a!.t("choice-0").click();
-    await b!.t("choice-0").click();
-    await expect(c!.t("phone-playing")).toBeVisible();
-    await expect(party.tv.getByTestId("tv-results")).toBeVisible({ timeout: 15_000 });
-    const deltas = await party.tvDeltas();
-    expect(deltas[c!.id!]).toBe(0);
-    expect(deltas[a!.id!]! + deltas[b!.id!]!).toBeGreaterThanOrEqual(0);
-    await expect(c!.t("phone-results")).toContainText("Tu n'as pas répondu");
+  test.describe(() => {
+    // Chrono court : on attend vraiment sa fin.
+    test.use({ serverOptions: { duree: 5 } });
+    test("ceci-ou-cela : si le chrono se termine, les non-répondants ne marquent pas", async ({ party }) => {
+      const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
+      await party.startGame({ "qui-est-le-plus": 0, "ceci-ou-cela": 1 });
+      await expect(party.tv.getByTestId("tv-playing")).toBeVisible();
+      // Seuls Alice et Bob répondent (1re réponse) ; Chloé laisse le chrono (8 s) aller au bout.
+      await a!.t("choice-0").click();
+      await b!.t("choice-0").click();
+      await expect(c!.t("phone-playing")).toBeVisible();
+      await expect(party.tv.getByTestId("tv-results")).toBeVisible({ timeout: 15_000 });
+      const deltas = await party.tvDeltas();
+      expect(deltas[c!.id!]).toBe(0);
+      expect(deltas[a!.id!]! + deltas[b!.id!]!).toBeGreaterThanOrEqual(0);
+      await expect(c!.t("phone-results")).toContainText("Tu n'as pas répondu");
+    });
   });
 });

@@ -54,11 +54,11 @@ test.describe("Contrôles du maître du jeu", () => {
     await party.addPhones("Alice", "Bob");
     await party.startGame({ "qui-est-le-plus": 0, "ceci-ou-cela": 1 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
-    // Le chrono de base est de 8 s : au-dessus, c'est forcément le bonus.
-    await expect.poll(() => seconds(tv)).toBeLessThanOrEqual(8);
+    // Le chrono de base est de 25 s : au-dessus, c'est forcément le bonus.
+    await expect.poll(() => seconds(tv)).toBeLessThanOrEqual(25);
     await tv.getByTestId("host-addtime").click();
-    await expect.poll(() => seconds(tv)).toBeGreaterThan(8);
-    expect(await seconds(tv)).toBeLessThanOrEqual(18);
+    await expect.poll(() => seconds(tv)).toBeGreaterThan(25);
+    expect(await seconds(tv)).toBeLessThanOrEqual(35);
   });
 
   test("retirer un joueur : bouton visible sans survol, confirmation dans le jeu, le joueur disparaît", async ({ party }) => {

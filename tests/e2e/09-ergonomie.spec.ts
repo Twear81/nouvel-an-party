@@ -2,7 +2,7 @@ import { expect, test } from "./helpers/fixtures";
 
 // Règle de conception : rien à deviner. Ces tests vérifient que l'interface se suffit à elle-même et reste utilisable sur de petits écrans.
 test.describe("Ergonomie téléphone", () => {
-  test("le bouton du profil reste visible sur un écran très court (360 px de haut)", async ({ party }) => {
+  test("le bouton du profil reste visible sur un écran très court (360 px de haut)", { tag: "@compat" }, async ({ party }) => {
     const { page } = await party.openPhonePage({ viewport: { width: 360, height: 360 } });
     const submit = page.getByTestId("profile-submit");
     // Sans pseudo, le bouton lui-même dit pourquoi il est inactif.
@@ -19,14 +19,14 @@ test.describe("Ergonomie téléphone", () => {
     await expect(page.getByTestId("phone-lobby-ready")).toBeVisible();
   });
 
-  test("la touche « Go » du clavier valide le profil", async ({ party }) => {
+  test("la touche « Go » du clavier valide le profil", { tag: "@compat" }, async ({ party }) => {
     const { page } = await party.openPhonePage();
     await page.getByTestId("profile-name").fill("Clavier");
     await page.getByTestId("profile-name").press("Enter");
     await expect(page.getByTestId("phone-lobby-ready")).toContainText("Clavier");
   });
 
-  test("anti-zoom iOS, tactile et pas de rebond : réglages CSS des téléphones", async ({ party }) => {
+  test("anti-zoom iOS, tactile et pas de rebond : réglages CSS des téléphones", { tag: "@compat" }, async ({ party }) => {
     const { page } = await party.openPhonePage();
     const input = await page.getByTestId("profile-name").evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     expect(input).toBeGreaterThanOrEqual(16); // en dessous, Safari iOS zoome sur le champ
@@ -44,7 +44,7 @@ test.describe("Ergonomie téléphone", () => {
     expect(await submit.evaluate((el) => { const cs = getComputedStyle(el) as CSSStyleDeclaration & { webkitUserSelect?: string }; return cs.userSelect || cs.webkitUserSelect; })).toBe("none");
   });
 
-  test("la caméra est un <video playsinline muted autoplay> et se coupe en quittant", async ({ party, browserName }) => {
+  test("la caméra est un <video playsinline muted autoplay> et se coupe en quittant", { tag: "@compat" }, async ({ party, browserName }) => {
     test.skip(browserName === "webkit", "WebKit (Playwright) n'a pas de caméra factice.");
     const { page } = await party.openPhonePage();
     await page.getByTestId("take-photo").click();

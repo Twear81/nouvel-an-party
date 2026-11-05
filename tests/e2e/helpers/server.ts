@@ -1,6 +1,6 @@
 // Lance un vrai serveur de jeu (process Bun) sur des ports libres, avec config de test et dossier data jetable.
 import { spawn, type ChildProcess } from "node:child_process";
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync, readdirSync } from "node:fs";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
@@ -50,8 +50,7 @@ function prepareConfig(tmp: string, opts: ServerOptions): string {
   };
   if (opts.introSeconds !== undefined) patch("partie.yaml", "intro_secondes", opts.introSeconds);
   if (opts.duree !== undefined) {
-    patch("minijeux/qui-est-le-plus.yaml", "duree", opts.duree);
-    patch("minijeux/ceci-ou-cela.yaml", "duree", opts.duree);
+    for (const f of readdirSync(path.join(dir, "minijeux"))) if (f.endsWith(".yaml")) patch(`minijeux/${f}`, "duree", opts.duree);
   }
   return dir;
 }

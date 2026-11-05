@@ -1,7 +1,7 @@
 actif: true
 nom: "Qui est le plus… ?"
 description: "Votez pour l'invité qui correspond le mieux à la question"
-duree: 8
+duree: 25
 temps_resultats: 5
 vote_pour_soi: false
 points:

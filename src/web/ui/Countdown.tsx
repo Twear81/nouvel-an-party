@@ -1,5 +1,5 @@
 // Chrono : barre + secondes restantes, calculé depuis la deadline serveur (horloge corrigée).
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { RoundInfo } from "../../shared/types";
 import { serverNow } from "../net/socket";
 
@@ -22,11 +22,8 @@ interface Props {
 
 export function Countdown({ round, size = "tv" }: Props) {
   const remaining = useRemainingMs(round);
-  // Durée de référence = plus grand temps restant vu pour cette manche (couvre aussi le +10 s).
-  const ref = useRef({ index: -1, max: 1 });
-  if (ref.current.index !== round.index) ref.current = { index: round.index, max: 1 };
-  if (remaining != null && remaining > ref.current.max) ref.current.max = remaining;
   if (remaining == null) return null;
+  const total = Math.max(1, round.timerTotalMs ?? remaining);
 
   const seconds = Math.ceil(remaining / 1000);
   const low = seconds <= 5;
@@ -36,7 +33,7 @@ export function Countdown({ round, size = "tv" }: Props) {
       <div className={`relative flex-1 overflow-hidden rounded-full bg-surface-strong ${big ? "h-5" : "h-2.5"}`}>
         <div
           className={`absolute inset-y-0 left-0 rounded-full transition-[width] duration-100 ease-linear ${low ? "bg-bad" : "bg-gold"}`}
-          style={{ width: `${Math.min(100, (remaining / ref.current.max) * 100)}%` }}
+          style={{ width: `${Math.min(100, (remaining / total) * 100)}%` }}
         />
       </div>
       <span className={`text-right font-display tabular-nums ${big ? "w-24 text-5xl" : "w-10 text-xl"} ${low ? "text-bad animate-pulse-soft" : "text-accent"}`}>{seconds}</span>

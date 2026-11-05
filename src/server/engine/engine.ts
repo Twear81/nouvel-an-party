@@ -61,7 +61,8 @@ interface CurrentRound {
   state: unknown;
   ctx: RoundContext<any>;
   timers: TimerGroup;
-  mainTimer: number | null; // timer de l'intro puis du chrono
+  mainTimer: number | null; // timer de l'intro puis du chrono visible
+  timerTotalMs: number | null; // durée totale du chrono visible (pour la barre de progression)
   endRequested: boolean;
   results: unknown;
   deltas: Record<PlayerId, number> | null;
@@ -190,7 +191,9 @@ export class GameEngine {
   addTime(seconds: number) {
     const c = this.current;
     if (this.phase !== "playing" || !c || c.mainTimer === null) return;
-    c.timers.shift(c.mainTimer, Math.max(-600, Math.min(600, seconds)) * 1000);
+    const delta = Math.max(-600, Math.min(600, seconds)) * 1000;
+    c.timers.shift(c.mainTimer, delta);
+    if (c.timerTotalMs !== null) c.timerTotalMs = Math.max(0, c.timerTotalMs + delta);
     this.changed();
   }
 
@@ -250,6 +253,7 @@ export class GameEngine {
       state: null,
       timers,
       mainTimer: null,
+      timerTotalMs: null,
       endRequested: false,
       results: null,
       deltas: null,
@@ -268,6 +272,17 @@ export class GameEngine {
         update: () => this.changed(),
         end: () => {
           round.endRequested = true;
+        },
+        countdown: (seconds, onEnd) => {
+          if (this.current !== round || this.phase !== "playing") {
+            throw new Error("ctx.countdown s'utilise pendant le jeu (onPlay, input ou un timer)");
+          }
+          this.startCountdown(round, seconds * 1000, onEnd);
+        },
+        clearCountdown: () => {
+          if (round.mainTimer !== null && this.phase === "playing") round.timers.cancel(round.mainTimer);
+          round.mainTimer = null;
+          round.timerTotalMs = null;
         },
       },
     };
@@ -292,9 +307,23 @@ export class GameEngine {
     if (c.mainTimer !== null) c.timers.cancel(c.mainTimer); // si l'intro a été passée
     this.phase = "playing";
     const seconds = c.loaded.game.roundSeconds(c.loaded.cfg, c.item);
-    c.mainTimer = seconds === null ? null : c.timers.add(seconds * 1000, () => this.endRound());
+    if (seconds !== null) this.startCountdown(c, seconds * 1000);
     if (c.loaded.game.onPlay) this.runGame(() => c.loaded.game.onPlay!(c.state, c.ctx));
     this.changed();
+  }
+
+  /** Chrono visible sur les écrans. Sans `onEnd`, la manche se termine à la fin du chrono. */
+  private startCountdown(c: CurrentRound, ms: number, onEnd?: () => void) {
+    if (c.mainTimer !== null) c.timers.cancel(c.mainTimer);
+    c.timerTotalMs = ms;
+    c.mainTimer = c.timers.add(ms, () => {
+      if (this.current !== c) return;
+      c.mainTimer = null;
+      c.timerTotalMs = null;
+      if (onEnd) this.runGame(onEnd);
+      else this.endRound();
+      this.changed();
+    });
   }
 
   private endRound() {
@@ -363,6 +392,7 @@ export class GameEngine {
         participants: c.ctx.players.map((p) => p.id),
         deadline: this.paused ? null : fireAt,
         pausedRemainingMs: this.paused && c.mainTimer !== null ? c.timers.remaining(c.mainTimer) : null,
+        timerTotalMs: this.phase === "playing" ? c.timerTotalMs : null,
         public: safe(() => g.publicView(c.state, c.ctx)),
         results: this.phase === "results" ? c.results : null,
         deltas: this.phase === "results" ? c.deltas : null,

@@ -2,7 +2,8 @@
 import { expect, type Browser, type BrowserContext, type BrowserContextOptions, type Locator, type Page } from "@playwright/test";
 import type { TestServer } from "./server";
 
-export type GameId = "qui-est-le-plus" | "ceci-ou-cela";
+/** Id d'un mini-jeu (nom de son dossier dans src/minigames). */
+export type GameId = "qui-est-le-plus" | "ceci-ou-cela" | (string & {});
 export const GAME_NAMES: Record<GameId, string> = { "qui-est-le-plus": "Qui est le plus… ?", "ceci-ou-cela": "Ceci ou Cela" };
 
 /** Téléphone par défaut (les projets Playwright imposent le leur : Android, Firefox mobile, iPhone). */
@@ -22,6 +23,8 @@ export interface JoinOptions {
   photo?: boolean;
   /** Taille d'écran de ce téléphone (ex : 360x640, le plus petit à supporter). */
   viewport?: { width: number; height: number };
+  /** Autre moteur pour ce téléphone (ex : un iPhone dans une partie Android), avec ses options de contexte. */
+  browser?: { browser: Browser; options: BrowserContextOptions };
 }
 
 export class Party {
@@ -29,10 +32,15 @@ export class Party {
   private contexts: BrowserContext[] = [];
   tv!: Page;
 
+  /**
+   * @param browser    navigateur des téléphones (celui du projet : Chromium, Firefox ou WebKit)
+   * @param tvBrowser  navigateur de la TV : toujours Chromium, comme le PC de la soirée
+   */
   constructor(
     private browser: Browser,
     readonly server: TestServer,
     private phoneOptions: BrowserContextOptions = DEFAULT_PHONE,
+    private tvBrowser: Browser = browser,
   ) {}
 
   // ───────────── Ouverture des écrans ─────────────
@@ -44,7 +52,7 @@ export class Party {
 
   /** Une page 1920x1080 dans son propre contexte (par exemple une 2e TV, éventuellement avec des en-têtes forcés). */
   async newContextPage(url: string, extraHTTPHeaders?: Record<string, string>) {
-    const context = await this.browser.newContext({ viewport: { width: 1920, height: 1080 }, ignoreHTTPSErrors: true, extraHTTPHeaders });
+    const context = await this.tvBrowser.newContext({ viewport: { width: 1920, height: 1080 }, ignoreHTTPSErrors: true, extraHTTPHeaders });
     this.contexts.push(context);
     const page = await context.newPage();
     await page.goto(url);
@@ -53,8 +61,10 @@ export class Party {
   }
 
   /** Ouvre /play dans un contexte neuf (localStorage séparé), sans créer le profil. */
-  async openPhonePage(overrides: BrowserContextOptions = {}): Promise<{ context: BrowserContext; page: Page }> {
-    const context = await this.browser.newContext({ ...this.phoneOptions, ignoreHTTPSErrors: true, ...overrides });
+  async openPhonePage(overrides: BrowserContextOptions = {}, other?: JoinOptions["browser"]): Promise<{ context: BrowserContext; page: Page }> {
+    const context = other
+      ? await other.browser.newContext({ ...other.options, ignoreHTTPSErrors: true, ...overrides })
+      : await this.browser.newContext({ ...this.phoneOptions, ignoreHTTPSErrors: true, ...overrides });
     this.contexts.push(context);
     const page = await context.newPage();
     await page.goto(this.server.playUrl);
@@ -66,7 +76,7 @@ export class Party {
   async addPhone(name: string, opts: JoinOptions = {}): Promise<Phone> {
     const inLobby = (await this.tv.locator("[data-phase]").getAttribute("data-phase")) === "lobby";
     const before = inLobby ? await this.tvPlayerIds() : [];
-    const { context, page } = await this.openPhonePage(opts.viewport ? { viewport: opts.viewport } : {});
+    const { context, page } = await this.openPhonePage(opts.viewport ? { viewport: opts.viewport } : {}, opts.browser);
     const phone: Phone = { context, page, name, id: null, t: (id) => page.getByTestId(id) };
 
     if (inLobby) {
@@ -112,7 +122,7 @@ export class Party {
 
   // ───────────── Écran de lancement ─────────────
 
-  /** Règle le nombre de manches de chaque mini-jeu avec les boutons +/− puis lance la partie. */
+  /** Règle le nombre de manches des mini-jeux cités avec les boutons +/− (les autres ne bougent pas). */
   async setCounts(counts: Partial<Record<GameId, number>>) {
     for (const [id, target] of Object.entries(counts)) {
       const count = this.tv.getByTestId(`setup-count-${id}`);
@@ -126,8 +136,10 @@ export class Party {
     }
   }
 
+  /** Lance une partie avec exactement ces manches : les mini-jeux non cités sont mis à 0. */
   async startGame(counts: Partial<Record<GameId, number>>) {
-    await this.setCounts(counts);
+    const rows = await this.tv.locator('[data-testid^="setup-row-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")!.slice("setup-row-".length)));
+    await this.setCounts({ ...Object.fromEntries(rows.map((id) => [id, 0])), ...counts });
     await this.tv.getByTestId("start-game").click();
     // L'annonce ne dure qu'une seconde dans la config de test : on vérifie juste qu'on a quitté le lobby.
     await expect(this.tv.locator("[data-phase]")).not.toHaveAttribute("data-phase", "lobby");
