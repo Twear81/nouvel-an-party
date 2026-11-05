@@ -1,0 +1,9 @@
+# Config de test E2E : durées très courtes. Les ports sont imposés par PARTY_HTTP_PORT / PARTY_HTTPS_PORT.
+titre: "Test E2E"
+duree_cible_minutes: 1
+ordre: melange
+intro_secondes: 1
+port_http: 3000
+port_https: 3443
+ip: "127.0.0.1"
+ouvrir_navigateur: false

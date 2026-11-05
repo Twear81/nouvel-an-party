@@ -4,8 +4,8 @@ import { PlayerAvatar } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
-const Tv = ({ pub, players }: MiniGameViewProps<Pub>) => {
-  const voters = players.filter((p) => p.profile);
+const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
+  const voters = players.filter((p) => round.participants.includes(p.id));
   const voted = voters.filter((p) => pub.votedIds.includes(p.id)).length;
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 text-center">
@@ -30,9 +30,9 @@ const Tv = ({ pub, players }: MiniGameViewProps<Pub>) => {
   );
 };
 
-const Phone = ({ pub, priv, players, snapshot, sendInput }: MiniGameViewProps<Pub, Priv>) => {
+const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewProps<Pub, Priv>) => {
   const myId = snapshot.me?.id;
-  const options = players.filter((p) => p.profile && (pub.allowSelfVote || p.id !== myId));
+  const options = players.filter((p) => round.participants.includes(p.id) && (pub.allowSelfVote || p.id !== myId));
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight">{pub.question}</h1>

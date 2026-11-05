@@ -1,0 +1,15 @@
+actif: true
+nom: "Oui ou Non"
+description: "Devinez ce que pense la majorité… ou un invité tiré au sort"
+duree: 8
+temps_resultats: 5
+points:
+  bonne_reponse: 100
+  cible: 0
+questions:
+  - "L'ananas sur la pizza, c'est acceptable ?"
+  - "Le champagne est meilleur que le crémant ?"
+  - "Les résolutions, ça marche vraiment ?"
+  - "Est-ce que {joueur} aime le karaoké ?"
+  - "Est-ce que {joueur} reste debout jusqu'à minuit ?"
+  - "Est-ce que {joueur} a déjà raté un train ?"

@@ -4,9 +4,9 @@ import { PlayerAvatar } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
-const Tv = ({ pub, playerById, players }: MiniGameViewProps<Pub>) => {
+const Tv = ({ pub, round, playerById, players }: MiniGameViewProps<Pub>) => {
   const target = pub.targetId ? playerById(pub.targetId) : undefined;
-  const voters = players.filter((p) => p.profile);
+  const voters = players.filter((p) => round.participants.includes(p.id));
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 text-center">
       {target && (

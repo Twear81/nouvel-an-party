@@ -1,0 +1,15 @@
+actif: true
+nom: "Qui est le plus… ?"
+description: "Votez pour l'invité qui correspond le mieux à la question"
+duree: 8
+temps_resultats: 5
+vote_pour_soi: false
+points:
+  majorite: 100
+  elu: 50
+questions:
+  - "Qui est le plus gourmand ?"
+  - "Qui est le plus radin ?"
+  - "Qui sera le premier endormi ?"
+  - "Qui danse le mieux ?"
+  - "Qui est le plus bavard ?"

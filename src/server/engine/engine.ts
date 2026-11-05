@@ -360,6 +360,7 @@ export class GameEngine {
         total: this.plan.length,
         gameId: g.id,
         gameName: g.name(c.loaded.cfg),
+        participants: c.ctx.players.map((p) => p.id),
         deadline: this.paused ? null : fireAt,
         pausedRemainingMs: this.paused && c.mainTimer !== null ? c.timers.remaining(c.mainTimer) : null,
         public: safe(() => g.publicView(c.state, c.ctx)),

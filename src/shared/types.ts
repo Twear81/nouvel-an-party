@@ -46,6 +46,8 @@ export interface RoundInfo {
   total: number;
   gameId: string;
   gameName: string;
+  /** Joueurs qui participent à cette manche (les retardataires jouent à la suivante). */
+  participants: PlayerId[];
   /** Timestamp (horloge serveur) de fin du chrono. null = pas de chrono ou en pause. */
   deadline: number | null;
   /** Temps restant figé pendant une pause (ms). */

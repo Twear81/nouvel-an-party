@@ -61,7 +61,7 @@ export default { Tv, Phone, TvResults, PhoneResults } satisfies MiniGameViews;
 
 Props (`MiniGameViewProps`) : `snapshot`, `round` (infos de la manche), `pub` (= `publicView`), `priv` (= `privateView`, `null` sur la TV), `results` (= `finish().results`, phase résultats seulement), `players`, `playerById(id)`, `sendInput(payload)` (téléphone : appelle `input` côté serveur).
 
-**Règle design** : n'utilisez que les composants de `src/web/ui` et les tokens de `src/web/theme` (couleurs, tailles, espacements). Pas de couleur, police ou taille en dur : ainsi tout changement de design (voir `docs/changer-le-design.md`) s'applique à tous les jeux. Pas d'état de jeu dans React : tout vient du serveur (un téléphone qui recharge retrouve la manche).
+**Règle design** : n'utilisez que les composants de `src/web/ui` (`Button`, `Panel`, `PlayerAvatar`, `Countdown`…, exportés par `src/web/ui/index.ts`) et les tokens de `src/web/theme` (couleurs, tailles, espacements). Pas de couleur, police ou taille en dur : ainsi tout changement de design (voir `docs/changer-le-design.md`) s'applique à tous les jeux. Pas d'état de jeu dans React : tout vient du serveur (un téléphone qui recharge retrouve la manche). Pour lister les joueurs de la manche, filtrez avec `round.participants` (les retardataires n'y sont pas).
 
 ## 4. Enregistrer le jeu
 Deux listes à compléter, sinon le jeu n'apparaît pas (ou plante) :
@@ -73,7 +73,11 @@ export const serverGames: MiniGame[] = [quiEstLePlus, ouiNon, plusRapide];
 ```ts
 // src/minigames/registry.web.ts : même id, vues React
 import plusRapide from "./plus-rapide/views";
-// ... ajouter { "plus-rapide": plusRapide } à la table des vues, comme les autres jeux
+
+export const webGames: Record<string, MiniGameViews> = {
+  // ...
+  "plus-rapide": plusRapide,
+};
 ```
 Si `config/minijeux/<id>.yaml` est absent, le jeu est désactivé avec un avertissement. `actif: false` dans le yaml le désactive aussi.
 
