@@ -5,6 +5,7 @@ import ceciOuCela from "./ceci-ou-cela/game";
 import commeLesAutres from "./comme-les-autres/game";
 import compteARebours from "./compte-a-rebours/game";
 import leBonPrix from "./le-bon-prix/game";
+import pierreFeuilleCiseaux from "./pierre-feuille-ciseaux/game";
 import quiADit from "./qui-a-dit/game";
 import quiEstLePlus from "./qui-est-le-plus/game";
 import simon from "./simon/game";
@@ -19,4 +20,5 @@ export const serverGames: MiniGame[] = [
   quiADit,
   compteARebours,
   simon,
+  pierreFeuilleCiseaux,
 ];

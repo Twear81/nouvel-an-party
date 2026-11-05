@@ -1,0 +1,13 @@
+# Config de test E2E : une seule variante (un seul lancer), pas de chrono long.
+actif: true
+nom: "Pierre-feuille-ciseaux : le tournoi"
+duree: 25
+duree_rejouer: 25
+rejouer_max: 3
+manches_gagnantes: 1
+temps_resultats: 5
+points:
+  vainqueur: 300
+  suivants: [150, 75, 25]
+variantes:
+  - nom: "Tournoi classique"

@@ -1,0 +1,42 @@
+# Mini-jeu "Pierre-feuille-ciseaux : le tournoi" — doc : src/minigames/pierre-feuille-ciseaux/README.md
+# Une manche = un tournoi à élimination directe entre tous les joueurs. Le jeu tire l'arbre au sort ;
+# s'il y a un nombre « bancal » de joueurs (5, 6, 7…), certains sont qualifiés d'office au 1er tour.
+# Les duels d'un même tour se jouent en même temps, chacun sur son téléphone : ✊ ✋ ✌️.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "Pierre-feuille-ciseaux : le tournoi"
+description: "Tournoi à élimination directe : ✊ ✋ ✌️ en duel, un seul champion"
+
+# Temps pour choisir, en secondes, à chaque tour (le tour avance plus tôt quand tous les duellistes ont choisi)
+duree: 10
+
+# Temps pour choisir quand un duel est à rejouer (égalité, ou manche suivante d'un duel en plusieurs manches)
+duree_rejouer: 6
+
+# Nombre de rejeux d'un duel après une égalité. Au-delà, le gagnant est tiré au sort (affiché sur la TV).
+rejouer_max: 3
+
+# Manches à gagner pour remporter un duel : 1 = un seul lancer, 2 = au meilleur des 3, 3 = au meilleur des 5.
+# Valeur par défaut des variantes ci-dessous (chaque variante peut la surcharger).
+manches_gagnantes: 1
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 15
+
+# Points gagnés en fin de manche, selon le tour atteint
+points:
+  vainqueur: 300        # le champion
+  suivants: [150, 75, 25]  # finaliste, demi-finalistes, quart-de-finalistes (puis 0 pour les éliminés avant)
+
+# Variantes : chaque manche de ce jeu joue une variante tirée au hasard. Maximum conseillé : 25.
+#   nom                 titre affiché sur la TV
+#   manches_gagnantes   (facultatif) remplace la valeur ci-dessus pour cette variante
+#   duree               (facultatif) remplace la durée de choix ci-dessus pour cette variante
+variantes:
+  - nom: "Tournoi classique"
+  - nom: "Tournoi en 2 manches gagnantes"
+    manches_gagnantes: 2
