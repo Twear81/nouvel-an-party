@@ -1,0 +1,15 @@
+# Config de test E2E : quelques consignes, durée courte.
+actif: true
+nom: "Comme les autres"
+description: "Trouvez la même réponse que les autres invités !"
+duree: 25
+temps_resultats: 5
+tolerance_fautes: true
+reponses: 1
+points:
+  par_joueur: 50
+  majorite: 50
+questions:
+  - "Cite un truc qu'on trouve dans un frigo."
+  - "Un fruit."
+  - "Une couleur."
