@@ -16,7 +16,7 @@ export const test = base.extend<{ party: Party; serverOptions: ServerOptions } &
   tvBrowser: [
     async ({ browser, browserName, playwright }, use) => {
       if (browserName === "chromium") return use(browser);
-      const tv = await playwright.chromium.launch();
+      const tv = await playwright.chromium.launch({ args: [], firefoxUserPrefs: undefined });
       await use(tv);
       await tv.close();
     },

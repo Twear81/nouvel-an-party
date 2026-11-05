@@ -9,8 +9,9 @@ test.describe("Navigateurs mixtes", () => {
     const missing = [playwright.firefox, playwright.webkit].filter((b) => !existsSync(b.executablePath()));
     test.skip(missing.length > 0, "Firefox / WebKit non installés (bunx playwright install firefox webkit)");
 
-    const firefox = await playwright.firefox.launch();
-    const webkit = await playwright.webkit.launch();
+    // Options explicites : sinon ces navigateurs héritent des options de lancement du projet chromium.
+    const firefox = await playwright.firefox.launch({ args: [], firefoxUserPrefs: {} });
+    const webkit = await playwright.webkit.launch({ args: [] });
     const { defaultBrowserType: _, ...iphone } = devices["iPhone 14"];
     const others: Browser[] = [firefox, webkit];
     try {

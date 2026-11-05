@@ -6,7 +6,9 @@ const SMALL = { width: 360, height: 640 };
 const TV = { width: 1920, height: 1080 };
 
 test.describe("8 joueurs", () => {
-  test.setTimeout(180_000);
+  test.setTimeout(240_000);
+  // 9 navigateurs ouverts sur une machine de CI : on laisse le temps aux 8 votes d'arriver.
+  test.use({ serverOptions: { duree: 90 } });
 
   test("une manche de chaque jeu jusqu'au classement final, tout tient à l'écran", { tag: "@compat" }, async ({ party }) => {
     const { tv } = party;
