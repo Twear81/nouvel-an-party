@@ -1,0 +1,66 @@
+# Mini-jeu "Comme les autres" — doc : src/minigames/comme-les-autres/README.md
+# Une consigne s'affiche ("Cite un truc qu'on trouve dans un frigo"), chacun tape sa réponse sur son téléphone.
+# On marque quand d'autres invités ont tapé la même réponse : l'idée est de penser comme le groupe !
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "Comme les autres"
+description: "Trouvez la même réponse que les autres invités !"
+
+# Temps pour répondre, en secondes (la manche s'arrête plus tôt si tout le monde a répondu)
+duree: 30
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 25
+
+# true  = "Champagne" et "Champagen" (une lettre de différence) comptent comme la même réponse
+#         (seulement pour les mots d'au moins 5 lettres : "chat" et "chien" restent distincts).
+# false = seule la ponctuation, les accents, les majuscules, les articles ("le", "un"…) et le pluriel sont ignorés.
+tolerance_fautes: true
+
+# Nombre de réponses que chaque joueur peut donner (1, 2 ou 3).
+# Chaque réponse marque indépendamment ; deux variantes de la même réponse comptent une seule fois.
+reponses: 1
+
+points:
+  par_joueur: 50  # points par AUTRE joueur ayant la même réponse (3 joueurs identiques : chacun gagne 2 x 50)
+  majorite: 50    # bonus pour les membres du plus grand groupe (s'il compte au moins 2 joueurs)
+
+# Une consigne = une ligne commençant par "- ". Deux formes possibles :
+#   1. Texte seul :
+#        - "Cite un truc qu'on trouve dans un frigo."
+#   2. Objet avec "texte" + "duree" optionnelle (secondes, remplace la durée ci-dessus pour cette consigne) :
+#        - texte: "Un prénom de chien."
+#          duree: 20
+# Mettez les consignes entre guillemets si elles contiennent ": " ou " #".
+# Maximum conseillé : 25 consignes (les manches sont tirées au hasard parmi elles).
+# Astuce : une bonne consigne a une réponse évidente que plusieurs personnes auront en tête.
+questions:
+  - "Cite un truc qu'on trouve dans un frigo."
+  - "Une résolution classique du 1er janvier."
+  - "Une chanson qu'on entend dans toutes les soirées."
+  - "Un prénom de chien."
+  - "Un pays où partir en vacances."
+  - "Un plat de réveillon."
+  - "Une boisson qu'on boit à minuit."
+  - "Un truc qu'on trouve dans une trousse."
+  - "Un fruit."
+  - "Une couleur."
+  - "Un animal de la ferme."
+  - "Un super-héros."
+  - "Un film de Noël."
+  - "Un métier que tout enfant rêve de faire."
+  - "Un sport d'hiver."
+  - "Un cadeau qu'on aime recevoir."
+  - "Une ville française."
+  - "Un légume qu'on n'aime pas."
+  - "Un truc qu'on oublie souvent chez soi."
+  - "Un personnage de dessin animé."
+  - "Un cocktail."
+  - "Un accessoire de fête."
+  - "Un truc qu'on dit à minuit."
+  - "Une marque de voiture."
+  - "Un instrument de musique."
