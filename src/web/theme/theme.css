@@ -79,6 +79,9 @@
   --gradient-hot: linear-gradient(135deg, var(--color-hot), var(--color-bg-3));
   --gradient-glass: linear-gradient(145deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.04));
 
+  /* ── Voile derrière une boîte de dialogue ou la pause (un skin peut le mettre à 0px) */
+  --scrim-blur: 10px;
+
   /* ── Animations */
   --animate-twinkle: twinkle 4s ease-in-out infinite;
   --animate-float: float 6s ease-in-out infinite;

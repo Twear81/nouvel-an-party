@@ -45,7 +45,7 @@ Pour travailler un skin : ajouter `?skin=<id>` à l'URL de la TV ou du télépho
 `--color-ink-muted`, `--color-accent`, `--color-accent-strong`, `--color-accent-deep`, `--color-accent-ink`,
 `--color-hot`, `--color-cool`, `--color-good`, `--color-good-deep`, `--color-bad`, `--color-bad-deep`, `--color-warn`,
 `--font-display`, `--font-sans`, `--font-num` (chiffres : chrono, scores), `--radius-card`, `--radius-btn`, `--radius-chip`,
-`--shadow-card`, `--shadow-glow`, `--shadow-btn`, `--gradient-bg`, `--gradient-gold`, `--gradient-hot`, `--gradient-glass`.
+`--shadow-card`, `--shadow-glow`, `--shadow-btn`, `--scrim-blur` (flou du voile des dialogues et de la pause), `--gradient-bg`, `--gradient-gold`, `--gradient-hot`, `--gradient-glass`.
 Les jetons de contenu (couleurs du Simon, des étages de tier-list, des feutres, mode « sérieux » de Culture gênante,
 QR code) ne changent pas avec le skin.
 

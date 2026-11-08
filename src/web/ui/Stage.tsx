@@ -37,7 +37,7 @@ export function ReconnectBanner({ show }: { show: boolean }) {
 export function PausedOverlay({ show, big }: { show: boolean; big?: boolean }) {
   if (!show) return null;
   return (
-    <div data-testid="paused-overlay" data-ui="paused" className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-bg/80 backdrop-blur-md">
+    <div data-testid="paused-overlay" data-ui="paused" className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-bg/80 backdrop-blur-(--scrim-blur)">
       <span className={`font-display text-gold-gradient ${big ? "text-[10rem]" : "text-6xl"}`}>PAUSE</span>
       <span className={`text-ink-muted ${big ? "text-4xl" : "text-lg"}`}>La partie reprend bientôt…</span>
     </div>
