@@ -37,6 +37,9 @@ navigateur, flèches ← → pour changer de skin).
 - Jamais de règle de skin qui dépend d'un mini-jeu précis : un skin ne connaît que les marqueurs `data-ui`, les titres
   (`h1`, `h2`) et les jetons. Un mini-jeu ne connaît aucun skin.
 
+Pour travailler un skin : ajouter `?skin=<id>` à l'URL de la TV ou du téléphone force ce skin sur cet appareil
+(mémorisé ; `?skin=` l'oublie). Outil de dev uniquement.
+
 ### Jetons
 `--color-bg`, `--color-bg-2`, `--color-bg-3`, `--color-surface`, `--color-surface-strong`, `--color-line`, `--color-ink`,
 `--color-ink-muted`, `--color-accent`, `--color-accent-strong`, `--color-accent-deep`, `--color-accent-ink`,

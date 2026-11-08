@@ -4,7 +4,7 @@
 // quand l'écran est entièrement couvert.
 import { motion } from "motion/react";
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import type { SkinId } from "../../shared/skins";
+import { isSkinId, type SkinId } from "../../shared/skins";
 
 const SkinContext = createContext<SkinId | null>(null);
 
@@ -40,8 +40,29 @@ export function SkinTransition() {
   );
 }
 
+/**
+ * Outil de dev / captures : `?skin=<id>` dans l'URL force un skin sur cet appareil (mémorisé dans le localStorage,
+ * `?skin=` vide l'oublie). Jamais utilisé pendant la soirée : les QR codes ne portent pas ce paramètre.
+ */
+const FORCE_KEY = "skin-force";
+function forcedSkin(): SkinId | null {
+  try {
+    const param = new URLSearchParams(window.location.search).get("skin");
+    if (param !== null) {
+      if (isSkinId(param)) localStorage.setItem(FORCE_KEY, param);
+      else localStorage.removeItem(FORCE_KEY);
+    }
+    const v = localStorage.getItem(FORCE_KEY);
+    return isSkinId(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
+
 /** `skin` : celui du snapshot (undefined tant que la connexion n'est pas établie). */
-export function SkinProvider({ skin, children }: { skin: SkinId | undefined; children: ReactNode }) {
+export function SkinProvider({ skin: fromServer, children }: { skin: SkinId | undefined; children: ReactNode }) {
+  const [forced] = useState(forcedSkin);
+  const skin = forced ?? fromServer;
   // Skin réellement affiché : suit `skin` immédiatement la première fois (pas de rideau), puis au milieu du rideau.
   const [shown, setShown] = useState<SkinId | null>(skin ?? null);
   const [curtain, setCurtain] = useState(0); // incrémenté à chaque rideau (clé de remontage)
