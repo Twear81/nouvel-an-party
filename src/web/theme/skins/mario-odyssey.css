@@ -1,0 +1,48 @@
+/*
+ * Skin « Mario Odyssey » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="mario-odyssey"].
+ * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
+ * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ */
+
+/* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
+html[data-skin="mario-odyssey"] {
+  /* Rouge sur carte du monde. L'accent est un jaune lisible sur le rouge ; le jaune-olive des étiquettes de la maquette est accent-deep. */
+  --color-bg: #f5202e;
+  --color-bg-2: #ec1626;
+  --color-bg-3: #c00e1c;
+  --color-surface: rgb(255 255 255 / 0.18);
+  --color-surface-strong: rgb(255 255 255 / 0.3);
+  --color-line: rgb(255 255 255 / 0.3);
+  --color-ink: #ffffff;
+  --color-ink-muted: #ffd6d9;
+  --color-accent: #ffdc3c;
+  --color-accent-strong: #fff08a;
+  --color-accent-deep: #b8a000;
+  --color-accent-ink: #4a3c00;
+  --color-hot: #ffffff;
+  --color-cool: #3aa0ff;
+  --color-good: #3ecf5a;
+  --color-good-deep: #1f8a36;
+  --color-bad: #5a0c16;
+  --color-bad-deep: #3a0a10;
+  --color-warn: #ffb020;
+  --font-display: "M PLUS 1p", "Rodin", "Segoe UI", sans-serif;
+  --font-sans: "M PLUS 1p", "Segoe UI", sans-serif;
+  --font-num: "M PLUS 1p", "Rodin", "Segoe UI", sans-serif;
+  --radius-card: 0.2rem;
+  --radius-btn: 0.15rem;
+  --radius-chip: 999px;
+  --shadow-card: 0 0.15rem 0.35rem rgb(120 0 10 / 0.35);
+  --shadow-glow: 0 0 1.2rem rgb(255 255 255 / 0.6);
+  --shadow-btn: 0 0.15rem 0.35rem rgb(120 0 10 / 0.4);
+  --gradient-bg: repeating-radial-gradient(circle at 72% 170%, transparent 0 9rem, rgb(255 255 255 / 0.2) 9rem calc(9rem + 1px)), linear-gradient(160deg, #ff3442, #ec1626);
+  --gradient-gold: linear-gradient(180deg, #ffffff, #ffffff);
+  --gradient-hot: linear-gradient(135deg, #ffffff, #ffd6d9);
+  --gradient-glass: linear-gradient(180deg, #f2f2f2, #f2f2f2);
+}
+
+/* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
+
+/* ── Fond (html[data-skin="mario-odyssey"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+
+/* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */

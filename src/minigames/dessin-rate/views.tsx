@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { fireConfetti, Panel, PlayerAvatar, SelectedBadge, TrashIcon, typo, UndoIcon, VoteDots } from "../../web/ui";
+import { Choice, fireConfetti, Panel, PlayerAvatar, TrashIcon, typo, UndoIcon, VoteDots } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { Drawing, DrawingPad, PEN_BG } from "./drawing";
 import type { Priv, Pub, Results, ResultCard, TvPub } from "./game";
@@ -264,26 +264,24 @@ function PhoneVote({ pub, priv, sendInput, snapshot }: Props) {
           const blank = c.strokes.length === 0;
           const selected = vote === c.playerId;
           return (
-            <motion.button
+            <Choice
               key={c.playerId}
-              type="button"
               data-testid={`vote-card-${c.playerId}`}
               data-blank={blank}
               disabled={blank}
-              aria-pressed={selected}
-              whileTap={blank ? undefined : { scale: 0.94 }}
-              animate={{ scale: selected ? 1.03 : 1, opacity: blank ? 0.55 : vote !== null && !selected ? 0.55 : 1 }}
+              selected={selected}
+              state={blank || (vote !== null && !selected) ? "faded" : "idle"}
               onClick={() => void sendInput({ target: c.playerId }).catch(() => {})}
-              className={`relative flex min-w-0 flex-col items-center gap-1 rounded-card border-2 p-1.5 ${selected ? "border-accent bg-accent/25 shadow-glow" : "glass border-transparent"}`}
+              checkTone="accent"
+              checkSize="sm"
+              checkClassName="absolute right-1 top-1"
+              className="min-w-0 flex-col gap-1 p-1.5"
             >
               <div className="aspect-square w-full">
                 <Drawing strokes={c.strokes} blankLabel="Page blanche" />
               </div>
               <span className="line-clamp-2 w-full text-balance text-center text-xs font-bold leading-tight">{c.word}</span>
-              {selected && (
-                <SelectedBadge tone="accent" size="sm" className="absolute right-1 top-1" />
-              )}
-            </motion.button>
+            </Choice>
           );
         })}
       </div>

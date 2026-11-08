@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { serverNow } from "../../web/net/socket";
-import { CheckIcon, CloseIcon, fireConfetti, PlayerAvatar } from "../../web/ui";
+import { CheckIcon, CloseIcon, fireConfetti, PlayerAvatar, ResultBar } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { PlayerResult, Priv, Pub, Results } from "./game";
 import { PADS, PadShape } from "./pads";
@@ -150,9 +150,7 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
                 )}
               </div>
               <span className={`w-full truncate font-bold ${crowd ? "text-xl" : "text-2xl"} ${isOut && !winner ? "text-ink-muted" : "text-ink"}`}>{p.profile!.name}</span>
-              <div className={`h-2.5 w-[7rem] overflow-hidden rounded-full bg-surface-strong ${isOut && !winner ? "invisible" : ""}`}>
-                <motion.div animate={{ width: `${ratio * 100}%` }} transition={{ duration: 0.2 }} className={`h-full rounded-full ${done || winner ? "bg-good" : "bg-gold"}`} />
-              </div>
+              <ResultBar pill tone={done || winner ? "good" : "gold"} value={ratio} fromZero={false} duration={0.2} className={`h-2.5 w-[7rem] ${isOut && !winner ? "invisible" : ""}`} />
             </motion.div>
           );
         })}

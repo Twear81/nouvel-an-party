@@ -1,0 +1,47 @@
+/*
+ * Skin « GunZ » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="gunz"].
+ * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
+ * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ */
+
+/* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
+html[data-skin="gunz"] {
+  --color-bg: #000000;
+  --color-bg-2: #141310;
+  --color-bg-3: #262626;
+  --color-surface: rgb(44 42 38 / 0.85);
+  --color-surface-strong: #3a3a3a;
+  --color-line: #4a4a4a;
+  --color-ink: #ffffff;
+  --color-ink-muted: #a8a8a8;
+  --color-accent: #9be22d;
+  --color-accent-strong: #c4f06a;
+  --color-accent-deep: #5f9a10;
+  --color-accent-ink: #0d1a00;
+  --color-hot: #ff3b1f;
+  --color-cool: #5ab0d0;
+  --color-good: #9be22d;
+  --color-good-deep: #5f9a10;
+  --color-bad: #ff3b1f;
+  --color-bad-deep: #8a1a0a;
+  --color-warn: #f0a020;
+  --font-display: "Jura", "Eurostile", sans-serif;
+  --font-sans: "Arimo", Arial, Helvetica, sans-serif;
+  --font-num: "Share Tech Mono", monospace;
+  --radius-card: 0.2rem;
+  --radius-btn: 0.15rem;
+  --radius-chip: 0.2rem;
+  --shadow-card: 0 0.4rem 1rem rgb(0 0 0 / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.12);
+  --shadow-glow: 0 0 1rem rgb(155 226 45 / 0.45);
+  --shadow-btn: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 0.2rem 0.4rem rgb(0 0 0 / 0.7);
+  --gradient-bg: radial-gradient(60% 50% at 35% 55%, #1a1a1a, #000 70%);
+  --gradient-gold: linear-gradient(180deg, #5c5c5c 0%, #3a3a3a 50%, #262626 100%);
+  --gradient-hot: linear-gradient(135deg, #ff3b1f, #262626);
+  --gradient-glass: linear-gradient(180deg, #2c2a26 0%, #141310 100%);
+}
+
+/* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
+
+/* ── Fond (html[data-skin="gunz"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+
+/* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */

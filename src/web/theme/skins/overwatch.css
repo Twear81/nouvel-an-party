@@ -1,0 +1,48 @@
+/*
+ * Skin « Overwatch » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="overwatch"].
+ * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
+ * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ */
+
+/* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
+html[data-skin="overwatch"] {
+  /* Le fond clair bleu-gris de la maquette (texte navy) se fait dans la section Fond ; ici les jetons restent lisibles en blanc. */
+  --color-bg: #2a3352;
+  --color-bg-2: #3a4870;
+  --color-bg-3: #3d4763;
+  --color-surface: rgb(61 71 99 / 0.9);
+  --color-surface-strong: #56657f;
+  --color-line: rgb(255 255 255 / 0.25);
+  --color-ink: #ffffff;
+  --color-ink-muted: #c9d3e6;
+  --color-accent: #f99e1a;
+  --color-accent-strong: #ffc766;
+  --color-accent-deep: #c47400;
+  --color-accent-ink: #1c2540;
+  --color-hot: #f06a2e;
+  --color-cool: #1ba3d6;
+  --color-good: #57e03c;
+  --color-good-deep: #2b9a1a;
+  --color-bad: #ff4a5a;
+  --color-bad-deep: #b8203f;
+  --color-warn: #f99e1a;
+  --font-display: "Bebas Neue", "Big Noodle Titling", "Arial Narrow", sans-serif;
+  --font-sans: "Jost", Futura, sans-serif;
+  --font-num: "Bebas Neue", "Big Noodle Titling", "Arial Narrow", sans-serif;
+  --radius-card: 0;
+  --radius-btn: 0;
+  --radius-chip: 0;
+  --shadow-card: 0 0.3rem 0.8rem rgb(10 16 40 / 0.35);
+  --shadow-glow: 0 0 1.2rem rgb(46 230 242 / 0.5);
+  --shadow-btn: 0 0.25rem 0.6rem rgb(10 16 40 / 0.4);
+  --gradient-bg: radial-gradient(70% 60% at 50% 35%, #5b6b94 0%, #3a4870 55%, #2a3352 100%);
+  --gradient-gold: linear-gradient(180deg, #f06a2e, #f06a2e);
+  --gradient-hot: linear-gradient(135deg, #1ba3d6, #2a3352);
+  --gradient-glass: linear-gradient(180deg, #3d4763, #3d4763);
+}
+
+/* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
+
+/* ── Fond (html[data-skin="overwatch"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+
+/* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */

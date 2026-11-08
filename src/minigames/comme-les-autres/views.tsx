@@ -158,7 +158,7 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
 
       {/* Qui a déjà répondu : les avatars s'allument comme sur la TV */}
       <div data-testid="phone-answered" className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden pb-2">
-        <span data-testid="phone-answered-count" className="font-display text-2xl text-ink-muted">
+        <span data-testid="phone-answered-count" className="font-num text-2xl text-ink-muted">
           <span className="text-accent">{answered}</span> / {writers.length}
         </span>
         <div className="flex flex-wrap justify-center gap-2">

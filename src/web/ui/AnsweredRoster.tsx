@@ -7,9 +7,9 @@ import { CheckIcon } from "./Icons";
 import { PlayerAvatar } from "./PlayerAvatar";
 
 /** Compteur « 3 / 8 » (data-testid `${testId}`, `tv-answered-count` par défaut). */
-export function AnsweredCount({ done, total, testId = "tv-answered-count", className = "font-display text-5xl text-ink-muted", accentClass = "text-accent" }: { done: number; total: number; testId?: string; className?: string; accentClass?: string }) {
+export function AnsweredCount({ done, total, testId = "tv-answered-count", className = "font-num text-5xl text-ink-muted", accentClass = "text-accent" }: { done: number; total: number; testId?: string; className?: string; accentClass?: string }) {
   return (
-    <div data-testid={testId} className={className}>
+    <div data-testid={testId} data-ui="answered-count" className={className}>
       <span className={accentClass}>{done}</span> / {total}
     </div>
   );
@@ -48,7 +48,7 @@ export function AnsweredRoster({ players, isDone, testId = "tv-answered", size =
   const gap = size === "large" ? "gap-1" : "gap-0.5";
   const rows = size === "large" ? "gap-y-3" : "gap-y-2";
   return (
-    <div data-testid={testId} className={className ?? `flex flex-wrap items-start justify-center gap-x-2 ${rows}`}>
+    <div data-testid={testId} data-ui="roster" className={className ?? `flex flex-wrap items-start justify-center gap-x-2 ${rows}`}>
       {players.map((p) => {
         const done = isDone(p.id);
         const nameColor = nameClassName
@@ -59,6 +59,8 @@ export function AnsweredRoster({ players, isDone, testId = "tv-answered", size =
         return (
           <motion.div
             key={p.id}
+            data-ui="roster-item"
+            data-done={done ? "true" : "false"}
             data-answered={done ? "true" : "false"}
             animate={{ scale: done ? 1 : 0.92, y: done ? -8 : 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 14 }}

@@ -1,6 +1,6 @@
 // Écrans de "Qui est le plus… ?" : n'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
-import { AnsweredCount, AnsweredRoster, PlayerAvatar, SelectedBadge, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, Choice, PlayerAvatar, ResultBar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -32,22 +32,20 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
         {options.map((p) => {
           const selected = voted === p.id;
           return (
-            <motion.button
+            <Choice
               key={p.id}
-              type="button"
               data-testid={`vote-option-${p.id}`}
-              whileTap={{ scale: 0.93 }}
-              animate={{ scale: selected ? 1.03 : 1, opacity: voted !== null && !selected ? 0.5 : 1 }}
+              selected={selected}
+              state={voted !== null && !selected ? "faded" : "idle"}
               onClick={() => void sendInput({ target: p.id }).catch(() => {})}
-              aria-pressed={selected}
-              className={`relative flex flex-col items-center justify-center gap-0.5 rounded-card border-2 p-1.5 ${dense ? "min-h-[4.9rem]" : "min-h-[8rem]"} ${selected ? "border-accent bg-accent/25 shadow-glow" : "glass border-transparent"}`}
+              checkTone="accent"
+              checkSize="sm"
+              checkClassName="absolute right-1.5 top-1.5"
+              className={`flex-col gap-0.5 p-1.5 ${dense ? "min-h-[4.9rem]" : "min-h-[8rem]"}`}
             >
               <PlayerAvatar profile={p.profile} size={tiny ? "sm" : dense ? "sm" : "lg"} />
               <span className="w-full truncate text-base font-bold leading-tight">{p.profile!.name}</span>
-              {selected && (
-                <SelectedBadge tone="accent" size="sm" className="absolute right-1.5 top-1.5" />
-              )}
-            </motion.button>
+            </Choice>
           );
         })}
       </div>
@@ -87,19 +85,20 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
                 <PlayerAvatar profile={player?.profile ?? null} size={size} />
               </div>
               <div className={`shrink-0 truncate font-bold ${n > 4 ? "w-[16rem] text-2xl" : "w-[14rem] text-3xl"}`}>{player?.profile?.name ?? "?"}</div>
-              <div className={`relative flex-1 overflow-hidden rounded-btn bg-surface ${barH}`}>
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(t.votes / max) * 100}%` }}
-                  transition={{ delay: BAR_DELAY_S + i * ROW_STEP_S, duration: BAR_DURATION_S, ease: "easeOut" }}
-                  className={`flex h-full min-w-[3rem] items-center gap-1.5 rounded-btn px-3 ${winner ? "bg-gold shadow-glow" : "bg-hot-gradient"}`}
-                >
-                  {t.voters.map((v) => (
-                    <PlayerAvatar key={v} profile={playerById(v)?.profile ?? null} size="xs" />
-                  ))}
-                </motion.div>
-              </div>
-              <div className={`w-20 text-right font-display text-5xl ${winner ? "text-accent" : "text-ink"}`}>{t.votes}</div>
+              <ResultBar
+                value={t.votes / max}
+                highlight={winner}
+                delay={BAR_DELAY_S + i * ROW_STEP_S}
+                duration={BAR_DURATION_S}
+                ease="easeOut"
+                className={`flex-1 ${barH}`}
+                fillClassName="min-w-[3rem] gap-1.5 px-3"
+              >
+                {t.voters.map((v) => (
+                  <PlayerAvatar key={v} profile={playerById(v)?.profile ?? null} size="xs" />
+                ))}
+              </ResultBar>
+              <div className={`w-20 text-right font-num text-5xl ${winner ? "text-accent" : "text-ink"}`}>{t.votes}</div>
             </motion.div>
           );
         })}

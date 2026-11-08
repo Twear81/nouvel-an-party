@@ -1,7 +1,7 @@
 // Écrans de "Tier list" : n'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { AnsweredCount, AnsweredRoster, CheckIcon, fireConfetti, PlayerAvatar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, CheckIcon, fireConfetti, PlayerAvatar, ResultBar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 import { TIER_BG, TIER_BORDER, TIER_TEXT, TierBadge, TierBoard } from "./tiers";
@@ -30,9 +30,7 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
           below={(p) => {
             const prog = pub.progress[p.id] ?? { done: 0, total: 1 };
             return (
-              <div className="h-2 w-full overflow-hidden rounded-full bg-surface-strong">
-                <motion.div animate={{ width: `${(prog.done / Math.max(1, prog.total)) * 100}%` }} className="h-full rounded-full bg-gold" />
-              </div>
+              <ResultBar pill tone="gold" value={prog.done / Math.max(1, prog.total)} fromZero={false} className="h-2 w-full" />
             );
           }}
         />
@@ -63,12 +61,10 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
           <>
             <div className="flex flex-1 gap-1">
               {targets.map((t) => (
-                <div key={t.id} className="h-2 flex-1 overflow-hidden rounded-full bg-surface-strong">
-                  <motion.div initial={false} animate={{ width: mine[t.id] !== undefined ? "100%" : "0%" }} className="h-full bg-gold" />
-                </div>
+                <ResultBar key={t.id} pill tone="gold" value={mine[t.id] !== undefined ? 1 : 0} fromZero={false} className="h-2 flex-1" />
               ))}
             </div>
-            <span className="w-10 text-right font-display text-base tabular-nums text-accent">
+            <span className="w-10 text-right font-num text-base tabular-nums text-accent">
               {done}/{targets.length}
             </span>
           </>

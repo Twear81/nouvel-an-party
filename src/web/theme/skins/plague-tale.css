@@ -1,0 +1,47 @@
+/*
+ * Skin « A Plague Tale » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="plague-tale"].
+ * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
+ * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ */
+
+/* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
+html[data-skin="plague-tale"] {
+  --color-bg: #181818;
+  --color-bg-2: #34332f;
+  --color-bg-3: #5d5c57;
+  --color-surface: rgb(18 18 18 / 0.6);
+  --color-surface-strong: rgb(18 18 18 / 0.85);
+  --color-line: rgb(227 219 191 / 0.18);
+  --color-ink: #e3dbbf;
+  --color-ink-muted: #a39d86;
+  --color-accent: #e0cb7d;
+  --color-accent-strong: #f3e4a6;
+  --color-accent-deep: #8a7640;
+  --color-accent-ink: #181818;
+  --color-hot: #a8553d;
+  --color-cool: #7e9aa6;
+  --color-good: #9ab87a;
+  --color-good-deep: #5c7a3e;
+  --color-bad: #c0604f;
+  --color-bad-deep: #7a2f24;
+  --color-warn: #d89c4a;
+  --font-display: "Cinzel", "Trajan Pro", serif;
+  --font-sans: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-num: "Cinzel", "Trajan Pro", serif;
+  --radius-card: 0.1rem;
+  --radius-btn: 0.1rem;
+  --radius-chip: 0.1rem;
+  --shadow-card: 0 0.6rem 1.4rem rgb(0 0 0 / 0.55);
+  --shadow-glow: 0 0 1.2rem rgb(224 203 125 / 0.35);
+  --shadow-btn: 0 0.2rem 0.6rem rgb(0 0 0 / 0.5);
+  --gradient-bg: repeating-radial-gradient(circle at 37% 61%, rgb(255 255 255 / 0.022) 0 1px, transparent 1px 3px), radial-gradient(45% 55% at 66% 42%, rgb(227 219 191 / 0.16), transparent 70%), radial-gradient(70% 80% at 55% 45%, #5d5c57 0%, #34332f 45%, #181818 90%);
+  --gradient-gold: linear-gradient(180deg, #f3e4a6, #e0cb7d 55%, #8a7640 130%);
+  --gradient-hot: linear-gradient(135deg, #a8553d, #34332f);
+  --gradient-glass: linear-gradient(90deg, rgb(18 18 18 / 0.78), rgb(18 18 18 / 0.35) 70%, rgb(18 18 18 / 0.15));
+}
+
+/* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
+
+/* ── Fond (html[data-skin="plague-tale"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+
+/* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */

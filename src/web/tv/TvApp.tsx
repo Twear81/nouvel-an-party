@@ -1,6 +1,7 @@
 // Écran TV : aiguille selon la phase et affiche les contrôles du maître du jeu.
 import { AnimatePresence, motion } from "motion/react";
 import { useGame } from "../net/useGame";
+import { SkinProvider } from "../theme/skin";
 import { PausedOverlay, ReconnectBanner, TvStage } from "../ui";
 import { FinalScreen } from "./FinalScreen";
 import { HostBar } from "./HostBar";
@@ -10,7 +11,16 @@ import { PlayingScreen } from "./PlayingScreen";
 import { ResultsScreen } from "./ResultsScreen";
 
 export function TvApp() {
-  const { snapshot, connected, host, actions } = useGame("tv");
+  const game = useGame("tv");
+  return (
+    <SkinProvider skin={game.snapshot?.skin}>
+      <TvScreens game={game} />
+    </SkinProvider>
+  );
+}
+
+function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
+  const { snapshot, connected, host, actions } = game;
 
   if (!snapshot) {
     return (
