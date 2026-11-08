@@ -738,26 +738,22 @@ describe("skins", () => {
     t.clock.advance(10_000);
     t.engine.skip();
   }
-  const restartWith = (t: T, persistence: MemoryPersistence, settings: object, seed: number) =>
+  const restart = (t: T, persistence: MemoryPersistence, seed: number) =>
     new GameEngine({
       games: [t.fake.loaded],
-      settings: { title: "Test", targetMinutes: 1, order: "melange", introSeconds: 4, ...settings },
+      settings: { title: "Test", targetMinutes: 1, order: "melange", introSeconds: 4 },
       joinUrl: "http://test",
       clock: new FakeClock(),
       rng: seededRng(seed),
       persistence,
     });
 
-  it("lobby : premier skin de la config (tous les skins par défaut)", () => {
-    expect(skinOf(createTestEngine())).toBe(SKINS[0]);
-    expect(skinOf(createTestEngine({ settings: { skins: ["gunz", "dofus"] } }))).toBe("gunz");
-  });
-
-  it("ordre `liste` : un skin par tranche de manches, il ne change qu'au passage à la manche suivante", () => {
-    const t = createTestEngine({ rounds: 4, settings: { skins: ["gunz", "dofus"], skinsOrder: "liste" } });
+  it("7 manches : les 7 skins passent chacun une fois, le lobby annonce le premier, rien ne change pendant une manche", () => {
+    const t = createTestEngine({ rounds: 7, game: { items: 20 } });
+    const lobby = skinOf(t);
     t.engine.start();
     const seen: SkinId[] = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 7; i++) {
       expect(t.engine.snapshot(null).phase).toBe("intro");
       seen.push(skinOf(t));
       t.clock.advance(4000);
@@ -767,39 +763,50 @@ describe("skins", () => {
       expect(skinOf(t)).toBe(seen[i]!); // ni pendant les résultats
       t.engine.skip();
     }
-    expect(seen).toEqual(["gunz", "gunz", "dofus", "dofus"]);
+    expect(seen[0]).toBe(lobby);
+    expect([...seen].sort()).toEqual([...SKINS].sort());
     expect(t.engine.snapshot(null).phase).toBe("final");
-    expect(skinOf(t)).toBe("dofus"); // dernière manche jouée
+    expect(skinOf(t)).toBe(seen[6]!); // dernière manche jouée
   });
 
-  it("ordre `melange` : permutation des skins de la config, tirée avec le rng du moteur", () => {
-    const t = createTestEngine({ rounds: 5, settings: { skins: SKINS.slice(0, 5) } });
+  it("14 manches : un changement toutes les 2 manches", () => {
+    const t = createTestEngine({ rounds: 14, game: { items: 20 } });
     t.engine.start();
     const seen: SkinId[] = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 14; i++) {
       seen.push(skinOf(t));
       nextRound(t);
     }
-    expect([...seen].sort()).toEqual([...SKINS.slice(0, 5)].sort());
-    const again = createTestEngine({ rounds: 5, settings: { skins: SKINS.slice(0, 5) } });
-    again.engine.start();
-    expect(skinOf(again)).toBe(seen[0]!); // même graine, même ordre
+    for (let i = 0; i < 14; i += 2) expect(seen[i + 1]).toBe(seen[i]!);
+    expect(new Set(seen).size).toBe(7);
   });
 
-  it("retour au lobby : on retrouve le premier skin de la config", () => {
-    const t = createTestEngine({ rounds: 4, settings: { skins: ["gunz", "dofus"], skinsOrder: "liste" } });
-    t.engine.start();
-    nextRound(t);
-    nextRound(t);
-    expect(skinOf(t)).toBe("dofus");
-    t.engine.backToLobby();
-    expect(skinOf(t)).toBe("gunz");
+  it("ordre tiré au hasard (rng du moteur), retiré à chaque retour au lobby", () => {
+    const orderOf = (seed: number) => {
+      const t = createTestEngine({ rounds: 7, seed, game: { items: 20 } });
+      t.engine.start();
+      const seen: SkinId[] = [];
+      for (let i = 0; i < 7; i++) {
+        seen.push(skinOf(t));
+        nextRound(t);
+      }
+      return seen;
+    };
+    expect(orderOf(1)).toEqual(orderOf(1)); // même graine, même ordre
+    const many = new Set([1, 2, 3, 4, 5, 6].map((s) => orderOf(s).join()));
+    expect(many.size).toBeGreaterThan(1); // l'ordre varie d'une partie à l'autre
+
+    const t = createTestEngine({ rounds: 7, game: { items: 20 } });
+    const before = Array.from({ length: 6 }, () => {
+      t.engine.backToLobby();
+      return skinOf(t);
+    });
+    expect(new Set(before).size).toBeGreaterThan(1);
   });
 
   it("l'ordre est sauvegardé et conservé à la reprise", () => {
     const persistence = new MemoryPersistence();
-    const settings = { skins: [...SKINS] };
-    const t = createTestEngine({ rounds: 5, persistence, settings });
+    const t = createTestEngine({ rounds: 7, persistence, game: { items: 20 } });
     t.engine.start();
     nextRound(t);
     nextRound(t);
@@ -809,26 +816,24 @@ describe("skins", () => {
     const expected = skinOf(t);
 
     // Redémarrage avec un autre rng : l'ordre ne doit pas être retiré à nouveau.
-    const engine = restartWith(t, persistence, settings, 999);
-    expect(engine.snapshot(null).skin).toBe(SKINS[0]); // lobby
+    const engine = restart(t, persistence, 999);
     engine.resumeSave();
     expect(engine.snapshot(null).skin).toBe(expected);
     expect(JSON.parse(JSON.stringify(persistence.data)).skinOrder).toEqual(saved);
   });
 
-  it("vieille sauvegarde sans ordre : reprenable, ordre de la config", () => {
-    const persistence = new MemoryPersistence();
-    const settings = { skins: ["gunz", "dofus"], skinsOrder: "liste" };
-    const t = createTestEngine({ rounds: 4, persistence, settings: settings as never });
-    t.engine.start();
-    nextRound(t);
-    nextRound(t);
-    t.clock.advance(4000);
-    delete persistence.data!.skinOrder;
-    const engine = restartWith(t, persistence, { ...settings, skinsOrder: "melange" }, 5);
-    engine.resumeSave();
-    const s = engine.snapshot(null);
-    expect(s.phase).toBe("intro");
-    expect(s.skin).toBe("dofus"); // manche 3/4 sur l'ordre de la config [gunz, dofus]
+  it("vieille sauvegarde sans ordre (ou ordre invalide) : reprenable, avec l'ordre tiré au démarrage", () => {
+    for (const bad of [undefined, ["dofus", "zelda"]]) {
+      const persistence = new MemoryPersistence();
+      const t = createTestEngine({ rounds: 7, persistence, game: { items: 20 } });
+      t.engine.start();
+      nextRound(t);
+      (persistence.data as { skinOrder?: unknown }).skinOrder = bad;
+      const engine = restart(t, persistence, 5);
+      engine.resumeSave();
+      const s = engine.snapshot(null);
+      expect(s.phase).toBe("intro");
+      expect(SKINS).toContain(s.skin);
+    }
   });
 });

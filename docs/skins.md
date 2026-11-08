@@ -18,13 +18,12 @@ navigateur, flèches ← → pour changer de skin).
 ## Rotation
 - Le **serveur** choisit le skin et l'envoie dans `GameSnapshot.skin` : la TV et les téléphones changent ensemble, un
   téléphone qui recharge retrouve le bon skin, la sauvegarde le garde.
-- `config/partie.yaml` : `skins` (liste des skins utilisés, dans l'ordre) et `skins_ordre` (`melange` = ordre tiré au
-  hasard au lancement de la partie, `liste` = ordre de la liste).
-- Lobby : premier skin de la liste. Au lancement, l'ordre de la partie est fixé (et sauvegardé), puis
-  `skinForRound(ordre, indexManche, totalManches)` (`src/shared/skins.ts`) répartit les skins en tranches égales du plan :
-  chacun passe une fois. 14 manches → un changement toutes les 2 manches. Moins de manches que de skins → on en voit
-  autant que de manches. Classement final : skin de la dernière manche.
-- Le skin ne change **qu'à l'annonce d'une manche** (phase `intro`), jamais pendant une question.
+- Les 7 skins sont toujours tous utilisés, dans un **ordre tiré au hasard** (rien à régler). L'ordre est tiré au
+  démarrage et à chaque retour au lobby ; le lobby montre le premier skin, celui de la 1re manche.
+- `skinForRound(ordre, indexManche, totalManches)` (`src/shared/skins.ts`) répartit les skins en tranches égales du
+  plan (interludes compris) : chacun passe une fois. 14 manches → un changement toutes les 2 manches. Moins de manches
+  que de skins → on en voit autant que de manches. Classement final : skin de la dernière manche.
+- Le skin ne change **qu'à l'annonce d'une manche** (phase `intro`), jamais pendant une question ni les résultats.
 
 ## Architecture front
 - `html[data-skin="<id>"]` porte le skin courant (posé par `SkinProvider`, `src/web/theme/skin.tsx`, à partir du

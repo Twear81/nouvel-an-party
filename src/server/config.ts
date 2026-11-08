@@ -4,7 +4,6 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
 import { z } from "zod";
-import { SKINS } from "../shared/skins";
 import { serverGames } from "../minigames/registry.server";
 import type { LoadedGame } from "./engine/planner";
 
@@ -13,9 +12,6 @@ export const settingsSchema = z.object({
   duree_cible_minutes: z.number().positive().default(60),
   ordre: z.enum(["melange", "groupe"]).default("melange"),
   intro_secondes: z.number().nonnegative().default(4),
-  /** Skins utilisés (ids de SKINS) ; défaut = tous, dans l'ordre de SKINS. */
-  skins: z.array(z.enum(SKINS, { error: (i) => `skin inconnu « ${String(i.input)} » (ids valides : ${SKINS.join(", ")})` })).min(1, "au moins un skin").default([...SKINS]),
-  skins_ordre: z.enum(["melange", "liste"]).default("melange"),
   port_http: z.number().int().default(3000),
   port_https: z.number().int().default(3443),
   /** "auto" ou une IP forcée si la détection choisit la mauvaise carte réseau. */
