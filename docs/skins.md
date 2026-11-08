@@ -59,7 +59,7 @@ QR code) ne changent pas avec le skin.
 | `choice` | `Choice` (carte de choix cliquable des téléphones et ses reflets TV) | `data-selected`, `data-state` (`idle`, `correct`, `wrong`, `faded`), parties `choice-key`, `choice-label`, `choice-check` |
 | `result-bar` | `ResultBar` (barre de résultat animée) | `data-highlight`, partie `result-bar-fill` |
 | `countdown` | `Countdown` | `data-low`, `data-variant` (voir « Chrono »), `--p` = part restante (0 → 1) |
-| `avatar` | `PlayerAvatar` | `data-dimmed`, partie `avatar-badge` |
+| `avatar` | `PlayerAvatar` | `data-dimmed`, parties `avatar-face` (disque intérieur : forme, fond), `avatar-badge` |
 | `roster`, `roster-item` | `AnsweredRoster` | `data-done` |
 | `answered-count` | `AnsweredCount` | |
 | `selected-badge` | `SelectedBadge` | |

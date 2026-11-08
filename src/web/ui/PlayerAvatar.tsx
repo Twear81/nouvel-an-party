@@ -27,6 +27,7 @@ export function PlayerAvatar({ profile, size = "md", dimmed, badge, className = 
   return (
     <div data-ui="avatar" data-dimmed={dimmed ? "true" : "false"} className={`relative shrink-0 rounded-full transition-[filter,opacity] ${dimmed ? "opacity-45 grayscale" : ""} ${className}`} style={style}>
       <div
+        data-ui="avatar-face"
         className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full"
         style={{ background: "radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--p) 55%, var(--color-ink)), var(--p))" }}
       >
