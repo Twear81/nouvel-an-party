@@ -36,12 +36,275 @@ html[data-skin="league-of-legends"] {
   --shadow-btn: 0 0 0.8rem rgb(10 200 185 / 0.35);
   --gradient-bg: radial-gradient(60% 50% at 70% 30%, rgb(60 40 90 / 0.35), transparent 70%), radial-gradient(90% 80% at 40% 0%, #0a1830 0%, #06101d 45%, #010a13 100%);
   --gradient-gold: linear-gradient(180deg, #c8aa6e, #785a28);
-  --gradient-hot: linear-gradient(135deg, #d6455d, #091428);
+  --gradient-hot: linear-gradient(90deg, #063a52, #0a9aa0);
+  --scrim-blur: 0px;
+  --lol-gold: linear-gradient(180deg, #c8aa6e, #785a28);
+  --lol-gold-h: linear-gradient(90deg, #785a28, #c8aa6e 40%, #785a28);
+  --lol-band: rgb(30 35 40 / 0.75);
   --gradient-glass: linear-gradient(180deg, rgb(30 35 40 / 0.75), rgb(30 35 40 / 0.55));
 }
 
 /* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
 
+/* Titres : grandes capitales à empattements, crème */
+html[data-skin="league-of-legends"] h1,
+html[data-skin="league-of-legends"] h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.03em; }
+html[data-skin="league-of-legends"] .text-gold-gradient {
+  background-image: linear-gradient(180deg, #f0e6d2 10%, #c8aa6e 75%, #a88542);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+html[data-skin="league-of-legends"] .shadow-glow { box-shadow: 0 0 1rem rgb(200 170 110 / 0.45); }
+
+/* Le « verre » devient la fenêtre du client : fond ardoise sombre, liseré or, pas de flou. */
+html[data-skin="league-of-legends"] .glass {
+  background-image: linear-gradient(180deg, rgb(30 35 40 / 0.82), rgb(9 20 40 / 0.78));
+  border: 1px solid #785a28;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgb(200 170 110 / 0.55), 0 0.5rem 1.2rem rgb(0 0 0 / 0.55);
+}
+
+/* Panneau + bandeau de section « ▾ COMBAT » */
+html[data-skin="league-of-legends"] [data-ui="panel-title"] {
+  background: var(--lol-band);
+  color: #cdbe91;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.45em 0.9em;
+  border-left: 0.2em solid #c8aa6e;
+}
+html[data-skin="league-of-legends"] [data-ui="panel-title"]::before { content: "▾"; margin-right: 0.9em; font-size: 0.8em; color: #a09b8c; }
+
+/* Boutons */
+html[data-skin="league-of-legends"] [data-ui="button"],
+html[data-skin="league-of-legends"] [data-ui="host-button"] {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 0.1rem;
+  box-shadow: none;
+}
+/* Secondaire : fond sombre, cadre or (« LEARN MORE »). Le cadre est un box-shadow interne : aucune taille ne bouge. */
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="secondary"],
+html[data-skin="league-of-legends"] [data-ui="host-button"] {
+  background: linear-gradient(180deg, #1e2328, #14191f);
+  color: #cdbe91;
+  box-shadow: inset 0 0 0 2px #785a28, inset 0 2px 0 0 #c8aa6e, inset 0 0 0.8rem rgb(0 0 0 / 0.6);
+}
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="ghost"] { color: #a09b8c; background: transparent; box-shadow: inset 0 -1px 0 #3c3c41; }
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="danger"],
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="bad"] {
+  background: linear-gradient(180deg, #3a1218, #1e0b10);
+  color: #ffd2d8;
+  box-shadow: inset 0 0 0 2px #8c1c2c, inset 0 2px 0 0 #e84057;
+}
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="good"] {
+  background: linear-gradient(180deg, #0f3a30, #08201c);
+  color: #cdfae6;
+  box-shadow: inset 0 0 0 2px #1a7a52, inset 0 2px 0 0 #3ec889;
+}
+/* Principal : flèche turquoise (« CONFIRM »), bord dégradé #0ac8b9 → #005a82, fond sombre, texte #cdfafa. */
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="primary"] {
+  position: relative;
+  isolation: isolate;
+  background: none;
+  color: #cdfafa;
+  text-shadow: 0 0 0.5em rgb(10 200 185 / 0.6);
+}
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="primary"]::before,
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="primary"]::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  clip-path: polygon(0 0, calc(100% - 1.1rem) 0, 100% 50%, calc(100% - 1.1rem) 100%, 0 100%);
+}
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="primary"]::before { inset: 0; background: linear-gradient(180deg, #0ac8b9, #005a82); }
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="primary"]::after { inset: 2px 3px 2px 2px; background: linear-gradient(180deg, #0a323c, #091428); box-shadow: inset 0 0 1em rgb(10 200 185 / 0.4); }
+/* Désactivé : cadre gris (« OWNED ») */
+html[data-skin="league-of-legends"] [data-ui="button"]:disabled { opacity: 0.7; color: #5b5a56; text-shadow: none; }
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="primary"]:disabled::before { background: linear-gradient(180deg, #5b5a56, #3c3c41); }
+html[data-skin="league-of-legends"] [data-ui="button"][data-variant="primary"]:disabled::after { background: #14191f; box-shadow: none; }
+html[data-skin="league-of-legends"] [data-ui="button"]:disabled:not([data-variant="primary"]) { background: #14191f; box-shadow: inset 0 0 0 2px #3c3c41; }
+
+/* Choix : losanges « ◇ BLIND PICK » */
+html[data-skin="league-of-legends"] [data-ui="choice"] {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a09b8c;
+}
+html[data-skin="league-of-legends"] [data-ui="choice"].glass {
+  background-image: none;
+  background-color: rgb(30 35 40 / 0.6);
+  border-color: #3c3c41;
+  box-shadow: none;
+}
+html[data-skin="league-of-legends"] [data-ui="choice"][data-selected="true"].glass {
+  color: #f0e6d2;
+  border-color: #c8aa6e;
+  background-image: linear-gradient(90deg, rgb(200 170 110 / 0.18), rgb(30 35 40 / 0.6));
+  box-shadow: inset 0 0 1rem rgb(200 170 110 / 0.18), 0 0 0.8rem rgb(200 170 110 / 0.3);
+}
+html[data-skin="league-of-legends"] [data-ui="choice-key"] {
+  width: 0.8rem;
+  height: 0.8rem;
+  font-size: 0;
+  border: 0.12rem solid #5b5a56;
+  border-radius: 0;
+  rotate: 45deg;
+  margin-right: 1.1rem;
+  background: transparent;
+}
+html[data-skin="league-of-legends"] [data-ui="choice"][data-selected="true"] [data-ui="choice-key"] {
+  border-color: #c8aa6e;
+  background: radial-gradient(circle, #f0e6d2 0 30%, transparent 31%), rgb(200 170 110 / 0.35);
+  box-shadow: 0 0 0.5rem rgb(200 170 110 / 0.7);
+}
+html[data-skin="league-of-legends"] [data-ui="choice"][data-state="correct"] { border-color: #0ac8b9 !important; background-color: rgb(10 200 185 / 0.18) !important; color: #cdfafa; }
+html[data-skin="league-of-legends"] [data-ui="choice"][data-state="wrong"] { border-color: #e84057 !important; background-color: rgb(232 64 87 / 0.16) !important; }
+/* ✓ du choix enregistré : pastille carrée or à texte sombre */
+html[data-skin="league-of-legends"] [data-ui="choice-check"],
+html[data-skin="league-of-legends"] [data-ui="selected-badge"] {
+  border-radius: 0.15rem;
+  background: #c8aa6e;
+  color: #010a13;
+  box-shadow: 0 0 0 1px #785a28;
+}
+
+/* Barre de résultat : rail sombre, remplissage bleu-turquoise, vainqueur or */
+html[data-skin="league-of-legends"] [data-ui="result-bar"] { border-radius: 0; background: #14191f; box-shadow: inset 0 0 0 1px #3c3c41; }
+html[data-skin="league-of-legends"] [data-ui="result-bar-fill"] { border-radius: 0; }
+html[data-skin="league-of-legends"] [data-ui="result-bar"][data-highlight="true"] { box-shadow: inset 0 0 0 1px #785a28; }
+html[data-skin="league-of-legends"] [data-ui="result-bar"][data-highlight="true"] [data-ui="result-bar-fill"] { background-image: var(--lol-gold); box-shadow: 0 0 1rem rgb(200 170 110 / 0.5); }
+
+/* Chrono TV : anneau or qui se vide + cartouche de niveau dessous */
+html[data-skin="league-of-legends"] [data-ui="countdown-ring-bg"] { stroke: #1e2328; stroke-width: 9; }
+html[data-skin="league-of-legends"] [data-ui="countdown-ring"] { stroke: #c8aa6e; stroke-width: 4; stroke-linecap: butt; filter: drop-shadow(0 0 2px rgb(200 170 110 / 0.7)); }
+html[data-skin="league-of-legends"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-ring"] { stroke: #e84057; filter: drop-shadow(0 0 3px rgb(232 64 87 / 0.8)); }
+html[data-skin="league-of-legends"] [data-ui="countdown"] [data-ui="countdown-num"] { font-family: var(--font-display); font-weight: 700; color: #f0e6d2; }
+html[data-skin="league-of-legends"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-num"] { color: #ff8a9a; }
+html[data-skin="league-of-legends"] [data-ui="countdown-cartouche"] { background: #010a13; border: 1px solid #785a28; border-radius: 0.25rem; }
+/* Chrono téléphone : barre à filet or */
+html[data-skin="league-of-legends"] [data-ui="countdown"][data-variant="bar"] [data-ui="countdown-track"] { border-radius: 0; background: #14191f; box-shadow: inset 0 0 0 1px #785a28; }
+html[data-skin="league-of-legends"] [data-ui="countdown"][data-variant="bar"] [data-ui="countdown-fill"] { border-radius: 0; background-image: var(--lol-gold); }
+html[data-skin="league-of-legends"] [data-ui="countdown"][data-variant="bar"][data-low="true"] [data-ui="countdown-fill"] { background-image: linear-gradient(180deg, #e84057, #8c1c2c); }
+
+/* Portraits ronds cerclés turquoise ; grisés = cercle gris ; pastille carrée or */
+html[data-skin="league-of-legends"] [data-ui="avatar"] { box-shadow: 0 0 0 0.1em #010a13, 0 0 0 0.2em #0ac8b9, 0 0 0.6em 0.2em rgb(10 200 185 / 0.35); }
+html[data-skin="league-of-legends"] [data-ui="avatar"][data-dimmed="true"] { box-shadow: 0 0 0 0.1em #010a13, 0 0 0 0.2em #5b5a56; }
+html[data-skin="league-of-legends"] [data-ui="avatar-badge"] {
+  border-radius: 0.15em;
+  background: #c89b3c;
+  background-image: none;
+  color: #010a13;
+  border: 0.1em solid #010a13;
+}
+html[data-skin="league-of-legends"] [data-ui="roster-item"][data-done="true"] > span { color: #f0e6d2; }
+html[data-skin="league-of-legends"] [data-ui="answered-count"] {
+  display: inline-block;
+  font-family: var(--font-display);
+  padding: 0 0.35em;
+  background: rgb(1 10 19 / 0.7);
+  box-shadow: inset 0 0 0 1px #785a28;
+  color: #a09b8c;
+}
+html[data-skin="league-of-legends"] [data-ui="answered-count"] > span { color: #f0b232; }
+
+/* Pavé numérique */
+html[data-skin="league-of-legends"] [data-ui="numpad-key"] {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: #cdbe91;
+  background: linear-gradient(180deg, #1e2328, #14191f);
+  border: 1px solid #785a28;
+  border-radius: 0.1rem;
+  box-shadow: inset 0 1px 0 rgb(200 170 110 / 0.5);
+}
+
+/* Pastilles de vote : losanges or */
+html[data-skin="league-of-legends"] [data-ui="vote-dots"] [data-testid="tv-vote-dots"] > span { border-radius: 0; rotate: 45deg; background: transparent; box-shadow: inset 0 0 0 0.15rem #5b5a56; }
+html[data-skin="league-of-legends"] [data-ui="vote-dots"] [data-testid="tv-vote-dots"] > span.bg-gold { background: #c8aa6e; box-shadow: 0 0 0.6rem rgb(200 170 110 / 0.7); }
+
+/* Boîte de dialogue et pause */
+html[data-skin="league-of-legends"] [data-ui="dialog"] { border: 1px solid #c8aa6e; box-shadow: inset 0 0 0 3px #010a13, inset 0 0 0 4px #785a28, 0 1rem 3rem rgb(0 0 0 / 0.8); border-radius: 0.15rem; }
+html[data-skin="league-of-legends"] [data-testid="confirm-dialog"] { background: rgb(1 10 19 / 0.88); backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+html[data-skin="league-of-legends"] [data-ui="paused"] { background: rgb(1 10 19 / 0.88); backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+/* En-tête de manche : filet or en bas ; étiquette en petites capitales */
+html[data-skin="league-of-legends"] [data-ui="round-header"] { background: rgb(1 10 19 / 0.7); padding-bottom: 0.9rem; border-bottom: 2px solid transparent; border-image: var(--lol-gold-h) 1; }
+html[data-skin="league-of-legends"] [data-ui="round-tag"] {
+  border-radius: 0;
+  background: rgb(1 10 19 / 0.7);
+  box-shadow: inset 0 0 0 1px #785a28;
+  color: #cdbe91;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+html[data-skin="league-of-legends"] [data-ui="host-bar"] { border-top: 1px solid #3c3c41; background: rgb(1 10 19 / 0.75); }
+
+/* Lignes de classement : libellés gris, valeurs or, ligne en tête surlignée (barre or à gauche + filets or) */
+html[data-skin="league-of-legends"] [data-ui="score-row"] { position: relative; }
+html[data-skin="league-of-legends"] [data-ui="score-row"].glass { background-image: none; background-color: rgb(30 35 40 / 0.55); border-color: #3c3c41; box-shadow: none; }
+html[data-skin="league-of-legends"] [data-ui="score-row"] .text-ink-muted { color: #a09b8c; }
+html[data-skin="league-of-legends"] [data-ui="score-row"][data-highlight="true"] { background-color: rgb(200 170 110 / 0.08); box-shadow: 0 -1px 0 #785a28, 0 1px 0 #785a28; }
+html[data-skin="league-of-legends"] [data-ui="score-row"][data-highlight="true"]::before { content: ""; position: absolute; left: -0.3rem; top: 0; bottom: 0; width: 0.25rem; background: var(--lol-gold); }
+
 /* ── Fond (html[data-skin="league-of-legends"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+html[data-skin="league-of-legends"] [data-ui="backdrop"] { background: var(--gradient-bg); }
+html[data-skin="league-of-legends"] [data-backdrop-default] { display: none; }
+/* 1 : brume crépusculaire violette qui dérive */
+html[data-skin="league-of-legends"] [data-ui="backdrop-layer"][data-layer="1"] {
+  inset: -20%;
+  background: radial-gradient(40% 35% at 75% 30%, rgb(90 55 130 / 0.35), transparent 70%), radial-gradient(35% 30% at 20% 75%, rgb(10 200 185 / 0.1), transparent 70%);
+}
+/* 2 : particules dorées */
+html[data-skin="league-of-legends"] [data-ui="backdrop-layer"][data-layer="2"] {
+  background:
+    radial-gradient(circle at 12% 22%, rgb(240 230 210 / 0.5) 0 1px, transparent 2px),
+    radial-gradient(circle at 64% 12%, rgb(200 170 110 / 0.55) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 86% 64%, rgb(240 230 210 / 0.4) 0 1px, transparent 2px),
+    radial-gradient(circle at 38% 82%, rgb(200 170 110 / 0.45) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 52% 48%, rgb(10 200 185 / 0.35) 0 1px, transparent 2px);
+}
+/* 3 : vignette sombre */
+html[data-skin="league-of-legends"] [data-ui="backdrop-layer"][data-layer="3"] {
+  background: radial-gradient(120% 100% at 50% 40%, transparent 55%, rgb(1 10 19 / 0.75));
+}
 
 /* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */
+@keyframes lol-drift { 0%, 100% { transform: translate3d(-3%, 0, 0); } 50% { transform: translate3d(3%, -3%, 0); } }
+@keyframes lol-dust { 0%, 100% { opacity: 0.55; transform: translate3d(0, 0, 0); } 50% { opacity: 1; transform: translate3d(0, -1.5%, 0); } }
+@keyframes lol-panel-in { from { opacity: 0; transform: translateY(0.6rem); } to { opacity: 1; transform: none; } }
+@keyframes lol-select { 0%, 100% { box-shadow: inset 0 0 1rem rgb(200 170 110 / 0.18), 0 0 0.5rem rgb(200 170 110 / 0.25); } 50% { box-shadow: inset 0 0 1.2rem rgb(200 170 110 / 0.3), 0 0 1.1rem rgb(200 170 110 / 0.5); } }
+@keyframes lol-sheen { from { background-position: 0 0; } to { background-position: 200% 0; } }
+@keyframes lol-danger { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-skin="league-of-legends"] [data-ui="backdrop-layer"][data-layer="1"] { animation: lol-drift 40s ease-in-out infinite; }
+  html[data-skin="league-of-legends"] [data-ui="backdrop-layer"][data-layer="2"] { animation: lol-dust 9s ease-in-out infinite; }
+  html[data-skin="league-of-legends"] [data-ui="panel"] { animation: lol-panel-in 0.4s ease-out both; }
+  html[data-skin="league-of-legends"] [data-ui="choice"][data-selected="true"].glass { animation: lol-select 2.2s ease-in-out infinite; }
+  html[data-skin="league-of-legends"] [data-ui="choice"],
+  html[data-skin="league-of-legends"] [data-ui="button"] { transition: border-color 0.15s, background-color 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.15s; }
+  html[data-skin="league-of-legends"] [data-ui="result-bar"][data-highlight="true"] [data-ui="result-bar-fill"] {
+    background-image: linear-gradient(100deg, #785a28 0%, #c8aa6e 35%, #f0e6d2 50%, #c8aa6e 65%, #785a28 100%);
+    background-size: 200% 100%;
+    animation: lol-sheen 3.5s linear infinite;
+  }
+  html[data-skin="league-of-legends"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-ring"] { animation: lol-danger 0.8s ease-in-out infinite; }
+}
+@media (hover: hover) {
+  html[data-skin="league-of-legends"] [data-ui="button"][data-variant="primary"]:not(:disabled):hover::before { background: linear-gradient(180deg, #5ff0e3, #0a8cc0); }
+  html[data-skin="league-of-legends"] [data-ui="button"][data-variant="secondary"]:not(:disabled):hover,
+  html[data-skin="league-of-legends"] [data-ui="host-button"]:hover { color: #f0e6d2; box-shadow: inset 0 0 0 2px #c8aa6e, inset 0 0 0.8rem rgb(200 170 110 / 0.3); }
+  html[data-skin="league-of-legends"] [data-ui="choice"]:not(:disabled):hover { border-color: #c8aa6e; color: #f0e6d2; }
+}
