@@ -47,6 +47,7 @@ Les polices sont installées en local (pas d'internet pendant la soirée).
 | Création / édition du profil | `src/web/phone/ProfileEditor.tsx`, `CameraCapture.tsx`, `photo.ts` |
 | Mini-jeu « Qui est le plus… ? » | `src/minigames/qui-est-le-plus/views.tsx` |
 | Mini-jeu « Ceci ou Cela » (deux réponses face à face, camps en résultats) | `src/minigames/ceci-ou-cela/views.tsx` |
+| Mini-jeu « Dessin raté » (page de dessin tactile, mosaïque, révélation ; couleurs = jetons `--color-paper` et `--color-pen-0…4` du thème) | `src/minigames/dessin-rate/views.tsx`, `drawing.tsx` |
 
 ## Composants réutilisables (`src/web/ui/`)
 `Button`, `ConfirmDialog` (confirmation dans le style du jeu, jamais `window.confirm`), `Icons` (icônes SVG : pause, passer, accueil…), `Panel` (carte en verre), `PlayerAvatar` / `PlayerChip` (avatar + cadre + couleur, tailles `xs`→`2xl`),

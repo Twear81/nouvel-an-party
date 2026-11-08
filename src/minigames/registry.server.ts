@@ -3,6 +3,7 @@
 import type { MiniGame } from "./contract";
 import ceciOuCela from "./ceci-ou-cela/game";
 import commeLesAutres from "./comme-les-autres/game";
+import dessinRate from "./dessin-rate/game";
 import compteARebours from "./compte-a-rebours/game";
 import leBonPrix from "./le-bon-prix/game";
 import pierreFeuilleCiseaux from "./pierre-feuille-ciseaux/game";
@@ -21,4 +22,5 @@ export const serverGames: MiniGame[] = [
   compteARebours,
   simon,
   pierreFeuilleCiseaux,
+  dessinRate,
 ];

@@ -1,0 +1,129 @@
+# Mini-jeu "Dessin raté" — doc : src/minigames/dessin-rate/README.md
+# Chacun dessine son mot secret sur son téléphone en un temps très court, les dessins défilent sur la TV, puis on vote.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "Dessin raté"
+description: "Dessine ton mot secret en 20 secondes, votez pour le meilleur"
+
+# Temps pour dessiner, en secondes (le dessin est figé à la fin)
+duree_dessin: 20
+
+# Temps d'affichage de CHAQUE dessin en grand sur la TV (avec son mot et son auteur), en secondes
+duree_galerie: 4
+
+# Temps pour voter, en secondes (le vote s'arrête dès que tout le monde a voté)
+duree_vote: 20
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 20
+
+points:
+  par_vote: 50     # points pour chaque vote reçu
+  gagnant: 100     # points en plus pour le(s) dessin(s) le plus voté (ex æquo : tous ; aucun vote : personne)
+
+# Les mots. Chaque manche tire UNE difficulté, et chaque joueur reçoit un mot différent de cette difficulté :
+# personne n'est avantagé. Une liste doit avoir au moins 8 mots pour être jouée ; avec 16 mots ou plus, la
+# difficulté revient sur plusieurs manches (une manche par tranche de 8 mots), sans répéter de mot.
+# Comment classer un mot : voir le README (en gros : on peut le dessiner sans écrire de texte ?).
+# Mettez-les entre guillemets s'ils contiennent ": " ou " #".
+mots:
+  # Facile : un objet concret, reconnaissable en 3 traits
+  facile:
+    - "Une banane"
+    - "Un sapin de Noël"
+    - "Une bouteille de champagne"
+    - "Une montre"
+    - "Un chapeau de fête"
+    - "Une guirlande"
+    - "Un gâteau d'anniversaire"
+    - "Une pizza"
+    - "Une chaise"
+    - "Un téléphone"
+    - "Une voiture"
+    - "Une maison"
+    - "Un parapluie"
+    - "La lune"
+    - "Un soleil"
+    - "Des lunettes"
+    - "Un ballon"
+    - "Une clé"
+    - "Une fourchette"
+    - "Un cadeau"
+    - "Une bougie"
+    - "Un morceau de fromage"
+    - "Une étoile"
+    - "Un poisson"
+    - "Un vélo"
+    - "Une tasse de café"
+    - "Un avion"
+    - "Une glace"
+    - "Un bonnet"
+    - "Une horloge"
+  # Moyen : une action ou une scène (un personnage + ce qu'il fait)
+  moyen:
+    - "Un chat qui fait du ski"
+    - "Un pingouin qui danse"
+    - "Deux personnes qui trinquent"
+    - "Un cuisinier qui rate sa crêpe"
+    - "Un père Noël à la plage"
+    - "Un chien qui conduit un camion"
+    - "Un robot qui fait la vaisselle"
+    - "Un bonhomme de neige qui fond"
+    - "Une souris qui mange une raclette"
+    - "Un fantôme qui prend l'apéro"
+    - "Un dragon qui fait griller des chamallows"
+    - "Un poulet à vélo"
+    - "Un crocodile chez le dentiste"
+    - "Une vache qui fait du surf"
+    - "Un astronaute qui fait les courses"
+    - "Un canard qui joue de la guitare"
+    - "Un lapin qui tire un feu d'artifice"
+    - "Un éléphant sur un trampoline"
+    - "Un singe qui pilote un avion"
+    - "Un requin dans le bus"
+    - "Une girafe qui passe sous une porte"
+    - "Un cochon qui joue au foot"
+    - "Une tortue qui court un marathon"
+    - "Un ours qui fait la sieste dans un lit"
+    - "Un pirate qui cherche ses clés"
+    - "Un escargot en retard"
+    - "Un hamster dans sa roue"
+    - "Un pigeon qui danse la salsa"
+    - "Un zèbre qui se maquille"
+    - "Une grenouille qui chante au karaoké"
+  # Difficile : un concept, une expression, une situation
+  difficile:
+    - "La gueule de bois"
+    - "Le réveil du 1er janvier"
+    - "Les bonnes résolutions"
+    - "Le compte à rebours"
+    - "Un lendemain de soirée"
+    - "Une promesse en l'air"
+    - "Le dernier métro"
+    - "La belle-famille qui s'incruste"
+    - "Le dimanche soir"
+    - "Le régime de janvier"
+    - "Un vœu qui ne se réalisera jamais"
+    - "La flemme"
+    - "Un cadeau revendu"
+    - "Le karaoké qui tourne mal"
+    - "La bise de minuit"
+    - "Un ami qui raconte sa vie"
+    - "Le plat qui a brûlé"
+    - "Le voisin qui râle à cause du bruit"
+    - "L'ambiance qui retombe"
+    - "Le slow de fin de soirée"
+    - "Un fou rire incontrôlable"
+    - "Le regret du dernier verre"
+    - "Un secret mal gardé"
+    - "Chercher ses clés en pleine nuit"
+    - "Un mauvais danseur"
+    - "L'année qui passe trop vite"
+    - "Arrêter de fumer demain"
+    - "Un copain endormi sur le canapé"
+    - "La peur de la balance en janvier"
+    - "Les 12 coups de minuit"

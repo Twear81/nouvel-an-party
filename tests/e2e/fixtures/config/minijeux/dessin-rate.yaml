@@ -1,0 +1,20 @@
+actif: true
+nom: "Dessin raté"
+description: "Dessine ton mot secret en 20 secondes, votez pour le meilleur"
+duree_dessin: 15
+duree_galerie: 2
+duree_vote: 20
+temps_resultats: 5
+points:
+  par_vote: 50
+  gagnant: 100
+mots:
+  facile:
+    - "Mot A1"
+    - "Mot A2"
+    - "Mot A3"
+    - "Mot A4"
+    - "Mot A5"
+    - "Mot A6"
+    - "Mot A7"
+    - "Mot A8"

@@ -39,6 +39,14 @@
   --color-qr-dark: #120a2e;
   --color-qr-light: #fff8e8;
 
+  /* ── Dessin (mini-jeu « Dessin raté ») : papier et 5 feutres, dans l'ordre de la palette (index envoyé au serveur) */
+  --color-paper: #fff8e8;
+  --color-pen-0: #1b1233;
+  --color-pen-1: #e8344f;
+  --color-pen-2: #1f6fe0;
+  --color-pen-3: #1fa05f;
+  --color-pen-4: #f08a1c;
+
   /* ── Polices (embarquées via @fontsource, voir main.tsx) */
   --font-display: "Bungee", "Outfit Variable", system-ui, sans-serif;
   --font-sans: "Outfit Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
