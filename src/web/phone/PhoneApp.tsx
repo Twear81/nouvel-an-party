@@ -8,7 +8,7 @@ import type { MiniGameViewProps } from "../../minigames/views-contract";
 import { gameViewProps, playersWithProfile, waitingPlayers } from "../net/helpers";
 import { useGame, type GameActions } from "../net/useGame";
 import { useRevealed } from "../net/useReveal";
-import { Button, Countdown, fireConfetti, PausedOverlay, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
+import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
 import { ProfileEditor } from "./ProfileEditor";
 import { useWakeLock } from "./useWakeLock";
 
@@ -220,7 +220,6 @@ function FinalPhone({ rank, total, score, profile }: { rank: number; total: numb
     if (rank === 1) fireConfetti("big");
     else fireConfetti("small");
   }, [rank]);
-  const ordinal = rank === 1 ? "1er" : `${rank}e`;
   return (
     <Center testId="phone-final">
       <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-lg font-bold uppercase tracking-widest text-ink-muted">
@@ -231,7 +230,7 @@ function FinalPhone({ rank, total, score, profile }: { rank: number; total: numb
         <PlayerAvatar profile={profile} size="xl" />
       </motion.div>
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="flex flex-col items-center gap-1">
-        <span className="font-display text-7xl text-gold-gradient">{ordinal}</span>
+        <span className="font-display text-7xl text-gold-gradient">{ordinal(rank)}</span>
         <span className="text-xl text-ink-muted">sur {total} joueur{total > 1 ? "s" : ""}</span>
         <span className="mt-2 font-display text-4xl text-accent">{score} pts</span>
         <span className="mt-4 text-xl font-semibold">Bonne année ! 🥂</span>
