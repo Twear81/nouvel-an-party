@@ -97,13 +97,14 @@ export const TvResults = ({ results, playerById }: Props) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: at(e.playerId), type: "spring", stiffness: 110, damping: 13 }}
                   className="absolute h-px w-px"
-                  style={{ left: `${pl.px}rem`, bottom: `${AXIS_BOTTOM_REM}rem`, zIndex: 10 + pl.lane }}
+                  style={{ left: `${pl.px}rem`, bottom: `${AXIS_BOTTOM_REM}rem`, zIndex: 10 + laneCount - pl.lane }}
                 >
-                  {/* La couleur du joueur relie sa pastille sur l'axe à son étiquette, même quand la tige passe derrière une autre étiquette. */}
+                  {/* La couleur du joueur relie sa pastille sur l'axe à son étiquette, même quand la tige passe derrière une autre étiquette.
+                      Les étages bas passent devant les tiges des étages hauts, et les étiquettes restent opaques : aucune tige ne raye un pseudo. */}
                   <span className="absolute bottom-0 left-[-0.15rem] w-[0.3rem]" style={{ height: `${stemH}rem`, background: color }} />
                   <span className={`absolute -bottom-[0.6rem] left-[-0.6rem] h-[1.2rem] w-[1.2rem] rounded-full ${winner ? "shadow-glow" : ""}`} style={{ background: color }} />
                   <motion.div
-                    animate={winner ? { scale: [1, 1.08, 1.04] } : { opacity: [1, 1, 0.75] }}
+                    animate={winner ? { scale: [1, 1.08, 1.04] } : { filter: ["brightness(1)", "brightness(1)", "brightness(0.8)"] }}
                     transition={{ delay: landAt(n - 1, n) + WINNER_FX_DELAY_S, duration: 0.6 }}
                     className={`absolute flex items-center gap-2 rounded-btn border-[0.2rem] bg-bg px-2 py-1 ${winner ? "shadow-glow" : ""}`}
                     style={{ borderColor: color, bottom: `${stemH}rem`, width: `${LABEL_W_REM}rem`, [pl.right ? "left" : "right"]: `-${STEM_OFFSET_REM}rem`, transformOrigin: pl.right ? "left bottom" : "right bottom" }}
