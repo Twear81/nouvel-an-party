@@ -202,7 +202,7 @@ export function TvResults({ results, playerById }: MiniGameViewProps<Pub, Priv, 
       <div ref={box.ref} className="relative min-h-0 flex-1">
         <div className="absolute inset-x-[3%] h-[0.45rem] -translate-y-1/2 rounded-full bg-surface-strong" style={{ bottom: `${AXIS_Y}rem` }} />
         {w > 0 &&
-          scale.ticks.map((t) => (
+          scale.ticks.filter((t) => !priceShown || Math.abs(axisX(t) - priceX) > 5 * rem).map((t) => ( // le repère du vrai prix remplace la graduation voisine
             <div key={t} className="absolute -translate-x-1/2 text-center" style={{ left: axisX(t), top: yAxis + 0.4 * rem }}>
               <div className="mx-auto mb-0.5 h-2 w-[0.15rem] bg-ink-muted" />
               <span className="whitespace-nowrap text-xl font-semibold text-ink-muted">{formatCents(t)}</span>
@@ -234,15 +234,23 @@ export function TvResults({ results, playerById }: MiniGameViewProps<Pub, Priv, 
           </svg>
         )}
 
-        {/* Le vrai prix : un faisceau doré tombe du haut, l'étiquette rebondit en bas */}
+        {/* Le vrai prix : repère doré sur l'axe + faisceau vers l'étiquette en bas. Rien au-dessus de l'axe : les cartes des joueurs ne sont jamais traversées. */}
         {priceShown && w > 0 && (
           <>
             <motion.div
               initial={{ scaleY: 0, opacity: 0 }}
               animate={{ scaleY: 1, opacity: 1 }}
               transition={{ duration: 0.45, ease: "easeIn" }}
-              style={{ left: priceX, originY: 0, bottom: `${AXIS_Y - 0.5}rem` }}
-              className="absolute top-0 z-0 w-[0.5rem] -translate-x-1/2 rounded-full bg-gold shadow-glow"
+              style={{ left: priceX, originY: 0, top: yAxis, bottom: "3rem" }}
+              className="absolute z-0 w-[0.5rem] -translate-x-1/2 rounded-full bg-gold shadow-glow"
+            />
+            <motion.div
+              data-testid="bp-price-pin"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 12 }}
+              style={{ left: priceX, top: yAxis }}
+              className="absolute z-30 h-[2rem] w-[2rem] -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[0.3rem] border-[0.2rem] border-accent-strong bg-gold shadow-glow"
             />
             <motion.div
               data-testid="bp-real-price"

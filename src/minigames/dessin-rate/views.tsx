@@ -216,10 +216,10 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
           {word}
         </h1>
       </div>
-      <div className="min-h-0 flex-1">
+      <div className="order-2 min-h-0 flex-1">
         <DrawingPad strokes={strokes} color={color} width={width} disabled={snapshot.paused} onChange={change} />
       </div>
-      <div data-testid="draw-tools" className="-mx-3 flex shrink-0 items-center justify-center gap-1">
+      <div data-testid="draw-tools" className="order-1 -mx-3 flex shrink-0 items-center justify-center gap-1">
         {Array.from({ length: PALETTE }, (_, i) => (
           <button
             key={i}

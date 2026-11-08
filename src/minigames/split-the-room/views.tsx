@@ -87,6 +87,9 @@ function TvWrite({ pub, round, players }: Props) {
       <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} data-testid="tv-start" className="max-w-[92rem] text-balance text-[5.75rem] font-extrabold leading-[1.05]">
         {pub.start}
       </motion.h1>
+      <p data-testid="tv-rule" className="-mt-4 max-w-[80rem] text-balance text-4xl font-semibold text-ink-muted">
+        Écris une fin qui coupe la salle en deux : plus le vote est 50/50, plus tu marques
+      </p>
       <div data-testid="tv-written-count" className={`font-display text-5xl ${pub.allWritten ? "text-good" : "text-ink-muted"}`}>
         <span className={pub.allWritten ? "" : "text-accent"}>{done}</span> / {writers.length}
       </div>
@@ -125,6 +128,7 @@ function TvVote({ pub }: Props) {
       </div>
       <div className="flex w-full flex-col items-center gap-4">
         <p className="font-display text-6xl">Tu acceptes ?</p>
+        <p data-testid="tv-rule" className="-mt-2 text-3xl font-semibold text-ink-muted">Plus le vote est 50/50, plus l'auteur marque</p>
         <VoteDots done={pub.votedCount} total={pub.voterCount} />
       </div>
     </div>

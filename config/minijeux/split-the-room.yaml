@@ -10,7 +10,7 @@ manches_max: 5
 
 # Titre et phrase d'explication affichés sur la TV
 nom: "Split the Room"
-description: "Termine la phrase pour couper la salle en deux"
+description: "Finis la phrase pour diviser la salle : OUI ou NON, le plus 50/50 gagne"
 
 # Temps pour écrire sa fin de phrase, en secondes (l'étape s'arrête 3 s après que tout le monde a envoyé la sienne)
 duree_ecriture: 60

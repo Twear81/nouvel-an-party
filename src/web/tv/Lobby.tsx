@@ -32,11 +32,24 @@ function QrCode({ url }: { url: string }) {
   );
 }
 
-/** Rappel animé (volontairement « cheap ») : sans l'alerte de certificat acceptée, le téléphone n'arrive jamais sur le jeu. */
-function CertificateWarning() {
+/**
+ * Rappel de l'alerte de certificat : sans l'accepter, le téléphone n'arrive jamais sur le jeu.
+ * Animé (volontairement « cheap ») tant qu'aucun téléphone n'est connecté ; version calme et discrète ensuite
+ * (il reste utile pour les retardataires, on ne le masque pas).
+ */
+function CertificateWarning({ calm }: { calm: boolean }) {
+  if (calm) {
+    return (
+      <div data-testid="cert-warning" data-calm="true" className="flex shrink-0 items-center gap-2 rounded-card border-[0.12rem] border-line bg-surface px-3 py-1.5">
+        <span aria-hidden className="text-2xl opacity-70">⚠️</span>
+        <p className="text-left text-lg font-semibold leading-tight text-ink-muted">Un invité bloqué ? Il doit accepter l'alerte de certificat du navigateur</p>
+      </div>
+    );
+  }
   return (
     <div
       data-testid="cert-warning"
+      data-calm="false"
       className="flex shrink-0 items-center gap-3 rounded-card border-[0.2rem] border-warn bg-warn/15 px-4 py-2 animate-attention"
     >
       <span aria-hidden className="inline-block text-4xl animate-wiggle">⚠️</span>
@@ -92,7 +105,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
           <h1 className="shrink-0 font-display text-4xl leading-tight text-gold-gradient">{snapshot.title}</h1>
           <QrCode url={snapshot.joinUrl} />
           <div className="shrink-0 rounded-chip bg-surface-strong px-5 py-2 font-mono text-2xl font-bold text-accent">{snapshot.joinUrl}</div>
-          <CertificateWarning />
+          <CertificateWarning calm={players.some((p) => p.connected)} />
         </div>
 
         {/* Joueurs */}

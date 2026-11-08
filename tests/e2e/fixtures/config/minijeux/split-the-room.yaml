@@ -1,6 +1,6 @@
 actif: true
 nom: "Split the Room"
-description: "Termine la phrase pour couper la salle en deux"
+description: "Finis la phrase pour diviser la salle : OUI ou NON, le plus 50/50 gagne"
 duree_ecriture: 30
 duree_vote: 15
 duree_revelation: 6
