@@ -5,6 +5,9 @@
 # false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
 actif: true
 
+# Nombre maximum de manches de ce jeu par partie (le lobby ne proposera pas plus ; enlève la ligne pour ne pas plafonner)
+manches_max: 20
+
 # Titre et phrase d'explication affichés sur la TV
 nom: "Qui est le plus… ?"
 description: "Votez pour l'invité qui correspond le mieux à la question"

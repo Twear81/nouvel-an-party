@@ -25,9 +25,23 @@ function QrCode({ url }: { url: string }) {
     }).then(setSrc, () => setSrc(null));
   }, [url]);
   return (
-    // Le QR rétrécit quand le panneau des mini-jeux prend de la hauteur.
-    <div className="flex aspect-square min-h-0 max-h-[18.5rem] flex-shrink rounded-card bg-ink p-3 shadow-glow">
+    // Taille fixe et grande (24 rem = 384 px, image 360 px à 1920×1080) : il se scanne de loin, quel que soit le nombre de jeux.
+    <div className="flex h-[24rem] w-[24rem] shrink-0 rounded-card bg-ink p-3 shadow-glow">
       {src ? <img data-testid="tv-qr" src={src} alt={`QR code ${url}`} className="h-full w-full rounded-btn" /> : <div className="h-full w-full" />}
+    </div>
+  );
+}
+
+/** Rappel animé (volontairement « cheap ») : sans l'alerte de certificat acceptée, le téléphone n'arrive jamais sur le jeu. */
+function CertificateWarning() {
+  return (
+    <div
+      data-testid="cert-warning"
+      className="flex shrink-0 items-center gap-3 rounded-card border-[0.2rem] border-warn bg-warn/15 px-4 py-2 animate-attention"
+    >
+      <span aria-hidden className="inline-block text-4xl animate-wiggle">⚠️</span>
+      <p className="text-left text-2xl font-bold leading-tight text-warn">Accepte l'alerte de certificat du navigateur pour continuer</p>
+      <span aria-hidden className="inline-block text-4xl animate-nudge">👈</span>
     </div>
   );
 }
@@ -39,9 +53,6 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   const [error, setError] = useState<string | null>(null);
   const [kicking, setKicking] = useState<{ id: string; name: string } | null>(null);
 
-  const many = catalog.length > 4;
-  // Au-delà de 10 mini-jeux, les deux colonnes se serrent pour laisser sa place au QR code et aux invités.
-  const crowded = catalog.length > 10;
   const normalGames = catalog.filter((g) => g.interlude === undefined);
   const normalRounds = normalGames.reduce((n, g) => n + (setup.counts[g.id] ?? 0), 0);
   // Les interludes (surprises) sont des interrupteurs : leur nombre de manches découle des manches normales choisies.
@@ -70,7 +81,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   const SMALLER: Record<AvatarSize, AvatarSize> = { "2xl": "xl", xl: "lg", lg: "md", md: "md", sm: "sm", xs: "xs" };
   const baseSize: AvatarSize = players.length <= 3 ? "2xl" : players.length <= 8 ? "xl" : "lg";
   // Jusqu'à 3 joueurs, une seule rangée : on garde les grands avatars même avec beaucoup de mini-jeux.
-  const avatarSize = crowded && players.length > 3 ? SMALLER[baseSize] : baseSize;
+  const avatarSize = catalog.length > 4 && players.length > 3 ?SMALLER[baseSize] : baseSize;
   const tileWidth = players.length <= 3 ? "w-[17rem]" : "w-[14rem]";
 
   return (
@@ -78,12 +89,10 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
       <div className="flex min-h-0 flex-1 gap-10">
         {/* Inscription */}
         <div className="flex min-h-0 w-[26rem] shrink-0 flex-col items-center gap-4 text-center">
-          <h1 className="shrink-0 font-display text-5xl leading-tight text-gold-gradient">{snapshot.title}</h1>
+          <h1 className="shrink-0 font-display text-4xl leading-tight text-gold-gradient">{snapshot.title}</h1>
           <QrCode url={snapshot.joinUrl} />
           <div className="shrink-0 rounded-chip bg-surface-strong px-5 py-2 font-mono text-2xl font-bold text-accent">{snapshot.joinUrl}</div>
-          <p className="shrink-0 text-xl leading-snug text-ink-muted">
-            Accepte l'alerte de certificat du navigateur pour continuer.
-          </p>
+          <CertificateWarning />
         </div>
 
         {/* Joueurs */}
@@ -131,7 +140,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
       </div>
 
       {/* Réglage de la partie */}
-      <Panel className={`flex shrink-0 flex-col gap-3 px-8 ${crowded ? "py-3" : "py-5"}`}>
+      <Panel className="flex shrink-0 flex-col gap-3 px-8 py-4">
         {resumable && host && (
           <div className="flex items-center justify-between rounded-btn bg-accent/15 px-6 py-3">
             <span className="text-2xl font-semibold text-accent">Une partie interrompue a été trouvée.</span>
@@ -140,61 +149,50 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
             </Button>
           </div>
         )}
-        {/* Beaucoup de mini-jeux : deux colonnes, pour laisser la place aux invités. */}
-        <div className={many ? `grid grid-cols-2 gap-x-12 ${crowded ? "gap-y-1" : "gap-y-2"}` : "flex flex-col gap-2"}>
+        {/* Une ligne courte par jeu, sur 3 colonnes : le détail se lit dans l'annonce de la manche. */}
+        <div data-testid="setup-grid" className="grid grid-cols-3 gap-x-10 gap-y-2">
           {catalog.map((g) => {
             const count = setup.counts[g.id] ?? 0;
-            const rowClass = `flex items-center ${many ? "gap-4" : "gap-6"}`;
-            const nameClass = `truncate font-display leading-tight ${crowded ? "text-xl" : many ? "text-2xl" : "text-3xl"}`;
-            const subClass = `truncate ${crowded ? "text-base leading-tight" : many ? "text-lg" : "text-xl"}`;
-            const btnSize = crowded ? "sm" : "md";
-            const durationClass = `text-right text-ink-muted ${many ? "w-20 text-xl" : "w-32 text-2xl"}`;
+            const nameClass = "min-w-0 flex-1 line-clamp-2 font-display text-xl leading-tight";
             if (g.interlude !== undefined) {
-              // Jeu surprise : un interrupteur au lieu d'un nombre de manches.
+              // Jeu surprise : un interrupteur, et ce qu'il produira vraiment avec les manches normales choisies.
               const on = count > 0;
+              const n = roundsOf(g);
               return (
-                <div key={g.id} data-testid={`setup-row-${g.id}`} data-interlude="true" className={rowClass}>
-                  <div className="min-w-0 flex-1">
-                    <div className={nameClass}>{g.name}</div>
-                    <div className={`${subClass} text-accent`}>Surprise · ~1 fois tous les {g.interlude} jeux</div>
-                  </div>
+                <div key={g.id} data-testid={`setup-row-${g.id}`} data-interlude="true" className="flex items-center gap-3">
+                  <div className={nameClass} title={g.name}>{g.name}</div>
+                  <span data-testid={`setup-planned-${g.id}`} className={`shrink-0 text-2xl font-bold ${on ? "text-accent" : "text-ink-muted"}`}>
+                    {on ? `×${n}${n > 0 ? ` · ${formatDuration(n * g.secondsPerRound)}` : ""}` : "—"}
+                  </span>
                   <Button
                     data-testid={`setup-toggle-${g.id}`}
                     data-on={on ? "true" : "false"}
                     role="switch"
                     aria-checked={on}
                     variant={on ? "primary" : "secondary"}
-                    size={btnSize}
-                    className="w-[11.5rem] shrink-0"
+                    size="sm"
+                    className="w-[7.5rem] shrink-0"
                     disabled={!host || g.available === 0}
                     onClick={() => setCount(g.id, on ? 0 : 1, 1)}
                   >
                     {on ? "Activé" : "Désactivé"}
                   </Button>
-                  <div className={durationClass}>{formatDuration(roundsOf(g) * g.secondsPerRound)}</div>
                 </div>
               );
             }
             return (
-              <div key={g.id} data-testid={`setup-row-${g.id}`} className={rowClass}>
-                <div className="min-w-0 flex-1">
-                  <div className={nameClass}>{g.name}</div>
-                  {/* Beaucoup de mini-jeux : on garde les lignes courtes, la description se lit dans l'annonce. */}
-                  {!crowded && <div className={`${subClass} text-ink-muted`}>{g.description}</div>}
+              <div key={g.id} data-testid={`setup-row-${g.id}`} className="flex items-center gap-3">
+                <div className={nameClass} title={g.name}>{g.name}</div>
+                <Button data-testid={`setup-dec-${g.id}`} variant="secondary" size="sm" disabled={!host || count <= 0} onClick={() => setCount(g.id, count - 1, g.available)} aria-label="Moins">
+                  −
+                </Button>
+                <div className="flex w-[4.5rem] shrink-0 items-baseline justify-center gap-1">
+                  <span data-testid={`setup-count-${g.id}`} className="font-display text-3xl text-accent">{count}</span>
+                  <span className="text-base text-ink-muted">/{g.available}</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Button data-testid={`setup-dec-${g.id}`} variant="secondary" size={btnSize} disabled={!host || count <= 0} onClick={() => setCount(g.id, count - 1, g.available)} aria-label="Moins">
-                    −
-                  </Button>
-                  <div className={crowded ? "flex w-24 items-baseline justify-center gap-1.5" : many ? "w-16 text-center" : "w-24 text-center"}>
-                    <span data-testid={`setup-count-${g.id}`} className={`font-display text-accent ${crowded ? "text-3xl" : many ? "text-4xl" : "text-5xl"}`}>{count}</span>
-                    <span className={`text-ink-muted ${crowded ? "text-sm" : "block text-base"}`}>sur {g.available}</span>
-                  </div>
-                  <Button data-testid={`setup-inc-${g.id}`} variant="secondary" size={btnSize} disabled={!host || count >= g.available} onClick={() => setCount(g.id, count + 1, g.available)} aria-label="Plus">
-                    +
-                  </Button>
-                </div>
-                <div className={durationClass}>{formatDuration(count * g.secondsPerRound)}</div>
+                <Button data-testid={`setup-inc-${g.id}`} variant="secondary" size="sm" disabled={!host || count >= g.available} onClick={() => setCount(g.id, count + 1, g.available)} aria-label="Plus">
+                  +
+                </Button>
               </div>
             );
           })}

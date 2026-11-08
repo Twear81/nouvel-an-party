@@ -20,7 +20,7 @@ tests/unit/<id>.test.ts        tests de la logique
 | Membre | Rôle |
 |---|---|
 | `id` | identifiant, = dossier = yaml |
-| `configSchema` | schéma **zod** du yaml (valeurs par défaut avec `.default()`, messages d'erreur clairs). Le champ `actif` est géré par le moteur, ne le déclarez pas |
+| `configSchema` | schéma **zod** du yaml (valeurs par défaut avec `.default()`, messages d'erreur clairs). Les champs `actif` et `manches_max` (plafond de manches, entier ≥ 1) sont gérés par le moteur, ne les déclarez pas |
 | `name(cfg)`, `description(cfg)` | titre et phrase d'explication affichés à l'annonce |
 | `items(cfg)` | liste des manches possibles |
 | `roundSeconds(cfg, item)` | durée du chrono en secondes, ou `null` si la manche se termine seule (via `ctx.end()`) |
@@ -97,7 +97,7 @@ export const webGames: Record<string, MiniGameViews> = {
 Si `config/minijeux/<id>.yaml` est absent, le jeu est désactivé avec un avertissement. `actif: false` dans le yaml le désactive aussi.
 
 ## 5. yaml et README
-- Le yaml documente **chaque option en commentaire** (voir `config/minijeux/ceci-ou-cela.yaml`) et commence par `actif: true`.
+- Le yaml documente **chaque option en commentaire** (voir `config/minijeux/ceci-ou-cela.yaml`) et commence par `actif: true`, suivi si besoin de `manches_max: N` (plafond de manches, générique : voir [configuration.md](configuration.md)).
 - Le README (en français, pour l'organisateur) : principe, déroulé TV / téléphones, points avec exemple, tableau des options, comment écrire du contenu, pièges YAML, `actif: false`, redémarrage de NouvelAn.exe.
 
 ## 6. Tests

@@ -71,11 +71,18 @@
   --animate-twinkle: twinkle 4s ease-in-out infinite;
   --animate-float: float 6s ease-in-out infinite;
   --animate-pulse-soft: pulse-soft 1.6s ease-in-out infinite;
+  --animate-wiggle: wiggle 1.4s ease-in-out infinite;
+  --animate-nudge: nudge 1s ease-in-out infinite;
+  --animate-attention: attention 1.8s ease-in-out infinite;
 }
 
 @keyframes twinkle { 0%, 100% { opacity: 0.15; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
 @keyframes float { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(4%, -6%, 0); } }
 @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+/* Panneau d'alerte « cheap » : le ⚠️ se dandine, le 👉 pointe, le cadre respire (doux, pas de stroboscope). */
+@keyframes wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+@keyframes nudge { 0%, 100% { transform: translateX(-0.4rem); } 50% { transform: translateX(0.5rem); } }
+@keyframes attention { 0%, 100% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0); transform: scale(1); } 50% { box-shadow: 0 0 1.8rem 0.2rem var(--color-warn); transform: scale(1.03); } }
 @keyframes spin-slow { to { transform: rotate(360deg); } }
 @property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 @keyframes angle-spin { to { --angle: 360deg; } }

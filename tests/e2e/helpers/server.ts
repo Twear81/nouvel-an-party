@@ -13,6 +13,8 @@ export interface ServerOptions {
   introSeconds?: number;
   /** Durée du chrono de chaque mini-jeu (s). Défaut du fixture : 8. */
   duree?: number;
+  /** Utilise le vrai dossier config/ (tous les mini-jeux, plafonds compris) avec seulement partie.yaml de test. Pour les captures. */
+  realConfig?: boolean;
 }
 
 export interface TestServer {
@@ -43,7 +45,10 @@ async function freePort(): Promise<number> {
 /** Copie la config de test dans le dossier temporaire en appliquant les surcharges demandées. */
 function prepareConfig(tmp: string, opts: ServerOptions): string {
   const dir = path.join(tmp, "config");
-  cpSync(FIXTURE_CONFIG, dir, { recursive: true });
+  if (opts.realConfig) {
+    cpSync(path.join(ROOT, "config"), dir, { recursive: true });
+    cpSync(path.join(FIXTURE_CONFIG, "partie.yaml"), path.join(dir, "partie.yaml"));
+  } else cpSync(FIXTURE_CONFIG, dir, { recursive: true });
   const patch = (file: string, key: string, value: number) => {
     const f = path.join(dir, file);
     writeFileSync(f, readFileSync(f, "utf8").replace(new RegExp(`^${key}:.*$`, "m"), `${key}: ${value}`));

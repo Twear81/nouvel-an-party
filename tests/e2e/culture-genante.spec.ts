@@ -239,19 +239,23 @@ test.describe("Culture gênante", () => {
   test("lobby : l'interrupteur remplace le compteur, la durée l'inclut", async ({ party }) => {
     const { tv } = party;
     const row = tv.getByTestId(`setup-row-${CG}`);
+    await expect(row).toHaveAttribute("data-interlude", "true");
     const toggle = tv.getByTestId(`setup-toggle-${CG}`);
-    await expect(row).toContainText("Surprise · ~1 fois tous les 2 jeux");
+    const planned = tv.getByTestId(`setup-planned-${CG}`);
     await expect(tv.getByTestId(`setup-inc-${CG}`)).toHaveCount(0);
     const total = tv.getByTestId("setup-total");
 
     await party.setOnly({ "ceci-ou-cela": 4 });
     await expect(toggle).toHaveAttribute("data-on", "false");
     await expect(total).toContainText("4 manches");
+    await expect(planned).toHaveText("—");
     await toggle.click();
     await expect(toggle).toHaveAttribute("data-on", "true");
+    await expect(planned).toContainText("×2"); // 4 manches normales, une surprise toutes les 2
     await expect(total).toContainText("6 manches"); // 4 normales + 2 surprises
     await party.setOnly({ "ceci-ou-cela": 1, [CG]: 1 });
     await expect(total).toContainText("1 manche"); // moins de 2 manches normales : pas de surprise
+    await expect(planned).toHaveText("×0");
     await party.setOnly({ [CG]: 1 });
     await expect(total).toContainText("1 manche"); // aucune normale : une seule surprise
     await expect(tv.getByTestId("start-game")).toBeDisabled(); // pas de joueur prêt, mais pas à cause des manches

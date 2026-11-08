@@ -6,6 +6,9 @@
 # false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
 actif: true
 
+# Nombre maximum de manches de ce jeu par partie (le lobby ne proposera pas plus ; enlève la ligne pour ne pas plafonner)
+manches_max: 3
+
 # Titre et phrase d'explication affichés sur la TV
 nom: "L'imposteur"
 description: "Un seul d'entre vous n'a pas le même mot… et il ne le sait pas"

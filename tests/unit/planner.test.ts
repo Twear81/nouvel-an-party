@@ -28,6 +28,35 @@ describe("buildCatalog", () => {
   });
 });
 
+describe("manches_max (plafond de manches)", () => {
+  it("plafonne `available` du catalogue, sans toucher aux jeux plus petits", () => {
+    const a = makeFakeGame({ id: "a", items: 12 });
+    const b = makeFakeGame({ id: "b", items: 2 });
+    const catalog = buildCatalog([{ ...a.loaded, maxRounds: 3 }, { ...b.loaded, maxRounds: 5 }], 4);
+    expect(catalog.map((c) => c.available)).toEqual([3, 2]);
+  });
+
+  it("sanitizeSetup, defaultSetup et buildPlan respectent le plafond", () => {
+    const a = makeFakeGame({ id: "a", items: 12 });
+    const loaded = { ...a.loaded, maxRounds: 3 };
+    const catalog = buildCatalog([loaded], 4);
+    expect(sanitizeSetup({ counts: { a: 9 } }, catalog).counts.a).toBe(3);
+    expect(defaultSetup(catalog, 600).counts.a).toBe(3);
+    // Même un setup non assaini ne peut pas dépasser le plafond.
+    expect(buildPlan([loaded], { counts: { a: 9 } }, "melange", seededRng(1))).toHaveLength(3);
+  });
+
+  it("plafonne le nombre de surprises d'un interlude", () => {
+    const n = makeFakeGame({ id: "n", items: 30 });
+    const s = makeFakeGame({ id: "s", items: 10, interlude: 2 });
+    const loaded = { ...s.loaded, maxRounds: 2 };
+    const catalog = buildCatalog([n.loaded, loaded], 4);
+    expect(catalog.find((c) => c.id === "s")!.available).toBe(2);
+    const plan = buildPlan([n.loaded, loaded], { counts: { n: 12, s: 1 } }, "melange", seededRng(3));
+    expect(plan.filter((r) => r.interlude)).toHaveLength(2);
+  });
+});
+
 describe("defaultSetup", () => {
   it("joue chaque mini-jeu au moins une fois même si la cible est minuscule", () => {
     const catalog = [entry("a", 5, 60), entry("b", 5, 60)];
