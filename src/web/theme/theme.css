@@ -167,6 +167,9 @@ button:disabled { cursor: not-allowed; }
 img { -webkit-touch-callout: none; }
 }
 
+/* ── Cadre commun d'un écran de mini-jeu (TV) : invisible ici, dessiné par chaque skin (docs/skins.md). */
+[data-ui="game-frame-title"] { display: none; }
+
 /* ── Cadres d'avatar (choisis dans profile-options.ts ; --p = couleur du joueur ; 1em = 1/10 de la taille) */
 .frame { position: absolute; inset: 0; border-radius: 999px; pointer-events: none; }
 .frame-none { box-shadow: inset 0 0 0 0.1em var(--color-line); }

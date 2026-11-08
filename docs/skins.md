@@ -66,6 +66,7 @@ QR code) ne changent pas avec le skin.
 | `numpad`, `numpad-key` | `NumPad` | |
 | `vote-dots` | `VoteDots` | |
 | `dialog` | `ConfirmDialog` | |
+| `game-frame` | cadre commun de l'écran d'un mini-jeu sur la TV (jeu et résultats, hors interludes) : invisible dans le thème de base, le skin le dessine en fenêtre de son jeu | parties `game-frame-title` (nom du jeu, masqué par défaut : `display` à rétablir), `game-frame-body` |
 | `round-header`, `round-tag` | en-tête TV d'une manche (`PlayingScreen`, `IntroScreen`) | |
 | `host-bar`, `host-button` | `HostBar` | |
 | `score-row` | lignes de classement (résultats, final, téléphone) | `data-rank`, `data-highlight` |

@@ -19,6 +19,21 @@ export function RoundHeader({ round, children }: { round: RoundInfo; children?: 
   );
 }
 
+/**
+ * Cadre commun de l'écran d'un mini-jeu sur la TV (jeu et résultats) : invisible dans le thème de base, chaque skin le
+ * dessine en fenêtre de son jeu (`game-frame`, titre `game-frame-title` masqué par défaut, contenu `game-frame-body`).
+ */
+export function GameFrame({ title, className = "mb-4 mt-4", children }: { title: string; className?: string; children: React.ReactNode }) {
+  return (
+    <section data-ui="game-frame" className={`relative mx-14 flex min-h-0 flex-1 flex-col ${className}`}>
+      <h2 data-ui="game-frame-title">{title}</h2>
+      <div data-ui="game-frame-body" className="flex min-h-0 flex-1 flex-col">
+        {children}
+      </div>
+    </section>
+  );
+}
+
 export function PlayingScreen({ snapshot, round }: { snapshot: GameSnapshot; round: RoundInfo }) {
   // Interlude : pas de cadre (en-tête, chrono standard). Le jeu met tout en scène, en plein écran.
   if (round.interlude) {
@@ -33,9 +48,9 @@ export function PlayingScreen({ snapshot, round }: { snapshot: GameSnapshot; rou
       <RoundHeader round={round}>
         <Countdown round={round} size="tv" answeredCount={round.progress?.done} waitingCount={round.progress ? Math.max(0, round.progress.expected - round.progress.done) : undefined} />
       </RoundHeader>
-      <div className="flex min-h-0 flex-1 flex-col px-14 pb-4 pt-4">
+      <GameFrame title={round.gameName}>
         <TvGameView snapshot={snapshot} round={round} kind="Tv" />
-      </div>
+      </GameFrame>
     </div>
   );
 }
