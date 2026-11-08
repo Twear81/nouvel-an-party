@@ -1,28 +1,25 @@
-// Le gros compteur de la TV : net au début, puis glitché. Calé sur l'heure serveur (pas sur le moment où la page l'a reçu).
-import { useEffect, useState } from "react";
+// Le compteur géant de la TV : choisit le design tiré par le serveur et le redessine à chaque image d'écran.
+// Calé sur l'heure serveur (pas sur le moment où la page a reçu les données) et déterministe (graine du serveur).
+import { useEffect, useState, type ComponentType } from "react";
 import { serverNow } from "../../web/net/socket";
-import { counterFrame, type Tone } from "./chaos";
-import { fmtCounter } from "./rank";
-import type { Pub } from "./game";
+import { chaosAt, shownMs, type DesignProps } from "./chaos";
+import { Coupe } from "./designs/Coupe";
+import { Digital } from "./designs/Digital";
+import { Horloge } from "./designs/Horloge";
+import { Meche } from "./designs/Meche";
+import { Minuit } from "./designs/Minuit";
+import type { DesignId, Pub } from "./game";
 
-// Classes écrites en toutes lettres pour que Tailwind les repère.
-export const TONE_CLASS: Record<Tone, string> = { ink: "text-ink", hot: "text-hot", cool: "text-cool", accent: "text-accent" };
-
-/** Chaque caractère dans une case de largeur fixe : le compteur ne "danse" pas à cause des chiffres plus ou moins larges. */
-export function Digits({ text }: { text: string }) {
-  return (
-    <>
-      {[...text].map((c, i) => (
-        <span key={i} className="inline-block text-center" style={{ width: c === "," ? "0.4em" : c === "+" || c === "−" ? "0.7em" : "0.8em" }}>
-          {c}
-        </span>
-      ))}
-    </>
-  );
-}
+export const DESIGNS: Record<DesignId, ComponentType<DesignProps>> = {
+  digital: Digital,
+  horloge: Horloge,
+  meche: Meche,
+  coupe: Coupe,
+  minuit: Minuit,
+};
 
 /** Rafraîchit à chaque image d'écran tant que `on` est vrai. */
-function useFrame(on: boolean) {
+export function useFrame(on: boolean) {
   const [, setN] = useState(0);
   useEffect(() => {
     if (!on) return;
@@ -37,36 +34,14 @@ function useFrame(on: boolean) {
 export function Counter({ pub }: { pub: Pub }) {
   const running = pub.phase === "running" && pub.startedAt !== null;
   useFrame(running);
-
-  if (!running) {
-    // Avant le départ : le compteur attend, immobile (au chiffre de départ).
-    const start = pub.decompte ? pub.cible * 1000 : 0;
-    return (
-      <div data-testid="tv-counter" data-kind="idle" className="animate-pulse-soft font-display text-[17rem] leading-none text-ink-muted">
-        <Digits text={fmtCounter(start)} />
-      </div>
-    );
-  }
-
-  const f = counterFrame(Math.max(0, serverNow() - pub.startedAt!), pub);
-  const s = f.split;
+  if (!running) return null;
+  const elapsedMs = Math.max(0, serverNow() - pub.startedAt!);
+  const chaos = chaosAt(elapsedMs, pub.visible * 1000, pub.seed);
+  const shown = shownMs(elapsedMs, chaos, pub.cible);
+  const Design = DESIGNS[pub.design];
   return (
-    <div className="relative">
-      {f.kind !== "clear" && f.kind !== "hidden" && (
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[24rem] w-[24rem] -translate-x-1/2 -translate-y-1/2 animate-pulse-soft rounded-full bg-hot/10 shadow-[0_0_8rem_var(--color-hot)]" />
-      )}
-      <div
-        data-testid="tv-counter"
-        data-kind={f.kind}
-        className={`relative font-display text-[17rem] leading-none ${TONE_CLASS[f.tone]}`}
-        style={{
-          opacity: f.opacity,
-          transform: `translate(${f.x}em, ${f.y}em) rotate(${f.rot}deg) skewX(${f.skew}deg) scale(${f.scale})`,
-          textShadow: f.kind === "clear" ? "0 0 3rem var(--color-accent-deep)" : `${s}em 0 0 var(--color-hot), -${s}em 0 0 var(--color-cool)`,
-        }}
-      >
-        <Digits text={f.text} />
-      </div>
+    <div data-testid="tv-counter" data-design={pub.design} data-mode={chaos.mode === "clear" ? "clear" : "chaos"} className="flex items-center justify-center">
+      <Design elapsedMs={elapsedMs} cible={pub.cible} chaos={chaos} shown={shown} />
     </div>
   );
 }

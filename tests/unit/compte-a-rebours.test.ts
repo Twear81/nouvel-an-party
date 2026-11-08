@@ -1,259 +1,275 @@
 import { describe, expect, it } from "bun:test";
-import { counterFrame } from "../../src/minigames/compte-a-rebours/chaos";
-import compte, { type Pub, type Results } from "../../src/minigames/compte-a-rebours/game";
-import { fmtSeconds, fmtSigned, rankByError } from "../../src/minigames/compte-a-rebours/rank";
+import { chaosAt, shownMs } from "../../src/minigames/compte-a-rebours/chaos";
+import compte, { DESIGN_IDS, GO_LEAD_MS, type Pub, type Results } from "../../src/minigames/compte-a-rebours/game";
+import { fmtCible, fmtSeconds, fmtSigned, rankByError } from "../../src/minigames/compte-a-rebours/rank";
+import { revealSeconds } from "../../src/minigames/compte-a-rebours/Results";
 import { createTestEngine } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
 const game = compte;
-const VARIANT = { titre: "Pile à minuit", cible: 10, visible: 3, decompte: false };
-const parse = (extra: Record<string, unknown> = {}) => game.configSchema.parse({ variantes: [VARIANT], ...extra });
+const parse = (extra: Record<string, unknown> = {}) => game.configSchema.parse({ cible_min: 10, cible_max: 10, ...extra });
 
-/** Une manche à `n` joueurs ; rng fixe donc ordre de passage déterministe (lu dans la vue publique). */
-function round(n = 3, extra: Record<string, unknown> = {}, players = makePlayers(n), offline: string[] = []) {
+/** Une manche à `n` joueurs, jusqu'au GO (cible 10 s par défaut). */
+function round(n = 3, extra: Record<string, unknown> = {}, rng: () => number = () => 0.5, offline: string[] = []) {
   const cfg = parse(extra);
-  const ctx = makeCtx(cfg, players);
+  const ctx = makeCtx(cfg, makePlayers(n), rng);
   for (const id of offline) ctx.setConnected(id, false);
   const state = game.start(game.items(cfg)[0]!, ctx);
   game.onPlay!(state, ctx);
   const pub = () => game.publicView(state, ctx) as Pub;
-  const order = pub().turns.map((t) => t.id);
-  const start = (id = pub().currentId!) => game.input(state, id, { action: "start" }, ctx);
-  const stop = (ms: unknown, id = pub().currentId!) => game.input(state, id, { action: "stop", ms }, ctx);
-  /** Joue un tour complet : START, `ms` plus tard STOP. */
-  const play = (ms: number) => {
-    start();
-    ctx.advance(ms);
-    stop(ms);
-    ctx.advance(cfg.duree_revelation * 1000);
+  /** Annonce puis « 3 2 1 » : le GO part. */
+  const goNow = () => {
+    ctx.advance(cfg.annonce * 1000);
+    ctx.advance(GO_LEAD_MS);
   };
-  return { cfg, ctx, state, pub, order, start, stop, play, finish: () => game.finish(state, ctx) };
+  const stop = (id: string, ms: unknown) => game.input(state, id, { ms }, ctx);
+  return { cfg, ctx, state, pub, goNow, stop, finish: () => game.finish(state, ctx) };
 }
 
-describe("compte-a-rebours : config", () => {
-  it("applique les valeurs par défaut", () => {
-    const cfg = parse();
-    expect(cfg).toMatchObject({ delai_depart: 10, points: [150, 100, 70, 50, 30, 20, 10, 0] });
-    expect(cfg.variantes[0]).toMatchObject({ visible: 3, decompte: false });
-    expect(game.roundSeconds(cfg, cfg.variantes[0]!)).toBeNull();
+describe("compte-a-rebours : config et tirage", () => {
+  it("valeurs par défaut : cible 6–12, 5 designs", () => {
+    const cfg = game.configSchema.parse({});
+    expect(cfg).toMatchObject({ cible_min: 6, cible_max: 12, visible_min: 2, visible_max: 3, marge_max: 4 });
+    expect(cfg.designs).toEqual([...DESIGN_IDS]);
+    expect(game.items(cfg)).toHaveLength(5);
+    expect(game.roundSeconds(cfg, game.items(cfg)[0]!)).toBeNull();
   });
-  it("exige au moins une variante et une cible d'au moins 1 s", () => {
-    expect(game.configSchema.safeParse({ variantes: [] }).success).toBe(false);
-    expect(game.configSchema.safeParse({ variantes: [{ titre: "x", cible: 0.5 }] }).success).toBe(false);
+  it("refuse des bornes incohérentes et une liste de designs vide ou inconnue", () => {
+    expect(game.configSchema.safeParse({ cible_min: 9, cible_max: 6 }).success).toBe(false);
+    expect(game.configSchema.safeParse({ visible_min: 4, visible_max: 3 }).success).toBe(false);
+    expect(game.configSchema.safeParse({ cible_min: 0.5 }).success).toBe(false);
+    expect(game.configSchema.safeParse({ designs: [] }).success).toBe(false);
+    expect(game.configSchema.safeParse({ designs: ["inconnu"] }).success).toBe(false);
+  });
+  it("la cible tirée reste dans les bornes, au demi-seconde, et la visibilité aussi", () => {
+    const cfg = game.configSchema.parse({});
+    for (const r of [0, 0.13, 0.5, 0.77, 0.999999]) {
+      const ctx = makeCtx(cfg, makePlayers(3), () => r);
+      const pub = game.publicView(game.start({ design: "digital" }, ctx), ctx) as Pub;
+      expect(pub.cible).toBeGreaterThanOrEqual(6);
+      expect(pub.cible).toBeLessThanOrEqual(12);
+      expect((pub.cible * 2) % 1).toBe(0);
+      expect(pub.visible).toBeGreaterThanOrEqual(2);
+      expect(pub.visible).toBeLessThanOrEqual(3);
+    }
+    const lo = makeCtx(cfg, makePlayers(2), () => 0);
+    expect((game.publicView(game.start({ design: "digital" }, lo), lo) as Pub).cible).toBe(6);
+    const hi = makeCtx(cfg, makePlayers(2), () => 0.999999);
+    expect((game.publicView(game.start({ design: "digital" }, hi), hi) as Pub).cible).toBe(12);
+  });
+  it("le design de la manche est celui de l'item, uniquement parmi les designs actifs", () => {
+    const cfg = parse({ designs: ["meche", "coupe", "meche"] });
+    expect(game.items(cfg).map((i) => i.design)).toEqual(["meche", "coupe"]);
+    const ctx = makeCtx(cfg, makePlayers(2));
+    expect((game.publicView(game.start({ design: "coupe" }, ctx), ctx) as Pub).design).toBe("coupe");
   });
 });
 
-describe("compte-a-rebours : déroulé d'un tour", () => {
-  it("un seul joueur à la fois, START puis STOP", () => {
+describe("compte-a-rebours : déroulé", () => {
+  it("annonce, « 3 2 1 », GO : le départ est annoncé à l'avance avec l'heure serveur", () => {
     const r = round(3);
-    expect(r.pub().phase).toBe("waiting");
-    const cur = r.pub().currentId!;
-    const other = r.order.find((id) => id !== cur)!;
-    r.start(other); // pas son tour : ignoré
-    expect(r.pub().phase).toBe("waiting");
-    r.stop(5000, cur); // STOP avant START : ignoré
-    expect(r.pub().phase).toBe("waiting");
-    r.start();
-    expect(r.pub()).toMatchObject({ phase: "running", startedAt: 0 });
-    expect(r.ctx.countdownState).toBeNull(); // pas de chrono visible qui trahirait le temps
-    r.ctx.advance(10_230);
-    r.stop(10_230);
-    const turn = r.pub().turns.find((t) => t.id === cur)!;
-    expect(turn).toMatchObject({ status: "done", elapsedMs: 10_230, signedMs: 230 });
-    expect(r.pub().phase).toBe("reveal");
-    expect(r.pub().currentId).toBe(cur); // la TV montre encore son résultat
-    r.ctx.advance(r.cfg.duree_revelation * 1000);
-    expect(r.pub().currentId).toBe(r.order[1]!);
-    expect(r.pub().phase).toBe("waiting");
-  });
-
-  it("le temps mesuré par le téléphone fait foi, sauf valeur absurde", () => {
-    const r = round(2);
-    r.start();
-    r.ctx.advance(10_100);
-    r.stop(10_000); // le téléphone avait démarré 100 ms avant le serveur : on le croit
-    expect(r.pub().turns.find((t) => t.status === "done")!.elapsedMs).toBe(10_000);
-
-    const r2 = round(2);
-    r2.start();
-    r2.ctx.advance(10_100);
-    r2.stop(1); // triche : trop loin du temps serveur → temps serveur
-    expect(r2.pub().turns.find((t) => t.status === "done")!.elapsedMs).toBe(10_100);
-  });
-
-  it("ignore les payloads invalides", () => {
-    const r = round(2);
-    r.start();
-    r.ctx.advance(5000);
-    for (const bad of [null, "stop", 42, { action: "stop", ms: "5" }, { action: "x" }]) game.input(r.state, r.pub().currentId!, bad, r.ctx);
-    expect(r.pub().phase === "running" || r.pub().phase === "reveal").toBe(true);
-    // ms non numérique : le STOP est accepté avec le temps serveur
-    expect(r.pub().turns.find((t) => t.status === "done")?.elapsedMs ?? 5000).toBe(5000);
-  });
-
-  it("pas de START dans le délai : tour sauté sans point", () => {
-    const r = round(3);
-    const first = r.pub().currentId!;
-    r.ctx.advance(10_000);
-    expect(r.pub().turns.find((t) => t.id === first)).toMatchObject({ status: "missed", reason: "no-start" });
-    r.ctx.advance(r.cfg.duree_revelation * 1000);
-    expect(r.pub().currentId).toBe(r.order[1]!);
-  });
-
-  it("pas de STOP avant cible × 3 : tour raté", () => {
-    const r = round(2);
-    r.start();
-    r.ctx.advance(29_999);
-    expect(r.pub().phase).toBe("running");
+    expect(r.pub().phase).toBe("announce");
+    expect(r.ctx.countdownState?.seconds).toBe(r.cfg.annonce);
+    r.ctx.advance(r.cfg.annonce * 1000);
+    expect(r.pub().phase).toBe("ready");
+    expect(r.pub().goAt).toBe(r.ctx.now() + GO_LEAD_MS);
+    expect(r.pub().startedAt).toBeNull();
+    r.ctx.advance(GO_LEAD_MS - 1);
+    expect(r.pub().phase).toBe("ready");
     r.ctx.advance(1);
-    expect(r.pub().turns[0]).toMatchObject({ status: "missed", reason: "no-stop" });
+    expect(r.pub().phase).toBe("running");
+    expect(r.pub().startedAt).toBe(r.ctx.now());
   });
 
-  it("un joueur déconnecté est sauté, et la manche s'arrête si plus personne ne joue", () => {
-    const r = round(3, {}, undefined, ["p1"]);
-    expect(r.pub().turns.find((t) => t.id === "p1")).toMatchObject({ status: "missed", reason: "absent" });
-    expect(r.pub().currentId).not.toBe("p1");
+  it("le temps n'est jamais dans la vue publique, seulement qui a stoppé", () => {
+    const r = round(3);
+    r.goNow();
+    r.ctx.advance(4321);
+    r.stop("p1", 4321);
+    expect(r.pub().stoppedIds).toEqual(["p1"]);
+    expect(JSON.stringify(game.publicView(r.state, r.ctx))).not.toContain("4321");
+  });
 
-    const r2 = round(2, {}, undefined, ["p1", "p2"]);
+  it("ignore un STOP avant le GO, d'un inconnu, ou au payload invalide", () => {
+    const r = round(3);
+    r.stop("p1", 100);
+    r.goNow();
+    r.ctx.advance(3000);
+    r.stop("inconnu", 3000);
+    for (const bad of [undefined, null, "x", 12, {}, { ms: "3000" }, { ms: NaN }, { ms: Infinity }, { ms: -5 }, { ms: null }]) game.input(r.state, "p1", bad, r.ctx);
+    expect(r.pub().stoppedIds).toEqual([]);
+  });
+
+  it("ignore un temps impossible (plus long que la manche) ; un appui est définitif", () => {
+    const r = round(3);
+    r.goNow();
+    r.ctx.advance(2000);
+    r.stop("p1", 60_000);
+    expect(r.pub().stoppedIds).toEqual([]);
+    r.stop("p1", 1900);
+    r.stop("p1", 2000); // deuxième appui ignoré
+    r.stop("p2", 2000);
+    const { results } = r.finish();
+    expect((results as Results).ranking.find((x) => x.playerId === "p1")!.elapsedMs).toBe(1900);
+  });
+
+  it("fin anticipée quand tous les connectés ont stoppé", () => {
+    const r = round(3);
+    r.goNow();
+    r.ctx.advance(9000);
+    r.stop("p1", 9000);
+    r.stop("p2", 9500);
+    expect(r.ctx.ended).toBe(false);
+    r.stop("p3", 10_000);
+    expect(r.ctx.ended).toBe(true);
+  });
+
+  it("un absent ne bloque pas la manche ; sa déconnexion en cours de route la termine", () => {
+    const r = round(3, {}, () => 0.5, ["p3"]);
+    r.goNow();
+    r.ctx.advance(9000);
+    r.stop("p1", 9000);
+    r.stop("p2", 9500);
+    expect(r.ctx.ended).toBe(true);
+
+    const r2 = round(3);
+    r2.goNow();
+    r2.ctx.advance(9000);
+    r2.stop("p1", 9000);
+    r2.stop("p2", 9500);
+    expect(r2.ctx.ended).toBe(false);
+    r2.ctx.setConnected("p3", false);
+    game.onPresenceChange!(r2.state, r2.ctx);
     expect(r2.ctx.ended).toBe(true);
   });
 
-  it("le joueur dont c'est le tour se déconnecte : sauté tout de suite, sans attendre le délai de départ", () => {
-    const r = round(3);
-    const first = r.pub().currentId!;
-    r.ctx.setConnected(first, false);
-    game.onPresenceChange!(r.state, r.ctx);
-    expect(r.pub().turns.find((t) => t.id === first)).toMatchObject({ status: "missed", reason: "absent" });
-    expect(r.pub().currentId).toBe(r.order[1]!);
-    expect(r.pub().phase).toBe("waiting");
-  });
-
-  it("un absent à venir est sauté à son tour, mais joue s'il s'est reconnecté entre-temps", () => {
-    const r = round(3);
-    const [, second, third] = r.order as [string, string, string];
-    r.ctx.setConnected(second, false);
-    game.onPresenceChange!(r.state, r.ctx); // pas son tour : rien ne change
-    expect(r.pub().currentId).toBe(r.order[0]!);
-    r.ctx.setConnected(second, true);
-    r.play(10_000);
-    expect(r.pub().currentId).toBe(second);
-
-    const r2 = round(3);
-    r2.ctx.setConnected(r2.order[1]!, false);
-    r2.play(10_000);
-    expect(r2.pub().turns.find((t) => t.id === r2.order[1])).toMatchObject({ status: "missed", reason: "absent" });
-    expect(r2.pub().currentId).toBe(third);
-  });
-
-  it("un joueur qui se déconnecte en plein tour (déjà parti) garde son tour", () => {
+  it("personne ne réagit en pause d'annonce : onPresenceChange ne termine pas avant le GO", () => {
     const r = round(2);
-    const id = r.pub().currentId!;
-    r.start();
-    r.ctx.setConnected(id, false);
+    r.ctx.setConnected("p1", false);
+    r.ctx.setConnected("p2", false);
     game.onPresenceChange!(r.state, r.ctx);
-    expect(r.pub().phase).toBe("running");
-    r.ctx.advance(10_000);
-    r.stop(10_000);
-    expect(r.pub().turns.find((t) => t.id === id)!.status).toBe("done");
-  });
-
-  it("la manche se termine après le dernier tour", () => {
-    const r = round(2);
-    r.play(10_000);
     expect(r.ctx.ended).toBe(false);
-    r.play(9_000);
+  });
+
+  it("à cible + marge_max la manche s'arrête, les non-stoppés sont ratés", () => {
+    const r = round(3, { marge_max: 3 });
+    r.goNow();
+    r.ctx.advance(10_000);
+    r.stop("p1", 10_000);
+    r.ctx.advance(2999);
+    expect(r.ctx.ended).toBe(false);
+    r.ctx.advance(1);
     expect(r.ctx.ended).toBe(true);
+    const { results, scores } = r.finish();
+    expect((results as Results).missed.map((m) => m.playerId)).toEqual(["p2", "p3"]);
+    expect(scores).toEqual({ p1: 150 });
   });
 });
 
 describe("compte-a-rebours : classement et points", () => {
   it("points par place, écart absolu (trop tôt ou trop tard)", () => {
     const r = round(3);
-    const [a, b, c] = r.order as [string, string, string];
-    r.play(10_300); // a : +0,30
-    r.play(9_900); //  b : −0,10 → meilleur
-    r.play(10_050); // c : +0,05 → meilleur encore
+    r.goNow();
+    r.ctx.advance(10_000);
+    r.stop("p1", 10_300); // +0,30
+    r.stop("p2", 9_900); //  −0,10
+    r.stop("p3", 10_050); // +0,05
     const { results, scores } = r.finish();
-    expect((results as Results).ranking.map((x) => x.playerId)).toEqual([c, b, a]);
-    expect(scores).toEqual({ [c]: 150, [b]: 100, [a]: 70 });
+    expect((results as Results).ranking.map((x) => x.playerId)).toEqual(["p3", "p2", "p1"]);
+    expect((results as Results).ranking[1]).toMatchObject({ signedMs: -100, elapsedMs: 9_900 });
+    expect(scores).toEqual({ p3: 150, p2: 100, p1: 70 });
   });
 
   it("égalité : même place, et la suivante saute", () => {
     const r = round(3);
-    const [a, b, c] = r.order as [string, string, string];
-    r.play(10_100);
-    r.play(9_900); // même écart au centième : égalité
-    r.play(10_500);
+    r.goNow();
+    r.ctx.advance(10_000);
+    r.stop("p1", 10_100);
+    r.stop("p2", 9_900);
+    r.stop("p3", 10_500);
     const { scores, results } = r.finish();
-    expect(scores).toEqual({ [a]: 150, [b]: 150, [c]: 70 });
+    expect(scores).toEqual({ p1: 150, p2: 150, p3: 70 });
     expect((results as Results).ranking.map((x) => x.rank)).toEqual([1, 1, 3]);
   });
 
-  it("place absente de la liste = 0, tour raté = pas de ligne de score", () => {
+  it("place absente de la liste = 0 ; les ratés n'ont pas de ligne de score", () => {
     const r = round(3, { points: [100] });
-    const [a, b, c] = r.order as [string, string, string];
-    r.play(10_000);
-    r.play(10_400);
-    r.ctx.advance(10_000); // c ne démarre pas
-    const { scores, results } = r.finish();
-    expect(scores).toEqual({ [a]: 100, [b]: 0 });
-    expect(scores[c]).toBeUndefined();
-    expect((results as Results).missed).toEqual([{ playerId: c, reason: "no-start" }]);
+    r.goNow();
+    r.ctx.advance(10_000);
+    r.stop("p1", 10_000);
+    r.stop("p2", 10_400);
+    r.ctx.advance(10_000);
+    const { scores } = r.finish();
+    expect(scores).toEqual({ p1: 100, p2: 0 });
   });
 
-  it("rankByError et formats", () => {
+  it("personne n'a stoppé : résultat vide, aucun point", () => {
+    const r = round(3);
+    r.goNow();
+    r.ctx.advance(20_000);
+    const { scores, results } = r.finish();
+    expect(scores).toEqual({});
+    expect((results as Results).ranking).toEqual([]);
+    expect(revealSeconds(results as Results)).toBeGreaterThan(0);
+  });
+
+  it("rankByError, formats, et durée de la révélation qui croît avec les joueurs", () => {
     expect(rankByError([3, -1, 1], (x) => x * 10).map((r) => [r.item, r.rank])).toEqual([[-1, 1], [1, 1], [3, 3]]);
     expect(fmtSeconds(7340)).toBe("7,34");
     expect(fmtSigned(-80)).toBe("−0,08");
-    expect(fmtSigned(230)).toBe("+0,23");
+    expect(fmtCible(8)).toBe("8,0");
+    expect(fmtCible(7.5)).toBe("7,5");
+    const mk = (n: number): Results => ({
+      design: "digital",
+      cible: 8,
+      ranking: Array.from({ length: n }, (_, i) => ({ playerId: `p${i}`, rank: i + 1, elapsedMs: 8000, signedMs: i * 100 })),
+      missed: [],
+    });
+    expect(revealSeconds(mk(7))).toBeGreaterThan(revealSeconds(mk(3)));
   });
 });
 
-describe("compte-a-rebours : compteur chaotique", () => {
-  const v = { cible: 10, visible: 3, decompte: false };
-  it("montre la vraie valeur pendant la phase visible, en montée ou en décompte", () => {
-    expect(counterFrame(2340, v)).toMatchObject({ kind: "clear", text: "02,34" });
-    expect(counterFrame(2340, { ...v, decompte: true })).toMatchObject({ kind: "clear", text: "07,66" });
-  });
-  it("devient chaotique ensuite, sans jamais afficher la vraie valeur, et de façon reproductible", () => {
+describe("compte-a-rebours : compteurs chaotiques", () => {
+  const vis = 2500;
+  it("net pendant la phase visible, puis chaotique, sans jamais montrer la vraie valeur, de façon reproductible", () => {
+    expect(chaosAt(1200, vis, 42).mode).toBe("clear");
+    expect(shownMs(1200, chaosAt(1200, vis, 42), 10)).toBe(1200);
     let leaked = 0;
-    for (let t = 3500; t < 12_000; t += 37) {
-      const f = counterFrame(t, v);
-      expect(f.kind).not.toBe("clear");
-      expect(counterFrame(t, v)).toEqual(f);
-      if (f.kind !== "glitch" && f.text === (t / 1000).toFixed(2).replace(".", ",").padStart(5, "0")) leaked++;
+    for (let t = 3200; t < 12_000; t += 37) {
+      const c = chaosAt(t, vis, 42);
+      expect(c.mode).not.toBe("clear");
+      expect(shownMs(t, chaosAt(t, vis, 42), 10)).toBe(shownMs(t, c, 10));
+      if (Math.abs(shownMs(t, c, 10) - t) < 10) leaked++;
     }
-    expect(leaked).toBeLessThan(3); // une coïncidence au centième près est possible, pas un affichage systématique
+    expect(leaked).toBeLessThan(5);
+  });
+  it("la graine change le déroulé du chaos", () => {
+    const a = chaosAt(6000, vis, 1);
+    const b = chaosAt(6000, vis, 999_999);
+    const sample = (c: typeof a) => [0, 1, 2, 3].map((k) => c.rnd(k));
+    expect(sample(a)).not.toEqual(sample(b));
   });
 });
 
 describe("compte-a-rebours : à travers le moteur", () => {
-  it("deux joueurs jouent chacun leur tour, les points arrivent dans les deltas", () => {
-    const cfg = parse({ delai_depart: 5, duree_revelation: 1 });
+  it("deux joueurs stoppent en même temps, les points arrivent dans les deltas", () => {
+    const cfg = parse({ annonce: 2 });
     const t = createTestEngine({ games: [{ game, cfg }], players: 2 });
     t.engine.setSetup({ counts: { "compte-a-rebours": 1 } });
     t.engine.start();
     t.clock.advance(4000); // intro
     const pub = () => t.engine.snapshot(null).round!.public as Pub;
-    expect(pub().phase).toBe("waiting");
-    expect(t.engine.snapshot(null).round!.timerTotalMs).toBe(5000);
-
-    const first = pub().currentId!;
-    t.engine.input(first, { action: "start" });
-    expect(t.engine.snapshot(null).round!.timerTotalMs).toBeNull();
+    expect(pub().phase).toBe("announce");
+    t.clock.advance(2000);
+    expect(pub().phase).toBe("ready");
+    t.clock.advance(GO_LEAD_MS);
+    expect(pub().phase).toBe("running");
     t.clock.advance(10_200);
-    t.engine.input(first, { action: "stop", ms: 10_200 });
-    expect(pub().phase).toBe("reveal");
-    t.clock.advance(1000);
-    const second = pub().currentId!;
-    expect(second).not.toBe(first);
-    t.engine.input(second, { action: "start" });
-    t.clock.advance(10_050);
-    t.engine.input(second, { action: "stop", ms: 10_050 });
-    t.clock.advance(1000);
-
-    const s = t.engine.snapshot(null);
-    expect(s.phase).toBe("results");
-    expect(s.round!.deltas).toEqual({ [second]: 150, [first]: 100 });
+    const [a, b] = t.engine.snapshot(null).players.map((p) => p.id) as [string, string];
+    t.engine.input(a, { ms: 10_200 });
+    expect(pub().stoppedIds).toEqual([a]);
+    t.engine.input(b, { ms: 10_050 });
+    expect(t.engine.snapshot(null).phase).toBe("results");
+    expect(t.engine.snapshot(null).round!.deltas).toEqual({ [b]: 150, [a]: 100 });
   });
 });
