@@ -2,6 +2,8 @@
  * Skin « GunZ » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="gunz"].
  * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
  * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ * Boutique d'origine : fond noir, bandeau de métal sale à rivets, onglet vert lumineux, cadres de métal vissés,
+ * en-têtes de colonnes gravés, ligne sélectionnée blanche à texte noir, boutons gris en relief, LED rouge.
  */
 
 /* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
@@ -35,13 +37,238 @@ html[data-skin="gunz"] {
   --shadow-glow: 0 0 1rem rgb(155 226 45 / 0.45);
   --shadow-btn: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 0.2rem 0.4rem rgb(0 0 0 / 0.7);
   --gradient-bg: radial-gradient(60% 50% at 35% 55%, #1a1a1a, #000 70%);
-  --gradient-gold: linear-gradient(180deg, #5c5c5c 0%, #3a3a3a 50%, #262626 100%);
+  /* « or » = le vert lumineux de l'onglet actif (titres, remplissages, bouton principal) */
+  --gradient-gold: linear-gradient(180deg, #e2ff9a 0%, #9be22d 50%, #5fa312 100%);
   --gradient-hot: linear-gradient(135deg, #ff3b1f, #262626);
   --gradient-glass: linear-gradient(180deg, #2c2a26 0%, #141310 100%);
+  /* Matières propres au skin */
+  --gz-metal: linear-gradient(180deg, #5c5c5c 0%, #3a3a3a 50%, #262626 100%);
+  --gz-brushed: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.03) 0 1px, transparent 1px 4px), repeating-linear-gradient(0deg, rgb(0 0 0 / 0.25) 0 2px, transparent 2px 7px), linear-gradient(180deg, #2c2a26 0%, #141310 100%);
+  --gz-rivets: radial-gradient(circle, #9a9a9a 0 0.09em, #2a2a2a 0.12em, transparent 0.15em) 0 50% / 0.7em 0.35em repeat-x;
+  --gz-screw: radial-gradient(circle, #b8b8b8 0 18%, #6a6a6a 22% 38%, #1e1e1e 42% 52%, transparent 56%);
+  --gz-relief: linear-gradient(180deg, #4a4a4a, #2a2a2a);
 }
 
 /* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
+html[data-skin="gunz"] body { background: #000; }
+html[data-skin="gunz"] h1,
+html[data-skin="gunz"] h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0; text-transform: none; }
+html[data-skin="gunz"] .text-gold-gradient { filter: drop-shadow(0 0 0.25em rgb(155 226 45 / 0.55)); }
+html[data-skin="gunz"] .shadow-glow { box-shadow: 0 0 0.9rem rgb(155 226 45 / 0.4); }
+html[data-skin="gunz"] .bg-night { background-color: #000; }
+html[data-skin="gunz"] .bg-hot-gradient { background-image: linear-gradient(180deg, #7a1a0e, #3a0c06); }
 
-/* ── Fond (html[data-skin="gunz"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+/* Encadré noir à fin bord gris (le « verre » devient une case du jeu) */
+html[data-skin="gunz"] .glass {
+  background-image: none;
+  background-color: #000;
+  border: 1px solid #6a6a6a;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px #111, 0 0.2rem 0.6rem rgb(0 0 0 / 0.7);
+}
+
+/* Panneau : épais cadre de métal gris, une vis à chaque coin, intérieur noir */
+html[data-skin="gunz"] [data-ui="panel"] {
+  background:
+    var(--gz-screw) left 0.25em top 0.25em / 1.1em 1.1em no-repeat,
+    var(--gz-screw) right 0.25em top 0.25em / 1.1em 1.1em no-repeat,
+    var(--gz-screw) left 0.25em bottom 0.25em / 1.1em 1.1em no-repeat,
+    var(--gz-screw) right 0.25em bottom 0.25em / 1.1em 1.1em no-repeat,
+    #000;
+  border: 0.35rem solid #3a3a3a;
+  border-radius: 0.8rem;
+  box-shadow: 0 0 0 0.1rem #7a7a7a, inset 0 0 0 0.1rem #111, inset 0 0 0 0.2rem #4a4a4a, 0 0.6rem 1.4rem rgb(0 0 0 / 0.8);
+}
+/* En-tête de colonne : métal dégradé, texte gris gravé */
+html[data-skin="gunz"] [data-ui="panel-title"] {
+  width: fit-content;
+  padding: 0.1em 1em;
+  margin-bottom: 0.3em;
+  background: var(--gz-metal);
+  border: 1px solid #777;
+  border-radius: 0.45em 0.45em 0 0;
+  color: #d0d0d0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-shadow: 0 -1px 0 #000, 0 1px 0 #666;
+}
+
+/* Boutons : gris en relief (bord clair en haut à gauche, sombre en bas à droite), texte blanc Arial */
+html[data-skin="gunz"] [data-ui="button"] {
+  background: var(--gz-relief);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-shadow: 0 1px 0 #000;
+  border: 1px solid;
+  border-color: #9a9a9a #1a1a1a #1a1a1a #9a9a9a;
+  box-shadow: 0 0 0 1px #000;
+}
+html[data-skin="gunz"] [data-ui="button"][data-variant="primary"],
+html[data-skin="gunz"] [data-ui="button"][data-variant="good"] {
+  background: linear-gradient(180deg, #b6f04f 0%, #7fc41c 50%, #4c8a0e 100%);
+  color: #0d1a00;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.35);
+  border-color: #e2ff9a #2f5a06 #2f5a06 #e2ff9a;
+}
+html[data-skin="gunz"] [data-ui="button"][data-variant="danger"],
+html[data-skin="gunz"] [data-ui="button"][data-variant="bad"] {
+  background: linear-gradient(180deg, #c4361f, #6e1608);
+  color: #fff;
+  border-color: #ff8a70 #3a0a04 #3a0a04 #ff8a70;
+}
+html[data-skin="gunz"] [data-ui="button"][data-variant="ghost"] { background: transparent; border-color: transparent; box-shadow: none; color: var(--color-ink-muted); text-shadow: none; }
+html[data-skin="gunz"] [data-ui="button"]:disabled { filter: grayscale(0.6); }
+
+/* Choix : ligne de liste ; sélectionnée = fond BLANC, texte NOIR gras */
+html[data-skin="gunz"] [data-ui="choice"] {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  border-radius: 0.15rem;
+}
+html[data-skin="gunz"] [data-ui="choice"].glass {
+  border: 1px solid #555;
+  box-shadow: none;
+  color: #fff;
+}
+html[data-skin="gunz"] [data-ui="choice"][data-selected="true"].glass {
+  background-color: #fff;
+  border-color: #fff;
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 0 0.8rem rgb(255 255 255 / 0.35);
+}
+html[data-skin="gunz"] [data-ui="choice"][data-selected="true"] [data-ui="choice-label"] { font-weight: 700; }
+html[data-skin="gunz"] [data-ui="choice"][data-state="correct"] { background-color: rgb(155 226 45 / 0.22) !important; border-color: #9be22d !important; color: #fff; }
+html[data-skin="gunz"] [data-ui="choice"][data-state="wrong"] { background-color: rgb(255 59 31 / 0.2) !important; border-color: #ff3b1f !important; color: #fff; }
+html[data-skin="gunz"] [data-ui="choice-key"] { background: var(--gz-metal); color: #cfcfcf; border: 1px solid #777; font-family: var(--font-display); }
+html[data-skin="gunz"] [data-ui="choice"][data-selected="true"].glass [data-ui="choice-key"] { color: #fff; border-color: #000; }
+html[data-skin="gunz"] [data-ui="choice-check"],
+html[data-skin="gunz"] [data-ui="selected-badge"] { background: #000; color: #9be22d; border: 2px solid #9be22d; border-radius: 0.2rem; box-shadow: 0 0 0.5rem rgb(155 226 45 / 0.6); }
+
+/* Barre de résultat : rail noir, remplissage métal ; le gagnant en vert lumineux */
+html[data-skin="gunz"] [data-ui="result-bar"] { background: #000; border: 1px solid #6a6a6a; border-radius: 0.2rem; box-shadow: inset 0 0 0 1px #111; }
+html[data-skin="gunz"] [data-ui="result-bar-fill"] { border-radius: 0; background-image: linear-gradient(180deg, #6a6a6a, #3a3a3a 55%, #2a2a2a); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25); }
+html[data-skin="gunz"] [data-ui="result-bar"][data-highlight="true"] { border-color: #9be22d; }
+html[data-skin="gunz"] [data-ui="result-bar"][data-highlight="true"] [data-ui="result-bar-fill"] { background-image: var(--gradient-gold); box-shadow: 0 0 0.9rem rgb(155 226 45 / 0.55); color: #0d1a00; }
+
+/* Chrono : afficheur LED rouge dans un cadre arrondi (TV) ; barre à segments (téléphone) */
+html[data-skin="gunz"] [data-ui="countdown-frame"] {
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  border: 0.18rem solid #4a4a4a;
+  border-radius: 0.6rem;
+  box-shadow: 0 0 0 0.05rem #7a7a7a, inset 0 0 0.8rem rgb(0 0 0 / 0.9);
+}
+html[data-skin="gunz"] [data-ui="countdown-frame"]::after {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0.35rem;
+  height: 0.28rem;
+  width: calc((100% - 1rem) * var(--p, 1));
+  background: repeating-linear-gradient(90deg, #ff3b1f 0 0.3rem, transparent 0.3rem 0.4rem);
+  box-shadow: 0 0 0.4rem rgb(255 59 31 / 0.8);
+}
+html[data-skin="gunz"] [data-ui="countdown"] [data-ui="countdown-num"] { font-family: var(--font-num); color: #ff3b1f; text-shadow: 0 0 0.35em rgb(255 59 31 / 0.85); }
+html[data-skin="gunz"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-num"] { color: #ff6a4d; text-shadow: 0 0 0.5em rgb(255 59 31 / 1); }
+html[data-skin="gunz"] [data-ui="countdown"][data-size="phone"] [data-ui="countdown-track"] { background: #000; border: 1px solid #6a6a6a; border-radius: 0.15rem; }
+html[data-skin="gunz"] [data-ui="countdown"][data-size="phone"] [data-ui="countdown-fill"] {
+  border-radius: 0;
+  background: repeating-linear-gradient(90deg, #ff3b1f 0 5px, transparent 5px 7px);
+  box-shadow: 0 0 6px rgb(255 59 31 / 0.7);
+}
+
+/* Avatars : case sombre à fin bord gris, pastille carrée de métal */
+html[data-skin="gunz"] [data-ui="avatar"] { outline: 1px solid #6a6a6a; outline-offset: 2px; }
+html[data-skin="gunz"] [data-ui="avatar-badge"] { background: var(--gz-metal); color: #fff; border: 1px solid #aaa; border-radius: 0.2em; }
+html[data-skin="gunz"] [data-ui="roster"] { background: var(--gz-rivets) top / 0.7em 0.35em repeat-x; padding-top: 0.6em; }
+html[data-skin="gunz"] [data-ui="roster-item"][data-done="true"] [data-ui="avatar"] { outline-color: #9be22d; box-shadow: 0 0 0.8rem rgb(155 226 45 / 0.5); }
+html[data-skin="gunz"] [data-ui="answered-count"] { font-family: var(--font-num); text-shadow: 0 0 0.3em rgb(155 226 45 / 0.5); }
+html[data-skin="gunz"] [data-ui="vote-dots"] span.rounded-full { border-radius: 0.15rem; }
+
+/* Pavé numérique : touches de métal en relief */
+html[data-skin="gunz"] [data-ui="numpad-key"] {
+  background: var(--gz-relief);
+  color: #fff;
+  font-family: var(--font-sans);
+  border: 1px solid;
+  border-color: #9a9a9a #1a1a1a #1a1a1a #9a9a9a;
+  border-radius: 0.15rem;
+  box-shadow: 0 0 0 1px #000;
+}
+
+/* Boîte de dialogue = fenêtre vissée */
+html[data-skin="gunz"] [data-ui="dialog"] {
+  background:
+    var(--gz-screw) left 0.25rem top 0.25rem / 1.1rem 1.1rem no-repeat,
+    var(--gz-screw) right 0.25rem top 0.25rem / 1.1rem 1.1rem no-repeat,
+    var(--gz-screw) left 0.25rem bottom 0.25rem / 1.1rem 1.1rem no-repeat,
+    var(--gz-screw) right 0.25rem bottom 0.25rem / 1.1rem 1.1rem no-repeat,
+    #000;
+  border: 0.4rem solid #3a3a3a;
+  border-radius: 0.8rem;
+  box-shadow: 0 0 0 0.1rem #7a7a7a, inset 0 0 0 0.2rem #4a4a4a, 0 1rem 3rem #000;
+}
+html[data-skin="gunz"] [data-ui="paused"] { background: rgb(0 0 0 / 0.85); backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+/* Bandeau du haut : métal sale brossé, rangée de rivets en bas ; fil d'Ariane en petit texte blanc */
+html[data-skin="gunz"] [data-ui="round-header"] {
+  padding-bottom: 0.9rem;
+  background: var(--gz-rivets) bottom / 0.7rem 0.35rem repeat-x, var(--gz-brushed);
+  border-bottom: 0.15rem solid #555;
+}
+html[data-skin="gunz"] [data-ui="round-header"] .font-display {
+  font-weight: 700;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 0.25em rgb(155 226 45 / 0.55));
+}
+html[data-skin="gunz"] [data-ui="round-tag"] { background: none; border-radius: 0; color: #fff; font-family: var(--font-sans); letter-spacing: 0; }
+html[data-skin="gunz"] [data-ui="host-bar"] { background: var(--gz-rivets) top / 0.7rem 0.35rem repeat-x, var(--gz-brushed); border-top: 0.1rem solid #555; padding-top: 0.6rem; }
+
+/* Classement : lignes de liste sur noir, rang 1 en vert lumineux */
+html[data-skin="gunz"] [data-ui="score-row"].glass { border-radius: 0.15rem; }
+html[data-skin="gunz"] [data-ui="score-row"][data-rank="1"] .font-num,
+html[data-skin="gunz"] [data-ui="score-row"][data-highlight="true"] { text-shadow: 0 0 0.35em rgb(155 226 45 / 0.6); }
+html[data-skin="gunz"] [data-ui="podium"] > div > div:last-child { border-radius: 0.2rem 0.2rem 0 0; border: 1px solid #777; }
+
+/* ── Fond : noir, lueur centrale, grain de métal ; les 3 calques portent le grain, une lueur lente et un balayage */
+html[data-skin="gunz"] [data-ui="backdrop"] { background: radial-gradient(60% 50% at 35% 55%, #1a1a1a, #000 70%); }
+html[data-skin="gunz"] [data-backdrop-default] { display: none; }
+html[data-skin="gunz"] [data-ui="backdrop-layer"][data-layer="1"] {
+  background: repeating-linear-gradient(0deg, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 4px);
+}
+html[data-skin="gunz"] [data-ui="backdrop-layer"][data-layer="2"] {
+  background: radial-gradient(40% 35% at 75% 30%, rgb(155 226 45 / 0.07), transparent 70%);
+}
+html[data-skin="gunz"] [data-ui="backdrop-layer"][data-layer="3"] {
+  background: linear-gradient(90deg, transparent 0%, rgb(255 255 255 / 0.03) 50%, transparent 100%) 0 0 / 30% 100% no-repeat;
+}
 
 /* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */
+@keyframes gz-glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes gz-sweep { from { background-position: -40% 0; } to { background-position: 140% 0; } }
+@keyframes gz-led-low { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+@keyframes gz-select { 0% { box-shadow: 0 0 0 rgb(255 255 255 / 0); } 50% { box-shadow: 0 0 1.4rem rgb(255 255 255 / 0.6); } 100% { box-shadow: 0 0 0.8rem rgb(255 255 255 / 0.35); } }
+@keyframes gz-panel-in { from { opacity: 0; transform: translateY(0.6rem); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-skin="gunz"] [data-ui="backdrop-layer"][data-layer="2"] { animation: gz-glow 7s ease-in-out infinite; }
+  html[data-skin="gunz"] [data-ui="backdrop-layer"][data-layer="3"] { animation: gz-sweep 18s linear infinite; }
+  html[data-skin="gunz"] [data-ui="button"]:not(:disabled):hover,
+  html[data-skin="gunz"] [data-ui="numpad-key"]:not(:disabled):hover { filter: brightness(1.2); }
+  html[data-skin="gunz"] [data-ui="button"]:not(:disabled):active,
+  html[data-skin="gunz"] [data-ui="numpad-key"]:not(:disabled):active { border-color: #1a1a1a #9a9a9a #9a9a9a #1a1a1a; filter: brightness(0.85); }
+  html[data-skin="gunz"] [data-ui="choice"]:not(:disabled):active { filter: brightness(1.4); }
+  html[data-skin="gunz"] [data-ui="choice"][data-selected="true"].glass { animation: gz-select 0.5s ease-out; }
+  html[data-skin="gunz"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-frame"]::after { animation: gz-led-low 0.8s steps(2, jump-none) infinite; }
+  html[data-skin="gunz"] [data-ui="panel"] { animation: gz-panel-in 0.35s ease-out both; }
+}
