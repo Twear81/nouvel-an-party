@@ -8,6 +8,7 @@ import cultureGenante from "./culture-genante/game";
 import leBonPrix from "./le-bon-prix/game";
 import pierreFeuilleCiseaux from "./pierre-feuille-ciseaux/game";
 import quiADit from "./qui-a-dit/game";
+import splitTheRoom from "./split-the-room/game";
 import quiEstLePlus from "./qui-est-le-plus/game";
 import simon from "./simon/game";
 import tierList from "./tier-list/game";
@@ -19,6 +20,7 @@ export const serverGames: MiniGame[] = [
   commeLesAutres,
   leBonPrix,
   quiADit,
+  splitTheRoom,
   compteARebours,
   simon,
   pierreFeuilleCiseaux,
