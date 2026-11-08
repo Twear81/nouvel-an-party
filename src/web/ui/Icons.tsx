@@ -49,3 +49,16 @@ export const CheckIcon = (p: SVGProps<SVGSVGElement>) => (
     <path d="m5 12.5 4.5 4.5L19 7" />
   </svg>
 );
+export const UndoIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base({ fill: "none", stroke: "currentColor", strokeWidth: 2.4, strokeLinecap: "round", strokeLinejoin: "round", ...p })}>
+    <path d="M9 14 4 9l5-5" />
+    <path d="M4 9h10a6 6 0 0 1 0 12h-3" />
+  </svg>
+);
+export const TrashIcon = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base({ fill: "none", stroke: "currentColor", strokeWidth: 2.4, strokeLinecap: "round", strokeLinejoin: "round", ...p })}>
+    <path d="M4 7h16" />
+    <path d="M9 7V4h6v3" />
+    <path d="M6 7l1 13h10l1-13" />
+  </svg>
+);

@@ -16,6 +16,7 @@ export const GAME_NAMES = {
   "pierre-feuille-ciseaux": "Pierre-feuille-ciseaux : le tournoi",
   "culture-genante": "Culture gênante",
   imposteur: "L'imposteur",
+  "dessin-rate": "Dessin raté",
 } as const;
 export type GameId = keyof typeof GAME_NAMES | (string & {});
 

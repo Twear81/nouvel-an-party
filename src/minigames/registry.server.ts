@@ -3,6 +3,7 @@
 import type { MiniGame } from "./contract";
 import ceciOuCela from "./ceci-ou-cela/game";
 import commeLesAutres from "./comme-les-autres/game";
+import dessinRate from "./dessin-rate/game";
 import compteARebours from "./compte-a-rebours/game";
 import cultureGenante from "./culture-genante/game";
 import imposteur from "./imposteur/game";
@@ -27,4 +28,5 @@ export const serverGames: MiniGame[] = [
   pierreFeuilleCiseaux,
   cultureGenante, // interlude : surgit entre les jeux
   imposteur,
+  dessinRate,
 ];
