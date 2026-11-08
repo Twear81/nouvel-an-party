@@ -57,7 +57,7 @@ export interface Results {
   /** Toutes les notes, révélées en fin de manche : votant → invité → étage. */
   ratings: Record<string, Record<string, number>>;
   /** Pour chaque votant : invités placés dans le bon étage, et nombre d'invités notés. */
-  hits: Record<string, { good: string[]; rated: number }>;
+  hits: Record<string, string[]>;
 }
 
 /** Invités que ce votant peut noter. */
@@ -133,7 +133,7 @@ export default defineMiniGame<Cfg, Item, State>({
     const ratings: Results["ratings"] = {};
     for (const [voter, mine] of state.ratings) {
       const good = [...mine].filter(([target, tier]) => tierOf.get(target) === tier).map(([target]) => target);
-      hits[voter] = { good, rated: mine.size };
+      hits[voter] = good;
       ratings[voter] = Object.fromEntries(mine);
       if (good.length) scores[voter] = good.length * ctx.cfg.points.consensus;
     }

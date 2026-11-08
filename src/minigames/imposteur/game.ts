@@ -60,8 +60,6 @@ export interface Pub {
   step: Step;
   tour: number;
   tours: number;
-  /** Joueurs de la manche, toujours dans le même ordre. */
-  playerIds: string[];
   /** Étape « parole » : ordre de passage, orateur courant (null hors parole) et ceux qui ont déjà parlé. */
   order: string[];
   currentId: string | null;
@@ -90,7 +88,6 @@ export interface Results {
   imposterWord: string;
   /** L'imposteur a strictement le plus de votes. */
   unmasked: boolean;
-  playerIds: string[];
   votes: VoteInfo[];
   /** Points gagnés par l'imposteur s'il n'est pas démasqué (0 sinon). */
   imposterGain: number;
@@ -184,7 +181,6 @@ export default defineMiniGame<Cfg, Item, State>({
       step: state.step,
       tour: state.tour,
       tours: ctx.cfg.tours_max,
-      playerIds: playerIds(ctx),
       order: speaking ? state.order : [],
       currentId: speaking ? (state.order[state.speaker] ?? null) : null,
       spokenIds: speaking ? [...state.spoken] : [],
@@ -220,7 +216,6 @@ export default defineMiniGame<Cfg, Item, State>({
       majorityWord: state.majorityWord,
       imposterWord: state.imposterWord,
       unmasked,
-      playerIds: playerIds(ctx),
       votes: [...state.votes].map(([voterId, targetId]) => ({ voterId, targetId })),
       imposterGain: !unmasked && imp ? ctx.cfg.points.imposteur_survit : 0,
       rightPoints: ctx.cfg.points.bon_vote,

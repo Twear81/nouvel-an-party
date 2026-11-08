@@ -9,6 +9,9 @@ import type { Priv, Pub } from "./game";
 import { draftToValue, formatNumber, pressKey } from "./number";
 import { fitText, LETTERS, Unbroken, PhoneSerious, SeriousTimer } from "./Serious";
 
+/** Réponse déjà enregistrée ? (QCM : un choix, estimation : une valeur) */
+const answered = (priv: Priv | null | undefined) => !!priv && (priv.choice !== null || priv.value !== null);
+
 /** Écran d'attente, identique pendant l'accroche et la bascule (aucun indice sur ce qui arrive). */
 function Waiting({ stage }: { stage: string }) {
   return (
@@ -48,7 +51,7 @@ function QcmPhone({ pub, priv, round, sendInput }: MiniGameViewProps<Pub, Priv>)
   const choices = pub.choices ?? [];
   const mine = priv?.choice ?? null;
   const answer = (i: number) => {
-    if (priv?.answered) return;
+    if (answered(priv)) return;
     const ms = shownAt.current === null ? 0 : performance.now() - shownAt.current;
     void sendInput({ choice: i, ms }).catch(() => {});
   };
@@ -69,8 +72,8 @@ function QcmPhone({ pub, priv, round, sendInput }: MiniGameViewProps<Pub, Priv>)
                 type="button"
                 data-testid={`cg-choice-${i}`}
                 whileTap={{ scale: 0.97 }}
-                animate={{ opacity: priv?.answered && !selected ? 0.35 : 1 }}
-                disabled={!!priv?.answered}
+                animate={{ opacity: answered(priv) && !selected ? 0.35 : 1 }}
+                disabled={answered(priv)}
                 onClick={() => answer(i)}
                 aria-pressed={selected}
                 className={`relative flex min-h-[4rem] flex-1 items-center gap-4 border px-4 text-left ${selected ? "border-serious-good bg-serious-good/15" : "border-serious-line bg-serious-bg-2/70"}`}
@@ -84,7 +87,7 @@ function QcmPhone({ pub, priv, round, sendInput }: MiniGameViewProps<Pub, Priv>)
             );
           })}
         </div>
-        {priv?.answered && <p className="shrink-0 animate-pulse-soft text-center text-lg text-serious-muted">Réponse enregistrée. On attend les autres…</p>}
+        {answered(priv) && <p className="shrink-0 animate-pulse-soft text-center text-lg text-serious-muted">Réponse enregistrée. On attend les autres…</p>}
       </div>
     </PhoneSerious>
   );
@@ -93,7 +96,7 @@ function QcmPhone({ pub, priv, round, sendInput }: MiniGameViewProps<Pub, Priv>)
 function EstimationPhone({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>) {
   const [draft, setDraft] = useState("");
   const value = draftToValue(draft);
-  const done = !!priv?.answered;
+  const done = answered(priv);
   const shown = value === null ? "" : formatNumber(value);
 
   return (

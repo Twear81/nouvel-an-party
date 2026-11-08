@@ -130,7 +130,7 @@ describe("tier-list : consensus et points", () => {
     ]);
     // p1 et p2 avaient mis p3 en S : pas A. Seul p2 avait mis p1 en B : +25. p3 n'a rien d'aligné.
     expect(scores).toEqual({ p2: 25 });
-    expect(r.hits.p2).toEqual({ good: ["p1"], rated: 2 });
+    expect(r.hits.p2).toEqual(["p1"]);
     expect(r.ratings.p1).toEqual({ p3: 0 });
   });
 

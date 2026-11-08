@@ -215,11 +215,11 @@ const PhoneResults = ({ results, snapshot, playerById }: MiniGameViewProps<Pub, 
       {mine ? (
         <>
           <p className="text-xl font-bold">
-            <span className={mine.good.length > 0 ? "text-good" : "text-ink-muted"}>{mine.good.length}</span> / {mine.rated} comme la tablée
+            <span className={mine.length > 0 ? "text-good" : "text-ink-muted"}>{mine.length}</span> / {rated.length} comme la tablée
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             {rated.map((id, i) => {
-              const ok = mine.good.includes(id);
+              const ok = mine.includes(id);
               return (
                 <motion.div key={id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + i * 0.07 }}>
                   <PlayerAvatar profile={playerById(id)?.profile ?? null} size="xs" dimmed={!ok} badge={ok ? <CheckIcon /> : undefined} />

@@ -176,7 +176,7 @@ describe("culture-genante : QCM", () => {
     const bad = r.idx("Le requin");
     r.answer("p1", bad);
     r.answer("p1", good);
-    expect((game.privateView!(r.state, "p1", r.ctx) as Priv)).toEqual({ answered: true, choice: bad, value: null });
+    expect((game.privateView!(r.state, "p1", r.ctx) as Priv)).toEqual({ choice: bad, value: null });
     expect(r.finish().scores.p1).toBe(0);
   });
 
