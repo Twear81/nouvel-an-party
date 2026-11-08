@@ -463,6 +463,7 @@ export class GameEngine {
           }
         : null,
       joinUrl: this.opts.joinUrl,
+      skin: "dofus", // provisoire : rotation à brancher (docs/skins.md)
       me: viewer ? { id: viewer, private: priv, inRound: !!c?.ctx.players.some((p) => p.id === viewer) } : null,
     };
   }

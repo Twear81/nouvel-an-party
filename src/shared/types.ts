@@ -1,6 +1,8 @@
 // Types partagés entre le serveur et les écrans (TV + téléphones).
 // Toute donnée qui transite par le réseau est décrite ici.
 
+import type { SkinId } from "./skins";
+
 export type PlayerId = string;
 
 export type Avatar =
@@ -96,6 +98,8 @@ export interface GameSnapshot {
   /** Numérotation affichée (interludes non comptés) : « manche roundIndex + 1 / total ». */
   resumable: { roundIndex: number; total: number } | null;
   joinUrl: string;
+  /** Habillage visuel courant (docs/skins.md) : identique pour la TV et tous les téléphones. */
+  skin: SkinId;
   /** Uniquement pour un téléphone : son identité et sa vue privée du mini-jeu. */
   me: { id: PlayerId; private: unknown; /** false si arrivé après le début de la manche */ inRound: boolean } | null;
 }
