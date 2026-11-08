@@ -188,3 +188,25 @@ img { -webkit-touch-callout: none; }
   --gradient-pedestal: linear-gradient(180deg, var(--color-bg-3) 0%, var(--color-bg-2) 100%);
   --gradient-pedestal-top: linear-gradient(180deg, var(--color-accent-strong) 0%, var(--color-accent-deep) 100%);
 }
+/* ─── fin mini-jeu le-bon-prix ─── */
+/* ─── mini-jeu culture-genante ───
+ * Le mode « sérieux » : après l'accroche rigolote, la TV (et les téléphones) basculent dans un décor sobre,
+ * sombre, sans paillettes, avec une typo solennelle. Tout passe par ces jetons : `bg-serious`, `text-serious-ink`,
+ * `font-serious`… (voir src/minigames/culture-genante/Serious.tsx). */
+@theme static {
+  --color-serious-bg: #0a0b0f;
+  --color-serious-bg-2: #171a22;
+  --color-serious-ink: #ebe7df;
+  --color-serious-muted: #8d9099;
+  --color-serious-line: rgb(235 231 223 / 0.2);
+  --color-serious-accent: #d6cfbd;
+  --color-serious-good: #8fc2a1;
+  --color-serious-bad: #cf8f8f;
+  --font-serious: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
+  --gradient-serious: radial-gradient(90% 70% at 50% 35%, var(--color-serious-bg-2) 0%, var(--color-serious-bg) 100%);
+}
+@utility bg-serious {
+  background-color: var(--color-serious-bg);
+  background-image: var(--gradient-serious);
+}
+/* ─── fin mini-jeu culture-genante ─── */

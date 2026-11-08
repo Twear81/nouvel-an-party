@@ -3,6 +3,7 @@ import type { MiniGameViews } from "./views-contract";
 import ceciOuCela from "./ceci-ou-cela/views";
 import commeLesAutres from "./comme-les-autres/views";
 import compteARebours from "./compte-a-rebours/views";
+import cultureGenante from "./culture-genante/views";
 import leBonPrix from "./le-bon-prix/views";
 import pierreFeuilleCiseaux from "./pierre-feuille-ciseaux/views";
 import quiADit from "./qui-a-dit/views";
@@ -20,4 +21,5 @@ export const webGames: Record<string, MiniGameViews> = {
   "compte-a-rebours": compteARebours,
   "simon": simon,
   "pierre-feuille-ciseaux": pierreFeuilleCiseaux,
+  "culture-genante": cultureGenante,
 };

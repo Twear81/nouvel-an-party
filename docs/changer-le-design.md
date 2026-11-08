@@ -19,6 +19,8 @@ Dans `theme.css`, modifier les variables `--color-*` :
 Les dégradés (`--gradient-bg`, `--gradient-gold`…) sont construits à partir de ces couleurs.
 Classes disponibles : `bg-bg`, `text-ink`, `text-ink-muted`, `bg-accent`, `text-accent`, `bg-gold`, `bg-night`, `glass`, `text-gold-gradient`…
 
+Le mode « sérieux » de Culture gênante (décor sombre, typo solennelle) a ses propres jetons : `--color-serious-*`, `--font-serious`, `--gradient-serious` (classes `bg-serious`, `text-serious-ink`, `font-serious`…), dans la section `culture-genante` de `theme.css`.
+
 ### Polices
 Les polices sont installées en local (pas d'internet pendant la soirée).
 1. `bun add @fontsource/<nom>` (ou `@fontsource-variable/<nom>`)
@@ -39,7 +41,7 @@ Les polices sont installées en local (pas d'internet pendant la soirée).
 | Routage TV (phases, pause, bande du maître) | `src/web/tv/TvApp.tsx` |
 | TV lobby (QR, joueurs avec bouton « retirer », réglage des manches) | `src/web/tv/Lobby.tsx` |
 | TV annonce de manche | `src/web/tv/IntroScreen.tsx` |
-| TV manche en cours (en-tête + chrono) | `src/web/tv/PlayingScreen.tsx` |
+| TV manche en cours (en-tête + chrono) ; un jeu interlude s'affiche en plein écran, sans cadre | `src/web/tv/PlayingScreen.tsx` |
 | TV résultats (points gagnés, « Continuer ») | `src/web/tv/ResultsScreen.tsx` |
 | TV classement final (révélation, podium, confettis) | `src/web/tv/FinalScreen.tsx` |
 | Contrôles du maître du jeu (Pause, Passer, +10 s, Lobby : bande fine toujours visible en bas à droite) | `src/web/tv/HostBar.tsx` |
@@ -47,6 +49,7 @@ Les polices sont installées en local (pas d'internet pendant la soirée).
 | Création / édition du profil | `src/web/phone/ProfileEditor.tsx`, `CameraCapture.tsx`, `photo.ts` |
 | Mini-jeu « Qui est le plus… ? » | `src/minigames/qui-est-le-plus/views.tsx` |
 | Mini-jeu « Ceci ou Cela » (deux réponses face à face, camps en résultats) | `src/minigames/ceci-ou-cela/views.tsx` |
+| Mini-jeu « Culture gênante » (interlude : une scène par fichier, `Accroche`, `Bascule`, `Question`, `Reveal`, `Phone`) | `src/minigames/culture-genante/` |
 
 ## Composants réutilisables (`src/web/ui/`)
 `Button`, `ConfirmDialog` (confirmation dans le style du jeu, jamais `window.confirm`), `Icons` (icônes SVG : pause, passer, accueil…), `Panel` (carte en verre), `PlayerAvatar` / `PlayerChip` (avatar + cadre + couleur, tailles `xs`→`2xl`),

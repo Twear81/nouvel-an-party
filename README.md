@@ -20,6 +20,7 @@ Fonctionne en local sur le wifi, sans internet ni installation sur les télépho
 | Compte à rebours chaotique | Chacun son tour, on arrête un compteur devenu fou pile à l'heure cible | [README](src/minigames/compte-a-rebours/README.md) |
 | Simon | La TV joue une suite de couleurs qui s'allonge ; le dernier à la reproduire sans faute gagne | [README](src/minigames/simon/README.md) |
 | Pierre-feuille-ciseaux | Tournoi à élimination directe, duels sur les téléphones | [README](src/minigames/pierre-feuille-ciseaux/README.md) |
+| Culture gênante (surprise) | Jeu interlude : entre deux jeux, la TV casse l'ambiance (« Bon. Plus sérieusement. ») avec une question qui met mal à l'aise, QCM ou estimation | [README](src/minigames/culture-genante/README.md) |
 
 Créer un nouveau mini-jeu : [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md).
 

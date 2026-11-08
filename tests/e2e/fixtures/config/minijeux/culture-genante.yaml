@@ -1,0 +1,27 @@
+# Config de test E2E : étapes très courtes, un QCM à 2 choix, un à 4 choix, une estimation.
+# Le test choisit sa question grâce au texte affiché (la bonne réponse est la 1re du yaml, l'ordre est mélangé).
+actif: true
+nom: "Culture gênante"
+description: "La TV casse l'ambiance"
+tous_les: 2
+duree_accroche: 2
+duree_bascule: 1
+duree_question: 30
+temps_resultats: 5
+points:
+  bonne_reponse: 100
+  bonus_rapidite: 50
+  estimation_premier: 150
+  estimation_decroissance: 50
+accroches:
+  - rigolo: "Haha, quelle ambiance, on rigole bien…"
+    serieux: "Bon. Plus sérieusement."
+questions:
+  - texte: "Capitale de l'Australie ?"
+    reponses: ["Canberra", "Sydney"]
+    commentaire: "Sydney est la plus grande ville, pas la capitale."
+  - texte: "Quel animal tue le plus d'humains ?"
+    reponses: ["Le moustique", "Le requin", "L'hippopotame", "Tonton au volant après minuit"]
+  - texte: "En quelle année l'homme a-t-il marché sur la Lune ?"
+    estimation: 1969
+    unite: "ans"
