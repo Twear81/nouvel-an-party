@@ -9,6 +9,7 @@
     "build:web": "vite build",
     "release": "bun scripts/build-release.ts",
     "typecheck": "tsc --noEmit",
+    "captures:skin": "playwright test skins-captures --project=chromium",
     "test": "bun test tests/unit",
     "test:e2e": "playwright test"
   },
