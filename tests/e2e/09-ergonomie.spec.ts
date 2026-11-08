@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test";
 import { expect, test } from "./helpers/fixtures";
 
 // Règle de conception : rien à deviner. Ces tests vérifient que l'interface se suffit à elle-même et reste utilisable sur de petits écrans.
@@ -76,6 +77,52 @@ test.describe("Ergonomie téléphone", () => {
     await expect(party.tv.getByTestId("tv-answered-count")).toContainText("1 / 2");
     await expect(party.tv.getByTestId("tv-answered").locator("svg")).toHaveCount(1); // un seul ✓ sur son avatar
   });
+});
+
+// Zone du geste « accueil » : le bas du téléphone porte la barre système, aucun contrôle ne doit y coller.
+const HOME_GESTURE_MARGIN_PX = 24; // 1,5 rem
+async function lowestControlGap(page: Page) {
+  return page.evaluate(() => {
+    let min = Infinity;
+    let who = "";
+    for (const el of document.querySelectorAll<HTMLElement>("button, input, textarea, [role=button]")) {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      if (r.width < 2 || r.height < 2 || cs.visibility === "hidden" || cs.display === "none" || Number(cs.opacity) === 0) continue;
+      const gap = window.innerHeight - r.bottom;
+      if (gap < 0) continue; // hors écran : dans une liste qui défile, pas collé au bord
+      if (gap < min) {
+        min = gap;
+        who = el.getAttribute("data-testid") ?? el.textContent?.slice(0, 20) ?? el.tagName;
+      }
+    }
+    return { gap: min, who };
+  });
+}
+
+test.describe("Zone du geste « accueil »", () => {
+  for (const size of [{ width: 390, height: 844 }, { width: 360, height: 640 }]) {
+    test(`aucun contrôle collé au bas de l'écran (${size.width}×${size.height})`, { tag: "@compat" }, async ({ party }) => {
+      const check = async (label: string, page: Page) => {
+        const { gap, who } = await lowestControlGap(page);
+        expect(gap, `${label} : « ${who} » est à ${Math.round(gap)} px du bas`).toBeGreaterThanOrEqual(HOME_GESTURE_MARGIN_PX);
+      };
+      // Profil (avant de rejoindre) : le bouton « C'est parti » reste décollé du bord.
+      const { page: profile } = await party.openPhonePage({ viewport: size });
+      await check("profil", profile);
+      const phones = await party.addPhonesWith({ viewport: size }, "Alice", "Bob", "Chloé");
+      await check("lobby", phones[0]!.page);
+      await party.startGame({ "ceci-ou-cela": 1, "qui-est-le-plus": 0 });
+      await expect(phones[0]!.t("choice-1")).toBeVisible();
+      await check("ceci ou cela : choix", phones[0]!.page); // le 2e choix est le plus bas
+      await party.answerRound();
+      await expect(phones[0]!.t("continue-button")).toBeVisible({ timeout: 60_000 });
+      await check("résultats : Continuer", phones[0]!.page);
+      await party.continueAll();
+      await expect(phones[0]!.t("phone-final")).toBeVisible({ timeout: 15_000 });
+      await check("classement final", phones[0]!.page);
+    });
+  }
 });
 
 test.describe("Ceci ou Cela : lisibilité", () => {

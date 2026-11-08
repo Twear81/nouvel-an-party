@@ -56,13 +56,13 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
             const shown = revealed(i);
             return (
               <div key={p.id} data-testid={`podium-${i + 1}`} className="flex w-[19rem] flex-col items-center">
-                <div className="mb-3 flex min-h-[19rem] flex-col items-center justify-end gap-2">
+                <div className="mb-5 flex min-h-[19rem] flex-col items-center justify-end gap-2">
                   <AnimatePresence>
                     {shown && (
                       <motion.div
                         initial={{ opacity: 0, y: -200, scale: 0.4 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ type: "spring", stiffness: 120, damping: 12 }}
+                        transition={{ type: "spring", stiffness: 120, damping: 22 }}
                         className="flex flex-col items-center gap-2"
                       >
                         {i === 0 && <motion.span animate={{ rotate: [-8, 8, -8] }} transition={{ repeat: Infinity, duration: 2 }} className="text-7xl">👑</motion.span>}

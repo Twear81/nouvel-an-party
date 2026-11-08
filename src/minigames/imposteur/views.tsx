@@ -205,6 +205,9 @@ function PhoneSpeech({ pub, sendInput, playerById, snapshot }: Props) {
   );
 }
 
+// Mêmes codes que « Ceci ou Cela » : deux gros boutons pleins, le choisi a un anneau et une pastille ✓, l'autre s'estompe.
+const DECISION_TONES = { vote: "bg-cool text-bg", tour: "bg-hot text-bg" } as const;
+
 function PhoneDecision({ priv, sendInput }: Props) {
   const choice = priv?.choice ?? null;
   const options = [
@@ -214,24 +217,28 @@ function PhoneDecision({ priv, sendInput }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
       <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight">On vote ou on refait un tour ?</h1>
-      <div className="flex min-h-0 flex-1 flex-col gap-3 pb-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-3">
         {options.map((o) => {
           const selected = choice === o.id;
           return (
-            <Button
+            <motion.button
               key={o.id}
+              type="button"
               data-testid={`decision-${o.id}`}
               data-selected={selected}
               aria-pressed={selected}
-              variant={selected ? "good" : "primary"}
-              size="lg"
-              block
+              whileTap={{ scale: 0.96 }}
+              animate={{ scale: selected ? 1.02 : 1, opacity: choice !== null && !selected ? 0.4 : 1 }}
               onClick={() => void sendInput({ choice: o.id }).catch(() => {})}
-              className={`min-h-0 flex-1 !py-2 !text-2xl ${choice !== null && !selected ? "opacity-60" : ""}`}
+              className={`relative flex min-h-[5rem] flex-1 items-center justify-center rounded-card px-4 shadow-card ${DECISION_TONES[o.id]} ${selected ? "ring-[0.4rem] ring-ink" : ""}`}
             >
-              {o.label}
-              {selected && <CheckIcon />}
-            </Button>
+              <span className="text-balance font-display text-3xl leading-tight">{o.label}</span>
+              {selected && (
+                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xl text-bg">
+                  <CheckIcon />
+                </motion.span>
+              )}
+            </motion.button>
           );
         })}
       </div>

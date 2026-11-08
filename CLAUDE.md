@@ -95,6 +95,9 @@ téléphone, en regardant la TV : ils ne lisent pas.
 - Avatars, cadres, couleurs de profil : `src/web/theme/profile-options.ts`. Les blagues/références aux invités vont
   dans le thème, `profile-options.ts`, `config/medias/` ou le contenu yaml — **pas codées en dur dans un mini-jeu**.
 - TV dessinée en 1920×1080 lisible à 4 m ; téléphone portrait dès 360×640, usage à une main, gros boutons.
+- **Zone du geste « accueil »** : le bas du téléphone porte la barre de geste du système. `PhoneStage` réserve une marge
+  basse (`safe-area-inset-bottom` + 1,5 rem) : ne jamais la contourner (pas de `fixed bottom-0`, pas de petit bouton
+  collé en bas) ; les gros boutons d'action peuvent être en bas, décollés du bord.
 - Règles d'ergonomie mobile (iOS : champs ≥ 16 px, `h-app`, pas de `filter: blur` géant…) :
   [docs/changer-le-design.md](docs/changer-le-design.md#règles-dergonomie-à-garder-en-ajoutant-un-écran).
 - Ajouter un `data-testid` (et des `data-*` d'état : `data-stage`, `data-status`…) aux éléments interactifs et aux

@@ -7,7 +7,7 @@ import { allConnectedDone } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Split the Room"),
-  description: z.string().default("Termine la phrase pour couper la salle en deux"),
+  description: z.string().default("Finis la phrase pour diviser la salle : OUI ou NON, le plus 50/50 gagne"),
   duree_ecriture: z.number().positive().default(60),
   duree_vote: z.number().positive().default(15),
   duree_revelation: z.number().positive().default(9),

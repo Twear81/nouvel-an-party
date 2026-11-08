@@ -25,7 +25,7 @@ Seul l'**auteur** de la phrase marque (les votants ne marquent rien), d'après l
 |---|---|---|
 | `actif` | `true` | `false` : le jeu est ignoré dans la partie |
 | `nom` | `Split the Room` | Titre affiché |
-| `description` | `Termine la phrase pour couper la salle en deux` | Phrase d'explication à l'annonce |
+| `description` | `Finis la phrase pour diviser la salle : OUI ou NON, le plus 50/50 gagne` | Phrase d'explication à l'annonce |
 | `duree_ecriture` | `60` | Secondes pour écrire |
 | `duree_vote` | `15` | Secondes pour voter sur chaque phrase |
 | `duree_revelation` | `9` | Secondes de révélation (jauge, verdict, auteur) après chaque phrase |

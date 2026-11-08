@@ -113,7 +113,7 @@ function avatarFor(roundCount: number, density: Density): AvatarSize {
   const size = 2 ** roundCount;
   if (density === "phone") return size <= 4 ? "sm" : "xs";
   if (density === "tvSmall") return size <= 4 ? "md" : size <= 8 ? "sm" : "xs";
-  return size <= 4 ? "lg" : size <= 8 ? "md" : "xs";
+  return size <= 4 ? "lg" : size <= 8 ? "sm" : "xs";
 }
 
 interface BracketProps {
@@ -191,7 +191,7 @@ function MatchCard({ m, r, i, avatar, tv, winsNeeded, playerById, intro, pop, me
       initial={intro ? { opacity: 0, scale: 0.5, y: 40, rotate: i % 2 ? 6 : -6 } : false}
       animate={m.active ? { opacity: 1, scale: [1, 1.03, 1], y: 0, rotate: 0 } : { opacity: 1, scale: 1, y: 0, rotate: 0 }}
       transition={m.active ? { scale: { duration: 1.6, repeat: Infinity, ease: "easeInOut" } } : { delay: intro ? 0.3 + r * 0.35 + i * 0.12 : 0, type: "spring", stiffness: 160, damping: 15 }}
-      className={`relative flex w-full min-w-0 flex-col rounded-card border-[length:var(--lw)] ${tv ? "gap-1 p-1.5" : "gap-0.5 p-[3px]"} ${m.active ? "border-accent bg-accent/10 shadow-glow" : "border-line bg-surface"}`}
+      className={`relative flex w-full min-w-0 flex-col rounded-card border-[length:var(--lw)] ${tv ? "gap-1 p-1" : "gap-0.5 p-[3px]"} ${m.active ? "border-accent bg-accent/10 shadow-glow" : "border-line bg-surface"}`}
     >
       <SlotRow id={m.a} m={m} side={0} avatar={avatar} tv={tv} winsNeeded={winsNeeded} playerById={playerById} pop={pop} delay={i * 0.15} meId={meId} />
       {m.bye ? <ByeRow avatar={avatar} tv={tv} /> : <SlotRow id={m.b} m={m} side={1} avatar={avatar} tv={tv} winsNeeded={winsNeeded} playerById={playerById} pop={pop} delay={i * 0.15 + 0.08} meId={meId} />}
