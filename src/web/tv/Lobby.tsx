@@ -69,7 +69,8 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   // Beaucoup de mini-jeux : le panneau du bas est plus haut, les avatars rétrécissent d'un cran.
   const SMALLER: Record<AvatarSize, AvatarSize> = { "2xl": "xl", xl: "lg", lg: "md", md: "md", sm: "sm", xs: "xs" };
   const baseSize: AvatarSize = players.length <= 3 ? "2xl" : players.length <= 8 ? "xl" : "lg";
-  const avatarSize = crowded ? SMALLER[baseSize] : baseSize;
+  // Jusqu'à 3 joueurs, une seule rangée : on garde les grands avatars même avec beaucoup de mini-jeux.
+  const avatarSize = crowded && players.length > 3 ? SMALLER[baseSize] : baseSize;
   const tileWidth = players.length <= 3 ? "w-[17rem]" : "w-[14rem]";
 
   return (
