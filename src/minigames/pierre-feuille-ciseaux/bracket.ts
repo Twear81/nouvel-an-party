@@ -1,4 +1,5 @@
 // Logique pure du tournoi (sans moteur ni réseau) : tirage, lancers, égalités, avancement, points.
+import { shuffle } from "../../shared/shuffle";
 
 /** 0 = pierre, 1 = feuille, 2 = ciseaux. */
 export type Choice = 0 | 1 | 2;
@@ -47,15 +48,6 @@ export function bracketSize(n: number): number {
   let s = 2;
   while (s < n) s *= 2;
   return s;
-}
-
-export function shuffle<T>(items: T[], rng: () => number): T[] {
-  const a = [...items];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
-  }
-  return a;
 }
 
 /**

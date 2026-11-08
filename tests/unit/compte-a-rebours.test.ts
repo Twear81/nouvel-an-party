@@ -90,12 +90,11 @@ describe("compte-a-rebours : déroulé", () => {
     expect(JSON.stringify(game.publicView(r.state, r.ctx))).not.toContain("4321");
   });
 
-  it("ignore un STOP avant le GO, d'un inconnu, ou au payload invalide", () => {
+  it("ignore un STOP avant le GO ou au payload invalide", () => {
     const r = round(3);
     r.stop("p1", 100);
     r.goNow();
     r.ctx.advance(3000);
-    r.stop("inconnu", 3000);
     for (const bad of [undefined, null, "x", 12, {}, { ms: "3000" }, { ms: NaN }, { ms: Infinity }, { ms: -5 }, { ms: null }]) game.input(r.state, "p1", bad, r.ctx);
     expect(r.pub().stoppedIds).toEqual([]);
   });

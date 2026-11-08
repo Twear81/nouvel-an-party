@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import type { GameSnapshot, RoundInfo } from "../../shared/types";
-import { waitingPlayers } from "../net/helpers";
+import { playersWithProfile, waitingPlayers } from "../net/helpers";
 import { useRevealed } from "../net/useReveal";
 import { CheckIcon, PlayerAvatar } from "../ui";
 import { TvGameView, tvViewProps } from "./GameView";
@@ -12,8 +12,7 @@ export function ResultsScreen({ snapshot, round }: { snapshot: GameSnapshot; rou
   const missing = waiting.filter((p) => !snapshot.continued.includes(p.id));
   // Les points n'apparaissent (et le classement ne se trie) qu'après l'animation des résultats : pas de spoil.
   const revealed = useRevealed(tvViewProps(snapshot, round));
-  const strip = snapshot.players
-    .filter((p) => p.profile)
+  const strip = playersWithProfile(snapshot)
     .sort((a, b) => (revealed ? (deltas[b.id] ?? 0) - (deltas[a.id] ?? 0) : 0));
 
   return (

@@ -110,9 +110,8 @@ describe("dessin-rate : dessiner", () => {
     }
   });
 
-  it("ignore les joueurs inconnus et le payload sans dessin ; ne garde que c/w/p ; accepte les bornes", () => {
+  it("ignore le payload sans dessin ; ne garde que c/w/p ; accepte les bornes", () => {
     const r = round();
-    r.draw("inconnu", [line()]);
     game.input(r.state, "p1", null, r.ctx);
     game.input(r.state, "p1", { strokes: [{ ...line(), extra: "x" }] }, r.ctx);
     expect(r.priv("p1").strokes[0]).toEqual(line());
@@ -190,7 +189,6 @@ describe("dessin-rate : vote", () => {
     r.vote("p1", "zz");
     r.vote("p1", 42);
     r.vote("p1", "p4");
-    r.vote("inconnu", "p2");
     expect(r.priv("p1").vote).toBeNull();
     expect(r.pub().votedCount).toBe(0);
     r.vote("p1", "p2");

@@ -2,20 +2,10 @@
 import type { GameSnapshot, RoundInfo } from "../../shared/types";
 import type { MiniGameViewProps } from "../../minigames/views-contract";
 import { webGames } from "../../minigames/registry.web";
-import { makePlayerById } from "../net/helpers";
+import { gameViewProps } from "../net/helpers";
 
-export function tvViewProps(snapshot: GameSnapshot, round: RoundInfo): MiniGameViewProps {
-  return {
-    snapshot,
-    round,
-    pub: round.public,
-    priv: null,
-    results: round.results,
-    players: snapshot.players,
-    playerById: makePlayerById(snapshot.players),
-    sendInput: async () => {},
-  };
-}
+export const tvViewProps = (snapshot: GameSnapshot, round: RoundInfo): MiniGameViewProps =>
+  gameViewProps(snapshot, round, null, async () => {});
 
 export function TvGameView({ snapshot, round, kind }: { snapshot: GameSnapshot; round: RoundInfo; kind: "Tv" | "TvResults" }) {
   const views = webGames[round.gameId];

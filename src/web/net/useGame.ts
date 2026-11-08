@@ -1,5 +1,5 @@
 // Hook central : état de jeu reçu du serveur, état de la connexion et actions typées.
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { GameSnapshot, PlayerId, Profile, Setup } from "../../shared/types";
 import { call, socket, syncClock } from "./socket";
 
@@ -24,8 +24,6 @@ export function useGame(role: "tv" | "phone") {
   const [snapshot, setSnapshot] = useState<GameSnapshot | null>(null);
   const [connected, setConnected] = useState(socket.connected);
   const [host, setHost] = useState(false);
-  const [kickedAt, setKickedAt] = useState(0);
-  const latest = useRef<GameSnapshot | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,12 +53,10 @@ export function useGame(role: "tv" | "phone") {
     };
     const onDisconnect = () => setConnected(false);
     const onState = (s: GameSnapshot) => {
-      latest.current = s;
       setSnapshot(s);
     };
     const onKicked = () => {
       writeToken(null);
-      setKickedAt(Date.now());
       void join(null);
     };
 
@@ -102,7 +98,7 @@ export function useGame(role: "tv" | "phone") {
     [setup],
   );
 
-  return { snapshot, connected, host, kickedAt, actions, latest };
+  return { snapshot, connected, host, actions };
 }
 
 export type GameActions = ReturnType<typeof useGame>["actions"];

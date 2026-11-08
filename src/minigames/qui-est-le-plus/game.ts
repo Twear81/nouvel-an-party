@@ -2,7 +2,7 @@
 // Points : ceux qui ont voté comme la majorité + bonus pour la/les personne(s) élue(s).
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, argmaxAll, normalizeQuestion, questionSchema } from "../helpers";
+import { argmaxAll, normalizeQuestion, questionSchema, endWhenAllDone } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Qui est le plus… ?"),
@@ -44,7 +44,7 @@ export interface Results {
 
 /** Fin anticipée : tous les joueurs connectés ont voté. */
 function checkAllVoted(state: State, ctx: RoundContext<Cfg>) {
-  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.votes.has(id))) ctx.end();
+  endWhenAllDone(ctx, (id) => state.votes.has(id));
 }
 
 export default defineMiniGame<Cfg, Item, State>({

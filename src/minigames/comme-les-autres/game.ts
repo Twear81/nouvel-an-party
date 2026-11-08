@@ -2,7 +2,7 @@
 // On marque quand sa réponse est la même que celle d'autres joueurs ; la plus répandue rapporte un bonus.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, normalizeAnswer, normalizeQuestion, questionSchema } from "../helpers";
+import { normalizeAnswer, normalizeQuestion, questionSchema, endWhenAllDone, playerIds } from "../helpers";
 
 export const MAX_LENGTH = 40;
 
@@ -44,8 +44,6 @@ export interface AnswerGroup {
   /** Réponse la plus fréquente dans le groupe, telle que tapée. */
   label: string;
   playerIds: string[];
-  /** Ce que chaque membre a tapé exactement. */
-  answers: { playerId: string; text: string }[];
   /** Points gagnés par chaque membre grâce à ce groupe. */
   points: number;
   /** Groupe(s) le plus nombreux, taille >= 2. */
@@ -139,7 +137,6 @@ export function groupAnswers(byPlayer: Map<string, string[]>, tolerance: boolean
     return {
       label: capitalize(best),
       playerIds: [...members.keys()],
-      answers: [...members].map(([playerId, text]) => ({ playerId, text })),
     };
   });
   return groups.sort((a, b) => b.playerIds.length - a.playerIds.length || a.label.localeCompare(b.label, "fr"));
@@ -147,7 +144,7 @@ export function groupAnswers(byPlayer: Map<string, string[]>, tolerance: boolean
 
 /** Fin anticipée : tous les joueurs connectés ont répondu. */
 function checkAllAnswered(state: State, ctx: RoundContext<Cfg>) {
-  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.answers.has(id))) ctx.end();
+  endWhenAllDone(ctx, (id) => state.answers.has(id));
 }
 
 export default defineMiniGame<Cfg, Item, State>({
@@ -162,7 +159,6 @@ export default defineMiniGame<Cfg, Item, State>({
   start: (item) => ({ question: item.text, answers: new Map() }),
 
   input(state, playerId, payload, ctx) {
-    if (!ctx.players.some((p) => p.id === playerId)) return;
     const raw = (payload as { answers?: unknown } | null)?.answers;
     if (!Array.isArray(raw)) return;
     const seen = new Set<string>();
@@ -199,7 +195,7 @@ export default defineMiniGame<Cfg, Item, State>({
       if (points) for (const id of g.playerIds) scores[id] = (scores[id] ?? 0) + points;
       return { ...g, points, biggest: isBiggest };
     });
-    const silentIds = ctx.players.map((p) => p.id).filter((id) => !state.answers.has(id));
+    const silentIds = playerIds(ctx).filter((id) => !state.answers.has(id));
     const results: Results = { question: state.question, groups, silentIds };
     return { results, scores };
   },
