@@ -2,7 +2,7 @@
 import { motion, type HTMLMotionProps } from "motion/react";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost" | "good" | "bad";
-type Size = "sm" | "md" | "lg" | "xl";
+type Size = "sm" | "md" | "lg" | "xl" | "hero";
 
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-gold text-accent-ink shadow-btn",
@@ -17,6 +17,8 @@ const SIZES: Record<Size, string> = {
   md: "px-6 py-3 text-lg",
   lg: "px-8 py-4 text-2xl",
   xl: "px-10 py-6 text-4xl",
+  // Bouton géant qui remplit la place (STOP du compte à rebours) : la hauteur vient de `className` (flex-1…).
+  hero: "flex items-center justify-center px-10 py-6 text-[5.5rem] leading-none",
 };
 
 export interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {

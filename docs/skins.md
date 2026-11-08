@@ -46,8 +46,10 @@ Pour travailler un skin : ajouter `?skin=<id>` à l'URL de la TV ou du télépho
 `--color-hot`, `--color-cool`, `--color-good`, `--color-good-deep`, `--color-bad`, `--color-bad-deep`, `--color-warn`,
 `--font-display`, `--font-sans`, `--font-num` (chiffres : chrono, scores), `--radius-card`, `--radius-btn`, `--radius-chip`,
 `--shadow-card`, `--shadow-glow`, `--shadow-btn`, `--scrim-blur` (flou du voile des dialogues et de la pause), `--gradient-bg`, `--gradient-gold`, `--gradient-hot`, `--gradient-glass`.
-Les jetons de contenu (couleurs du Simon, des étages de tier-list, des feutres, mode « sérieux » de Culture gênante,
-QR code) ne changent pas avec le skin.
+Les jetons de contenu (couleurs du Simon, des étages de tier-list, des feutres, QR code) ne changent pas avec le skin.
+Le mode « sérieux » de Culture gênante (`--color-serious-*`, `--font-serious`, `--gradient-serious`) et `--color-shade` (ombre
+portée des objets du décor) sont **dérivés** des jetons du skin dans `theme.css` (`html[data-skin]`) : un skin ne les
+redéfinit pas.
 
 ### Marqueurs `data-ui`
 | Marqueur | Composant | États / parties |
@@ -64,6 +66,10 @@ QR code) ne changent pas avec le skin.
 | `answered-count` | `AnsweredCount` | |
 | `selected-badge` | `SelectedBadge` | |
 | `numpad`, `numpad-key` | `NumPad` | |
+| `duel-gauge` | `DuelGauge` (jauge bilatérale OUI / NON) | parties `duel-gauge-left` (good), `duel-gauge-right` (bad), `duel-gauge-mid` |
+| `tool`, `toolbar` | outils de dessin (barre + boutons feutre / épaisseur / annuler / effacer) | `data-selected`, `data-kind` (`pen`, `width`, `action`) ; les feutres (`pen`) gardent leur couleur |
+| `tier-row`, `tier-label` | étages d'une tier list (rangée + pastille d'étage, aussi sur le téléphone) | `data-tier` ; la couleur de l'étage est du contenu |
+| `pad`, `hub` | pastilles colorées de Simon et disque central | `pad` : couleur et forme fixes, un skin ne les recolore pas |
 | `vote-dots` | `VoteDots` | |
 | `dialog` | `ConfirmDialog` | |
 | `game-frame` | cadre commun de l'écran d'un mini-jeu sur la TV (jeu et résultats, hors interludes) : invisible dans le thème de base, le skin le dessine en fenêtre de son jeu | parties `game-frame-title` (nom du jeu, masqué par défaut : `display` à rétablir), `game-frame-body` |

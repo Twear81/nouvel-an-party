@@ -47,6 +47,9 @@
   --color-qr-dark: #061233;
   --color-qr-light: #fff8e8;
 
+  /* ── Ombre portée des objets posés sur le décor (vitrine du Bon Prix…) : noire en thème de base, teintée par le skin */
+  --color-shade: rgb(0 0 0 / 0.55);
+
   /* ── Rideau de changement de skin (neutre, ne change pas avec le skin) */
   --color-curtain: #ffffff;
 
@@ -245,5 +248,20 @@ img { -webkit-touch-callout: none; }
 @utility bg-serious {
   background-color: var(--color-serious-bg);
   background-image: var(--gradient-serious);
+}
+/* Sous un skin, le mode « sérieux » ne sort pas de l'univers du skin : il en dérive fond plus sombre et désaturé,
+ * texte et accent du skin, police sans-serif du skin. Le contraste avec la partie festive reste net. Sans skin
+ * (thème de base) les valeurs ci-dessus s'appliquent. Même élément (html) que le skin : le skin gagne sur ses jetons. */
+html[data-skin] {
+  --color-serious-bg: color-mix(in oklab, var(--color-bg) 28%, #050506);
+  --color-serious-bg-2: color-mix(in oklab, var(--color-bg) 45%, #0c0c0f);
+  --color-serious-ink: var(--color-ink);
+  --color-serious-muted: color-mix(in oklab, var(--color-ink-muted) 80%, #8d9099);
+  --color-serious-line: color-mix(in srgb, var(--color-ink) 20%, transparent);
+  --color-serious-accent: color-mix(in oklab, var(--color-accent) 75%, var(--color-ink));
+  --color-serious-good: color-mix(in oklab, var(--color-good) 65%, #9a9ca3);
+  --color-serious-bad: color-mix(in oklab, var(--color-bad) 65%, #9a9ca3);
+  --font-serious: var(--font-sans);
+  --color-shade: color-mix(in srgb, color-mix(in oklab, var(--color-bg) 30%, #000) 62%, transparent);
 }
 /* ─── fin mini-jeu culture-genante ─── */
