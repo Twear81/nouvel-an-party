@@ -1,0 +1,169 @@
+# Mini-jeu "Culture gênante" — doc : src/minigames/culture-genante/README.md
+# JEU SURPRISE (interlude) : il ne se règle pas avec un nombre de manches, il surgit tout seul,
+# environ une fois toutes les `tous_les` manches, sans annonce. La TV casse l'ambiance :
+#   1. une accroche rigolote qui s'écrit,   2. la bascule « Bon. Plus sérieusement. » (écran sombre),
+#   3. une question qui met mal à l'aise,   4. la révélation (« 2 / 7 ont trouvé… »).
+# Sur l'écran de lancement de la TV, un interrupteur Activé / Désactivé remplace le nombre de manches.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication
+nom: "Culture gênante"
+description: "La TV casse l'ambiance : une question qui met mal à l'aise"
+
+# Rythme : une manche surprise environ toutes les N manches normales (1 par bloc de N, à un moment aléatoire du bloc,
+# jamais en première position ni deux de suite). Avec 20 manches et tous_les: 5 → environ 4 surprises.
+tous_les: 5
+
+# Durée de chaque étape, en secondes
+duree_accroche: 4     # la phrase rigolote (elle s'écrit pendant ~2,5 s, le reste sert à la lire)
+duree_bascule: 2      # la rupture : écran sombre, phrase sérieuse
+duree_question: 15    # temps pour répondre (la manche s'arrête plus tôt si tout le monde a répondu)
+temps_resultats: 8    # temps estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+
+points:
+  bonne_reponse: 100          # QCM : bonne réponse
+  bonus_rapidite: 50          # QCM : bonus maximal pour une bonne réponse instantanée (décroît jusqu'à 0 à la fin du temps)
+  estimation_premier: 150     # estimation : points du plus proche
+  estimation_decroissance: 50 # estimation : points perdus à chaque rang suivant (150, 100, 50, puis 0). Ex æquo = même rang
+
+# Les accroches : une partie rigolote + la phrase de bascule sérieuse. Une est tirée au hasard à chaque manche
+# (sauf si la question en impose une, voir plus bas). Gardez-les courtes : 80 caractères maximum conseillés.
+# Option : `image:` et `son:` = fichiers du dossier config/medias (ex. image: "fete.jpg", son: "rires.mp3"), affichés / joués
+# pendant la partie rigolote. Facultatifs.
+accroches:
+  - rigolo: "Haha, quelle ambiance, on rigole bien…"
+    serieux: "Bon. Plus sérieusement."
+  - rigolo: "Ça sent la fête, les amis, c'est magnifique !"
+    serieux: "Stop. On redescend."
+  - rigolo: "Champagne, rires, confettis… la vie est belle !"
+    serieux: "Passons aux choses sérieuses."
+  - rigolo: "Quelle belle soirée, tout le monde est détendu…"
+    serieux: "C'était trop beau. Silence."
+  - rigolo: "Les voisins tapent au mur, c'est qu'on s'amuse !"
+    serieux: "Maintenant, on se concentre."
+  - rigolo: "Qui veut encore du gâteau ? Haha, quelle bonne humeur !"
+    serieux: "Posez vos verres."
+  - rigolo: "Ah là là, qu'est-ce qu'on rigole !"
+    serieux: "On se calme. Regardez-moi."
+  - rigolo: "Santé ! À nous ! Aux amis !"
+    serieux: "Très bien. Voyons qui a de la culture."
+  - rigolo: "On est bien là, hein ? Tranquilles, sans pression…"
+    serieux: "Fin de la récréation."
+  - rigolo: "Personne ne juge personne ce soir, c'est la fête !"
+    serieux: "Menteurs. Question."
+  - rigolo: "Les confettis, la musique, les bonnes résolutions de 2027 !"
+    serieux: "Pour bien commencer l'année : un petit contrôle de niveau."
+  - rigolo: "Vous avez de la conversation, ce soir, c'est formidable !"
+    serieux: "Vérifions."
+  - rigolo: "Haha, vous êtes trop drôles, vraiment…"
+    serieux: "Ça suffit."
+
+# Les questions : deux types.
+#
+#   QCM (2 à 4 réponses, la BONNE EN PREMIER : l'ordre est mélangé à l'écran, personne ne le voit) :
+#     - texte: "Quelle est la capitale de l'Australie ?"
+#       reponses: ["Canberra", "Sydney"]
+#
+#   Estimation (un nombre entier ; le plus proche gagne ; `unite` est facultative) :
+#     - texte: "En quelle année l'homme a-t-il marché sur la Lune ?"
+#       estimation: 1969
+#
+#   Options communes (toutes facultatives) :
+#       commentaire: "Phrase affichée avec la bonne réponse."
+#       duree: 20                       # durée de cette question (sinon duree_question)
+#       accroche: { rigolo: "...", serieux: "..." }   # impose l'accroche (sinon tirée au hasard dans la liste ci-dessus)
+#
+# Réponses courtes (40 caractères max) : ce sont de gros boutons sur les téléphones.
+# Mettez les textes entre guillemets (surtout s'ils contiennent ":" ou "?").
+# Une question tirée n'est jamais rejouée dans la partie.
+questions:
+  # --- Culture générale « basique mais ça pique » ---
+  - texte: "Quelle est la capitale de l'Australie ?"
+    reponses: ["Canberra", "Sydney"]
+    commentaire: "Sydney est la plus grande ville, mais la capitale, c'est Canberra."
+  - texte: "Quelle est la capitale du Brésil ?"
+    reponses: ["Brasília", "Rio de Janeiro", "São Paulo"]
+  - texte: "Quelle est la capitale de la Suisse ?"
+    reponses: ["Berne", "Genève", "Zurich"]
+  - texte: "Quelle est la capitale du Canada ?"
+    reponses: ["Ottawa", "Toronto", "Montréal"]
+  - texte: "Quelle est la capitale de la Turquie ?"
+    reponses: ["Ankara", "Istanbul"]
+  - texte: "Quelle est la capitale de la Nouvelle-Zélande ?"
+    reponses: ["Wellington", "Auckland"]
+  - texte: "Quel est le plus grand pays d'Afrique par sa superficie ?"
+    reponses: ["L'Algérie", "RD Congo", "Le Nigeria", "L'Égypte"]
+  - texte: "Quel est le plus petit pays du monde ?"
+    reponses: ["Le Vatican", "Monaco", "Saint-Marin"]
+  - texte: "Quel pays est le plus peuplé du monde aujourd'hui ?"
+    reponses: ["L'Inde", "La Chine", "Les États-Unis"]
+    commentaire: "L'Inde a dépassé la Chine en 2023."
+  - texte: "Quel est le plus long fleuve de France ?"
+    reponses: ["La Loire", "La Seine", "Le Rhône", "La Garonne"]
+  - texte: "Quel est le plus grand désert chaud du monde ?"
+    reponses: ["Le Sahara", "Le Gobi", "Le Kalahari"]
+  - texte: "Quelle est la plus grande planète du système solaire ?"
+    reponses: ["Jupiter", "Saturne"]
+  - texte: "Quel est le symbole chimique de l'or ?"
+    reponses: ["Au", "Ag", "Or"]
+    commentaire: "Au, comme aurum, « or » en latin. Ag, c'est l'argent."
+  - texte: "Qui a peint La Joconde ?"
+    reponses: ["Léonard de Vinci", "Michel-Ange", "Raphaël"]
+  - texte: "Qui a écrit « Les Misérables » ?"
+    reponses: ["Victor Hugo", "Émile Zola", "Alexandre Dumas", "Honoré de Balzac"]
+  - texte: "Quel gaz les plantes absorbent-elles pour la photosynthèse ?"
+    reponses: ["Le dioxyde de carbone", "L'oxygène", "L'azote"]
+  - texte: "Quel est l'animal terrestre le plus rapide ?"
+    reponses: ["Le guépard", "Le lion", "L'antilope"]
+  - texte: "Combien de temps met la lumière du Soleil pour arriver jusqu'à la Terre ?"
+    reponses: ["8 minutes", "8 secondes", "8 heures"]
+  - texte: "Quelle est la monnaie du Japon ?"
+    reponses: ["Le yen", "Le yuan", "Le won"]
+  - texte: "Quel animal dort le plus ?"
+    reponses: ["Le koala", "Le paresseux", "Le chat", "Toi, le 1er janvier"]
+    commentaire: "Environ 20 heures par jour pour le koala. Toi, ça va dépendre de ce soir."
+
+  # --- Estimations ---
+  - texte: "En quelle année l'homme a-t-il marché sur la Lune pour la première fois ?"
+    estimation: 1969
+  - texte: "En quelle année la Révolution française a-t-elle commencé ?"
+    estimation: 1789
+  - texte: "Combien d'os compte le corps d'un adulte ?"
+    estimation: 206
+  - texte: "Combien de dents a un adulte, dents de sagesse comprises ?"
+    estimation: 32
+  - texte: "Combien de pays compte l'Union européenne aujourd'hui ?"
+    estimation: 27
+  - texte: "Quelle est l'altitude de l'Everest, en mètres ?"
+    estimation: 8849
+    unite: "m"
+  - texte: "Combien de planètes compte le système solaire ?"
+    estimation: 8
+    commentaire: "Pluton n'est plus une planète depuis 2006."
+
+  # --- Réponses problématiques, humour noir (jamais sur une personne ou un groupe : sur la situation, et sur vous) ---
+  - texte: "Quel animal tue le plus d'humains chaque année ?"
+    reponses: ["Le moustique", "Le requin", "L'hippopotame", "Tonton au volant après minuit"]
+    commentaire: "Le moustique, très loin devant. Tonton est en embuscade."
+  - texte: "Quelle est la première cause de mortalité dans le monde ?"
+    reponses: ["Les maladies du cœur", "Les requins", "Les accidents de trottinette", "Le gluten"]
+  - texte: "Combien de temps un humain peut-il survivre sans boire ?"
+    reponses: ["Environ 3 jours", "Environ 3 semaines", "Environ 3 heures"]
+    commentaire: "Une règle célèbre : 3 minutes sans air, 3 jours sans eau, 3 semaines sans manger."
+  - texte: "Combien de temps vit en moyenne un hamster ?"
+    reponses: ["2 à 3 ans", "8 ans", "15 ans"]
+    commentaire: "Prends-en soin, c'est court."
+  - texte: "Quelle est l'espérance de vie à la naissance en France, en années ?"
+    estimation: 83
+    unite: "ans"
+    commentaire: "Un peu plus de 80 ans pour les hommes, un peu moins de 86 pour les femmes."
+  - texte: "Combien d'humains vivent sur Terre, en milliards ?"
+    estimation: 8
+    unite: "milliards"
+    commentaire: "Et vous voilà coincés avec les mêmes dans cette pièce."
+  - texte: "Qui a inventé le feu d'artifice ?"
+    reponses: ["La Chine", "L'Italie", "Alfred Nobel", "Ton beau-frère et son rosé"]
+    commentaire: "Les Chinois, avec la poudre. Ton beau-frère a seulement perfectionné les dégâts."

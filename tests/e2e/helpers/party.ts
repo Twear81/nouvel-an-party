@@ -13,6 +13,7 @@ export const GAME_NAMES = {
   "compte-a-rebours": "Compte à rebours chaotique",
   simon: "Simon",
   "pierre-feuille-ciseaux": "Pierre-feuille-ciseaux : le tournoi",
+  "culture-genante": "Culture gênante",
 } as const;
 export type GameId = keyof typeof GAME_NAMES | (string & {});
 
