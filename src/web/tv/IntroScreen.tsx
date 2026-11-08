@@ -10,7 +10,7 @@ export function IntroScreen({ snapshot, round }: { snapshot: GameSnapshot; round
         animate={{ opacity: 1, y: 0 }}
         className="rounded-chip bg-surface-strong px-10 py-3 font-display text-4xl tracking-widest text-accent"
       >
-        Manche {round.index + 1} / {round.total}
+        Manche {round.number} / {round.normalTotal}
       </motion.div>
       <motion.h1
         initial={{ opacity: 0, scale: 0.4, rotate: -4 }}

@@ -5,6 +5,7 @@
 //                      ▲                                                            │
 //                      └──────────── tout le monde a cliqué "Continuer" ◄───────────┘
 //   … après la dernière manche : final
+// Une manche « interlude » (jeu surprise) saute l'intro : lobby/results ──► playing directement.
 import { randomBytes, randomUUID } from "node:crypto";
 import type { RoundContext } from "../../minigames/contract";
 import { profileSchema } from "../../shared/schemas";
@@ -58,6 +59,7 @@ interface PlayerRecord {
 interface CurrentRound {
   loaded: LoadedGame;
   item: unknown;
+  interlude: boolean;
   state: unknown;
   ctx: RoundContext<any>;
   timers: TimerGroup;
@@ -256,6 +258,7 @@ export class GameEngine {
     const round: CurrentRound = {
       loaded,
       item: planned.item,
+      interlude: planned.interlude === true,
       state: null,
       timers,
       mainTimer: null,
@@ -304,6 +307,12 @@ export class GameEngine {
     }
 
     this.phase = "intro";
+    if (round.interlude) {
+      // Surprise : pas d'annonce, on passe directement au jeu.
+      this.beginPlaying();
+      this.save();
+      return;
+    }
     round.mainTimer = timers.add(this.opts.settings.introSeconds * 1000, () => this.beginPlaying());
     this.save();
     this.changed();
@@ -410,6 +419,9 @@ export class GameEngine {
       round = {
         index: this.roundIndex,
         total: this.plan.length,
+        number: normalCount(this.plan, this.roundIndex),
+        normalTotal: normalCount(this.plan, this.plan.length - 1),
+        interlude: c.interlude,
         gameId: g.id,
         gameName: g.name(c.loaded.cfg),
         participants: c.ctx.players.map((p) => p.id),
@@ -432,7 +444,13 @@ export class GameEngine {
       continued: [...this.continued],
       catalog: this.catalog,
       setup: this.setup,
-      resumable: this.resumable ? { roundIndex: this.resumable.roundIndex, total: this.resumable.plan.length } : null,
+      resumable: this.resumable
+        ? {
+            // Numérotation affichée (interludes non comptés) : l'index d'une manche normale est son rang - 1.
+            roundIndex: Math.max(0, normalCount(this.resumable.plan, this.resumable.roundIndex) - 1),
+            total: normalCount(this.resumable.plan, this.resumable.plan.length - 1),
+          }
+        : null,
       joinUrl: this.opts.joinUrl,
       me: viewer ? { id: viewer, private: priv, inRound: !!c?.ctx.players.some((p) => p.id === viewer) } : null,
     };
@@ -469,6 +487,11 @@ export class GameEngine {
   private changed() {
     this.opts.onChange?.();
   }
+}
+
+/** Nombre de manches normales (hors interludes) du plan jusqu'à l'index `upTo` inclus : la numérotation affichée. */
+function normalCount(plan: PlannedRound[], upTo: number): number {
+  return plan.slice(0, upTo + 1).filter((r) => !r.interlude).length;
 }
 
 function safe<T>(fn: () => T): T | null {

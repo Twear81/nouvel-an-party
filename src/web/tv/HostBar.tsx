@@ -5,7 +5,8 @@ import type { GameSnapshot } from "../../shared/types";
 import type { GameActions } from "../net/useGame";
 import { Button, ClockIcon, ConfirmDialog, HomeIcon, PauseIcon, PlayIcon, SkipIcon } from "../ui";
 
-export function HostBar({ snapshot, actions }: { snapshot: GameSnapshot; actions: GameActions }) {
+/** `overlay` : barre posée par-dessus l'écran (interlude plein écran, le jeu occupe toute la TV et laisse le coin libre). */
+export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot; actions: GameActions; overlay?: boolean }) {
   const [confirmLobby, setConfirmLobby] = useState(false);
   const { phase, paused } = snapshot;
   const inGame = phase === "intro" || phase === "playing" || phase === "results";
@@ -27,7 +28,7 @@ export function HostBar({ snapshot, actions }: { snapshot: GameSnapshot; actions
 
   return (
     <>
-      <div data-testid="host-bar" className="relative z-50 flex shrink-0 items-center justify-end gap-3 px-10 pb-3 pt-1">
+      <div data-testid="host-bar" className={`z-50 flex items-center justify-end gap-3 px-10 pb-3 pt-1 ${overlay ? "absolute inset-x-0 bottom-0" : "relative shrink-0"}`}>
         {inGame && (
           <>
             <Button data-testid="host-pause" variant={paused ? "primary" : "secondary"} size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={togglePause}>

@@ -30,6 +30,8 @@ export interface FakeGameOptions {
   estimate?: number;
   failStart?: (item: string) => boolean;
   failFinish?: boolean;
+  /** Fait du jeu un interlude : « une fois toutes les N manches normales ». */
+  interlude?: number;
 }
 
 export function makeFakeGame(opts: FakeGameOptions = {}) {
@@ -43,6 +45,7 @@ export function makeFakeGame(opts: FakeGameOptions = {}) {
   const game = defineMiniGame<any, string, FakeState>({
     id,
     configSchema: z.any(),
+    interlude: opts.interlude === undefined ? undefined : () => opts.interlude!,
     name: () => `Jeu ${id}`,
     description: () => `Description ${id}`,
     items: () => itemList,

@@ -135,9 +135,19 @@ export class Party {
 
   // ───────────── Écran de lancement ─────────────
 
-  /** Règle le nombre de manches des mini-jeux cités avec les boutons +/− (les autres ne bougent pas). */
+  /**
+   * Règle le nombre de manches des mini-jeux cités avec les boutons +/− (les autres ne bougent pas).
+   * Un jeu interlude (surprise) n'a qu'un interrupteur : 0 = désactivé, autre = activé.
+   */
   async setCounts(counts: Partial<Record<GameId, number>>) {
     for (const [id, target] of Object.entries(counts)) {
+      const toggle = this.tv.getByTestId(`setup-toggle-${id}`);
+      if (await toggle.count()) {
+        const want = target! > 0 ? "true" : "false";
+        if ((await toggle.getAttribute("data-on")) !== want) await toggle.click();
+        await expect(toggle).toHaveAttribute("data-on", want);
+        continue;
+      }
       const count = this.tv.getByTestId(`setup-count-${id}`);
       for (let guard = 0; guard < 30; guard++) {
         const current = Number(await count.innerText());

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { interludeCounts } from "../../src/shared/interlude";
 import { buildCatalog, buildPlan, defaultSetup, sanitizeSetup } from "../../src/server/engine/planner";
 import type { CatalogEntry, Setup } from "../../src/shared/types";
 import { makeFakeGame } from "./helpers/fake-game";
@@ -139,5 +140,141 @@ describe("buildPlan", () => {
   it("est déterministe pour une même graine", () => {
     const s = { counts: { a: 3, b: 3, c: 3 } };
     expect(buildPlan(games, s, "melange", seededRng(9))).toEqual(buildPlan(games, s, "melange", seededRng(9)));
+  });
+});
+
+describe("jeux interlude (surprises)", () => {
+  const normalA = makeFakeGame({ id: "a", items: 12 });
+  const normalB = makeFakeGame({ id: "b", items: 12 });
+  const surprise = (items = 6, every = 3, id = "s") => makeFakeGame({ id, items, interlude: every });
+  const ids = (plan: { gameId: string }[]) => plan.map((r) => r.gameId).join("");
+
+  it("le catalogue expose N, sans compter l'intro dans la durée", () => {
+    const s = makeFakeGame({ id: "s", items: 4, estimate: 20, interlude: 5 });
+    expect(buildCatalog([s.loaded], 4)).toEqual([{ id: "s", name: "Jeu s", description: "Description s", available: 4, secondsPerRound: 20, interlude: 5 }]);
+  });
+
+  it("un interlude vaut 0 ou 1 (interrupteur), par défaut 1, même avec une grosse durée cible", () => {
+    const catalog = buildCatalog([normalA.loaded, surprise().loaded], 4);
+    expect(defaultSetup(catalog, 600).counts.s).toBe(1);
+    expect(sanitizeSetup({ counts: { a: 1, s: 7 } }, catalog).counts.s).toBe(1);
+    expect(sanitizeSetup({ counts: { a: 1, s: -2 } }, catalog).counts.s).toBe(0);
+    expect(sanitizeSetup({ counts: { a: 1, s: 0.9 } }, catalog).counts.s).toBe(0);
+  });
+
+  it("un interlude sans contenu reste à 0", () => {
+    const catalog = buildCatalog([surprise(0).loaded], 4);
+    expect(defaultSetup(catalog, 60).counts.s).toBe(0);
+    expect(sanitizeSetup({ counts: { s: 1 } }, catalog).counts.s).toBe(0);
+  });
+
+  it("insère une manche interlude par bloc complet de N manches normales", () => {
+    const s = surprise(6, 3);
+    for (const order of ["melange", "groupe"] as const) {
+      const plan = buildPlan([normalA.loaded, normalB.loaded, s.loaded], { counts: { a: 4, b: 3, s: 1 } }, order, seededRng(7));
+      expect(plan.filter((r) => r.interlude)).toHaveLength(2); // 7 manches normales → 2 blocs complets
+      expect(plan.filter((r) => !r.interlude)).toHaveLength(7);
+      expect(plan.filter((r) => r.interlude).every((r) => r.gameId === "s")).toBe(true);
+    }
+  });
+
+  it("jamais en première position, jamais deux de suite, un par bloc", () => {
+    const s = surprise(10, 3);
+    for (let seed = 0; seed < 300; seed++) {
+      const plan = buildPlan([normalA.loaded, normalB.loaded, s.loaded], { counts: { a: 5, b: 4, s: 1 } }, "melange", seededRng(seed));
+      expect(plan[0]!.interlude, `seed=${seed}`).toBeFalsy();
+      expect(plan.filter((r) => r.interlude)).toHaveLength(3);
+      for (let i = 1; i < plan.length; i++) expect(plan[i]!.interlude && plan[i - 1]!.interlude, `seed=${seed}`).toBeFalsy();
+      // Le k-ème interlude est dans le bloc k : il suit entre 1 et 3 manches normales du bloc.
+      let normals = 0;
+      let block = 0;
+      for (const r of plan) {
+        if (!r.interlude) normals++;
+        else {
+          expect(normals, `seed=${seed}`).toBeGreaterThan(block * 3);
+          expect(normals).toBeLessThanOrEqual(block * 3 + 3);
+          block++;
+        }
+      }
+    }
+  });
+
+  it("la position varie selon le tirage (pas toujours au même endroit)", () => {
+    const s = surprise(10, 5);
+    const positions = new Set<number>();
+    for (let seed = 0; seed < 100; seed++) {
+      const plan = buildPlan([normalA.loaded, s.loaded], { counts: { a: 5, s: 1 } }, "melange", seededRng(seed));
+      positions.add(plan.findIndex((r) => r.interlude));
+    }
+    expect(positions.size).toBeGreaterThanOrEqual(4);
+  });
+
+  it("épuisement : s'arrête quand il n'y a plus d'éléments, sans répétition", () => {
+    const s = surprise(2, 2);
+    const plan = buildPlan([normalA.loaded, s.loaded], { counts: { a: 12, s: 1 } }, "melange", seededRng(4));
+    const picked = plan.filter((r) => r.interlude);
+    expect(picked).toHaveLength(2); // 6 blocs possibles, 2 éléments seulement
+    expect(new Set(picked.map((r) => r.item)).size).toBe(2);
+  });
+
+  it("moins de N manches normales : pas d'interlude", () => {
+    const plan = buildPlan([normalA.loaded, surprise(6, 5).loaded], { counts: { a: 4, s: 1 } }, "melange", seededRng(1));
+    expect(plan.some((r) => r.interlude)).toBe(false);
+    expect(plan).toHaveLength(4);
+  });
+
+  it("interrupteur à 0 : aucun interlude", () => {
+    const plan = buildPlan([normalA.loaded, surprise(6, 2).loaded], { counts: { a: 8, s: 0 } }, "melange", seededRng(1));
+    expect(plan.some((r) => r.interlude)).toBe(false);
+  });
+
+  it("aucune manche normale mais interlude activé : une seule manche interlude", () => {
+    const plan = buildPlan([normalA.loaded, surprise(6, 5).loaded], { counts: { a: 0, s: 1 } }, "melange", seededRng(1));
+    expect(plan).toHaveLength(1);
+    expect(plan[0]).toMatchObject({ gameId: "s", interlude: true });
+  });
+
+  it("aucune manche du tout (interlude à 0) : plan vide", () => {
+    expect(buildPlan([normalA.loaded, surprise().loaded], { counts: { a: 0, s: 0 } }, "melange", seededRng(1))).toEqual([]);
+  });
+
+  it("mode groupe : les manches normales d'un jeu restent groupées, l'interlude s'intercale entre deux manches", () => {
+    const s = surprise(6, 3);
+    const plan = buildPlan([normalA.loaded, normalB.loaded, s.loaded], { counts: { a: 3, b: 3, s: 1 } }, "groupe", seededRng(2));
+    expect(ids(plan.filter((r) => !r.interlude))).toBe("aaabbb");
+    expect(plan.filter((r) => r.interlude)).toHaveLength(2);
+    expect(plan[0]!.interlude).toBeFalsy();
+  });
+
+  it("plusieurs jeux interlude : chacun son rythme, jamais adjacents", () => {
+    const s1 = surprise(5, 2, "s1");
+    const s2 = surprise(5, 2, "s2");
+    for (let seed = 0; seed < 100; seed++) {
+      const plan = buildPlan([normalA.loaded, s1.loaded, s2.loaded], { counts: { a: 6, s1: 1, s2: 1 } }, "melange", seededRng(seed));
+      expect(plan.filter((r) => r.gameId === "s1")).toHaveLength(3);
+      expect(plan.filter((r) => r.gameId === "s2")).toHaveLength(3);
+      expect(plan[0]!.interlude).toBeFalsy();
+      for (let i = 1; i < plan.length; i++) expect(plan[i]!.interlude && plan[i - 1]!.interlude, `seed=${seed}`).toBeFalsy();
+    }
+  });
+
+  it("est déterministe pour une même graine, et ne change pas le plan normal", () => {
+    const s = surprise(6, 3);
+    const setup = { counts: { a: 4, b: 3, s: 1 } };
+    const one = buildPlan([normalA.loaded, normalB.loaded, s.loaded], setup, "melange", seededRng(9));
+    expect(buildPlan([normalA.loaded, normalB.loaded, s.loaded], setup, "melange", seededRng(9))).toEqual(one);
+    const without = buildPlan([normalA.loaded, normalB.loaded], { counts: { a: 4, b: 3 } }, "melange", seededRng(9));
+    expect(one.filter((r) => !r.interlude)).toEqual(without);
+  });
+});
+
+describe("interludeCounts (estimation du lobby)", () => {
+  it("compte les blocs complets, plafonne au contenu", () => {
+    const src = [{ id: "s", every: 5, available: 3, enabled: true }];
+    expect(interludeCounts(4, src).s).toBe(0);
+    expect(interludeCounts(5, src).s).toBe(1);
+    expect(interludeCounts(14, src).s).toBe(2);
+    expect(interludeCounts(40, src).s).toBe(3);
+    expect(interludeCounts(40, [{ ...src[0]!, enabled: false }]).s).toBe(0);
   });
 });

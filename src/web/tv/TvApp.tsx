@@ -55,7 +55,7 @@ export function TvApp() {
           {screen}
         </motion.div>
       </AnimatePresence>
-      {host && snapshot.phase !== "lobby" && <HostBar snapshot={snapshot} actions={actions} />}
+      {host && snapshot.phase !== "lobby" && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "playing" && !!round?.interlude} />}
       <PausedOverlay show={snapshot.paused} big />
       <ReconnectBanner show={!connected} />
     </TvStage>
