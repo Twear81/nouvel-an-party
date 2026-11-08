@@ -1,75 +1,18 @@
-// Écrans de « L'imposteur » : lire son mot, indices, tableau des indices (aide-mémoire du débat), vote, révélation.
+// Écrans de « L'imposteur » : lire son mot, parole (un joueur à la fois, indice dit à voix haute), décision, vote, révélation.
 // Règle d'or : le téléphone de l'imposteur est identique à celui des autres (même écrans, même données) jusqu'aux résultats.
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Button, CheckIcon, fireConfetti, PlayerAvatar } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
-import { containsOwnWord, type Priv, type Pub, type Results } from "./game";
+import type { Priv, Pub, Results } from "./game";
 
 type Props = MiniGameViewProps<Pub, Priv, Results>;
-
-/** Même nettoyage que le serveur (espaces réduits) pour comparer ce qui est tapé à ce qui est envoyé. */
-const clean = (s: string) => s.replace(/\s+/g, " ").trim();
 
 /** Durée (s) pendant laquelle le mot reste affiché quand on le consulte en cours de manche. */
 const PEEK_SECONDS = 3;
 
-/** Une case du tableau : l'indice dévoilé, ou un état d'attente pendant la saisie du tour. */
-type Slot = { kind: "clue"; text: string; fresh: boolean } | { kind: "sent" } | { kind: "wait" } | { kind: "none" };
-
-function slotsOf(pub: Pub, id: string): Slot[] {
-  const revealed = pub.clues[id] ?? [];
-  return Array.from({ length: pub.tours }, (_, t): Slot => {
-    if (t < revealed.length) return { kind: "clue", text: revealed[t] || "—", fresh: pub.step === "montre" && t === pub.tour - 1 };
-    if (pub.step === "indice" && t === pub.tour - 1) return pub.sentIds.includes(id) ? { kind: "sent" } : { kind: "wait" };
-    return { kind: "none" };
-  });
-}
-
 // ───────────────────────────── TV ─────────────────────────────
-
-/** Tableau des indices : une carte par joueur. Reste affiché jusqu'au vote (aide-mémoire du débat). */
-function TvBoard({ pub, round, players }: Pick<Props, "pub" | "round" | "players">) {
-  const list = pub.playerIds.map((id) => players.find((p) => p.id === id)).filter((p): p is NonNullable<typeof p> => !!p?.profile && round.participants.includes(p.id));
-  const dense = list.length > 6;
-  return (
-    <div data-testid="tv-board" className="flex min-h-0 flex-1 flex-wrap content-center items-start justify-center gap-4">
-      {list.map((p, i) => {
-        const slots = slotsOf(pub, p.id);
-        const sent = pub.step === "indice" && pub.sentIds.includes(p.id);
-        return (
-          <div key={p.id} data-testid={`board-${p.id}`} className={`glass flex flex-col gap-2 rounded-card px-4 py-3 ${dense ? "w-[26rem]" : "w-[30rem]"}`}>
-            <div className="flex items-center gap-4">
-              <PlayerAvatar profile={p.profile} size="md" dimmed={pub.step === "indice" && !sent} badge={sent ? <CheckIcon /> : undefined} />
-              <span className="min-w-0 flex-1 truncate text-3xl font-extrabold">{p.profile!.name}</span>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              {slots.map((s, t) => (
-                <div key={t} className="flex min-h-[4.25rem] items-center gap-3 rounded-chip bg-surface-strong px-4 py-1">
-                  <span className="shrink-0 font-display text-2xl text-accent">{t + 1}</span>
-                  {s.kind === "clue" ? (
-                    <motion.span
-                      data-testid={`clue-${p.id}-${t}`}
-                      initial={s.fresh ? { opacity: 0, scale: 0.4, rotate: -6 } : false}
-                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                      transition={{ delay: i * 0.3, type: "spring", stiffness: 220, damping: 13 }}
-                      className="min-w-0 flex-1 text-4xl font-bold leading-tight [overflow-wrap:anywhere]"
-                    >
-                      {s.text}
-                    </motion.span>
-                  ) : (
-                    <span className="min-w-0 flex-1 text-3xl text-ink-muted">{s.kind === "sent" ? "✓" : s.kind === "wait" ? "…" : ""}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 function Title({ children, sub, testId }: { children: React.ReactNode; sub?: React.ReactNode; testId?: string }) {
   return (
@@ -92,24 +35,89 @@ function TvWord() {
   );
 }
 
-function Tv(props: Props) {
-  const { pub, round, players } = props;
-  if (pub.step === "mot") return <TvWord />;
-  const n = pub.playerIds.filter((id) => round.participants.includes(id)).length;
-  const sub =
-    pub.step === "indice" ? (
-      <span data-testid="tv-sent-count"><span className="text-accent">{pub.sentIds.length}</span> / {n}</span>
-    ) : pub.step === "debat" ? (
-      <span data-testid="tv-ready-count"><span className="text-accent">{pub.readyIds.length}</span> / {n} prêts à voter</span>
-    ) : pub.step === "vote" ? (
-      <span data-testid="tv-vote-count"><span className="text-accent">{pub.votedCount}</span> / {n} ont voté</span>
-    ) : null;
-  const title =
-    pub.step === "indice" ? `Indice ${pub.tour}/${pub.tours} : un mot pour décrire le vôtre` : pub.step === "montre" ? `Les indices ${pub.tours > 1 ? `du tour ${pub.tour}` : ""}` : pub.step === "debat" ? "Débattez ! Qui n'a pas le même mot ?" : "Qui n'a pas le même mot ?";
+/** Parole : l'orateur en très grand, la file des suivants en dessous (ceux qui ont parlé sont cochés). */
+function TvSpeech({ pub, round, playerById }: Props) {
+  const current = playerById(pub.currentId ?? "");
+  const queue = pub.order.filter((id) => round.participants.includes(id));
   return (
-    <div data-testid="tv-imposteur" data-step={pub.step} className="flex min-h-0 flex-1 flex-col">
-      <Title sub={sub} testId="tv-imposteur-title">{title}</Title>
-      <TvBoard pub={pub} round={round} players={players} />
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-between gap-4 text-center">
+      <p className="shrink-0 font-display text-4xl text-ink-muted">{pub.tours > 1 ? `Tour ${pub.tour}/${pub.tours}` : "Indice"}</p>
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5">
+        <motion.div key={pub.currentId ?? "none"} initial={{ scale: 0.5, opacity: 0, rotate: -6 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 200, damping: 13 }} className="flex flex-col items-center gap-4">
+          <PlayerAvatar profile={current?.profile ?? null} size="2xl" />
+          <h1 data-testid="tv-speaker" data-speaker={pub.currentId ?? ""} className="max-w-full truncate text-[5.5rem] font-extrabold leading-none">
+            À <span className="text-accent">{current?.profile?.name ?? "…"}</span> !
+          </h1>
+        </motion.div>
+        <p className="font-display text-5xl text-ink-muted">Dis ton indice à voix haute</p>
+      </div>
+      <div data-testid="tv-queue" className="flex shrink-0 flex-wrap items-start justify-center gap-x-5 gap-y-2">
+        {queue.map((id) => {
+          const done = pub.spokenIds.includes(id);
+          const isCur = id === pub.currentId;
+          return (
+            <div key={id} data-testid={`queue-${id}`} data-state={done ? "done" : isCur ? "current" : "wait"} className={`flex w-[11rem] flex-col items-center gap-1 ${isCur ? "scale-110" : ""}`}>
+              <PlayerAvatar profile={playerById(id)?.profile ?? null} size="md" dimmed={!done && !isCur} badge={done ? <CheckIcon /> : undefined} className={isCur ? "drop-shadow-[0_0_1.2rem_var(--color-accent)]" : ""} />
+              <span className={`w-full truncate text-xl font-bold ${isCur ? "text-accent" : done ? "text-ink-muted" : ""}`}>{playerById(id)?.profile?.name}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** Décision : deux gros compteurs en direct (jamais de noms). */
+function TvDecision({ pub }: Props) {
+  const total = Math.max(1, pub.wantVote + pub.wantTour);
+  const cards = [
+    { id: "vote", emoji: "🗳️", label: "On vote", n: pub.wantVote },
+    { id: "tour", emoji: "🔁", label: "Encore un tour", n: pub.wantTour },
+  ];
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <Title testId="tv-decision-title">On vote ou on refait un tour ?</Title>
+      <div className="flex min-h-0 flex-1 items-center justify-center gap-12">
+        {cards.map((c) => (
+          <div key={c.id} data-testid={`tv-count-${c.id}`} data-count={c.n} className="glass flex w-[40rem] flex-col items-center gap-5 rounded-card px-8 py-10">
+            <span className="text-[7rem] leading-none" aria-hidden>{c.emoji}</span>
+            <span className="font-display text-6xl">{c.label}</span>
+            <span className="font-display text-[9rem] leading-none text-accent">{c.n}</span>
+            <div className="h-6 w-full overflow-hidden rounded-full bg-surface-strong">
+              <motion.div animate={{ width: `${(c.n / total) * 100}%` }} transition={{ type: "spring", stiffness: 120, damping: 16 }} className="h-full rounded-full bg-accent" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TvVote({ pub, round, playerById }: Props) {
+  const list = pub.playerIds.filter((id) => round.participants.includes(id));
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <Title sub={<span data-testid="tv-vote-count"><span className="text-accent">{pub.votedCount}</span> / {list.length} ont voté</span>} testId="tv-imposteur-title">
+        Qui n'a pas le même mot ?
+      </Title>
+      <div className="flex min-h-0 flex-1 flex-wrap content-center items-start justify-center gap-x-6 gap-y-6">
+        {list.map((id) => (
+          <div key={id} className="flex w-[13rem] flex-col items-center gap-2">
+            <PlayerAvatar profile={playerById(id)?.profile ?? null} size="xl" />
+            <span className="w-full truncate text-2xl font-bold">{playerById(id)?.profile?.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Tv(props: Props) {
+  const { pub } = props;
+  if (pub.step === "mot") return <TvWord />;
+  return (
+    <div data-testid="tv-imposteur" data-step={pub.step} data-tour={pub.tour} className="flex min-h-0 flex-1 flex-col">
+      {pub.step === "parole" ? <TvSpeech {...props} /> : pub.step === "decision" ? <TvDecision {...props} /> : <TvVote {...props} />}
     </div>
   );
 }
@@ -159,120 +167,74 @@ function PhoneWord({ priv }: Props) {
   );
 }
 
-/** Tableau compact : une ligne par joueur avec ses indices. */
-function PhoneBoard({ pub, round, playerById, myId }: Pick<Props, "pub" | "round" | "playerById"> & { myId?: string }) {
-  const list = pub.playerIds.filter((id) => round.participants.includes(id));
-  return (
-    <div data-testid="phone-board" className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto overscroll-contain">
-      {list.map((id) => {
-        const p = playerById(id);
-        const slots = slotsOf(pub, id);
-        return (
-          <div key={id} data-testid={`phone-board-${id}`} className={`glass flex shrink-0 items-center gap-3 rounded-chip px-3 py-1.5 ${id === myId ? "border border-accent" : ""}`}>
-            <PlayerAvatar profile={p?.profile ?? null} size="sm" />
-            <div className="flex min-w-0 flex-1 flex-col leading-tight">
-              <span className="truncate text-sm font-bold text-ink-muted">{p?.profile?.name}</span>
-              <span className="text-balance text-xl [overflow-wrap:anywhere]">
-                {slots.map((s, t) => (
-                  <span key={t} className={s.kind === "clue" ? "font-bold" : "text-ink-muted"}>
-                    {t > 0 && <span className="text-ink-muted"> · </span>}
-                    {s.kind === "clue" ? s.text : s.kind === "sent" ? "✓" : s.kind === "wait" ? "…" : ""}
-                  </span>
-                ))}
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function PhoneClue({ pub, priv, sendInput, round, playerById, snapshot }: Props) {
-  const sent = priv?.clue ?? null;
-  const [draft, setDraft] = useState(sent ?? "");
+/** Parole : l'orateur a un énorme bouton ; les autres regardent qui parle. Une seule chose à faire par écran. */
+function PhoneSpeech({ pub, sendInput, playerById, snapshot }: Props) {
+  const myId = snapshot.me?.id;
+  const mine = pub.currentId !== null && pub.currentId === myId;
+  const current = playerById(pub.currentId ?? "");
   const [busy, setBusy] = useState(false);
-  const typed = clean(draft);
-  const isSent = sent !== null && typed === sent;
-  const forbidden = typed !== "" && (containsOwnWord(typed, priv?.word ?? "") || priv?.rejected === typed);
-  const canSend = !busy && !isSent && !forbidden && (typed !== "" || sent !== null);
-
-  // Nouveau tour : champ vide (l'indice du tour précédent est déjà sur le tableau).
-  useEffect(() => {
-    setDraft(priv?.clue ?? "");
-  }, [pub.tour]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const submit = () => {
-    if (!canSend) return;
-    (document.activeElement as HTMLElement | null)?.blur();
-    setBusy(true);
-    void sendInput({ clue: draft })
-      .catch(() => {})
-      .finally(() => setBusy(false));
-  };
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight">
-        {pub.tours > 1 ? `Indice ${pub.tour}/${pub.tours} : ` : ""}un mot pour décrire le tien
-      </h1>
-      <div className="flex shrink-0 flex-col gap-2">
-        <div className="relative">
-          <input
-            data-testid="clue-input"
-            value={draft}
-            maxLength={pub.maxLength}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key !== "Enter") return;
-              e.preventDefault();
-              submit();
-            }}
-            enterKeyHint="send"
-            autoComplete="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            placeholder="Ton indice…"
-            aria-label="Ton indice"
-            className={`w-full rounded-btn border-[0.2rem] bg-surface-strong px-4 py-4 pr-12 text-xl font-bold text-ink outline-none transition-colors placeholder:font-normal placeholder:text-ink-muted focus:border-accent ${forbidden ? "border-bad" : isSent ? "border-good" : "border-line"}`}
-          />
-          {isSent && (
-            <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 14 }} className="pointer-events-none absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-good text-lg text-bg">
-              <CheckIcon />
-            </motion.span>
-          )}
-        </div>
-        {forbidden ? (
-          <p data-testid="clue-error" className="text-center text-base font-bold text-bad">Pas le droit d'écrire ton propre mot !</p>
-        ) : (
-          <Button data-testid="clue-send" data-sent={isSent} variant={isSent ? "good" : "primary"} size="lg" block disabled={!canSend && !isSent} onClick={submit}>
-            {isSent ? <span className="inline-flex items-center gap-2">Envoyé <CheckIcon /></span> : typed === "" && sent !== null ? "Retirer" : sent !== null ? "Modifier" : "Envoyer"}
-          </Button>
-        )}
+  useEffect(() => setBusy(false), [pub.currentId]);
+  if (mine) {
+    return (
+      <div data-testid="phone-speaking" data-me="true" className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 pb-2 text-center">
+        <p className="shrink-0 text-balance text-2xl font-extrabold leading-tight">C'est à toi !<br />Dis ton indice à voix haute</p>
+        <Button
+          data-testid="speech-done"
+          variant="good"
+          size="lg"
+          block
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            void sendInput({ done: true }).catch(() => setBusy(false));
+          }}
+          className="min-h-0 flex-1 !text-3xl"
+        >
+          J'ai dit mon indice ✓
+        </Button>
       </div>
-      <PhoneBoard pub={pub} round={round} playerById={playerById} myId={snapshot.me?.id} />
+    );
+  }
+  return (
+    <div data-testid="phone-speaking" data-me="false" className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 text-center">
+      <PlayerAvatar profile={current?.profile ?? null} size="xl" />
+      <p className="w-full truncate text-4xl font-extrabold">{current?.profile?.name ?? "…"}</p>
+      <p className="font-display text-3xl text-accent">parle…</p>
+      <p className="text-xl text-ink-muted">Écoute bien son indice</p>
     </div>
   );
 }
 
-function PhoneShow({ pub, round, playerById, snapshot }: Props) {
+function PhoneDecision({ priv, sendInput }: Props) {
+  const choice = priv?.choice ?? null;
+  const options = [
+    { id: "vote", label: "🗳️ On vote" },
+    { id: "tour", label: "🔁 Encore un tour" },
+  ] as const;
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <h1 className="shrink-0 text-center text-2xl font-extrabold">👀 Regarde la TV !</h1>
-      <PhoneBoard pub={pub} round={round} playerById={playerById} myId={snapshot.me?.id} />
-    </div>
-  );
-}
-
-function PhoneDebate({ pub, priv, sendInput, round, playerById, snapshot }: Props) {
-  const ready = priv?.ready ?? false;
-  return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight">Débattez ! Qui n'a pas le même mot ?</h1>
-      <PhoneBoard pub={pub} round={round} playerById={playerById} myId={snapshot.me?.id} />
-      <Button data-testid="ready-btn" data-ready={ready} variant={ready ? "good" : "primary"} size="lg" block onClick={() => void sendInput({ ready: !ready }).catch(() => {})} className="shrink-0">
-        {ready ? <span className="inline-flex items-center gap-2">Prêt <CheckIcon /> ({pub.readyIds.length}/{pub.playerIds.length})</span> : "Prêt à voter"}
-      </Button>
+      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight">On vote ou on refait un tour ?</h1>
+      <div className="flex min-h-0 flex-1 flex-col gap-3 pb-2">
+        {options.map((o) => {
+          const selected = choice === o.id;
+          return (
+            <Button
+              key={o.id}
+              data-testid={`decision-${o.id}`}
+              data-selected={selected}
+              aria-pressed={selected}
+              variant={selected ? "good" : "primary"}
+              size="lg"
+              block
+              onClick={() => void sendInput({ choice: o.id }).catch(() => {})}
+              className={`min-h-0 flex-1 !py-2 !text-2xl ${choice !== null && !selected ? "opacity-60" : ""}`}
+            >
+              {o.label}
+              {selected && <CheckIcon />}
+            </Button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -289,7 +251,6 @@ function PhoneVote({ pub, priv, sendInput, playerById, snapshot }: Props) {
         {options.map((id) => {
           const selected = vote === id;
           const profile = playerById(id)?.profile ?? null;
-          const clues = (pub.clues[id] ?? []).filter(Boolean).join(" · ");
           return (
             <motion.button
               key={id}
@@ -299,11 +260,10 @@ function PhoneVote({ pub, priv, sendInput, playerById, snapshot }: Props) {
               animate={{ scale: selected ? 1.03 : 1, opacity: vote !== null && !selected ? 0.5 : 1 }}
               onClick={() => void sendInput({ target: id }).catch(() => {})}
               aria-pressed={selected}
-              className={`relative flex flex-col items-center justify-center gap-0.5 rounded-card border-2 p-1.5 ${dense ? "min-h-[5.5rem]" : "min-h-[8rem]"} ${selected ? "border-accent bg-accent/25 shadow-glow" : "glass border-transparent"}`}
+              className={`relative flex flex-col items-center justify-center gap-1 rounded-card border-2 p-1.5 ${dense ? "min-h-[6.5rem]" : "min-h-[9rem]"} ${selected ? "border-accent bg-accent/25 shadow-glow" : "glass border-transparent"}`}
             >
-              <PlayerAvatar profile={profile} size={dense ? "sm" : "lg"} />
-              <span className="w-full truncate text-base font-bold leading-tight">{profile?.name}</span>
-              <span className="line-clamp-2 w-full text-balance text-sm leading-tight text-ink-muted [overflow-wrap:anywhere]">{clues || "—"}</span>
+              <PlayerAvatar profile={profile} size={dense ? "md" : "lg"} />
+              <span className="w-full truncate text-lg font-bold leading-tight">{profile?.name}</span>
               {selected && (
                 <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm text-accent-ink">
                   <CheckIcon />
@@ -323,7 +283,7 @@ function Phone(props: Props) {
   return (
     <div data-testid="phone-imposteur" data-step={pub.step} className="flex min-h-0 flex-1 flex-col gap-3">
       <WordPeek word={priv?.word ?? ""} />
-      {pub.step === "indice" ? <PhoneClue {...props} /> : pub.step === "montre" ? <PhoneShow {...props} /> : pub.step === "debat" ? <PhoneDebate {...props} /> : <PhoneVote {...props} />}
+      {pub.step === "parole" ? <PhoneSpeech {...props} /> : pub.step === "decision" ? <PhoneDecision {...props} /> : <PhoneVote {...props} />}
     </div>
   );
 }
