@@ -1,32 +1,19 @@
 // Écrans de "Qui est le plus… ?" : n'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
-import { CheckIcon, PlayerAvatar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, PlayerAvatar, SelectedBadge, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
 const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
   const voters = players.filter((p) => round.participants.includes(p.id) && p.profile);
   const voted = voters.filter((p) => pub.votedIds.includes(p.id)).length;
-  const crowd = voters.length > 5;
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-12 text-center">
       <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-[88rem] text-balance text-[6rem] font-extrabold leading-[1.05]">
         {typo(pub.question)}
       </motion.h1>
-      <div data-testid="tv-answered-count" className="font-display text-5xl text-ink-muted">
-        <span className="text-accent">{voted}</span> / {voters.length}
-      </div>
-      <div data-testid="tv-answered" className="flex flex-wrap items-start justify-center gap-x-2 gap-y-3">
-        {voters.map((p) => {
-          const has = pub.votedIds.includes(p.id);
-          return (
-            <motion.div key={p.id} animate={{ scale: has ? 1 : 0.92, y: has ? -8 : 0 }} className="flex w-[11rem] flex-col items-center gap-1">
-              <PlayerAvatar profile={p.profile} size={crowd ? "md" : "lg"} dimmed={!has} badge={has ? <CheckIcon /> : undefined} />
-              <span className={`w-full truncate font-bold ${crowd ? "text-xl" : "text-2xl"} ${has ? "text-ink" : "text-ink-muted"}`}>{p.profile!.name}</span>
-            </motion.div>
-          );
-        })}
-      </div>
+      <AnsweredCount done={voted} total={voters.length} />
+      <AnsweredRoster players={voters} isDone={(id) => pub.votedIds.includes(id)} />
     </div>
   );
 };
@@ -58,9 +45,7 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
               <PlayerAvatar profile={p.profile} size={tiny ? "sm" : dense ? "sm" : "lg"} />
               <span className="w-full truncate text-base font-bold leading-tight">{p.profile!.name}</span>
               {selected && (
-                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm text-accent-ink">
-                  <CheckIcon />
-                </motion.span>
+                <SelectedBadge tone="accent" size="sm" className="absolute right-1.5 top-1.5" />
               )}
             </motion.button>
           );

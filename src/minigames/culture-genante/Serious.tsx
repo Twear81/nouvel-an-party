@@ -3,11 +3,10 @@
 // pour refaire la mise en scène, on change ces jetons ou les scènes (Accroche, Bascule, Question, Reveal).
 import type { ReactNode } from "react";
 import type { RoundInfo } from "../../shared/types";
-import { useRemainingMs } from "../../web/ui";
+import { fit, useRemainingMs } from "../../web/ui";
 
-/** Taille de police (rem) pour qu'un texte de `availRem` de large tienne sur `lines` lignes (≈ 0.5em par lettre en serif). */
-export const fitText = (text: string, availRem: number, min: number, max: number, lines = 1) =>
-  Math.max(min, Math.min(max, (availRem * lines) / (Math.max(text.length, 1) * 0.5)));
+/** Taille de police (rem) pour qu'un texte tienne sur `lines` lignes de `availRem` de large (≈ 0.5em par lettre en serif). */
+export const fitText = (text: string, availRem: number, min: number, max: number, lines = 1) => fit(text, availRem, min, max, lines, 0.5);
 
 /** Texte où les mots à trait d'union (« a-t-il », « Nouvelle-Zélande ») ne sont jamais coupés en fin de ligne. */
 export function Unbroken({ text }: { text: string }) {

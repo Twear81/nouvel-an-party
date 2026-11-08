@@ -3,7 +3,7 @@
 // Temps de réaction (QCM) : mesuré ICI, avec performance.now(), à partir de l'affichage des choix (invariant 7).
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { CheckIcon } from "../../web/ui";
+import { CheckIcon, NumPad, SelectedBadge } from "../../web/ui";
 import type { MiniGameViewProps } from "../views-contract";
 import type { Priv, Pub } from "./game";
 import { draftToValue, formatNumber, pressKey } from "./number";
@@ -79,11 +79,7 @@ function QcmPhone({ pub, priv, round, sendInput }: MiniGameViewProps<Pub, Priv>)
                 <span className="min-w-0 text-balance break-words leading-tight" style={{ fontSize: `${fitText(label, 15, 1.15, 1.7, 2)}rem` }}>
                   {label}
                 </span>
-                {selected && (
-                  <span className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-serious-good text-serious-bg">
-                    <CheckIcon />
-                  </span>
-                )}
+                {selected && <SelectedBadge tone="serious" size="md" className="absolute right-3 top-1/2 -translate-y-1/2" />}
               </motion.button>
             );
           })}
@@ -94,22 +90,11 @@ function QcmPhone({ pub, priv, round, sendInput }: MiniGameViewProps<Pub, Priv>)
   );
 }
 
-const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "back"] as const;
-
 function EstimationPhone({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>) {
   const [draft, setDraft] = useState("");
   const value = draftToValue(draft);
   const done = !!priv?.answered;
   const shown = value === null ? "" : formatNumber(value);
-
-  const press = (key: string) => {
-    try {
-      navigator.vibrate?.(8);
-    } catch {
-      /* pas de vibration : tant pis */
-    }
-    setDraft((d) => pressKey(d, key));
-  };
 
   return (
     <PhoneSerious testId="cg-phone" stage="question">
@@ -130,26 +115,7 @@ function EstimationPhone({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>)
               </span>
               {pub.unit && <span className="text-xl text-serious-muted">{pub.unit}</span>}
             </div>
-            <div className="grid min-h-0 flex-1 grid-cols-3 grid-rows-4 gap-2">
-              {KEYS.map((k, i) =>
-                k === "" ? (
-                  <div key={i} />
-                ) : (
-                  <motion.button
-                    key={k}
-                    type="button"
-                    data-testid={k === "back" ? "cg-key-back" : `cg-key-${k}`}
-                    aria-label={k === "back" ? "Effacer" : undefined}
-                    whileTap={{ scale: 0.92 }}
-                    disabled={pressKey(draft, k) === draft}
-                    onClick={() => press(k)}
-                    className="flex items-center justify-center border border-serious-line bg-serious-bg-2/70 text-3xl transition-opacity disabled:opacity-30"
-                  >
-                    {k === "back" ? "⌫" : k}
-                  </motion.button>
-                ),
-              )}
-            </div>
+            <NumPad tone="serious" testIdPrefix="cg-key-" isUseless={(k) => pressKey(draft, k) === draft} onKey={(k) => setDraft((d) => pressKey(d, k))} />
             <motion.button
               type="button"
               data-testid="cg-submit"

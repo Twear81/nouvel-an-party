@@ -1,7 +1,7 @@
 // Écrans de "Ceci ou Cela" : deux réponses face à face (couleurs neutres bleu / rose : ce n'est pas "bien / mal").
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
-import { CheckIcon, PlayerAvatar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, CheckIcon, fit, PlayerAvatar, SelectedBadge, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -10,9 +10,6 @@ const TONES = [
   { solid: "bg-cool text-bg", soft: "border-cool bg-cool/15", text: "text-cool", glow: "shadow-[0_0_3.5rem_rgb(90_209_255/0.5)]" },
   { solid: "bg-hot text-bg", soft: "border-hot bg-hot/15", text: "text-hot", glow: "shadow-[0_0_3.5rem_rgb(255_79_154/0.5)]" },
 ] as const;
-
-/** Taille de police (rem) pour qu'un libellé de `availRem` de large tienne sur une ligne (Bungee ≈ 0.8em par lettre). */
-const fit = (label: string, availRem: number, min: number, max: number) => Math.max(min, Math.min(max, availRem / (Math.max(label.length, 1) * 0.8)));
 
 const GuessIcon = () => <span aria-hidden>🎯</span>;
 
@@ -40,7 +37,6 @@ function ModeChip({ pub, playerById }: Pick<MiniGameViewProps<Pub>, "pub" | "pla
 const Tv = ({ pub, round, playerById, players }: MiniGameViewProps<Pub>) => {
   const voters = players.filter((p) => round.participants.includes(p.id) && p.profile);
   const answered = voters.filter((p) => pub.answeredIds.includes(p.id)).length;
-  const crowd = voters.length > 5;
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-between gap-4 text-center">
       <ModeChip pub={pub} playerById={playerById} />
@@ -68,21 +64,15 @@ const Tv = ({ pub, round, playerById, players }: MiniGameViewProps<Pub>) => {
       </div>
 
       <div className="flex flex-col items-center gap-1">
-      <div data-testid="tv-answered-count" className="font-display text-4xl text-ink-muted">
-        <span className="text-accent">{answered}</span> / {voters.length}
-      </div>
-      <div className="flex flex-wrap items-start justify-center gap-x-2 gap-y-2" data-testid="tv-answered">
-        {voters.map((p) => {
-          const has = pub.answeredIds.includes(p.id);
-          const isTarget = p.id === pub.targetId;
-          return (
-            <div key={p.id} className="flex w-[11rem] flex-col items-center gap-0.5">
-              <PlayerAvatar profile={p.profile} size={crowd ? "md" : "lg"} dimmed={!has} badge={has ? <CheckIcon /> : isTarget ? <GuessIcon /> : undefined} className={isTarget ? "drop-shadow-[0_0_1rem_var(--color-accent)]" : ""} />
-              <span className={`w-full truncate font-bold ${crowd ? "text-lg" : "text-xl"} ${isTarget ? "text-accent" : has ? "text-ink" : "text-ink-muted"}`}>{p.profile!.name}</span>
-            </div>
-          );
-        })}
-      </div>
+        <AnsweredCount done={answered} total={voters.length} className="font-display text-4xl text-ink-muted" />
+        <AnsweredRoster
+          players={voters}
+          size="compact"
+          isDone={(id) => pub.answeredIds.includes(id)}
+          badge={(p, done) => (done ? <CheckIcon /> : p.id === pub.targetId ? <GuessIcon /> : undefined)}
+          avatarClassName={(p) => (p.id === pub.targetId ? "drop-shadow-[0_0_1rem_var(--color-accent)]" : "")}
+          nameClassName={(p, done) => (p.id === pub.targetId ? "text-accent" : done ? "text-ink" : "text-ink-muted")}
+        />
       </div>
     </div>
   );
@@ -124,9 +114,7 @@ const Phone = ({ pub, priv, sendInput, playerById }: MiniGameViewProps<Pub, Priv
                 {label}
               </span>
               {selected && (
-                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xl text-bg">
-                  <CheckIcon />
-                </motion.span>
+                <SelectedBadge className="absolute right-3 top-3" />
               )}
             </motion.button>
           );

@@ -1,7 +1,7 @@
 // Écrans de "Tier list" : n'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { CheckIcon, fireConfetti, PlayerAvatar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, CheckIcon, fireConfetti, PlayerAvatar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 import { TIER_BG, TIER_BORDER, TIER_TEXT, TierBadge, TierBoard } from "./tiers";
@@ -20,24 +20,22 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
         {() => null}
       </TierBoard>
       <div className="flex shrink-0 items-center gap-8">
-        <div data-testid="tv-answered-count" className="font-display text-5xl text-ink-muted">
-          <span className="text-accent">{finished}</span> / {voters.length}
-        </div>
-        <div data-testid="tv-answered" className="flex flex-1 flex-wrap items-start justify-center gap-x-3 gap-y-2">
-          {voters.map((p) => {
+        <AnsweredCount done={finished} total={voters.length} />
+        <AnsweredRoster
+          players={voters}
+          size="small"
+          className="flex flex-1 flex-wrap items-start justify-center gap-x-3 gap-y-2"
+          isDone={(id) => !!pub.progress[id] && pub.progress[id]!.done >= pub.progress[id]!.total}
+          dimmed={(p, done) => !done && (pub.progress[p.id]?.done ?? 0) === 0}
+          below={(p) => {
             const prog = pub.progress[p.id] ?? { done: 0, total: 1 };
-            const done = prog.done >= prog.total;
             return (
-              <motion.div key={p.id} animate={{ scale: done ? 1 : 0.94, y: done ? -4 : 0 }} className="flex w-[9.5rem] flex-col items-center gap-1">
-                <PlayerAvatar profile={p.profile} size="md" dimmed={!done && prog.done === 0} badge={done ? <CheckIcon /> : undefined} />
-                <span className={`w-full truncate text-center text-xl font-bold ${done ? "text-ink" : "text-ink-muted"}`}>{p.profile!.name}</span>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-surface-strong">
-                  <motion.div animate={{ width: `${(prog.done / Math.max(1, prog.total)) * 100}%` }} className="h-full rounded-full bg-gold" />
-                </div>
-              </motion.div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-surface-strong">
+                <motion.div animate={{ width: `${(prog.done / Math.max(1, prog.total)) * 100}%` }} className="h-full rounded-full bg-gold" />
+              </div>
             );
-          })}
-        </div>
+          }}
+        />
       </div>
     </div>
   );

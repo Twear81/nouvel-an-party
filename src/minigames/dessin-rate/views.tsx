@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { CheckIcon, fireConfetti, PlayerAvatar, TrashIcon, typo, UndoIcon } from "../../web/ui";
+import { fireConfetti, PlayerAvatar, SelectedBadge, TrashIcon, typo, UndoIcon, VoteDots } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { Drawing, DrawingPad, PEN_BG } from "./drawing";
 import type { Priv, Pub, Results, ResultCard, TvPub } from "./game";
@@ -119,22 +119,6 @@ function TvGallery({ pub, playerById }: MiniGameViewProps<Pub>) {
           </span>
         </div>
       </motion.div>
-    </div>
-  );
-}
-
-/** Pastilles anonymes de progression du vote (on ne dit pas qui a voté). */
-function VoteDots({ done, total }: { done: number; total: number }) {
-  return (
-    <div className="flex shrink-0 items-center justify-center gap-5">
-      <div className="flex items-center gap-2" data-testid="tv-vote-dots">
-        {Array.from({ length: total }, (_, i) => (
-          <motion.span key={i} animate={{ scale: i < done ? 1.2 : 1 }} className={`h-6 w-6 rounded-full ${i < done ? "bg-gold shadow-glow" : "bg-surface-strong"}`} />
-        ))}
-      </div>
-      <span data-testid="tv-vote-count" className="font-display text-4xl text-ink-muted">
-        <span className="text-accent">{done}</span> / {total}
-      </span>
     </div>
   );
 }
@@ -297,9 +281,7 @@ function PhoneVote({ pub, priv, sendInput, snapshot }: Props) {
               </div>
               <span className="line-clamp-2 w-full text-balance text-center text-xs font-bold leading-tight">{c.word}</span>
               {selected && (
-                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm text-accent-ink">
-                  <CheckIcon />
-                </motion.span>
+                <SelectedBadge tone="accent" size="sm" className="absolute right-1 top-1" />
               )}
             </motion.button>
           );

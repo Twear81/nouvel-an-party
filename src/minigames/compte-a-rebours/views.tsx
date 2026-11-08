@@ -7,12 +7,12 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { activeNow } from "../../shared/clock";
 import type { RoundInfo } from "../../shared/types";
 import { serverNow } from "../../web/net/socket";
-import { PlayerAvatar } from "../../web/ui";
+import { ordinal, PlayerAvatar } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { Counter, useFrame } from "./Counter";
 import { GO_LEAD_MS, type Priv, type Pub, type Results } from "./game";
 import { revealSeconds, TvResults } from "./Results";
-import { fmtCible, fmtSigned, ordinal, QUALITY_TEXT, quality } from "./rank";
+import { fmtCible, fmtSigned, QUALITY_TEXT, quality } from "./rank";
 
 type Props = MiniGameViewProps<Pub, Priv, Results>;
 

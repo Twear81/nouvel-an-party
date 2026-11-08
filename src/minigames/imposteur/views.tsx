@@ -3,7 +3,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Button, CheckIcon, fireConfetti, PlayerAvatar } from "../../web/ui";
+import { Button, CheckIcon, fireConfetti, PlayerAvatar, SelectedBadge } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -36,9 +36,9 @@ function TvWord() {
 }
 
 /** Parole : l'orateur en très grand, la file des suivants en dessous (ceux qui ont parlé sont cochés). */
-function TvSpeech({ pub, round, playerById }: Props) {
+function TvSpeech({ pub, playerById }: Props) {
   const current = playerById(pub.currentId ?? "");
-  const queue = pub.order.filter((id) => round.participants.includes(id));
+  const queue = pub.order;
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-between gap-4 text-center">
       <p className="shrink-0 font-display text-4xl text-ink-muted">{pub.tours > 1 ? `Tour ${pub.tour}/${pub.tours}` : "Indice"}</p>
@@ -93,8 +93,8 @@ function TvDecision({ pub }: Props) {
   );
 }
 
-function TvVote({ pub, round, playerById }: Props) {
-  const list = pub.playerIds.filter((id) => round.participants.includes(id));
+function TvVote({ pub, playerById }: Props) {
+  const list = pub.playerIds;
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Title sub={<span data-testid="tv-vote-count"><span className="text-accent">{pub.votedCount}</span> / {list.length} ont voté</span>} testId="tv-imposteur-title">
@@ -234,9 +234,7 @@ function PhoneDecision({ priv, sendInput }: Props) {
             >
               <span className="text-balance font-display text-3xl leading-tight">{o.label}</span>
               {selected && (
-                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xl text-bg">
-                  <CheckIcon />
-                </motion.span>
+                <SelectedBadge className="absolute right-3 top-3" />
               )}
             </motion.button>
           );
@@ -272,9 +270,7 @@ function PhoneVote({ pub, priv, sendInput, playerById, snapshot }: Props) {
               <PlayerAvatar profile={profile} size={dense ? "md" : "lg"} />
               <span className="w-full truncate text-lg font-bold leading-tight">{profile?.name}</span>
               {selected && (
-                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-sm text-accent-ink">
-                  <CheckIcon />
-                </motion.span>
+                <SelectedBadge tone="accent" size="sm" className="absolute right-1.5 top-1.5" />
               )}
             </motion.button>
           );
