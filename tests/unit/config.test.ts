@@ -42,6 +42,27 @@ function errorOf(fn: () => unknown): ConfigError {
 }
 
 describe("loadConfig", () => {
+  it("lit `manches_max` (géré par le moteur, absent du schéma du jeu) et le retire du yaml du jeu", () => {
+    const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": `manches_max: 4\n${CECI}` });
+    const { games } = loadConfig(dir);
+    expect(games).toHaveLength(1);
+    expect(games[0]!.maxRounds).toBe(4);
+    expect(games[0]!.cfg).not.toHaveProperty("manches_max");
+  });
+
+  it("sans `manches_max`, pas de plafond", () => {
+    const { games } = loadConfig(tmpConfig({ "minijeux/ceci-ou-cela.yaml": CECI }));
+    expect(games[0]!.maxRounds).toBeUndefined();
+  });
+
+  it("refuse un `manches_max` invalide en citant le fichier", () => {
+    for (const bad of ["0", "2.5", '"beaucoup"', "-1"]) {
+      const err = errorOf(() => loadConfig(tmpConfig({ "minijeux/ceci-ou-cela.yaml": `manches_max: ${bad}\n${CECI}` })));
+      expect(err.message).toContain("ceci-ou-cela.yaml");
+      expect(err.message).toContain("manches_max");
+    }
+  });
+
   it("charge le vrai dossier config/ sans erreur", () => {
     const { settings, games } = loadConfig(realConfig);
     expect(settings.titre.length).toBeGreaterThan(0);

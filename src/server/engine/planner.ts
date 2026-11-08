@@ -6,6 +6,8 @@ import type { MiniGame } from "../../minigames/contract";
 export interface LoadedGame {
   game: MiniGame;
   cfg: any;
+  /** Plafond de manches (`manches_max` du yaml, géré par le moteur). Absent = pas de plafond. */
+  maxRounds?: number;
 }
 
 export interface PlannedRound {
@@ -22,13 +24,13 @@ export function interludeEvery(game: MiniGame, cfg: unknown): number | null {
 }
 
 export function buildCatalog(games: LoadedGame[], introSeconds: number): CatalogEntry[] {
-  return games.map(({ game, cfg }) => {
+  return games.map(({ game, cfg, maxRounds }) => {
     const every = interludeEvery(game, cfg);
     return {
       id: game.id,
       name: game.name(cfg),
       description: game.description(cfg),
-      available: game.items(cfg).length,
+      available: Math.min(game.items(cfg).length, maxRounds ?? Infinity),
       // Un interlude n'a pas d'annonce : pas d'intro à compter.
       secondsPerRound: Math.round(game.estimateSeconds(cfg) + (every === null ? introSeconds : 0)),
       ...(every === null ? {} : { interlude: every }),
@@ -121,10 +123,10 @@ export function buildPlan(games: LoadedGame[], setup: Setup, order: "melange" | 
  */
 function insertInterludes(normalPlan: PlannedRound[], games: LoadedGame[], setup: Setup, rng: () => number): PlannedRound[] {
   if (games.length === 0) return normalPlan;
-  const sources = games.map(({ game, cfg }) => ({
+  const sources = games.map(({ game, cfg, maxRounds }) => ({
     id: game.id,
     every: interludeEvery(game, cfg)!,
-    available: game.items(cfg).length,
+    available: Math.min(game.items(cfg).length, maxRounds ?? Infinity),
     enabled: (setup.counts[game.id] ?? 0) > 0,
   }));
   const n = normalPlan.length;
@@ -165,9 +167,9 @@ function insertInterludes(normalPlan: PlannedRound[], games: LoadedGame[], setup
 
 function buildNormalPlan(games: LoadedGame[], setup: Setup, order: "melange" | "groupe", rng: () => number): PlannedRound[] {
   const pools = games
-    .map(({ game, cfg }) => ({
+    .map(({ game, cfg, maxRounds }) => ({
       gameId: game.id,
-      items: shuffle(game.items(cfg), rng).slice(0, setup.counts[game.id] ?? 0),
+      items: shuffle(game.items(cfg), rng).slice(0, Math.min(setup.counts[game.id] ?? 0, maxRounds ?? Infinity)),
     }))
     .filter((p) => p.items.length > 0);
 

@@ -20,6 +20,8 @@ export const settingsSchema = z.object({
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
+const maxRoundsSchema = z.number().int().min(1, "doit être un entier ≥ 1");
+
 export class ConfigError extends Error {}
 
 function readYaml(file: string): unknown {
@@ -53,7 +55,10 @@ export function loadConfig(configDir: string): { settings: Settings; games: Load
       const raw = readYaml(file) as Record<string, unknown>;
       if (raw.actif === false) continue;
       delete raw.actif;
-      games.push({ game, cfg: validate(game.configSchema, raw, file) });
+      // `manches_max` : plafond générique de manches, géré par le moteur (le mini-jeu ne le déclare pas).
+      const maxRounds = raw.manches_max === undefined ? undefined : validate(maxRoundsSchema, raw.manches_max, `${file} (manches_max)`);
+      delete raw.manches_max;
+      games.push({ game, cfg: validate(game.configSchema, raw, file), ...(maxRounds === undefined ? {} : { maxRounds }) });
     } catch (err) {
       errors.push((err as Error).message);
     }

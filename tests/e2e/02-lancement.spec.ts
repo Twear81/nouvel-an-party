@@ -7,8 +7,11 @@ const CECI = "ceci-ou-cela";
 test.describe("Écran de lancement", () => {
   test("les compteurs de manches sont bornés entre 0 et le nombre de questions", async ({ party }) => {
     const { tv } = party;
+    await expect(tv.getByTestId("cert-warning")).toBeVisible();
+    const qr = await tv.getByTestId("tv-qr").boundingBox();
+    expect(qr!.width).toBeGreaterThanOrEqual(340); // QR code grand, lisible de loin
     for (const [id, max] of [[QUI, 5], [CECI, 6]] as const) {
-      await expect(tv.getByTestId(`setup-row-${id}`)).toContainText(`sur ${max}`);
+      await expect(tv.getByTestId(`setup-row-${id}`)).toContainText(`/${max}`);
       // Descendre jusqu'à 0 : le bouton "−" se désactive.
       await party.setCounts({ [id]: 0 });
       await expect(tv.getByTestId(`setup-dec-${id}`)).toBeDisabled();
