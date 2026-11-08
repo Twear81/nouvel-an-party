@@ -10,6 +10,7 @@ export const GAME_NAMES = {
   "comme-les-autres": "Comme les autres",
   "le-bon-prix": "Le bon prix",
   "qui-a-dit": "Qui a dit ça ?",
+  "split-the-room": "Split the Room",
   "compte-a-rebours": "Compte à rebours chaotique",
   simon: "Simon",
   "pierre-feuille-ciseaux": "Pierre-feuille-ciseaux : le tournoi",

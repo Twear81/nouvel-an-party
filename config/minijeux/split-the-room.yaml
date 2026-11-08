@@ -1,0 +1,58 @@
+# Mini-jeu "Split the Room" — doc : src/minigames/split-the-room/README.md
+# On termine une situation sur son téléphone, puis la salle vote OUI / NON sur chaque phrase anonyme.
+# L'auteur marque d'autant plus que la salle est coupée en deux. Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "Split the Room"
+description: "Termine la phrase pour couper la salle en deux"
+
+# Temps pour écrire sa fin de phrase, en secondes (l'étape s'arrête 3 s après que tout le monde a envoyé la sienne)
+duree_ecriture: 60
+
+# Temps pour voter sur CHAQUE phrase, en secondes (on passe à la suite dès que tout le monde a voté)
+duree_vote: 15
+
+# Temps d'affichage de la révélation (jauge, verdict, auteur) après chaque phrase, en secondes
+duree_revelation: 9
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 15
+
+# Nombre maximum de caractères d'une fin de phrase (entre 10 et 200)
+longueur_max: 80
+
+points:
+  max: 300     # points de l'auteur quand la salle est parfaitement coupée (0 si unanimité, proportionnel entre les deux)
+
+# Une situation = une ligne commençant par "- " ; une seule est tirée par manche.
+# Elle doit finir par « mais… » ou équivalent : les invités écrivent la suite.
+# Mettez-les entre guillemets si elles contiennent ": " ou " #".
+situations:
+  - "Tu gagnes 1 million d'euros, mais…"
+  - "Tu peux voler, mais…"
+  - "Tu ne vieillis plus jamais, mais…"
+  - "On t'offre un an de vacances payées, mais…"
+  - "Tu peux lire dans les pensées de tout le monde, mais…"
+  - "Tu rencontres l'amour de ta vie, mais…"
+  - "Tu deviens célèbre dans le monde entier, mais…"
+  - "Tu peux remonter dans le temps, mais…"
+  - "Tu as le physique de tes rêves, mais…"
+  - "Tu n'as plus jamais besoin de dormir, mais…"
+  - "On t'offre une villa en bord de mer, mais…"
+  - "Tu es toujours à l'heure et jamais malade, mais…"
+  - "Tu peux téléporter n'importe où, mais…"
+  - "Tu deviens invisible quand tu veux, mais…"
+  - "Ton patron t'annonce une augmentation de 50 %, mais…"
+  - "Tu parles toutes les langues du monde, mais…"
+  - "Tu ne paies plus jamais un seul restaurant, mais…"
+  - "Tu as un jour de congé en plus chaque semaine, mais…"
+  - "Tu retrouves instantanément tes 20 ans, mais…"
+  - "Tu peux effacer un seul souvenir de ta vie, mais…"
+  - "On t'offre le voyage de tes rêves avec un invité de ce soir, mais…"
+  - "Tu gagnes à chaque jeu de société, mais…"
+  - "Tu peux annuler un seul message envoyé, mais…"
+  - "Tu es le meilleur du monde dans ton domaine préféré, mais…"
+  - "Tu as des amis fidèles pour toujours, mais…"

@@ -1,0 +1,13 @@
+actif: true
+nom: "Split the Room"
+description: "Termine la phrase pour couper la salle en deux"
+duree_ecriture: 30
+duree_vote: 15
+duree_revelation: 6
+temps_resultats: 5
+longueur_max: 80
+points:
+  max: 300
+situations:
+  - "Tu gagnes 1 million d'euros, mais…"
+  - "Tu peux voler, mais…"

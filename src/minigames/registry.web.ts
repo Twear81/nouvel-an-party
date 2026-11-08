@@ -6,6 +6,7 @@ import compteARebours from "./compte-a-rebours/views";
 import leBonPrix from "./le-bon-prix/views";
 import pierreFeuilleCiseaux from "./pierre-feuille-ciseaux/views";
 import quiADit from "./qui-a-dit/views";
+import splitTheRoom from "./split-the-room/views";
 import quiEstLePlus from "./qui-est-le-plus/views";
 import simon from "./simon/views";
 import tierList from "./tier-list/views";
@@ -17,6 +18,7 @@ export const webGames: Record<string, MiniGameViews> = {
   "comme-les-autres": commeLesAutres,
   "le-bon-prix": leBonPrix,
   "qui-a-dit": quiADit,
+  "split-the-room": splitTheRoom,
   "compte-a-rebours": compteARebours,
   "simon": simon,
   "pierre-feuille-ciseaux": pierreFeuilleCiseaux,
