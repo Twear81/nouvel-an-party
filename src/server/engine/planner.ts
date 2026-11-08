@@ -1,4 +1,5 @@
 // Composition de la partie : combien de manches par mini-jeu, et dans quel ordre.
+import { shuffle } from "../../shared/shuffle";
 import { interludeCounts, type InterludeSource } from "../../shared/interlude";
 import type { CatalogEntry, Setup } from "../../shared/types";
 import type { MiniGame } from "../../minigames/contract";
@@ -82,15 +83,6 @@ export function sanitizeSetup(setup: Setup, catalog: CatalogEntry[]): Setup {
     counts[c.id] = Number.isFinite(n) ? Math.min(Math.max(n, 0), max) : 0;
   }
   return { counts };
-}
-
-function shuffle<T>(arr: T[], rng: () => number): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
-  }
-  return a;
 }
 
 /** Après avoir joué `pick`, peut-on ordonner les manches restantes sans répétition consécutive ? */

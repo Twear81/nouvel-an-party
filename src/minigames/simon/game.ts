@@ -6,7 +6,7 @@
 //  - "over"    : fin de partie (vainqueurs fêtés), puis la manche se termine.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone } from "../helpers";
+import { allConnectedDone, playerIds } from "../helpers";
 
 const PADS = 4;
 /** Délai avant la 1re note (le temps de lire "Regardez bien !"), puis après la dernière. */
@@ -205,7 +205,7 @@ const game = defineMiniGame<Cfg, Item, State>({
   },
 
   start(item, ctx) {
-    const alive = new Set(ctx.players.map((p) => p.id));
+    const alive = new Set(playerIds(ctx));
     return {
       item,
       seq: Array.from({ length: item.start }, () => randomPad(ctx.rng)),

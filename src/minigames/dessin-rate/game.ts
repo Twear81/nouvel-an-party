@@ -2,7 +2,7 @@
 // (avec leur mot), puis on vote pour le mieux dessiné. Une manche, trois étapes : dessiner, galerie, vote.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, argmaxAll } from "../helpers";
+import { argmaxAll, endWhenAllDone, playerIds, shuffle } from "../helpers";
 import { cleanStrokes, DIFFICULTIES, isBlank, type Difficulty, type Stroke } from "./shared";
 
 /** Un mot est tiré dans une liste de 8 mots minimum : en dessous, la difficulté n'est pas jouée. */
@@ -96,15 +96,6 @@ export interface Results {
   voted: boolean;
 }
 
-function shuffle<T>(list: T[], rng: () => number): T[] {
-  const a = [...list];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
-  }
-  return a;
-}
-
 /** Nombre de manches possibles par difficulté : une par lot de 8 mots au moins (30 mots → 3 lots de 10). */
 function lots(cfg: Cfg): Item[] {
   const out: Item[] = [];
@@ -176,7 +167,6 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 
   input(state, playerId, payload, ctx) {
-    if (!ctx.players.some((p) => p.id === playerId)) return;
     const p = payload as { strokes?: unknown; target?: unknown } | null;
 
     if (state.step === "draw") {
@@ -216,7 +206,7 @@ export default defineMiniGame<Cfg, Item, State>({
 
   finish(state, ctx) {
     const counts = tally(state);
-    const ids = ctx.players.map((p) => p.id);
+    const ids = playerIds(ctx);
     const shown = (state.order.length ? state.order : ids).filter((id) => !isBlankOf(state, id));
     const cards: ResultCard[] = shown.map((id) => ({ ...cardOf(state, id), votes: counts[id] ?? 0 }));
     const winners = argmaxAll(counts);
@@ -233,7 +223,7 @@ export default defineMiniGame<Cfg, Item, State>({
 /** Fin du dessin : les dessins sont figés, on les montre un par un (les pages blanches sont sautées). */
 function startGallery(state: State, ctx: Ctx) {
   state.order = shuffle(
-    ctx.players.map((p) => p.id),
+    playerIds(ctx),
     ctx.rng,
   );
   state.gallery = state.order.filter((id) => !isBlankOf(state, id));
@@ -260,5 +250,5 @@ function startVote(state: State, ctx: Ctx) {
 /** Tous les votants connectés ont voté : on termine sans attendre le chrono. */
 function checkVoted(state: State, ctx: Ctx) {
   if (state.step !== "vote") return;
-  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.votes.has(id))) ctx.end();
+  endWhenAllDone(ctx, (id) => state.votes.has(id));
 }

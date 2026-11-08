@@ -50,7 +50,6 @@ describe("tier-list : notes", () => {
     rate("p1", "p2", 1.5);
     rate("p1", "p2", "0");
     rate("p1", "p2", null);
-    rate("inconnu", "p2", 0);
     expect(state.ratings.size).toBe(0);
     expect(ctx.ended).toBe(false);
   });

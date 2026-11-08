@@ -3,7 +3,7 @@
 // Le téléphone mesure lui-même le temps (performance.now) : la latence du wifi n'avantage ni ne pénalise personne.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone } from "../helpers";
+import { allConnectedDone, playerIds } from "../helpers";
 import { rankByError } from "./rank";
 
 export const DESIGN_IDS = ["digital", "horloge", "meche", "coupe", "minuit"] as const;
@@ -72,7 +72,7 @@ export const GO_LEAD_MS = 3000;
 const TRUST_MS = 1500;
 
 const everyoneStopped = (s: State, ctx: Ctx) =>
-  allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => s.stops.has(id));
+  allConnectedDone(ctx, playerIds(ctx), (id) => s.stops.has(id));
 
 function go(s: State, ctx: Ctx) {
   s.phase = "running";
@@ -118,7 +118,7 @@ export default defineMiniGame<Cfg, Item, State>({
 
   input(s, playerId, payload, ctx) {
     if (s.phase !== "running" || s.startedAt === null) return;
-    if (!ctx.players.some((p) => p.id === playerId) || s.stops.has(playerId)) return;
+    if (s.stops.has(playerId)) return;
     if (typeof payload !== "object" || payload === null) return;
     const ms = (payload as { ms?: unknown }).ms;
     if (typeof ms !== "number" || !Number.isFinite(ms) || ms < 0) return;

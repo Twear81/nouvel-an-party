@@ -103,9 +103,7 @@ describe("comme-les-autres : réponses", () => {
     for (const payload of [null, undefined, "x", 42, {}, { answers: "pomme" }, { answers: [1, null, {}] }, { answers: ["", "   ", "!!!"] }]) {
       game.input(state, "p2", payload, ctx);
     }
-    game.input(state, "inconnu", { answers: ["pomme"] }, ctx);
     expect(state.answers.has("p2")).toBe(false);
-    expect(state.answers.has("inconnu")).toBe(false);
     expect(ctx.ended).toBe(false);
   });
 

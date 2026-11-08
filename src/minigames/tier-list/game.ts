@@ -3,7 +3,7 @@
 // pour chaque invité qu'il a placé dans son étage consensus.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, normalizeQuestion, questionSchema } from "../helpers";
+import { normalizeQuestion, questionSchema, endWhenAllDone } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Tier list"),
@@ -71,7 +71,7 @@ const isComplete = (state: State, voter: string, ctx: { players: { id: string }[
 
 /** Fin anticipée : tous les joueurs connectés ont fini de noter. */
 function checkAllRated(state: State, ctx: RoundContext<Cfg>) {
-  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => isComplete(state, id, ctx))) ctx.end();
+  endWhenAllDone(ctx, (id) => isComplete(state, id, ctx));
 }
 
 export default defineMiniGame<Cfg, Item, State>({
@@ -86,7 +86,6 @@ export default defineMiniGame<Cfg, Item, State>({
   start: (item) => ({ question: item.text, ratings: new Map() }),
 
   input(state, playerId, payload, ctx) {
-    if (!ctx.players.some((p) => p.id === playerId)) return;
     const { target, tier } = (payload ?? {}) as { target?: unknown; tier?: unknown };
     if (typeof target !== "string" || !targetsOf(playerId, ctx).includes(target)) return;
     if (typeof tier !== "number" || !Number.isInteger(tier) || tier < 0 || tier >= ctx.cfg.tiers.length) return;

@@ -96,9 +96,8 @@ describe("split-the-room : écriture", () => {
     expect(JSON.stringify(r.pub())).not.toContain("second");
   });
 
-  it("ignore payloads invalides, joueurs inconnus, vote pendant l'écriture", () => {
+  it("ignore payloads invalides, vote pendant l'écriture", () => {
     const r = round();
-    r.write("inconnu", "salut");
     game.input(r.state, "p1", null, r.ctx);
     game.input(r.state, "p1", { text: 12 }, r.ctx);
     r.vote("p1", true);
@@ -185,13 +184,12 @@ describe("split-the-room : vote", () => {
     expect(r.priv(voters[1]!).vote).toBeNull();
   });
 
-  it("refuse : vote de l'auteur, valeur non booléenne, inconnu", () => {
+  it("refuse : vote de l'auteur, valeur non booléenne", () => {
     const { r, author, voters } = toVote(4);
     r.vote(author, true);
     r.vote(voters[0]!, "oui");
     r.vote(voters[0]!, 1);
     game.input(r.state, voters[0]!, null, r.ctx);
-    r.vote("inconnu", true);
     expect(r.pub().votedCount).toBe(0);
   });
 

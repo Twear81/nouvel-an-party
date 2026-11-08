@@ -3,7 +3,7 @@
 // Une manche, trois étapes : écrire (chrono 1), puis une phrase à la fois : vote (chrono 2) + révélation (chrono 3).
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone } from "../helpers";
+import { allConnectedDone, playerIds, shuffle } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Split the Room"),
@@ -140,7 +140,6 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 
   input(state, playerId, payload, ctx) {
-    if (!ctx.players.some((p) => p.id === playerId)) return;
     const p = payload as { text?: unknown; vote?: unknown } | null;
 
     if (state.step === "write") {
@@ -217,7 +216,7 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 });
 
-const allWritten = (state: State, ctx: Ctx) => allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.texts.has(id));
+const allWritten = (state: State, ctx: Ctx) => allConnectedDone(ctx, playerIds(ctx), (id) => state.texts.has(id));
 
 /** Tous les joueurs connectés ont écrit : court délai pour corriger, puis on enchaîne. */
 function checkWritten(state: State, ctx: Ctx) {
@@ -230,17 +229,8 @@ function checkWritten(state: State, ctx: Ctx) {
 function checkVoted(state: State, ctx: Ctx) {
   const sentence = state.sentences[state.index];
   if (state.step !== "vote" || !sentence) return;
-  const voters = ctx.players.map((p) => p.id).filter((id) => id !== sentence.authorId);
+  const voters = playerIds(ctx).filter((id) => id !== sentence.authorId);
   if (allConnectedDone(ctx, voters, (id) => sentence.votes.has(id))) reveal(state, ctx);
-}
-
-function shuffle<T>(list: T[], rng: () => number): T[] {
-  const a = [...list];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
-  }
-  return a;
 }
 
 /** Fin de l'écriture : on tire l'ordre des phrases puis on lance la première. */
