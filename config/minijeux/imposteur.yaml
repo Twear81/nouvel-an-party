@@ -1,0 +1,83 @@
+# Mini-jeu "L'imposteur" — doc : src/minigames/imposteur/README.md
+# Tout le monde reçoit le même mot sur son téléphone, sauf UN joueur tiré au sort qui reçoit un mot proche
+# (et ne sait pas qu'il est l'imposteur). Chacun donne des indices, on débat, on vote pour le suspect.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
+
+# false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
+actif: true
+
+# Titre et phrase d'explication affichés sur la TV
+nom: "L'imposteur"
+description: "Un seul d'entre vous n'a pas le même mot… et il ne le sait pas"
+
+# Temps pour lire son mot au début, en secondes
+duree_mot: 6
+
+# Nombre de tours d'indices (1 à 3) : à chaque tour, chacun tape UN mot qui décrit son mot
+tours_indices: 2
+
+# Temps pour taper son indice à chaque tour, en secondes (le tour s'arrête 2 s après que tout le monde a envoyé le sien)
+duree_indice: 20
+
+# Temps pendant lequel la TV montre les indices du tour qui vient de se terminer, en secondes
+duree_revelation_indices: 4
+
+# Temps de débat, en secondes (on passe au vote dès que tout le monde touche « Prêt à voter »)
+duree_debat: 40
+
+# Temps pour voter, en secondes (la manche enchaîne 2 s après que tout le monde a voté)
+duree_vote: 20
+
+# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 25
+
+# Longueur maximale d'un indice, en caractères (entre 8 et 40)
+longueur_indice_max: 24
+
+points:
+  bon_vote: 100          # pour chaque joueur qui a voté pour l'imposteur, SI l'imposteur est démasqué
+                         # (démasqué = il a strictement le plus de votes ; égalité en tête = il s'en sort)
+  imposteur_survit: 300  # pour l'imposteur, s'il n'est pas démasqué
+
+# Une paire = deux mots proches : [mot A, mot B]. Une paire est tirée par manche ; on tire ensuite au hasard
+# lequel des deux mots est celui de la majorité (l'autre va à l'imposteur).
+# Une bonne paire : assez proche pour que l'imposteur ne se doute de rien, assez différente pour qu'on le repère.
+# Mettez les mots entre guillemets. Maximum conseillé : 60 paires.
+paires:
+  - ["Champagne", "Crémant"]
+  - ["Raclette", "Fondue"]
+  - ["Gueule de bois", "Fatigue"]
+  - ["Tinder", "Speed dating"]
+  - ["Père Noël", "Saint Nicolas"]
+  - ["Feu d'artifice", "Pétard"]
+  - ["Bûche de Noël", "Galette des rois"]
+  - ["Huîtres", "Moules"]
+  - ["Foie gras", "Rillettes"]
+  - ["Karaoké", "Blind test"]
+  - ["Boîte de nuit", "Bar"]
+  - ["Résolution", "Bonne habitude"]
+  - ["Vœux", "Cartes postales"]
+  - ["Chaussettes de Noël", "Pantoufles"]
+  - ["Guirlande", "Boule disco"]
+  - ["Canapé", "Fauteuil"]
+  - ["Pizza", "Tarte flambée"]
+  - ["Chips", "Cacahuètes"]
+  - ["Whisky", "Cognac"]
+  - ["Bière", "Cidre"]
+  - ["Mojito", "Caïpirinha"]
+  - ["Tequila", "Vodka"]
+  - ["Uber", "Taxi"]
+  - ["Netflix", "Cinéma"]
+  - ["Selfie", "Photo de groupe"]
+  - ["Pyjama", "Jogging"]
+  - ["Réveillon", "Anniversaire"]
+  - ["Bisou", "Câlin"]
+  - ["Cotillons", "Confettis"]
+  - ["Dernière danse", "Slow"]
+  - ["Playlist", "Radio"]
+  - ["Régime", "Détox"]
+  - ["Gaufre", "Crêpe"]
+  - ["Chocolat chaud", "Vin chaud"]
+  - ["Cadeau", "Pochette surprise"]
+  - ["Minuit", "Midi"]
+  - ["Application de rencontre", "Agence matrimoniale"]

@@ -20,6 +20,7 @@ Fonctionne en local sur le wifi, sans internet ni installation sur les télépho
 | Compte à rebours chaotique | Chacun son tour, on arrête un compteur devenu fou pile à l'heure cible | [README](src/minigames/compte-a-rebours/README.md) |
 | Simon | La TV joue une suite de couleurs qui s'allonge ; le dernier à la reproduire sans faute gagne | [README](src/minigames/simon/README.md) |
 | Pierre-feuille-ciseaux | Tournoi à élimination directe, duels sur les téléphones | [README](src/minigames/pierre-feuille-ciseaux/README.md) |
+| L'imposteur | Tous ont le même mot sauf un, qui ne sait pas qu'il est l'imposteur : indices, débat, vote | [README](src/minigames/imposteur/README.md) |
 
 Créer un nouveau mini-jeu : [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md).
 
