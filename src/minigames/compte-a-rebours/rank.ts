@@ -37,7 +37,5 @@ export function quality(signedMs: number): Quality {
 // Classes écrites en toutes lettres pour que Tailwind les repère.
 export const QUALITY_TEXT: Record<Quality, string> = { pile: "text-good", great: "text-good", ok: "text-accent", far: "text-bad" };
 
-export const ordinal = (rank: number) => (rank === 1 ? "1er" : `${rank}e`);
-
 /** 8 → "8,0" ; 7.5 → "7,5" (la cible est au demi-seconde). */
 export const fmtCible = (cibleS: number) => cibleS.toFixed(1).replace(".", ",");

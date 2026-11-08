@@ -3,21 +3,17 @@
 // Téléphone : un champ + un bouton qui change d'état (Envoyer → Envoyé → Renvoyer si on modifie).
 import { motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button, CheckIcon, fireConfetti, PlayerAvatar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, Button, CheckIcon, fireConfetti, fit, PlayerAvatar, SelectedBadge, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { AnswerGroup, Priv, Pub, Results } from "./game";
 
 const MAX_LENGTH = 40;
-
-/** Taille de police (rem) pour qu'un libellé de `availRem` de large tienne sur une ligne (Bungee ≈ 0.8em par lettre). */
-const fit = (label: string, availRem: number, min: number, max: number) => Math.max(min, Math.min(max, availRem / (Math.max(label.length, 1) * 0.8)));
 
 // ───────────── TV pendant la manche ─────────────
 
 const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
   const writers = players.filter((p) => round.participants.includes(p.id) && p.profile);
   const answered = writers.filter((p) => pub.answeredIds.includes(p.id)).length;
-  const crowd = writers.length > 5;
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-9 text-center">
       <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-[90rem] text-balance text-[5.75rem] font-extrabold leading-[1.05]">
@@ -28,30 +24,15 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
           {pub.perPlayer} réponses possibles
         </motion.div>
       )}
-      <div data-testid="tv-answered-count" className="font-display text-5xl text-ink-muted">
-        <span className="text-accent">{answered}</span> / {writers.length}
-      </div>
-      <div data-testid="tv-answered" className="flex flex-wrap items-start justify-center gap-x-2 gap-y-3">
-        {writers.map((p) => {
-          const has = pub.answeredIds.includes(p.id);
-          return (
-            <motion.div key={p.id} data-answered={has ? "true" : "false"} animate={{ scale: has ? 1.06 : 0.92, y: has ? -10 : 0 }} transition={{ type: "spring", stiffness: 300, damping: 14 }} className="flex w-[11rem] flex-col items-center gap-1">
-              <div className="relative">
-                {/* Onde qui part de l'avatar au moment où le joueur répond */}
-                {has && <motion.span aria-hidden initial={{ scale: 1, opacity: 0.9 }} animate={{ scale: 1.9, opacity: 0 }} transition={{ duration: 0.9 }} className="absolute inset-0 rounded-full border-[0.4rem] border-good" />}
-                <PlayerAvatar
-                  profile={p.profile}
-                  size={crowd ? "md" : "lg"}
-                  dimmed={!has}
-                  badge={has ? <CheckIcon /> : <span className="animate-pulse-soft">…</span>}
-                  className={has ? "drop-shadow-[0_0_1.4rem_var(--color-good)]" : ""}
-                />
-              </div>
-              <span className={`w-full truncate font-bold ${crowd ? "text-xl" : "text-2xl"} ${has ? "text-ink" : "text-ink-muted"}`}>{p.profile!.name}</span>
-            </motion.div>
-          );
-        })}
-      </div>
+      <AnsweredCount done={answered} total={writers.length} />
+      <AnsweredRoster
+        players={writers}
+        isDone={(id) => pub.answeredIds.includes(id)}
+        badge={(_, done) => (done ? <CheckIcon /> : <span className="animate-pulse-soft">…</span>)}
+        avatarClassName={(_, done) => (done ? "drop-shadow-[0_0_1.4rem_var(--color-good)]" : "")}
+        /* Onde qui part de l'avatar au moment où le joueur répond */
+        overlay={(_, done) => done && <motion.span aria-hidden initial={{ scale: 1, opacity: 0.9 }} animate={{ scale: 1.9, opacity: 0 }} transition={{ duration: 0.9 }} className="absolute inset-0 rounded-full border-[0.4rem] border-good" />}
+      />
     </div>
   );
 };
@@ -151,9 +132,7 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
                 className={`w-full rounded-btn border-[0.2rem] bg-surface-strong pr-12 ${n > 1 ? "py-3" : "py-4"} text-xl font-bold text-ink outline-none transition-colors placeholder:font-normal placeholder:text-ink-muted focus:border-accent ${n > 1 ? "pl-11" : "pl-4"} ${done ? "border-good" : "border-line"}`}
               />
               {done && (
-                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 14 }} className="pointer-events-none absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-good text-lg text-bg">
-                  <CheckIcon />
-                </motion.span>
+                <SelectedBadge tone="good" size="md" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" />
               )}
             </div>
           );

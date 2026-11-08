@@ -2,24 +2,18 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useState } from "react";
-import { CheckIcon, PlayerAvatar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, CheckIcon, fit, NumPad, ordinal, SelectedBadge, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { centsToDraft, draftToCents, formatCents, formatDraft, pressKey } from "./amount";
 import type { Priv, Pub, Results } from "./game";
 import { ItemVisual, Showcase } from "./Showcase";
 import { gapLabel, revealSeconds, TvResults } from "./TvReveal";
 
-/** Taille de police (rem) pour qu'un texte de `availRem` de large tienne sur une ligne (Bungee ≈ 0.8em par lettre). */
-const fit = (label: string, availRem: number, min: number, max: number) => Math.max(min, Math.min(max, availRem / (Math.max(label.length, 1) * 0.8)));
-
-const ordinal = (rank: number) => (rank === 1 ? "1er" : `${rank}e`);
-
 // ───────────────────────────── TV : pendant le jeu ─────────────────────────────
 
 const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
   const voters = players.filter((p) => round.participants.includes(p.id) && p.profile);
   const answered = voters.filter((p) => pub.answeredIds.includes(p.id)).length;
-  const crowd = voters.length > 5;
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center gap-1 text-center">
       <motion.h1
@@ -40,28 +34,14 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
       <Showcase image={pub.image} emoji={pub.emoji} />
 
       <div className="flex flex-col items-center gap-1 pt-2">
-        <div data-testid="tv-answered-count" className="font-display text-3xl text-ink-muted">
-          <span className="text-accent">{answered}</span> / {voters.length}
-        </div>
-        <div className="flex flex-wrap items-start justify-center gap-x-2 gap-y-1" data-testid="tv-answered">
-          {voters.map((p) => {
-            const has = pub.answeredIds.includes(p.id);
-            return (
-              <div key={p.id} className="flex w-[11rem] flex-col items-center gap-0.5">
-                <PlayerAvatar profile={p.profile} size={crowd ? "md" : "lg"} dimmed={!has} badge={has ? <CheckIcon /> : undefined} />
-                <span className={`w-full truncate font-bold ${crowd ? "text-lg" : "text-xl"} ${has ? "text-ink" : "text-ink-muted"}`}>{p.profile!.name}</span>
-              </div>
-            );
-          })}
-        </div>
+        <AnsweredCount done={answered} total={voters.length} className="font-display text-3xl text-ink-muted" />
+        <AnsweredRoster players={voters} size="compact" isDone={(id) => pub.answeredIds.includes(id)} />
       </div>
     </div>
   );
 };
 
 // ───────────────────────────── Téléphone : pavé numérique ─────────────────────────────
-
-const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "back"] as const;
 
 const Phone = ({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>) => {
   const sent = priv?.cents ?? null;
@@ -70,14 +50,6 @@ const Phone = ({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>) => {
   const validated = sent !== null && cents === sent;
   const shown = draft === "" ? "0" : formatDraft(draft);
 
-  const press = (key: string) => {
-    try {
-      navigator.vibrate?.(8);
-    } catch {
-      /* pas de vibration : tant pis */
-    }
-    setDraft((d) => pressKey(d, key));
-  };
   const submit = () => {
     if (cents !== null && !validated) void sendInput({ cents }).catch(() => {});
   };
@@ -108,32 +80,11 @@ const Phone = ({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>) => {
         {!validated && <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }} className="-ml-1 h-10 w-[0.2rem] rounded bg-accent" />}
         <span className="font-display text-3xl leading-none text-accent">€</span>
         {validated && (
-          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 14 }} className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-good text-bg">
-            <CheckIcon />
-          </motion.span>
+          <SelectedBadge tone="good" size="md" className="absolute right-3 top-1/2 -translate-y-1/2" />
         )}
       </div>
 
-      {/* Pavé numérique */}
-      <div className="grid min-h-0 flex-1 grid-cols-3 grid-rows-4 gap-2">
-        {KEYS.map((k) => {
-          const useless = pressKey(draft, k) === draft;
-          return (
-            <motion.button
-              key={k}
-              type="button"
-              data-testid={k === "back" ? "key-back" : k === "," ? "key-comma" : `key-${k}`}
-              aria-label={k === "back" ? "Effacer" : undefined}
-              whileTap={{ scale: 0.9 }}
-              disabled={useless}
-              onClick={() => press(k)}
-              className="glass flex items-center justify-center rounded-btn font-display text-3xl transition-opacity disabled:opacity-30"
-            >
-              {k === "back" ? "⌫" : k}
-            </motion.button>
-          );
-        })}
-      </div>
+      <NumPad allowComma isUseless={(k) => pressKey(draft, k) === draft} onKey={(k) => setDraft((d) => pressKey(d, k))} />
 
       <motion.button
         type="button"

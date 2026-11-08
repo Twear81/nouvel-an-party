@@ -4,7 +4,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { CheckIcon, CloseIcon, fireConfetti, PlayerAvatar, SkipIcon, type AvatarSize } from "../../web/ui";
+import { AVATAR_REM, CheckIcon, CloseIcon, fireConfetti, PlayerAvatar, SelectedBadge, SkipIcon, type AvatarSize } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { roundLabel, type Choice } from "./bracket";
 import type { MatchView, Priv, Pub, Results } from "./game";
@@ -23,13 +23,13 @@ const REVEAL_AT = 1300;
 /** Puis l'issue du lancer. */
 const OUTCOME_AT = 1900;
 
-function useAfter(ms: number, key: unknown) {
+function useAfter(ms: number) {
   const [on, setOn] = useState(false);
   useEffect(() => {
     setOn(false);
     const t = setTimeout(() => setOn(true), ms);
     return () => clearTimeout(t);
-  }, [ms, key]);
+  }, [ms]);
   return on;
 }
 
@@ -50,7 +50,7 @@ function stageName(roundCount: number, round: number) {
  * `reveal` : un « ? » tremble (« pierre… feuille… ciseaux ! », jamais un vrai coup avant la révélation), puis le vrai choix éclate.
  */
 function Hand({ mode, choice, picked, em, side, outcome }: { mode: "pick" | "reveal"; choice?: Choice | null; picked?: boolean; em: number; side: 0 | 1; outcome?: "win" | "lose" | "tie" | null }) {
-  const shown = useAfter(REVEAL_AT, null);
+  const shown = useAfter(REVEAL_AT);
   const box: CSSProperties = { width: `${em * 1.5}rem`, height: `${em * 1.5}rem`, fontSize: `${em}rem` };
   const ring = outcome === "win" ? "border-accent bg-accent/25 shadow-glow" : outcome === "tie" ? "border-warn bg-warn/15" : "border-line bg-surface-strong";
 
@@ -227,7 +227,7 @@ function SlotRow({ id, m, side, avatar, tv, winsNeeded, playerById, pop, delay, 
 }
 
 function ByeRow({ avatar, tv }: { avatar: AvatarSize; tv: boolean }) {
-  const h = { xs: 2, sm: 3.25, md: 5, lg: 8, xl: 11, "2xl": 15 }[avatar];
+  const h = AVATAR_REM[avatar];
   return (
     <div data-testid="pfc-bye" style={{ minHeight: `${h}rem` }} className={`flex items-center justify-center gap-2 rounded-btn border-2 border-dashed border-line text-ink-muted ${tv ? "text-2xl font-bold" : "text-sm"}`}>
       <SkipIcon />
@@ -273,7 +273,7 @@ function sideOutcome(m: MatchView, side: 0 | 1): "win" | "lose" | "tie" | null {
 
 function DuelTile({ m, index, size, mode, winsNeeded, playerById, final }: { m: MatchView; index: number; size: TileSize; mode: "pick" | "reveal"; winsNeeded: number; playerById: ById; final: boolean }) {
   const t = TILE[size];
-  const showOutcome = useAfter(OUTCOME_AT, null);
+  const showOutcome = useAfter(OUTCOME_AT);
   const tie = m.last?.result === "tie" && !m.byChance;
   // Pendant l'animation, on montre le score d'avant ce lancer.
   const before: [number, number] = [...m.wins];
@@ -459,9 +459,7 @@ function PickButtons({ myPick, sendInput }: { myPick: Choice | null; sendInput: 
             <span className="text-[3.25rem] leading-none">{h.emoji}</span>
             <span className="font-display text-2xl">{h.label}</span>
             {selected && (
-              <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-ink text-xl text-bg">
-                <CheckIcon />
-              </motion.span>
+              <SelectedBadge className="absolute right-3 top-3" />
             )}
           </motion.button>
         );
@@ -474,7 +472,7 @@ function PickButtons({ myPick, sendInput }: { myPick: Choice | null; sendInput: 
 function PhoneReveal({ m, me }: { m: MatchView; me: string }) {
   const mySide: 0 | 1 = m.a === me ? 0 : 1;
   const oppSide: 0 | 1 = mySide === 0 ? 1 : 0;
-  const show = useAfter(OUTCOME_AT, null);
+  const show = useAfter(OUTCOME_AT);
   const outcome = sideOutcome(m, mySide);
   const choiceOf = (s: 0 | 1) => (s === 0 ? m.last!.a : m.last!.b);
   const text = outcome === "win" ? "Gagné !" : outcome === "lose" ? "Perdu…" : "Égalité !";
