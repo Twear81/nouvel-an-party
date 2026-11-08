@@ -39,6 +39,7 @@ html[data-skin="rocket-league"] {
   --gradient-hot: linear-gradient(135deg, #ff8a4a, #d85c1c);
   --gradient-glass: linear-gradient(180deg, #0f2c4c, #081a2e);
 
+  --scrim-blur: 0px;
   --rl-bar: rgb(4 8 14 / 0.82);
   --rl-pale: linear-gradient(180deg, #e6f6ff 0%, #a9dcff 55%, #7cc4ff 100%);
   --rl-blue-btn: linear-gradient(180deg, #3b86d4 0%, #1f5fa6 55%, #174c89 100%);
@@ -140,6 +141,16 @@ html[data-skin="rocket-league"] [data-ui="choice"][data-state="correct"] { backg
 html[data-skin="rocket-league"] [data-ui="choice"][data-state="wrong"] { background-color: #561820; box-shadow: inset 0 0 0 0.15em var(--color-bad); }
 html[data-skin="rocket-league"] [data-ui="choice"][data-state="correct"][data-selected="true"] { background-image: linear-gradient(180deg, #b6f5d2, #5fe39b); color: #04210f; }
 html[data-skin="rocket-league"] [data-ui="choice"][data-state="wrong"][data-selected="true"] { background-image: linear-gradient(180deg, #ffc2c8, #ff7a86); color: #4a0810; }
+/* Choix colorés : équipe bleue (cool), équipe orange (hot), vert / rouge (good / bad), barres biseautées teintées */
+html[data-skin="rocket-league"] [data-ui="choice"].bg-cool { background-image: linear-gradient(180deg, #4a8cf0, #1c4fb8); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4); }
+html[data-skin="rocket-league"] [data-ui="choice"].bg-hot { background-image: var(--rl-orange-btn); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4); }
+html[data-skin="rocket-league"] [data-ui="choice"].bg-good { background-image: linear-gradient(180deg, #5fe39b, #1f9a58); color: #04210f; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4); }
+html[data-skin="rocket-league"] [data-ui="choice"].bg-bad { background-image: linear-gradient(180deg, #ff6a6a, #b8242f); color: #fff; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.4); }
+html[data-skin="rocket-league"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-selected="true"] {
+  filter: brightness(1.18) saturate(1.1);
+  box-shadow: inset 0 0 0 0.2em #fff, inset 0 0 1.4em rgb(255 255 255 / 0.55);
+}
+html[data-skin="rocket-league"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-state="faded"] { filter: saturate(0.5); }
 html[data-skin="rocket-league"] [data-ui="choice-key"] { border: 0; width: auto; height: auto; font-size: 0.9em; font-weight: 500; color: var(--color-ink-muted); }
 html[data-skin="rocket-league"] [data-ui="choice"][data-selected="true"] [data-ui="choice-key"] { color: #1660b0; }
 html[data-skin="rocket-league"] [data-ui="choice-check"],
@@ -212,7 +223,7 @@ html[data-skin="rocket-league"] [data-ui="countdown"][data-variant="bar"] [data-
 
 /* Avatars : cadre argenté carré, badge de niveau doré */
 html[data-skin="rocket-league"] [data-ui="avatar"],
-html[data-skin="rocket-league"] [data-ui="avatar"] > div:first-child,
+html[data-skin="rocket-league"] [data-ui="avatar-face"],
 html[data-skin="rocket-league"] [data-ui="avatar"] .frame { border-radius: 0.18em; }
 html[data-skin="rocket-league"] [data-ui="avatar"] { box-shadow: 0 0 0 0.1em #d7dee8, 0 0 0 0.18em #5a6470; }
 html[data-skin="rocket-league"] [data-ui="avatar-badge"] {
