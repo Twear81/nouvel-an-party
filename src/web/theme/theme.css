@@ -16,17 +16,17 @@
 @source "../../minigames";
 
 @theme static {
-  /* ── Fonds */
-  --color-bg: #080620;
-  --color-bg-2: #1b0f42;
-  --color-bg-3: #321457;
+  /* ── Fonds (thème de base, hors skins : bleu Karmine Corp) */
+  --color-bg: #040b1e;
+  --color-bg-2: #08194a;
+  --color-bg-3: #0f2f86;
   --color-surface: rgb(255 255 255 / 0.07);
   --color-surface-strong: rgb(255 255 255 / 0.14);
   --color-line: rgb(255 255 255 / 0.16);
 
   /* ── Textes */
   --color-ink: #f7f2ff;
-  --color-ink-muted: #b9add9;
+  --color-ink-muted: #a9bbe0;
 
   /* ── Accents (or champagne, rose, bleu glacé) */
   --color-accent: #f6cd72;
@@ -44,7 +44,7 @@
   --color-warn: #ffb347;
 
   /* ── QR code (doit rester très contrasté pour être scanné) */
-  --color-qr-dark: #120a2e;
+  --color-qr-dark: #061233;
   --color-qr-light: #fff8e8;
 
   /* ── Rideau de changement de skin (neutre, ne change pas avec le skin) */
@@ -78,6 +78,9 @@
   --gradient-gold: linear-gradient(180deg, var(--color-accent-strong) 0%, var(--color-accent) 55%, var(--color-accent-deep) 130%);
   --gradient-hot: linear-gradient(135deg, var(--color-hot), var(--color-bg-3));
   --gradient-glass: linear-gradient(145deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.04));
+
+  /* ── Voile derrière une boîte de dialogue ou la pause (un skin peut le mettre à 0px) */
+  --scrim-blur: 10px;
 
   /* ── Animations */
   --animate-twinkle: twinkle 4s ease-in-out infinite;
