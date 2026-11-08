@@ -8,6 +8,7 @@ import type { MiniGameViewProps } from "../../minigames/views-contract";
 import { gameViewProps, playersWithProfile, waitingPlayers } from "../net/helpers";
 import { useGame, type GameActions } from "../net/useGame";
 import { useRevealed } from "../net/useReveal";
+import { SkinProvider } from "../theme/skin";
 import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, Panel, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
 import { ProfileEditor } from "./ProfileEditor";
 import { useWakeLock } from "./useWakeLock";
@@ -38,11 +39,13 @@ export function PhoneApp() {
   }
 
   return (
-    <PhoneStage phase={snapshot?.phase}>
-      {body}
-      <PausedOverlay show={!!snapshot?.paused} />
-      <ReconnectBanner show={!connected} />
-    </PhoneStage>
+    <SkinProvider skin={snapshot?.skin}>
+      <PhoneStage phase={snapshot?.phase}>
+        {body}
+        <PausedOverlay show={!!snapshot?.paused} />
+        <ReconnectBanner show={!connected} />
+      </PhoneStage>
+    </SkinProvider>
   );
 }
 
@@ -179,11 +182,11 @@ function ResultsPhone({ snapshot, round, me, actions }: Pick<ScreenProps, "snaps
   return (
     <div data-testid="phone-results" className="flex min-h-0 flex-1 flex-col gap-3">
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-center">
-        <motion.div initial={{ scale: 0.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 160, damping: 10 }} data-testid="points-gained" className={`font-display text-7xl ${gained > 0 ? "text-good" : "text-ink-muted"}`}>
+        <motion.div initial={{ scale: 0.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 160, damping: 10 }} data-testid="points-gained" data-ui="score-row" data-highlight={gained > 0 ? "true" : "false"} className={`font-num text-7xl ${gained > 0 ? "text-good" : "text-ink-muted"}`}>
           {gained > 0 ? `+${gained}` : "+0"}
         </motion.div>
         <p className="text-ink-muted">
-          Total : <b className="text-accent">{me.score}</b> pts
+          Total : <b className="font-num text-accent">{me.score}</b> pts
         </p>
         {PhoneResults && (
           <div className="mt-2 w-full">
@@ -229,10 +232,10 @@ function FinalPhone({ rank, total, score, profile }: { rank: number; total: numb
         {rank === 1 && <span className="absolute -top-12 left-1/2 -translate-x-1/2 text-6xl">👑</span>}
         <PlayerAvatar profile={profile} size="xl" />
       </motion.div>
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="flex flex-col items-center gap-1">
-        <span className="font-display text-7xl text-gold-gradient">{ordinal(rank)}</span>
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} data-ui="score-row" data-rank={rank} data-highlight={rank === 1 ? "true" : "false"} className="flex flex-col items-center gap-1">
+        <span className="font-num text-7xl text-gold-gradient">{ordinal(rank)}</span>
         <span className="text-xl text-ink-muted">sur {total} joueur{total > 1 ? "s" : ""}</span>
-        <span className="mt-2 font-display text-4xl text-accent">{score} pts</span>
+        <span className="mt-2 font-num text-4xl text-accent">{score} pts</span>
         <span className="mt-4 text-xl font-semibold">Bonne année ! 🥂</span>
       </motion.div>
     </Center>

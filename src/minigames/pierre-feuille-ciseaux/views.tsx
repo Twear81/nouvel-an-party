@@ -4,7 +4,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { AVATAR_REM, CheckIcon, CloseIcon, fireConfetti, PlayerAvatar, SelectedBadge, SkipIcon, type AvatarSize } from "../../web/ui";
+import { AVATAR_REM, CheckIcon, Choice as ChoiceCard, CloseIcon, fireConfetti, PlayerAvatar, SkipIcon, type AvatarSize } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { roundLabel, type Choice } from "./bracket";
 import type { MatchView, Priv, Pub, Results } from "./game";
@@ -443,25 +443,23 @@ function PickButtons({ myPick, sendInput }: { myPick: Choice | null; sendInput: 
         const selected = myPick === i;
         const locked = myPick !== null;
         return (
-          <motion.button
+          <ChoiceCard
             key={i}
-            type="button"
             data-testid={`pfc-choice-${i}`}
-            aria-pressed={selected}
+            tone="plain"
+            selected={selected}
+            state={locked && !selected ? "faded" : "idle"}
             disabled={locked}
             whileTap={locked ? undefined : { scale: 0.94 }}
             initial={{ opacity: 0, x: i % 2 ? 60 : -60 }}
             animate={{ opacity: locked && !selected ? 0.3 : 1, x: 0, scale: selected ? 1.03 : 1 }}
             transition={{ delay: locked ? 0 : i * 0.06, type: "spring", stiffness: 260, damping: 18 }}
             onClick={() => void sendInput({ choice: i }).catch(() => {})}
-            className={`relative flex min-h-[4.5rem] flex-1 items-center justify-center gap-4 rounded-card px-4 shadow-card disabled:cursor-default ${h.solid} ${selected ? "ring-[0.35rem] ring-ink" : ""}`}
+            className={`min-h-[4.5rem] flex-1 gap-4 px-4 disabled:cursor-default ${h.solid}`}
           >
             <span className="text-[3.25rem] leading-none">{h.emoji}</span>
             <span className="font-display text-2xl">{h.label}</span>
-            {selected && (
-              <SelectedBadge className="absolute right-3 top-3" />
-            )}
-          </motion.button>
+          </ChoiceCard>
         );
       })}
     </div>

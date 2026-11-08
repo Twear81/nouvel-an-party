@@ -15,11 +15,14 @@ interface Props {
   size?: keyof typeof SIZES;
   /** Position (ex : `absolute right-3 top-3`). */
   className?: string;
+  /** Marqueur de skin : `selected-badge` ; `Choice` passe `choice-check`. */
+  ui?: "selected-badge" | "choice-check";
 }
 
-export function SelectedBadge({ tone = "ink", size = "lg", className = "" }: Props) {
+export function SelectedBadge({ tone = "ink", size = "lg", className = "", ui = "selected-badge" }: Props) {
   return (
     <motion.span
+      data-ui={ui}
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       transition={{ type: "spring", stiffness: 400, damping: 15 }}

@@ -1,0 +1,47 @@
+/*
+ * Skin « Dofus » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="dofus"].
+ * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
+ * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ */
+
+/* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
+html[data-skin="dofus"] {
+  --color-bg: #1e1710;
+  --color-bg-2: #33344a;
+  --color-bg-3: #45465f;
+  --color-surface: rgb(69 70 95 / 0.85);
+  --color-surface-strong: #55567a;
+  --color-line: #1d1e2b;
+  --color-ink: #f1f1f6;
+  --color-ink-muted: #a8a9c2;
+  --color-accent: #ecdb4f;
+  --color-accent-strong: #f6e977;
+  --color-accent-deep: #c4ab22;
+  --color-accent-ink: #2a2606;
+  --color-hot: #d8566b;
+  --color-cool: #6aa6e8;
+  --color-good: #7ac943;
+  --color-good-deep: #3f7a1c;
+  --color-bad: #e0564a;
+  --color-bad-deep: #8a1f1a;
+  --color-warn: #f0a030;
+  --font-display: "Fira Sans", "Segoe UI", sans-serif;
+  --font-sans: "Fira Sans", "Segoe UI", sans-serif;
+  --font-num: "Fira Sans", "Segoe UI", sans-serif;
+  --radius-card: 0.35rem;
+  --radius-btn: 0.25rem;
+  --radius-chip: 0.3rem;
+  --shadow-card: 0 0.4rem 1.2rem rgb(0 0 0 / 0.65), inset 0 1px 0 #43445c;
+  --shadow-glow: 0 0 1.2rem rgb(236 219 79 / 0.35);
+  --shadow-btn: inset 0 1px 0 #fffbd0, 0 0.15rem 0.4rem rgb(0 0 0 / 0.4);
+  --gradient-bg: radial-gradient(50% 45% at 78% 70%, rgb(255 170 60 / 0.28), transparent 70%), radial-gradient(40% 40% at 15% 20%, rgb(120 160 70 / 0.18), transparent 70%), radial-gradient(120% 100% at 50% 50%, #4a3520 0%, #1a130c 85%);
+  --gradient-gold: linear-gradient(180deg, #f6e977, #e0c93a 55%, #c4ab22);
+  --gradient-hot: linear-gradient(135deg, var(--color-hot), #6e2a37);
+  --gradient-glass: linear-gradient(180deg, #3e3f57, #33344a);
+}
+
+/* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
+
+/* ── Fond (html[data-skin="dofus"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+
+/* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */

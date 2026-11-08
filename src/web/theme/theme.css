@@ -4,6 +4,14 @@
  * Voir docs/changer-le-design.md.
  */
 @import "tailwindcss";
+/* Un fichier par skin (docs/skins.md) : redéfinit les jetons ci-dessous sous html[data-skin="<id>"]. */
+@import "./skins/dofus.css";
+@import "./skins/overwatch.css";
+@import "./skins/league-of-legends.css";
+@import "./skins/rocket-league.css";
+@import "./skins/gunz.css";
+@import "./skins/mario-odyssey.css";
+@import "./skins/plague-tale.css";
 /* Tailwind ne regarde pas hors de src/web par défaut : on lui indique les écrans des mini-jeux. */
 @source "../../minigames";
 
@@ -39,6 +47,9 @@
   --color-qr-dark: #120a2e;
   --color-qr-light: #fff8e8;
 
+  /* ── Rideau de changement de skin (neutre, ne change pas avec le skin) */
+  --color-curtain: #ffffff;
+
   /* ── Dessin (mini-jeu « Dessin raté ») : papier et 5 feutres, dans l'ordre de la palette (index envoyé au serveur) */
   --color-paper: #fff8e8;
   --color-pen-0: #1b1233;
@@ -50,6 +61,7 @@
   /* ── Polices (embarquées via @fontsource, voir main.tsx) */
   --font-display: "Bungee", "Outfit Variable", system-ui, sans-serif;
   --font-sans: "Outfit Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-num: "Bungee", "Outfit Variable", system-ui, sans-serif; /* chiffres du chrono et des scores */
 
   /* ── Rayons */
   --radius-card: 1.5rem;

@@ -25,7 +25,7 @@ export function PlayerAvatar({ profile, size = "md", dimmed, badge, className = 
   } as CSSProperties;
 
   return (
-    <div className={`relative shrink-0 rounded-full transition-[filter,opacity] ${dimmed ? "opacity-45 grayscale" : ""} ${className}`} style={style}>
+    <div data-ui="avatar" data-dimmed={dimmed ? "true" : "false"} className={`relative shrink-0 rounded-full transition-[filter,opacity] ${dimmed ? "opacity-45 grayscale" : ""} ${className}`} style={style}>
       <div
         className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full"
         style={{ background: "radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--p) 55%, var(--color-ink)), var(--p))" }}
@@ -40,7 +40,7 @@ export function PlayerAvatar({ profile, size = "md", dimmed, badge, className = 
       </div>
       <div className={`frame ${frameById(profile?.frame ?? "none").className}`} />
       {badge != null && (
-        <div className="absolute -bottom-[0.2em] -right-[0.2em] flex min-h-[2.8em] min-w-[2.8em] items-center justify-center rounded-full border-[0.15em] border-bg bg-gold px-[0.5em] text-[1.6em] font-bold leading-none text-accent-ink">
+        <div data-ui="avatar-badge" className="absolute -bottom-[0.2em] -right-[0.2em] flex min-h-[2.8em] min-w-[2.8em] items-center justify-center rounded-full border-[0.15em] border-bg bg-gold px-[0.5em] text-[1.6em] font-bold leading-none text-accent-ink">
           {badge}
         </div>
       )}

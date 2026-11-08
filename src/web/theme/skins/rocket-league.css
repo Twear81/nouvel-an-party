@@ -1,0 +1,47 @@
+/*
+ * Skin « Rocket League » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="rocket-league"].
+ * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
+ * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ */
+
+/* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
+html[data-skin="rocket-league"] {
+  --color-bg: #0b1420;
+  --color-bg-2: #182230;
+  --color-bg-3: #0f2c4c;
+  --color-surface: rgb(4 8 14 / 0.82);
+  --color-surface-strong: #0f2c4c;
+  --color-line: rgb(255 255 255 / 0.15);
+  --color-ink: #ffffff;
+  --color-ink-muted: #9fb0c4;
+  --color-accent: #4aa8ff;
+  --color-accent-strong: #a9dcff;
+  --color-accent-deep: #174c89;
+  --color-accent-ink: #ffffff;
+  --color-hot: #ff8a4a;
+  --color-cool: #3d7ee8;
+  --color-good: #38d27a;
+  --color-good-deep: #1a8a4c;
+  --color-bad: #ff4d5a;
+  --color-bad-deep: #a8202c;
+  --color-warn: #f2a83a;
+  --font-display: "Exo 2", "Eurostile", sans-serif;
+  --font-sans: "Arimo", Arial, Helvetica, sans-serif;
+  --font-num: "Orbitron", "Exo 2", sans-serif;
+  --radius-card: 0.2rem;
+  --radius-btn: 0.15rem;
+  --radius-chip: 0.2rem;
+  --shadow-card: 0 0 1rem rgb(40 130 230 / 0.45), inset 0 0 2rem rgb(0 0 0 / 0.4);
+  --shadow-glow: 0 0 1rem rgb(140 210 255 / 0.8);
+  --shadow-btn: inset 0 1px 0 rgb(255 255 255 / 0.35), 0 0.3rem 0.6rem rgb(0 0 0 / 0.5);
+  --gradient-bg: radial-gradient(30% 18% at 20% 30%, rgb(255 150 60 / 0.22), transparent 70%), radial-gradient(30% 20% at 80% 28%, rgb(60 140 255 / 0.25), transparent 70%), linear-gradient(180deg, #0a111c 0%, #182230 42%, #1f2c18 60%, #16200f 80%, #0c1208 100%);
+  --gradient-gold: linear-gradient(180deg, #3b86d4 0%, #1f5fa6 55%, #174c89 100%);
+  --gradient-hot: linear-gradient(135deg, #ff8a4a, #d85c1c);
+  --gradient-glass: linear-gradient(180deg, #0f2c4c, #081a2e);
+}
+
+/* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
+
+/* ── Fond (html[data-skin="rocket-league"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+
+/* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */

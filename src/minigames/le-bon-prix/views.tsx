@@ -34,7 +34,7 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
       <Showcase image={pub.image} emoji={pub.emoji} />
 
       <div className="flex flex-col items-center gap-1 pt-2">
-        <AnsweredCount done={answered} total={voters.length} className="font-display text-3xl text-ink-muted" />
+        <AnsweredCount done={answered} total={voters.length} className="font-num text-3xl text-ink-muted" />
         <AnsweredRoster players={voters} size="compact" isDone={(id) => pub.answeredIds.includes(id)} />
       </div>
     </div>

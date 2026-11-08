@@ -31,6 +31,9 @@ export function Button({ variant = "primary", size = "md", block, className = ""
       whileTap={{ scale: 0.95, y: 3 }}
       whileHover={rest.disabled ? undefined : { scale: 1.03 }}
       type="button"
+      data-ui="button"
+      data-variant={variant}
+      data-size={size}
       className={`rounded-btn font-display tracking-wide transition-opacity disabled:opacity-40 ${VARIANTS[variant]} ${SIZES[size]} ${block ? "w-full" : ""} ${className}`}
       {...rest}
     >

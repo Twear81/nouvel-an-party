@@ -186,7 +186,7 @@ const PhoneResults = ({ results, snapshot }: Props) => {
   return (
     <div data-testid="cabr-phone-result" data-rank={mine.rank} className="flex flex-col items-center gap-2 text-center">
       <span className="font-display text-3xl text-accent">{ordinal(mine.rank)}</span>
-      <span className={`font-display text-4xl ${QUALITY_TEXT[quality(mine.signedMs)]}`}>{fmtSigned(mine.signedMs)} s</span>
+      <span className={`font-num text-4xl ${QUALITY_TEXT[quality(mine.signedMs)]}`}>{fmtSigned(mine.signedMs)} s</span>
     </div>
   );
 };

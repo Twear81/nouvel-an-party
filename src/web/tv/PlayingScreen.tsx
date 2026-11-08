@@ -4,11 +4,11 @@ import { TvGameView } from "./GameView";
 
 export function RoundHeader({ round, children }: { round: RoundInfo; children?: React.ReactNode }) {
   return (
-    <header className="flex items-center justify-between gap-8 px-14 pt-8">
+    <header data-ui="round-header" className="flex items-center justify-between gap-8 px-14 pt-8">
       <div className="flex items-center gap-5">
         {/* Un interlude n'a pas de numéro : le compter dévoilerait sa venue. */}
         {!round.interlude && (
-          <span className="rounded-chip bg-surface-strong px-6 py-2 font-display text-3xl text-accent">
+          <span data-ui="round-tag" className="rounded-chip bg-surface-strong px-6 py-2 font-num text-3xl text-accent">
             {round.number} / {round.normalTotal}
           </span>
         )}

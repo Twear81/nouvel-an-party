@@ -19,13 +19,14 @@ const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "back"] as 
 export function NumPad({ allowComma = false, isUseless, onKey, testIdPrefix = "key-", tone = "default" }: Props) {
   const serious = tone === "serious";
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-3 grid-rows-4 gap-2">
+    <div data-ui="numpad" className="grid min-h-0 flex-1 grid-cols-3 grid-rows-4 gap-2">
       {KEYS.map((k) => {
         if (k === "," && !allowComma) return <div key={k} />;
         return (
           <motion.button
             key={k}
             type="button"
+            data-ui="numpad-key"
             data-testid={`${testIdPrefix}${k === "," ? "comma" : k}`}
             aria-label={k === "back" ? "Effacer" : undefined}
             whileTap={{ scale: serious ? 0.92 : 0.9 }}

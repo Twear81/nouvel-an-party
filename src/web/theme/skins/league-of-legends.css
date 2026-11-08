@@ -1,0 +1,47 @@
+/*
+ * Skin « League of Legends » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="league-of-legends"].
+ * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
+ * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ */
+
+/* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
+html[data-skin="league-of-legends"] {
+  --color-bg: #010a13;
+  --color-bg-2: #0a1830;
+  --color-bg-3: #091428;
+  --color-surface: rgb(30 35 40 / 0.75);
+  --color-surface-strong: #1e2328;
+  --color-line: #3c3c41;
+  --color-ink: #f0e6d2;
+  --color-ink-muted: #a09b8c;
+  --color-accent: #c8aa6e;
+  --color-accent-strong: #f0e6d2;
+  --color-accent-deep: #785a28;
+  --color-accent-ink: #010a13;
+  --color-hot: #d6455d;
+  --color-cool: #0ac8b9;
+  --color-good: #3ec889;
+  --color-good-deep: #1a7a52;
+  --color-bad: #e84057;
+  --color-bad-deep: #8c1c2c;
+  --color-warn: #f0b232;
+  --font-display: "Cinzel", "Beaufort for LOL", serif;
+  --font-sans: "Lato", "Spiegel", sans-serif;
+  --font-num: "Cinzel", "Beaufort for LOL", serif;
+  --radius-card: 0.15rem;
+  --radius-btn: 0.1rem;
+  --radius-chip: 0.15rem;
+  --shadow-card: 0 0.5rem 1.2rem rgb(0 0 0 / 0.6);
+  --shadow-glow: 0 0 1rem rgb(200 170 110 / 0.5);
+  --shadow-btn: 0 0 0.8rem rgb(10 200 185 / 0.35);
+  --gradient-bg: radial-gradient(60% 50% at 70% 30%, rgb(60 40 90 / 0.35), transparent 70%), radial-gradient(90% 80% at 40% 0%, #0a1830 0%, #06101d 45%, #010a13 100%);
+  --gradient-gold: linear-gradient(180deg, #c8aa6e, #785a28);
+  --gradient-hot: linear-gradient(135deg, #d6455d, #091428);
+  --gradient-glass: linear-gradient(180deg, rgb(30 35 40 / 0.75), rgb(30 35 40 / 0.55));
+}
+
+/* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
+
+/* ── Fond (html[data-skin="league-of-legends"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+
+/* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */

@@ -10,6 +10,7 @@ export function IntroScreen({ snapshot, round }: { snapshot: GameSnapshot; round
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
+        data-ui="round-tag"
         className="rounded-chip bg-surface-strong px-10 py-3 font-display text-4xl tracking-widest text-accent"
       >
         Manche {round.number} / {round.normalTotal}
@@ -18,7 +19,7 @@ export function IntroScreen({ snapshot, round }: { snapshot: GameSnapshot; round
         initial={{ opacity: 0, scale: 0.4, rotate: -4 }}
         animate={{ opacity: 1, scale: 1, rotate: 0 }}
         transition={{ type: "spring", stiffness: 140, damping: 14, delay: 0.2 }}
-        className={`font-display ${long ? "text-[4.5rem]" : "text-[7rem]"} leading-[1.05] text-gold-gradient drop-shadow-[0_0_2rem_rgb(246_205_114/0.4)]`}
+        className={`font-display ${long ? "text-[4.5rem]" : "text-[7rem]"} leading-[1.05] text-gold-gradient drop-shadow-[0_0_2rem_color-mix(in_srgb,var(--color-accent)_40%,transparent)]`}
       >
         {round.gameName}
       </motion.h1>

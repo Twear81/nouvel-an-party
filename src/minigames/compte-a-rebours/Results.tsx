@@ -111,7 +111,7 @@ export const TvResults = ({ results, playerById }: Props) => {
                   >
                     <PlayerAvatar profile={p?.profile ?? null} size="xs" className={winner ? "drop-shadow-[0_0_1rem_var(--color-accent)]" : ""} />
                     <span className="min-w-0 flex-1 truncate text-2xl font-bold">{p?.profile?.name}</span>
-                    <span className={`shrink-0 font-display text-3xl ${QUALITY_TEXT[quality(e.signedMs)]}`}>{fmtSigned(e.signedMs)}</span>
+                    <span className={`shrink-0 font-num text-3xl ${QUALITY_TEXT[quality(e.signedMs)]}`}>{fmtSigned(e.signedMs)}</span>
                   </motion.div>
                 </motion.div>
               );
@@ -130,10 +130,10 @@ export const TvResults = ({ results, playerById }: Props) => {
             transition={{ delay: at(e.playerId) + 0.5 }}
             className={`flex h-[4.6rem] items-center gap-3 rounded-btn px-3 ${e.rank === 1 ? "border-[0.2rem] border-accent bg-accent/15 shadow-glow" : "bg-surface"}`}
           >
-            <span className={`w-9 text-center font-display text-3xl ${e.rank === 1 ? "text-accent" : "text-ink-muted"}`}>{e.rank}</span>
+            <span className={`w-9 text-center font-num text-3xl ${e.rank === 1 ? "text-accent" : "text-ink-muted"}`}>{e.rank}</span>
             <PlayerAvatar profile={playerById(e.playerId)?.profile ?? null} size="sm" />
             <span className="min-w-0 flex-1 truncate text-2xl font-bold">{playerById(e.playerId)?.profile?.name}</span>
-            <span className={`font-display text-3xl ${QUALITY_TEXT[quality(e.signedMs)]}`}>{fmtSigned(e.signedMs)}</span>
+            <span className={`font-num text-3xl ${QUALITY_TEXT[quality(e.signedMs)]}`}>{fmtSigned(e.signedMs)}</span>
           </motion.div>
         ))}
         {results.missed.map((m) => (
