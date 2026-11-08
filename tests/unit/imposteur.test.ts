@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import imposteur, { cleanClue, containsOwnWord, GRACE_SECONDS, type Priv, type Pub, type Results } from "../../src/minigames/imposteur/game";
+import imposteur, { GRACE_SECONDS, type Priv, type Pub, type Results } from "../../src/minigames/imposteur/game";
 import { createTestEngine } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 import { seededRng } from "./helpers/rng";
@@ -20,40 +20,44 @@ function round(nPlayers = 5, cfgExtra: Record<string, unknown> = {}, rng: () => 
   const imposter = ids.find((id) => words.filter((w) => w === priv(id).word).length === 1) ?? ids[0]!; // le seul avec un mot unique (3 joueurs ou plus)
   const send = (id: string, payload: unknown) => game.input(state, id, payload, ctx);
   const finish = () => game.finish(state, ctx);
-  /** Joue les indices du tour en cours (tout le monde, indice "i<id>") puis laisse passer le délai de grâce. */
-  const clueAll = (tag = "i") => {
-    for (const id of ids) send(id, { clue: `${tag}${id}` });
-    ctx.advance(GRACE_SECONDS * 1000);
+  const presence = (id: string, on: boolean) => {
+    ctx.setConnected(id, on);
+    game.onPresenceChange!(state, ctx);
   };
-  const toDebate = () => {
-    ctx.finishCountdown(); // mot
-    for (let t = 1; t <= cfg.tours_indices; t++) {
-      clueAll(`t${t}`);
-      ctx.finishCountdown(); // montre
-    }
+  /** Chaque orateur touche « J'ai dit mon indice » jusqu'à la fin du tour. */
+  const speakAll = () => {
+    for (let guard = 0; guard < 20 && pub().step === "parole"; guard++) send(pub().currentId!, { done: true });
+  };
+  const toSpeech = () => ctx.finishCountdown(); // mot → parole
+  const toDecision = () => {
+    toSpeech();
+    speakAll();
   };
   const toVote = () => {
-    toDebate();
-    ctx.finishCountdown();
+    toDecision();
+    ctx.finishCountdown(); // personne n'a choisi → on vote
   };
-  return { cfg, ctx, state, pub, priv, ids, send, finish, clueAll, toDebate, toVote, imposter };
+  return { cfg, ctx, state, pub, priv, ids, send, finish, presence, speakAll, toSpeech, toDecision, toVote, imposter };
 }
 
 describe("imposteur : config", () => {
   it("valeurs par défaut", () => {
-    expect(parse()).toMatchObject({ duree_mot: 6, tours_indices: 2, duree_indice: 20, duree_debat: 40, duree_vote: 20, longueur_indice_max: 24, points: { bon_vote: 100, imposteur_survit: 300 } });
+    expect(parse()).toMatchObject({ duree_mot: 6, duree_parole: 15, tours_max: 2, duree_decision: 15, duree_vote: 20, points: { bon_vote: 100, imposteur_survit: 300 } });
   });
-  it("exige des paires de deux mots", () => {
+  it("exige des paires de deux mots et 1 ou 2 tours", () => {
     expect(game.configSchema.safeParse({ paires: [] }).success).toBe(false);
     expect(game.configSchema.safeParse({ paires: [["seul"]] }).success).toBe(false);
     expect(game.configSchema.safeParse({ paires: [["a", "b", "c"]] }).success).toBe(false);
     expect(game.configSchema.safeParse({}).success).toBe(false);
-    expect(game.configSchema.safeParse({ paires: [PAIR], tours_indices: 4 }).success).toBe(false);
+    expect(game.configSchema.safeParse({ paires: [PAIR], tours_max: 3 }).success).toBe(false);
+    expect(game.configSchema.safeParse({ paires: [PAIR], tours_max: 0 }).success).toBe(false);
+    expect(game.configSchema.safeParse({ paires: [PAIR], tours_max: 1 }).success).toBe(true);
   });
-  it("durée estimée réaliste (2 à 3 minutes par défaut)", () => {
+  it("durée estimée réaliste (2 à 4 minutes par défaut)", () => {
     const s = game.estimateSeconds(parse());
-    expect(s).toBeGreaterThan(100);
-    expect(s).toBeLessThan(180);
+    expect(s).toBeGreaterThan(120);
+    expect(s).toBeLessThan(240);
+    expect(game.estimateSeconds(parse({ tours_max: 1 }))).toBeLessThan(s);
   });
 });
 
@@ -77,20 +81,26 @@ describe("imposteur : mots et secret", () => {
     expect(majorities.size).toBe(2);
   });
 
-  it("la vue privée a la même forme pour tout le monde et la vue publique ne dit rien de l'imposteur ni des mots", () => {
+  it("à chaque étape : même forme de vue privée pour tous ; aucune fuite de l'imposteur ni des mots dans la vue publique", () => {
     const r = round(5);
-    const shapes = r.ids.map((id) => Object.keys(r.priv(id)).sort().join());
-    expect(new Set(shapes).size).toBe(1);
-    for (const step of ["mot", "indice", "montre", "debat", "vote"] as const) {
+    const check = () => {
+      expect(new Set(r.ids.map((id) => Object.keys(r.priv(id)).sort().join())).size).toBe(1);
       const json = JSON.stringify(r.pub());
       expect(json).not.toContain("Champagne");
       expect(json).not.toContain("Crémant");
-      if (step === "mot") {
-        r.ctx.finishCountdown();
-        r.clueAll();
-      } else r.ctx.finishCountdown();
-      if (step === "debat") for (const id of r.ids) r.send(id, { ready: true });
-    }
+      expect(json).not.toContain("imposter");
+      // La vue privée de l'imposteur ne dit rien de plus que les autres, hormis son mot.
+      const strip = (id: string) => ({ ...r.priv(id), word: "" });
+      expect(strip(r.imposter)).toEqual(strip(r.ids.find((i) => i !== r.imposter)!));
+    };
+    check(); // mot
+    r.toSpeech();
+    check(); // parole
+    r.speakAll();
+    check(); // décision
+    for (const id of r.ids) r.send(id, { choice: "vote" });
+    r.ctx.advance(GRACE_SECONDS * 1000);
+    check(); // vote
   });
 
   it("une seule paire possible avec 2 joueurs ne plante pas", () => {
@@ -99,185 +109,243 @@ describe("imposteur : mots et secret", () => {
   });
 });
 
-describe("imposteur : indices", () => {
-  it("la manche commence par l'étape mot puis passe aux indices", () => {
+describe("imposteur : parole", () => {
+  it("la manche commence par l'étape mot puis passe à la parole, avec un chrono par orateur", () => {
     const r = round();
     expect(r.pub().step).toBe("mot");
     expect(r.ctx.countdownState!.seconds).toBe(6);
-    r.ctx.finishCountdown();
-    expect(r.pub().step).toBe("indice");
+    r.toSpeech();
+    expect(r.pub().step).toBe("parole");
     expect(r.pub().tour).toBe(1);
-    expect(r.ctx.countdownState!.seconds).toBe(20);
+    expect(r.ctx.countdownState!.seconds).toBe(15);
+    expect([...r.pub().order].sort()).toEqual([...r.ids].sort());
+    expect(r.pub().currentId).toBe(r.pub().order[0]!);
+    expect(r.pub().spokenIds).toEqual([]);
   });
 
-  it("ignore les indices pendant l'étape mot", () => {
-    const r = round();
-    r.send("p1", { clue: "bulles" });
-    r.ctx.finishCountdown();
-    expect(r.pub().sentIds).toEqual([]);
+  it("l'ordre est mélangé (rng) et l'imposteur n'est jamais premier au tour 1", () => {
+    const firsts = new Set<string>();
+    for (let seed = 1; seed < 80; seed++) {
+      const r = round(5, {}, seededRng(seed));
+      r.toSpeech();
+      expect(r.pub().order[0]).not.toBe(r.imposter);
+      expect(r.pub().order).toHaveLength(5);
+      expect(new Set(r.pub().order).size).toBe(5);
+      firsts.add(r.pub().order[0]!);
+    }
+    expect(firsts.size).toBeGreaterThan(2);
+    // Il parle bien un jour : il est ailleurs dans l'ordre.
+    const r = round(5);
+    r.toSpeech();
+    expect(r.pub().order).toContain(r.imposter);
   });
 
-  it("nettoie et coupe l'indice ; les indices des autres ne fuitent pas avant la fin du tour", () => {
-    expect(cleanClue("  des   bulles ", 24)).toBe("des bulles");
-    expect(cleanClue("x".repeat(60), 24)).toHaveLength(24);
-    expect(cleanClue(5, 24)).toBe("");
-    const r = round();
-    r.ctx.finishCountdown();
-    r.send("p1", { clue: "secret" });
-    expect(r.priv("p1").clue).toBe("secret");
-    expect(r.priv("p2").clue).toBeNull();
-    expect(JSON.stringify(r.pub())).not.toContain("secret");
-    expect(r.pub().sentIds).toEqual(["p1"]);
+  it("l'ordre change au tour 2 (nouveau tirage)", () => {
+    const orders = new Set<string>();
+    for (let seed = 1; seed < 20; seed++) {
+      const r = round(5, {}, seededRng(seed));
+      r.toDecision();
+      for (const id of r.ids) r.send(id, { choice: "tour" });
+      r.ctx.advance(GRACE_SECONDS * 1000);
+      expect(r.pub().step).toBe("parole");
+      expect(r.pub().tour).toBe(2);
+      orders.add(r.pub().order.join());
+    }
+    expect(orders.size).toBeGreaterThan(1);
   });
 
-  it("refuse son propre mot (accents, majuscules, pluriel, article), pas celui de l'autre", () => {
-    expect(containsOwnWord("CHAMPAGNE", "Champagne")).toBe(true);
-    expect(containsOwnWord("le champagnes", "Champagne")).toBe(true);
-    expect(containsOwnWord("du crémant rosé", "Crémant")).toBe(true);
-    expect(containsOwnWord("cremant", "Crémant")).toBe(true);
-    expect(containsOwnWord("champagnard", "Champagne")).toBe(false);
-    expect(containsOwnWord("bulles", "Champagne")).toBe(false);
-    const r = round();
-    r.ctx.finishCountdown();
-    const own = r.priv("p1").word;
-    r.send("p1", { clue: own.toUpperCase() });
-    expect(r.priv("p1").clue).toBeNull();
-    expect(r.priv("p1").rejected).toBe(own.toUpperCase());
-    expect(r.pub().sentIds).toEqual([]);
-    r.send("p1", { clue: "bulles" });
-    expect(r.priv("p1").rejected).toBeNull();
-    expect(r.priv("p1").clue).toBe("bulles");
-    // un indice valide déjà envoyé reste en place quand le suivant est refusé
-    r.send("p1", { clue: own });
-    expect(r.priv("p1").clue).toBe("bulles");
+  it("seul l'orateur courant peut passer la main ; payloads invalides ignorés", () => {
+    const r = round(4);
+    r.toSpeech();
+    const cur = r.pub().currentId!;
+    const other = r.ids.find((i) => i !== cur)!;
+    r.send(other, { done: true });
+    r.send("inconnu", { done: true });
+    r.send(cur, null);
+    r.send(cur, { done: "oui" });
+    r.send(cur, { done: false });
+    r.send(cur, { clue: "bulles" });
+    r.send(cur, { choice: "vote" });
+    r.send(cur, { target: other });
+    expect(r.pub().currentId).toBe(cur);
+    expect(r.pub().spokenIds).toEqual([]);
+    r.send(cur, { done: true });
+    expect(r.pub().spokenIds).toEqual([cur]);
+    expect(r.pub().currentId).toBe(r.pub().order[1]!);
+    expect(r.ctx.countdownState!.seconds).toBe(15); // chrono relancé pour le suivant
+    r.send(cur, { done: true }); // il a déjà parlé
+    expect(r.pub().currentId).toBe(r.pub().order[1]!);
   });
 
-  it("on peut modifier ou retirer son indice ; payloads invalides ignorés", () => {
-    const r = round();
+  it("le chrono écoulé passe au suivant, sans le cocher", () => {
+    const r = round(3);
+    r.toSpeech();
+    const [a, b] = r.pub().order as [string, string];
     r.ctx.finishCountdown();
-    r.send("p1", { clue: "un" });
-    r.send("p1", { clue: "deux" });
-    expect(r.priv("p1").clue).toBe("deux");
-    r.send("p1", { clue: "   " });
-    expect(r.priv("p1").clue).toBeNull();
-    r.send("inconnu", { clue: "x" });
-    r.send("p1", null);
-    r.send("p1", { clue: 12 });
-    r.send("p1", { ready: true });
+    expect(r.pub().currentId).toBe(b);
+    expect(r.pub().spokenIds).toEqual([]);
+    expect(a).not.toBe(b);
+  });
+
+  it("ignore tout pendant l'étape mot", () => {
+    const r = round();
+    r.send("p1", { done: true });
+    r.send("p1", { choice: "tour" });
     r.send("p1", { target: "p2" });
-    expect(r.pub().sentIds).toEqual([]);
+    r.toSpeech();
+    expect(r.pub().spokenIds).toEqual([]);
+    expect(r.pub().wantTour).toBe(0);
   });
 
-  it("tout le monde a envoyé : délai de grâce puis la TV dévoile les indices du tour", () => {
-    const r = round(3);
-    r.ctx.finishCountdown();
-    for (const id of r.ids) r.send(id, { clue: `i${id}` });
-    expect(r.ctx.countdownState!.seconds).toBe(GRACE_SECONDS);
-    expect(r.pub().step).toBe("indice");
-    r.send("p2", { clue: "corrigé" }); // pendant la grâce
-    r.ctx.advance(GRACE_SECONDS * 1000);
-    expect(r.pub().step).toBe("montre");
-    expect(r.pub().clues).toEqual({ p1: ["ip1"], p2: ["corrigé"], p3: ["ip3"] });
-  });
-
-  it("fin du chrono : les absents ont un indice vide", () => {
-    const r = round(3);
-    r.ctx.finishCountdown();
-    r.send("p1", { clue: "a" });
-    r.ctx.finishCountdown();
-    expect(r.pub().step).toBe("montre");
-    expect(r.pub().clues).toEqual({ p1: ["a"], p2: [""], p3: [""] });
-  });
-
-  it("deux tours : les indices du tour 2 restent cachés jusqu'à la fin du tour, le tour 1 reste visible", () => {
-    const r = round(3);
-    r.ctx.finishCountdown();
-    r.clueAll("a");
-    r.ctx.finishCountdown(); // montre
-    expect(r.pub().step).toBe("indice");
-    expect(r.pub().tour).toBe(2);
-    r.send("p1", { clue: "tour2" });
-    expect(r.priv("p1").clue).toBe("tour2");
-    expect(r.pub().clues.p1).toEqual(["ap1"]);
-    expect(JSON.stringify(r.pub())).not.toContain("tour2");
-    r.ctx.finishCountdown();
-    r.ctx.finishCountdown();
-    expect(r.pub().step).toBe("debat");
-    expect(r.pub().clues.p1).toEqual(["ap1", "tour2"]);
-  });
-
-  it("tours_indices: 1 enchaîne directement sur le débat", () => {
-    const r = round(3, { tours_indices: 1 });
-    r.toDebate();
-    expect(r.pub().step).toBe("debat");
-    expect(r.pub().clues.p1).toHaveLength(1);
-  });
-
-  it("un déconnecté ne bloque pas le tour ; il peut revenir", () => {
-    const r = round(3);
-    r.ctx.finishCountdown();
-    r.ctx.setConnected("p3", false);
-    r.send("p1", { clue: "a" });
-    r.send("p2", { clue: "b" });
-    expect(r.ctx.countdownState!.seconds).toBe(GRACE_SECONDS);
-    r.ctx.advance(GRACE_SECONDS * 1000);
-    expect(r.pub().step).toBe("montre");
-  });
-
-  it("la déconnexion du dernier qui n'avait pas répondu relance la vérification (onPresenceChange)", () => {
-    const r = round(3);
-    r.ctx.finishCountdown();
-    r.send("p1", { clue: "a" });
-    r.send("p2", { clue: "b" });
-    expect(r.ctx.countdownState!.seconds).toBe(20);
-    r.ctx.setConnected("p3", false);
-    game.onPresenceChange!(r.state, r.ctx);
-    expect(r.ctx.countdownState!.seconds).toBe(GRACE_SECONDS);
+  it("un déconnecté est sauté ; s'il se déconnecte pendant son tour, on passe au suivant", () => {
+    const r = round(4);
+    r.toSpeech();
+    const [a, b, c, d] = r.pub().order as [string, string, string, string];
+    r.presence(b, false); // b s'en va avant son tour
+    r.send(a, { done: true });
+    expect(r.pub().currentId).toBe(c);
+    r.presence(c, false); // c s'en va pendant son tour
+    expect(r.pub().currentId).toBe(d);
+    expect(r.pub().spokenIds).toEqual([a]);
+    // b revient mais son tour est passé pour ce tour
+    r.presence(b, true);
+    expect(r.pub().currentId).toBe(d);
+    r.send(d, { done: true });
+    expect(r.pub().step).toBe("decision");
   });
 
   it("l'imposteur déconnecté : la manche continue normalement", () => {
     const r = round(4);
-    r.ctx.setConnected(r.imposter, false);
+    r.presence(r.imposter, false);
+    r.toSpeech();
+    expect(r.pub().order).toContain(r.imposter);
+    r.speakAll();
+    expect(r.pub().step).toBe("decision");
+  });
+
+  it("tout le monde déconnecté : le tour se termine sans bloquer", () => {
+    const r = round(3);
+    r.toSpeech();
+    for (const id of r.ids) r.ctx.setConnected(id, false);
     game.onPresenceChange!(r.state, r.ctx);
-    r.ctx.finishCountdown();
-    for (const id of r.ids.filter((i) => i !== r.imposter)) r.send(id, { clue: `i${id}` });
-    r.ctx.advance(GRACE_SECONDS * 1000);
-    expect(r.pub().step).toBe("montre");
+    expect(r.pub().step).toBe("decision");
+  });
+
+  it("tout le monde a parlé : on passe à la décision", () => {
+    const r = round(3);
+    r.toDecision();
+    expect(r.pub().step).toBe("decision");
+    expect(r.ctx.countdownState!.seconds).toBe(15);
+    expect(r.pub().currentId).toBeNull();
   });
 });
 
-describe("imposteur : débat", () => {
-  it("passe au vote quand tous les connectés sont prêts, et on peut annuler son « prêt »", () => {
+describe("imposteur : décision", () => {
+  it("compteurs anonymes, choix modifiable, payloads invalides ignorés", () => {
+    const r = round(4);
+    r.toDecision();
+    r.send("p1", { choice: "tour" });
+    r.send("p2", { choice: "vote" });
+    r.send("p2", { choice: "tour" }); // change d'avis
+    r.send("p3", { choice: "autre" });
+    r.send("p3", { choice: 3 });
+    r.send("p3", null);
+    r.send("inconnu", { choice: "tour" });
+    r.send("p3", { done: true });
+    expect(r.pub().wantTour).toBe(2);
+    expect(r.pub().wantVote).toBe(0);
+    expect(r.priv("p1").choice).toBe("tour");
+    expect(r.priv("p3").choice).toBeNull();
+    expect(JSON.stringify(r.pub())).not.toContain("p1\":\"tour");
+  });
+
+  it("majorité stricte pour « encore un tour » → tour 2 ; fin anticipée avec délai de grâce", () => {
+    const r = round(5);
+    r.toDecision();
+    for (const id of ["p1", "p2", "p3"]) r.send(id, { choice: "tour" });
+    r.send("p4", { choice: "vote" });
+    expect(r.pub().step).toBe("decision");
+    r.send("p5", { choice: "vote" });
+    expect(r.ctx.countdownState!.seconds).toBe(GRACE_SECONDS);
+    r.ctx.advance(GRACE_SECONDS * 1000);
+    expect(r.pub().step).toBe("parole");
+    expect(r.pub().tour).toBe(2);
+    expect(r.pub().spokenIds).toEqual([]);
+    expect(r.ctx.countdownState!.seconds).toBe(15);
+    expect(r.priv("p1").choice).toBeNull();
+  });
+
+  it("changer d'avis pendant le délai de grâce compte", () => {
     const r = round(3);
-    r.toDebate();
-    expect(r.pub().step).toBe("debat");
-    expect(r.ctx.countdownState!.seconds).toBe(40);
-    r.send("p1", { ready: true });
-    r.send("p2", { ready: true });
-    r.send("p2", { ready: false });
-    expect(r.pub().readyIds).toEqual(["p1"]);
-    expect(r.priv("p1").ready).toBe(true);
-    r.send("p2", { ready: true });
-    r.send("p3", { ready: "oui" }); // invalide
-    expect(r.pub().step).toBe("debat");
-    r.send("p3", { ready: true });
+    r.toDecision();
+    r.send("p1", { choice: "tour" });
+    r.send("p2", { choice: "tour" });
+    r.send("p3", { choice: "tour" });
+    r.send("p1", { choice: "vote" });
+    r.send("p2", { choice: "vote" });
+    r.ctx.advance(GRACE_SECONDS * 1000);
     expect(r.pub().step).toBe("vote");
   });
 
-  it("un absent ne bloque pas le débat", () => {
-    const r = round(3);
-    r.toDebate();
-    r.ctx.setConnected("p3", false);
-    r.send("p1", { ready: true });
-    r.send("p2", { ready: true });
+  it("égalité → on vote", () => {
+    const r = round(4);
+    r.toDecision();
+    r.send("p1", { choice: "tour" });
+    r.send("p2", { choice: "tour" });
+    r.send("p3", { choice: "vote" });
+    r.send("p4", { choice: "vote" });
+    r.ctx.advance(GRACE_SECONDS * 1000);
     expect(r.pub().step).toBe("vote");
+    expect(r.ctx.countdownState!.seconds).toBe(20);
   });
 
-  it("fin du chrono : on vote quand même", () => {
-    const r = round(3);
-    r.toDebate();
+  it("personne n'a choisi : fin du chrono → on vote", () => {
+    const r = round(4);
+    r.toDecision();
     r.ctx.finishCountdown();
     expect(r.pub().step).toBe("vote");
+  });
+
+  it("fin du chrono avec une majorité parmi ceux qui ont répondu (les silencieux ne comptent pas)", () => {
+    const r = round(5);
+    r.toDecision();
+    r.send("p1", { choice: "tour" });
+    r.send("p2", { choice: "tour" });
+    r.send("p3", { choice: "vote" });
+    r.ctx.finishCountdown();
+    expect(r.pub().step).toBe("parole");
+    expect(r.pub().tour).toBe(2);
+  });
+
+  it("un absent ne bloque pas ; sa déconnexion déclenche la fin (onPresenceChange)", () => {
+    const r = round(3);
+    r.toDecision();
+    r.send("p1", { choice: "tour" });
+    r.send("p2", { choice: "tour" });
+    expect(r.ctx.countdownState!.seconds).toBe(15);
+    r.presence("p3", false);
+    expect(r.ctx.countdownState!.seconds).toBe(GRACE_SECONDS);
+    r.ctx.advance(GRACE_SECONDS * 1000);
+    expect(r.pub().tour).toBe(2);
+    expect(r.pub().step).toBe("parole");
+  });
+
+  it("après le tour 2 : vote directement, pas de nouvelle décision", () => {
+    const r = round(3);
+    r.toDecision();
+    for (const id of r.ids) r.send(id, { choice: "tour" });
+    r.ctx.advance(GRACE_SECONDS * 1000);
+    r.speakAll();
+    expect(r.pub().step).toBe("vote");
+    expect(r.pub().tour).toBe(2);
+  });
+
+  it("tours_max 1 : vote direct après le tour de parole, jamais de décision", () => {
+    const r = round(3, { tours_max: 1 });
+    r.toSpeech();
+    r.speakAll();
+    expect(r.pub().step).toBe("vote");
+    expect(r.pub().tours).toBe(1);
     expect(r.ctx.countdownState!.seconds).toBe(20);
   });
 });
@@ -285,9 +353,10 @@ describe("imposteur : débat", () => {
 describe("imposteur : vote et points", () => {
   it("pas de vote pour soi, pour un inconnu, ni hors de l'étape vote", () => {
     const r = round(4);
-    r.toDebate();
-    r.send("p1", { target: "p2" }); // pendant le débat
+    r.toDecision();
+    r.send("p1", { target: "p2" }); // pendant la décision
     r.ctx.finishCountdown();
+    expect(r.pub().step).toBe("vote");
     expect(r.priv("p1").vote).toBeNull();
     r.send("p1", { target: "p1" });
     r.send("p1", { target: "inconnu" });
@@ -380,13 +449,12 @@ describe("imposteur : vote et points", () => {
     r.toVote();
     r.send("p1", { target: "p2" });
     r.send("p2", { target: "p1" });
-    r.ctx.setConnected("p3", false);
-    game.onPresenceChange!(r.state, r.ctx);
+    r.presence("p3", false);
     r.ctx.advance(GRACE_SECONDS * 1000);
     expect(r.ctx.ended).toBe(true);
   });
 
-  it("les résultats contiennent les deux mots, les votes et tous les indices", () => {
+  it("les résultats contiennent les deux mots et les votes (plus d'indices écrits)", () => {
     const r = round(3);
     r.toVote();
     r.send("p1", { target: "p2" });
@@ -394,21 +462,20 @@ describe("imposteur : vote et points", () => {
     const res = r.finish().results as Results;
     expect([res.majorityWord, res.imposterWord].sort()).toEqual([...PAIR].sort());
     expect(res.votes).toEqual([{ voterId: "p1", targetId: "p2" }]);
-    expect(res.clues.p1).toEqual(["t1p1", "t2p1"]);
     expect(res.playerIds).toEqual(["p1", "p2", "p3"]);
+    expect("clues" in res).toBe(false);
   });
 
-  it("manche écourtée dès les indices : finish ne plante pas", () => {
+  it("manche écourtée pendant la parole : finish ne plante pas", () => {
     const r = round(3);
-    r.ctx.finishCountdown();
-    r.send("p1", { clue: "a" });
+    r.toSpeech();
     const res = r.finish().results as Results;
-    expect(res.clues.p1).toEqual(["a", ""]);
+    expect(res.votes).toEqual([]);
   });
 });
 
 describe("imposteur : à travers le moteur", () => {
-  it("une manche complète, des chronos aux points cumulés", () => {
+  it("une manche complète avec un 2e tour, des chronos aux points cumulés", () => {
     const cfg = parse();
     const t = createTestEngine({ games: [{ game, cfg }], players: 4, settings: { introSeconds: 1 } });
     t.engine.setSetup({ counts: { imposteur: 1 } });
@@ -418,15 +485,16 @@ describe("imposteur : à travers le moteur", () => {
     const pub = () => snap().public as Pub;
     expect(pub().step).toBe("mot");
     t.clock.advance(6_000);
-    for (let tour = 1; tour <= 2; tour++) {
-      expect(pub().step).toBe("indice");
-      for (const id of t.ids) t.engine.input(id, { clue: `indice ${tour} ${id}` });
-      t.clock.advance(GRACE_SECONDS * 1000);
-      expect(pub().step).toBe("montre");
-      t.clock.advance(4_000);
-    }
-    expect(pub().step).toBe("debat");
-    for (const id of t.ids) t.engine.input(id, { ready: true });
+    const speakTour = (tour: number) => {
+      expect(pub().step).toBe("parole");
+      expect(pub().tour).toBe(tour);
+      for (let i = 0; i < t.ids.length; i++) t.engine.input(pub().currentId!, { done: true });
+    };
+    speakTour(1);
+    expect(pub().step).toBe("decision");
+    for (const id of t.ids) t.engine.input(id, { choice: "tour" });
+    t.clock.advance(GRACE_SECONDS * 1000);
+    speakTour(2);
     expect(pub().step).toBe("vote");
     // Chacun vote pour le suivant dans la liste : personne ne gagne plus de voix que les autres.
     t.ids.forEach((id, i) => t.engine.input(id, { target: t.ids[(i + 1) % t.ids.length] }));

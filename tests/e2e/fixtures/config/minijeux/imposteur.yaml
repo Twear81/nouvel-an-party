@@ -2,13 +2,11 @@ actif: true
 nom: "L'imposteur"
 description: "Un seul d'entre vous n'a pas le même mot… et il ne le sait pas"
 duree_mot: 2
-tours_indices: 2
-duree_indice: 20
-duree_revelation_indices: 2
-duree_debat: 20
+duree_parole: 12
+tours_max: 2
+duree_decision: 12
 duree_vote: 20
 temps_resultats: 5
-longueur_indice_max: 24
 points:
   bon_vote: 100
   imposteur_survit: 300

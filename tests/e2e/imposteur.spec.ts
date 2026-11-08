@@ -1,14 +1,29 @@
+import type { Page } from "@playwright/test";
 import { expect, test } from "./helpers/fixtures";
 import type { Phone } from "./helpers/party";
 
-async function sendClue(p: Phone, text: string) {
-  await p.t("clue-input").fill(text);
-  await p.t("clue-send").click();
-  await expect(p.t("clue-send")).toHaveAttribute("data-sent", "true");
+/**
+ * Fait parler, un par un, l'orateur affiché sur la TV (« J'ai dit mon indice ») jusqu'à la fin du tour.
+ * Un téléphone fermé (absent) n'a rien à toucher : le serveur le saute tout seul.
+ */
+async function speakTour(tv: Page, alive: Phone[]) {
+  const speaker = () => tv.getByTestId("tv-speaker").getAttribute("data-speaker", { timeout: 1000 }).catch(() => null);
+  const step = () => tv.getByTestId("tv-imposteur").getAttribute("data-step", { timeout: 1000 }).catch(() => null);
+  const spoken: string[] = [];
+  for (let guard = 0; guard < 30 && (await step()) === "parole"; guard++) {
+    const cur = await speaker();
+    const phone = alive.find((p) => p.id === cur);
+    if (phone) {
+      await phone.t("speech-done").click();
+      spoken.push(cur!);
+    }
+    await expect.poll(async () => (await step()) !== "parole" || (await speaker()) !== cur, { timeout: 15_000 }).toBe(true);
+  }
+  return spoken;
 }
 
 test.describe("L'imposteur", () => {
-  test("mots, indices, débat, vote, révélation et points", async ({ party }) => {
+  test("mots, indices à voix haute, 2e tour, vote, révélation et points", async ({ party }) => {
     const { tv } = party;
     const phones = await party.addPhones("Alice", "Bob", "Chloé", "David");
     await party.startGame({ imposteur: 1 });
@@ -26,30 +41,33 @@ test.describe("L'imposteur", () => {
     const imp = phones[impIdx]!;
     const others = phones.filter((p) => p !== imp);
 
-    // Tour 1 : son propre mot est refusé, puis chacun envoie un indice.
+    // Tour 1 : un seul orateur à la fois, bouton réservé à l'orateur, l'imposteur ne parle jamais en premier.
+    await expect(tv.getByTestId("tv-speaker")).toBeVisible({ timeout: 10_000 });
+    const first = (await tv.getByTestId("tv-speaker").getAttribute("data-speaker"))!;
+    expect(first).not.toBe(imp.id);
+    const firstPhone = phones.find((p) => p.id === first)!;
+    await expect(firstPhone.t("speech-done")).toBeVisible();
+    for (const p of phones.filter((x) => x !== firstPhone)) await expect(p.t("speech-done")).toHaveCount(0);
+    await expect(tv.getByTestId(`queue-${first}`)).toHaveAttribute("data-state", "current");
+    const spoken1 = await speakTour(tv, phones);
+    expect(new Set(spoken1).size).toBe(4);
+
+    // Décision : tout le monde veut un 2e tour (compteurs anonymes sur la TV).
+    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "decision", { timeout: 10_000 });
+    await phones[0]!.t("decision-tour").click();
+    await expect(tv.getByTestId("tv-count-tour")).toHaveAttribute("data-count", "1");
+    for (const p of phones) await p.t("decision-tour").click();
+    await expect(tv.getByTestId("tv-count-tour")).toHaveAttribute("data-count", "4");
+    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "parole", { timeout: 10_000 });
+    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-tour", "2");
+    const spoken2 = await speakTour(tv, phones);
+    expect(new Set(spoken2).size).toBe(4);
+
+    // Après le tour 2 : vote direct. Le mot reste consultable.
+    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "vote", { timeout: 10_000 });
     const a = phones[0]!;
-    await expect(a.t("clue-input")).toBeVisible({ timeout: 10_000 });
-    await a.t("clue-input").fill(words[0]!);
-    await expect(a.t("clue-error")).toBeVisible();
-    for (const [i, p] of phones.entries()) await sendClue(p, `tour1-${i}`);
-    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "montre", { timeout: 10_000 });
-    await expect(tv.getByTestId(`clue-${a.id}-0`)).toHaveText("tour1-0");
-
-    // Tour 2 : les indices du tour 1 restent affichés, ceux du tour 2 arrivent à la fin du tour.
-    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "indice", { timeout: 10_000 });
-    await expect(tv.getByTestId(`clue-${a.id}-0`)).toBeVisible();
-    for (const [i, p] of phones.entries()) await sendClue(p, `tour2-${i}`);
-    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "debat", { timeout: 15_000 });
-    await expect(tv.getByTestId(`clue-${a.id}-1`)).toHaveText("tour2-0");
-
-    // Le mot reste consultable sur le téléphone.
     await a.t("word-peek").click();
-    await expect(a.t("word-peek")).toHaveAttribute("data-shown", "true");
     await expect(a.t("word-peek-word")).toHaveText(words[0]!);
-
-    // Débat : tout le monde prêt → vote.
-    for (const p of phones) await p.t("ready-btn").click();
-    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "vote");
     await expect(imp.t(`vote-option-${imp.id}`)).toHaveCount(0); // pas de vote pour soi
 
     // Tout le monde (imposteur compris, qui ne sait pas) vote ; les autres désignent l'imposteur.
@@ -68,7 +86,7 @@ test.describe("L'imposteur", () => {
     expect(await party.tvDeltas()).toEqual(Object.fromEntries(phones.map((p) => [p.id!, p === imp ? 0 : 100])));
   });
 
-  test("imposteur non démasqué et téléphone déconnecté : la manche ne bloque pas", async ({ party }) => {
+  test("vote direct, imposteur déconnecté non démasqué : la manche ne bloque pas", async ({ party }) => {
     const { tv } = party;
     const phones = await party.addPhones("Alice", "Bob", "Chloé");
     await party.startGame({ imposteur: 1 });
@@ -81,18 +99,16 @@ test.describe("L'imposteur", () => {
     const imp = phones[impIdx]!;
     const [x, y] = phones.filter((p) => p !== imp) as [Phone, Phone];
 
-    // L'imposteur ferme son navigateur : les deux autres terminent chaque étape sans lui.
-    await expect(x.t("clue-input")).toBeVisible({ timeout: 10_000 });
+    // L'imposteur ferme son navigateur : son tour est sauté, les deux autres parlent.
+    await expect(tv.getByTestId("tv-speaker")).toBeVisible({ timeout: 10_000 });
     await imp.page.close();
-    await sendClue(x, "x1");
-    await sendClue(y, "y1");
-    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "indice", { timeout: 20_000 });
-    await expect(tv.getByTestId(`clue-${x.id}-0`)).toHaveText("x1");
-    await sendClue(x, "x2");
-    await sendClue(y, "y2");
-    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "debat", { timeout: 20_000 });
-    await x.t("ready-btn").click();
-    await y.t("ready-btn").click();
+    const spoken = await speakTour(tv, [x, y]);
+    expect(spoken.sort()).toEqual([x.id!, y.id!].sort());
+
+    // Décision : « On vote » → vote direct, sans attendre l'absent.
+    await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "decision", { timeout: 10_000 });
+    await x.t("decision-vote").click();
+    await y.t("decision-vote").click();
     await expect(tv.getByTestId("tv-imposteur")).toHaveAttribute("data-step", "vote", { timeout: 10_000 });
 
     // Les innocents se votent entre eux : l'imposteur s'en sort et gagne 300.

@@ -22,7 +22,7 @@ Fonctionne en local sur le wifi, sans internet ni installation sur les télépho
 | Simon | La TV joue une suite de couleurs qui s'allonge ; le dernier à la reproduire sans faute gagne | [README](src/minigames/simon/README.md) |
 | Pierre-feuille-ciseaux | Tournoi à élimination directe, duels sur les téléphones | [README](src/minigames/pierre-feuille-ciseaux/README.md) |
 | Culture gênante (surprise) | Jeu interlude : entre deux jeux, la TV casse l'ambiance (« Bon. Plus sérieusement. ») avec une question qui met mal à l'aise, QCM ou estimation | [README](src/minigames/culture-genante/README.md) |
-| L'imposteur | Tous ont le même mot sauf un, qui ne sait pas qu'il est l'imposteur : indices, débat, vote | [README](src/minigames/imposteur/README.md) |
+| L'imposteur | Tous ont le même mot sauf un, qui ne sait pas qu'il est l'imposteur : indices dits à voix haute, vote | [README](src/minigames/imposteur/README.md) |
 | Dessin raté | Chacun dessine son mot secret en 20 s sur son téléphone ; les dessins défilent sur la TV, on vote pour le mieux dessiné | [README](src/minigames/dessin-rate/README.md) |
 
 Créer un nouveau mini-jeu : [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md).
