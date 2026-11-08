@@ -16,3 +16,13 @@ export function typo(text: string | null | undefined): string | undefined {
       .replace(/[   ]*»/g, `${NBSP}»`)
   );
 }
+
+/**
+ * Taille de police (rem) pour qu'un texte tienne sur `lines` lignes de `availRem` de large.
+ * `em` = largeur moyenne d'une lettre en em (0.8 pour la police d'affichage Bungee, 0.5 pour un serif).
+ */
+export const fit = (text: string, availRem: number, min: number, max: number, lines = 1, em = 0.8) =>
+  Math.max(min, Math.min(max, (availRem * lines) / (Math.max(text.length, 1) * em)));
+
+/** 1 → "1er", 2 → "2e". */
+export const ordinal = (rank: number) => (rank === 1 ? "1er" : `${rank}e`);

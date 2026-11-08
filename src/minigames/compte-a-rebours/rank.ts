@@ -1,5 +1,7 @@
 // Fonctions pures partagées par le serveur (game.ts) et les écrans (views.tsx) : classement et formats d'affichage.
 
+import { tieRanks } from "../../shared/ranking";
+
 /** Écart affiché au centième de seconde : deux joueurs au même centième sont à égalité. */
 export const errorCs = (signedMs: number) => Math.round(Math.abs(signedMs) / 10);
 
@@ -14,10 +16,8 @@ export function rankByError<T>(entries: T[], signedOf: (e: T) => number): Ranked
   const sorted = entries
     .map((item) => ({ item, errorMs: Math.abs(signedOf(item)) }))
     .sort((a, b) => errorCs(a.errorMs) - errorCs(b.errorMs) || a.errorMs - b.errorMs);
-  return sorted.map((s) => {
-    const first = sorted.findIndex((o) => errorCs(o.errorMs) === errorCs(s.errorMs));
-    return { ...s, rank: first + 1 };
-  });
+  const ranks = tieRanks(sorted, (s) => errorCs(s.errorMs));
+  return sorted.map((s, i) => ({ ...s, rank: ranks[i]! }));
 }
 
 /** 7340 → "7,34" (virgule française, toujours 2 décimales). */
@@ -36,8 +36,6 @@ export function quality(signedMs: number): Quality {
 }
 // Classes écrites en toutes lettres pour que Tailwind les repère.
 export const QUALITY_TEXT: Record<Quality, string> = { pile: "text-good", great: "text-good", ok: "text-accent", far: "text-bad" };
-
-export const ordinal = (rank: number) => (rank === 1 ? "1er" : `${rank}e`);
 
 /** 8 → "8,0" ; 7.5 → "7,5" (la cible est au demi-seconde). */
 export const fmtCible = (cibleS: number) => cibleS.toFixed(1).replace(".", ",");

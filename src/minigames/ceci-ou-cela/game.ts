@@ -4,7 +4,7 @@
 //  - sans {joueur} : on gagne si on est dans le camp majoritaire (égalité : tout le monde gagne).
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, fillPlayer } from "../helpers";
+import { fillPlayer, endWhenAllDone } from "../helpers";
 
 const choicesSchema = z.tuple([z.string().min(1), z.string().min(1)]);
 
@@ -64,7 +64,7 @@ export interface Results {
 
 /** Fin anticipée : tous les joueurs connectés ont répondu. */
 function checkAllAnswered(state: State, ctx: RoundContext<Cfg>) {
-  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.answers.has(id))) ctx.end();
+  endWhenAllDone(ctx, (id) => state.answers.has(id));
 }
 
 export default defineMiniGame<Cfg, Item, State>({

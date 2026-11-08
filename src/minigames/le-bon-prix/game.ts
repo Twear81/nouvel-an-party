@@ -2,7 +2,8 @@
 // Les plus proches (écart absolu) gagnent des points par rang ; bonus si on tombe pile sur le prix.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone } from "../helpers";
+import { tieRanks } from "../../shared/ranking";
+import { endWhenAllDone } from "../helpers";
 import { MAX_CENTS } from "./amount";
 
 const objetSchema = z.object({
@@ -85,7 +86,7 @@ export interface Results {
 
 /** Fin anticipée : tous les joueurs connectés ont répondu. */
 function checkAllGuessed(state: State, ctx: RoundContext<Cfg>) {
-  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.guesses.has(id))) ctx.end();
+  endWhenAllDone(ctx, (id) => state.guesses.has(id));
 }
 
 export default defineMiniGame<Cfg, Item, State>({
@@ -100,7 +101,6 @@ export default defineMiniGame<Cfg, Item, State>({
   start: (item) => ({ item, priceCents: Math.round(item.prix * 100), guesses: new Map() }),
 
   input(state, playerId, payload, ctx) {
-    if (!ctx.players.some((p) => p.id === playerId)) return;
     const cents = (payload as { cents?: unknown } | null)?.cents;
     if (typeof cents !== "number" || !Number.isInteger(cents) || cents < 0 || cents > MAX_CENTS) return;
     state.guesses.set(playerId, cents);
@@ -126,11 +126,11 @@ export default defineMiniGame<Cfg, Item, State>({
       .sort((a, b) => a.gap - b.gap);
 
     // Rang "olympique" : 1, 1, 3… (les ex æquo ont les mêmes points)
-    const ranking: GuessResult[] = [];
-    sorted.forEach((g, i) => {
-      const rank = i > 0 && sorted[i - 1]!.gap === g.gap ? ranking[i - 1]!.rank : i + 1;
+    const ranks = tieRanks(sorted, (g) => g.gap);
+    const ranking: GuessResult[] = sorted.map((g, i) => {
+      const rank = ranks[i]!;
       const exact = g.gap <= tolerance_centimes;
-      ranking.push({ ...g, rank, exact, points: (classement[rank - 1] ?? 0) + (exact ? bonus_prix_exact : 0) });
+      return { ...g, rank, exact, points: (classement[rank - 1] ?? 0) + (exact ? bonus_prix_exact : 0) };
     });
     const scores: Record<string, number> = {};
     for (const g of ranking) scores[g.playerId] = g.points;

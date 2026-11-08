@@ -160,7 +160,6 @@ describe("imposteur : parole", () => {
     const cur = r.pub().currentId!;
     const other = r.ids.find((i) => i !== cur)!;
     r.send(other, { done: true });
-    r.send("inconnu", { done: true });
     r.send(cur, null);
     r.send(cur, { done: "oui" });
     r.send(cur, { done: false });
@@ -250,7 +249,6 @@ describe("imposteur : décision", () => {
     r.send("p3", { choice: "autre" });
     r.send("p3", { choice: 3 });
     r.send("p3", null);
-    r.send("inconnu", { choice: "tour" });
     r.send("p3", { done: true });
     expect(r.pub().wantTour).toBe(2);
     expect(r.pub().wantVote).toBe(0);
@@ -361,7 +359,6 @@ describe("imposteur : vote et points", () => {
     r.send("p1", { target: "p1" });
     r.send("p1", { target: "inconnu" });
     r.send("p1", { target: 4 });
-    r.send("inconnu", { target: "p2" });
     expect(r.pub().votedCount).toBe(0);
     r.send("p1", { target: "p2" });
     r.send("p1", { target: "p3" }); // changement d'avis

@@ -3,7 +3,7 @@
 // Logique de l'arbre dans bracket.ts (pure, testée à part) ; ici : étapes, chronos, vues publiques/privées, points.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone } from "../helpers";
+import { allConnectedDone, playerIds } from "../helpers";
 import {
   advanceWinners,
   applyThrow,
@@ -190,7 +190,7 @@ export default defineMiniGame<Cfg, Item, State>({
 
   start(item, ctx) {
     const bracket = buildBracket(
-      ctx.players.map((p) => p.id),
+      playerIds(ctx),
       ctx.rng,
     );
     return { item, bracket, step: "draw", round: 0, throwNo: 0, active: new Set(), picks: new Map(), last: new Map() };
@@ -266,7 +266,7 @@ export default defineMiniGame<Cfg, Item, State>({
     const choice = (payload as { choice?: unknown } | null)?.choice;
     if (!isChoice(choice) || s.picks.has(playerId)) return;
     const duel = pendingDuels(s.bracket, s.round).find(({ index, duel: d }) => s.active.has(index) && (d.a === playerId || d.b === playerId));
-    if (!duel || !ctx.players.some((p) => p.id === playerId)) return;
+    if (!duel) return;
     s.picks.set(playerId, choice);
     checkAllPicked(s, ctx);
   },

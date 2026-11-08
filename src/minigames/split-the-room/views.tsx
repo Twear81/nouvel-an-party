@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Button, CheckIcon, fireConfetti, PlayerAvatar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, Button, CheckIcon, fireConfetti, PlayerAvatar, SelectedBadge, typo, VoteDots } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results, Verdict } from "./game";
 
@@ -57,27 +57,10 @@ function Sentence({ start, ending, size, testId }: { start: string; ending: stri
   );
 }
 
-/** Pastilles anonymes de progression du vote (on ne dit pas qui a voté : l'auteur ne vote pas, ça le trahirait). */
-function VoteDots({ done, total }: { done: number; total: number }) {
-  return (
-    <div className="flex items-center gap-5">
-      <div className="flex items-center gap-2" data-testid="tv-vote-dots">
-        {Array.from({ length: total }, (_, i) => (
-          <motion.span key={i} animate={i < done ? { scale: [1, 1.5, 1] } : { scale: 1 }} className={`h-6 w-6 rounded-full ${i < done ? "bg-gold shadow-glow" : "bg-surface-strong"}`} />
-        ))}
-      </div>
-      <span data-testid="tv-vote-count" className="font-display text-4xl text-ink-muted">
-        <span className="text-accent">{done}</span> / {total}
-      </span>
-    </div>
-  );
-}
-
 // ───────────────────────────── TV ─────────────────────────────
 
 function TvWrite({ pub, round, players }: Props) {
   const writers = players.filter((p) => round.participants.includes(p.id) && p.profile);
-  const crowd = writers.length > 5;
   const done = writers.filter((p) => pub.writtenIds.includes(p.id)).length;
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-10 text-center">
@@ -90,20 +73,19 @@ function TvWrite({ pub, round, players }: Props) {
       <p data-testid="tv-rule" className="-mt-4 max-w-[80rem] text-balance text-4xl font-semibold text-ink-muted">
         Écris une fin qui coupe la salle en deux : plus le vote est 50/50, plus tu marques
       </p>
-      <div data-testid="tv-written-count" className={`font-display text-5xl ${pub.allWritten ? "text-good" : "text-ink-muted"}`}>
-        <span className={pub.allWritten ? "" : "text-accent"}>{done}</span> / {writers.length}
-      </div>
-      <div data-testid="tv-written" className="flex flex-wrap items-start justify-center gap-x-2 gap-y-3">
-        {writers.map((p) => {
-          const has = pub.writtenIds.includes(p.id);
-          return (
-            <motion.div key={p.id} animate={{ scale: has ? 1 : 0.92, y: has ? -8 : 0 }} transition={{ type: "spring", stiffness: 300, damping: 14 }} className="flex w-[11rem] flex-col items-center gap-1">
-              <PlayerAvatar profile={p.profile} size={crowd ? "md" : "lg"} dimmed={!has} badge={has ? <CheckIcon /> : undefined} className={has ? "drop-shadow-[0_0_1.2rem_var(--color-accent)]" : ""} />
-              <span className={`w-full truncate font-bold ${crowd ? "text-xl" : "text-2xl"} ${has ? "text-ink" : "text-ink-muted"}`}>{p.profile!.name}</span>
-            </motion.div>
-          );
-        })}
-      </div>
+      <AnsweredCount
+        done={done}
+        total={writers.length}
+        testId="tv-written-count"
+        className={`font-display text-5xl ${pub.allWritten ? "text-good" : "text-ink-muted"}`}
+        accentClass={pub.allWritten ? "" : "text-accent"}
+      />
+      <AnsweredRoster
+        players={writers}
+        testId="tv-written"
+        isDone={(id) => pub.writtenIds.includes(id)}
+        avatarClassName={(_, has) => (has ? "drop-shadow-[0_0_1.2rem_var(--color-accent)]" : "")}
+      />
     </div>
   );
 }
@@ -253,9 +235,7 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
           {draft.length}/{pub.maxLength}
         </span>
         {isSent && (
-          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="pointer-events-none absolute bottom-2 left-4 flex h-7 w-7 items-center justify-center rounded-full bg-good text-bg">
-            <CheckIcon />
-          </motion.span>
+          <SelectedBadge tone="good" size="md" className="pointer-events-none absolute bottom-2 left-4" />
         )}
       </div>
       <Button data-testid="split-send" data-sent={isSent} variant={isSent ? "good" : "primary"} size="lg" block disabled={!canSend && !isSent} onClick={submit} className="shrink-0">

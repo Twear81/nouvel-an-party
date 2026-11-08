@@ -2,10 +2,22 @@
 // s'effacent, repartent à l'envers ou se changent en points d'interrogation.
 import type { DesignProps } from "../chaos";
 import { fmtCounter } from "../rank";
-import { Digits } from "./Digits";
 
 // Classes écrites en toutes lettres pour que Tailwind les repère.
 const TONES = ["text-ink", "text-hot", "text-cool", "text-accent"];
+
+// Chaque caractère dans une case de largeur fixe : un compteur ne « danse » pas à cause des chiffres plus ou moins larges.
+function Digits({ text }: { text: string }) {
+  return (
+    <>
+      {[...text].map((c, i) => (
+        <span key={i} className="inline-block text-center" style={{ width: c === "," ? "0.4em" : c === "+" || c === "−" ? "0.7em" : "0.8em" }}>
+          {c}
+        </span>
+      ))}
+    </>
+  );
+}
 
 export function Digital({ chaos: c, shown }: DesignProps) {
   const jit = (k: number) => c.rnd(c.frame * 7 + k) - 0.5;

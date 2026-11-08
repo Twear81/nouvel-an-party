@@ -4,7 +4,7 @@
 // Rien ne trahit l'imposteur avant les résultats : même vue privée pour tous, aucune info sur lui dans la vue publique.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone } from "../helpers";
+import { allConnectedDone, playerIds, shuffle } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("L'imposteur"),
@@ -98,17 +98,6 @@ export interface Results {
   rightPoints: number;
 }
 
-const idsOf = (ctx: Ctx) => ctx.players.map((p) => p.id);
-
-/** Mélange de Fisher-Yates avec le rng de la manche. */
-function shuffle<T>(arr: T[], rng: () => number): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
-  }
-  return a;
-}
 
 export default defineMiniGame<Cfg, Item, State>({
   id: "imposteur",
@@ -152,7 +141,6 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 
   input(state, playerId, payload, ctx) {
-    if (!ctx.players.some((p) => p.id === playerId)) return;
     const p = payload as { done?: unknown; choice?: unknown; target?: unknown } | null;
 
     if (state.step === "parole") {
@@ -196,7 +184,7 @@ export default defineMiniGame<Cfg, Item, State>({
       step: state.step,
       tour: state.tour,
       tours: ctx.cfg.tours_max,
-      playerIds: idsOf(ctx),
+      playerIds: playerIds(ctx),
       order: speaking ? state.order : [],
       currentId: speaking ? (state.order[state.speaker] ?? null) : null,
       spokenIds: speaking ? [...state.spoken] : [],
@@ -232,7 +220,7 @@ export default defineMiniGame<Cfg, Item, State>({
       majorityWord: state.majorityWord,
       imposterWord: state.imposterWord,
       unmasked,
-      playerIds: idsOf(ctx),
+      playerIds: playerIds(ctx),
       votes: [...state.votes].map(([voterId, targetId]) => ({ voterId, targetId })),
       imposterGain: !unmasked && imp ? ctx.cfg.points.imposteur_survit : 0,
       rightPoints: ctx.cfg.points.bon_vote,
@@ -250,7 +238,7 @@ function beginTour(state: State, ctx: Ctx, tour: number) {
   state.graceStarted = false;
   state.spoken = new Set();
   state.speaker = -1;
-  const order = shuffle(idsOf(ctx), ctx.rng);
+  const order = shuffle(playerIds(ctx), ctx.rng);
   if (tour === 1 && order.length > 1 && order[0] === state.imposterId) {
     const j = 1 + Math.floor(ctx.rng() * (order.length - 1));
     [order[0], order[j]] = [order[j]!, order[0]!];
@@ -299,14 +287,14 @@ function beginVote(state: State, ctx: Ctx) {
 
 function checkDecided(state: State, ctx: Ctx) {
   if (state.step !== "decision" || state.graceStarted) return;
-  if (!allConnectedDone(ctx, idsOf(ctx), (id) => state.choices.has(id))) return;
+  if (!allConnectedDone(ctx, playerIds(ctx), (id) => state.choices.has(id))) return;
   state.graceStarted = true;
   ctx.countdown(GRACE_SECONDS, () => resolveDecision(state, ctx));
 }
 
 function checkVoted(state: State, ctx: Ctx) {
   if (state.step !== "vote" || state.graceStarted) return;
-  if (!allConnectedDone(ctx, idsOf(ctx), (id) => state.votes.has(id))) return;
+  if (!allConnectedDone(ctx, playerIds(ctx), (id) => state.votes.has(id))) return;
   state.graceStarted = true;
   ctx.countdown(GRACE_SECONDS, () => ctx.end());
 }

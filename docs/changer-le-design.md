@@ -53,9 +53,13 @@ Les polices sont installées en local (pas d'internet pendant la soirée).
 | Mini-jeu « Dessin raté » (page de dessin tactile, mosaïque, révélation ; couleurs = jetons `--color-paper` et `--color-pen-0…4` du thème) | `src/minigames/dessin-rate/views.tsx`, `drawing.tsx` |
 
 ## Composants réutilisables (`src/web/ui/`)
-`Button`, `ConfirmDialog` (confirmation dans le style du jeu, jamais `window.confirm`), `Icons` (icônes SVG : pause, passer, accueil…), `Panel` (carte en verre), `PlayerAvatar` / `PlayerChip` (avatar + cadre + couleur, tailles `xs`→`2xl`),
-`Countdown` (barre + secondes depuis la deadline serveur), `Backdrop` (fond étoilé), `Stage` (cadres TV 16:9 / téléphone,
-bandeau « Reconnexion… », overlay Pause), `fireConfetti`.
+- `Button`, `ConfirmDialog` (confirmation dans le style du jeu, jamais `window.confirm`), `Icons` (icônes SVG : pause, passer, accueil…), `Panel` (carte en verre), `PlayerAvatar` (avatar + cadre + couleur, tailles `xs`→`2xl`, `AVATAR_REM` = taille en rem).
+- `Countdown` (barre + secondes depuis la deadline serveur), `Backdrop` (fond étoilé), `Stage` (cadres TV 16:9 / téléphone, bandeau « Reconnexion… », overlay Pause), `fireConfetti`.
+- `AnsweredRoster` + `AnsweredCount` : barre TV « qui a répondu » (avatars grisés puis ✓, pseudo tronqué, taille selon le nombre de joueurs ; `data-testid` `tv-answered` / `tv-answered-count`, variantes par props : badge, halo, barre de progression, ton « serious »).
+- `SelectedBadge` : pastille ✓ animée sur le choix enregistré (tons `ink` / `accent` / `good` / `serious`, tailles `sm` / `md` / `lg`, position par `className`).
+- `NumPad` : pavé numérique du téléphone (virgule optionnelle, touches sans effet grisées, ton `serious`) ; la logique de saisie (`pressKey`) reste dans le mini-jeu.
+- `VoteDots` : pastilles anonymes de progression d'un vote + compteur.
+- `typo`, `fit` (taille de police selon la longueur du texte), `ordinal` (« 1er », « 2e ») : typographie et mise en forme du contenu, dans `typo.ts`.
 Un mini-jeu ne doit utiliser que ces composants + les classes du thème.
 
 ## Dimensions

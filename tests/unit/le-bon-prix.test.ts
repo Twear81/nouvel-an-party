@@ -45,12 +45,11 @@ describe("le-bon-prix : config", () => {
 });
 
 describe("le-bon-prix : réponses", () => {
-  it("ignore les payloads invalides et les joueurs inconnus", () => {
+  it("ignore les payloads invalides", () => {
     const { ctx, state, guess } = round(3);
     for (const payload of [null, undefined, "12", 12, {}, { cents: "1200" }, { cents: 12.5 }, { cents: -1 }, { cents: NaN }, { cents: Infinity }, { cents: 1e12 }, { cents: [1] }]) {
       game.input(state, "p1", payload, ctx);
     }
-    guess("inconnu", 100);
     expect(state.guesses.size).toBe(0);
     expect(ctx.ended).toBe(false);
   });

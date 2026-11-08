@@ -2,7 +2,7 @@
 // Pour changer la mise en scène : modifier ce composant (aucune logique de jeu ici).
 import { motion } from "motion/react";
 import type { PublicPlayer, RoundInfo } from "../../shared/types";
-import { CheckIcon, PlayerAvatar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, typo } from "../../web/ui";
 import type { Pub } from "./game";
 import { fitText, LETTERS, SeriousTimer, Unbroken } from "./Serious";
 
@@ -32,20 +32,8 @@ function AnsweredStrip({ pub, round, players }: { pub: Pub; round: RoundInfo; pl
   const answered = voters.filter((p) => pub.answeredIds.includes(p.id)).length;
   return (
     <div className="flex shrink-0 flex-col items-center gap-2">
-      <div data-testid="cg-answered-count" className="text-3xl text-serious-muted">
-        <span className="text-serious-ink">{answered}</span> / {voters.length}
-      </div>
-      <div className="flex flex-wrap items-start justify-center gap-x-2" data-testid="cg-answered">
-        {voters.map((p) => {
-          const has = pub.answeredIds.includes(p.id);
-          return (
-            <div key={p.id} className="flex w-[9.5rem] flex-col items-center gap-0.5">
-              <PlayerAvatar profile={p.profile} size="md" dimmed={!has} badge={has ? <CheckIcon /> : undefined} />
-              <span className={`w-full truncate text-center text-lg ${has ? "text-serious-ink" : "text-serious-muted"}`}>{p.profile!.name}</span>
-            </div>
-          );
-        })}
-      </div>
+      <AnsweredCount done={answered} total={voters.length} testId="cg-answered-count" className="text-3xl text-serious-muted" accentClass="text-serious-ink" />
+      <AnsweredRoster players={voters} size="small" tone="serious" testId="cg-answered" isDone={(id) => pub.answeredIds.includes(id)} />
     </div>
   );
 }

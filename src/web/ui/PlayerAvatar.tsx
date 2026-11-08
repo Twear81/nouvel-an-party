@@ -47,19 +47,3 @@ export function PlayerAvatar({ profile, size = "md", dimmed, badge, className = 
     </div>
   );
 }
-
-/** Avatar + pseudo, en colonne. */
-export function PlayerChip({
-  profile,
-  size = "md",
-  dimmed,
-  badge,
-  nameClass = "text-xl",
-}: Props & { nameClass?: string }) {
-  return (
-    <div className="flex min-w-0 flex-col items-center gap-2">
-      <PlayerAvatar profile={profile} size={size} dimmed={dimmed} badge={badge} />
-      <span className={`max-w-full truncate font-semibold ${nameClass} ${dimmed ? "text-ink-muted" : ""}`}>{profile?.name ?? "…"}</span>
-    </div>
-  );
-}

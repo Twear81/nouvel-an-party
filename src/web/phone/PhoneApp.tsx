@@ -5,10 +5,10 @@ import { rankOf } from "../../shared/ranking";
 import type { GameSnapshot, RoundInfo } from "../../shared/types";
 import { webGames } from "../../minigames/registry.web";
 import type { MiniGameViewProps } from "../../minigames/views-contract";
-import { makePlayerById, waitingPlayers } from "../net/helpers";
+import { gameViewProps, playersWithProfile, waitingPlayers } from "../net/helpers";
 import { useGame, type GameActions } from "../net/useGame";
 import { useRevealed } from "../net/useReveal";
-import { Button, Countdown, fireConfetti, PausedOverlay, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
+import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
 import { ProfileEditor } from "./ProfileEditor";
 import { useWakeLock } from "./useWakeLock";
 
@@ -56,11 +56,11 @@ interface ScreenProps {
 
 function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
   const round = snapshot.round;
-  const rank = [...snapshot.players.filter((p) => p.profile)].sort((a, b) => b.score - a.score);
+  const rank = playersWithProfile(snapshot).sort((a, b) => b.score - a.score);
 
   switch (snapshot.phase) {
     case "lobby": {
-      const others = snapshot.players.filter((p) => p.profile && p.id !== me.id);
+      const others = playersWithProfile(snapshot).filter((p) => p.id !== me.id);
       return (
         <Center testId="phone-lobby-ready">
           <motion.div initial={{ scale: 0.3, rotate: -20 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 150, damping: 10 }}>
@@ -96,7 +96,7 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
       );
     case "playing":
       if (!round) return null;
-      return <PlayingPhone snapshot={snapshot} round={round} me={me} actions={actions} late={!snapshot.me?.inRound} />;
+      return <PlayingPhone snapshot={snapshot} round={round} actions={actions} late={!snapshot.me?.inRound} />;
     case "results":
       if (!round) return null;
       return <ResultsPhone snapshot={snapshot} round={round} me={me} actions={actions} />;
@@ -108,20 +108,12 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
 }
 
 function viewProps(snapshot: GameSnapshot, round: RoundInfo, actions: GameActions, onError: (m: string) => void): MiniGameViewProps {
-  return {
-    snapshot,
-    round,
-    pub: round.public,
-    priv: snapshot.me?.private ?? null,
-    results: round.results,
-    players: snapshot.players,
-    playerById: makePlayerById(snapshot.players),
-    sendInput: (payload) =>
-      actions.input(payload).catch((e: Error) => {
-        onError(e.message);
-        throw e;
-      }),
-  };
+  return gameViewProps(snapshot, round, snapshot.me?.private ?? null, (payload) =>
+    actions.input(payload).catch((e: Error) => {
+      onError(e.message);
+      throw e;
+    }),
+  );
 }
 
 const LATE_TEXT = "Tu joues à la prochaine manche";
@@ -136,7 +128,7 @@ function Late({ testId }: { testId?: string }) {
   );
 }
 
-function PlayingPhone({ snapshot, round, actions, late }: Pick<ScreenProps, "snapshot" | "actions" | "me"> & { round: RoundInfo; late: boolean }) {
+function PlayingPhone({ snapshot, round, actions, late }: Pick<ScreenProps, "snapshot" | "actions"> & { round: RoundInfo; late: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const View = webGames[round.gameId]?.Phone;
   if (late) return <Late testId="phone-playing" />;
@@ -228,7 +220,6 @@ function FinalPhone({ rank, total, score, profile }: { rank: number; total: numb
     if (rank === 1) fireConfetti("big");
     else fireConfetti("small");
   }, [rank]);
-  const ordinal = rank === 1 ? "1er" : `${rank}e`;
   return (
     <Center testId="phone-final">
       <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-lg font-bold uppercase tracking-widest text-ink-muted">
@@ -239,7 +230,7 @@ function FinalPhone({ rank, total, score, profile }: { rank: number; total: numb
         <PlayerAvatar profile={profile} size="xl" />
       </motion.div>
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="flex flex-col items-center gap-1">
-        <span className="font-display text-7xl text-gold-gradient">{ordinal}</span>
+        <span className="font-display text-7xl text-gold-gradient">{ordinal(rank)}</span>
         <span className="text-xl text-ink-muted">sur {total} joueur{total > 1 ? "s" : ""}</span>
         <span className="mt-2 font-display text-4xl text-accent">{score} pts</span>
         <span className="mt-4 text-xl font-semibold">Bonne année ! 🥂</span>

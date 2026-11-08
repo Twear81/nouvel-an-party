@@ -2,6 +2,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { rankOf } from "../../shared/ranking";
+import { playersWithProfile } from "../net/helpers";
 import type { GameSnapshot } from "../../shared/types";
 import { fireConfetti, PlayerAvatar } from "../ui";
 
@@ -10,7 +11,7 @@ const FAST_STEP_MS = 1000; // du dernier au 4e : plus vite
 
 export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   const sorted = useMemo(
-    () => snapshot.players.filter((p) => p.profile).sort((a, b) => b.score - a.score || a.profile!.name.localeCompare(b.profile!.name)),
+    () => playersWithProfile(snapshot).sort((a, b) => b.score - a.score || a.profile!.name.localeCompare(b.profile!.name)),
     [snapshot.players],
   );
   const total = sorted.length;

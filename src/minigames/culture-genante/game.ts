@@ -4,7 +4,8 @@
 // ou estimation chiffrée (le plus proche gagne). Étapes pilotées par le serveur : accroche → bascule → question.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone } from "../helpers";
+import { tieRanks } from "../../shared/ranking";
+import { endWhenAllDone, shuffle } from "../helpers";
 
 /** Plus grand nombre accepté pour une estimation (9 chiffres sur le pavé). */
 export const MAX_ESTIMATION = 999_999_999;
@@ -109,8 +110,6 @@ export interface Pub {
   unit: string | null;
   /** Qui a répondu (pas quoi). */
   answeredIds: string[];
-  /** Durée de la question (ms), pour le chrono. */
-  questionMs: number;
 }
 /** Vue de la TV : en plus, les textes de la mise en scène (les téléphones n'en ont pas besoin). */
 export interface TvPub extends Pub {
@@ -155,19 +154,10 @@ export interface Results {
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
-function shuffle<T>(arr: T[], rng: () => number): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j]!, a[i]!];
-  }
-  return a;
-}
-
 /** Fin anticipée : tous les joueurs connectés ont répondu (seulement pendant la question). */
 function checkAllAnswered(state: State, ctx: RoundContext<Cfg>) {
   if (state.stage !== "question") return;
-  if (allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => state.answers.has(id))) ctx.end();
+  endWhenAllDone(ctx, (id) => state.answers.has(id));
 }
 
 function publicOf(state: State): Pub {
@@ -179,7 +169,6 @@ function publicOf(state: State): Pub {
     choices: asked && state.kind === "qcm" ? state.choices : null,
     unit: asked ? (state.item.unite ?? null) : null,
     answeredIds: [...state.answers.keys()],
-    questionMs: state.durationS * 1000,
   };
 }
 
@@ -221,7 +210,7 @@ export default defineMiniGame<Cfg, Item, State>({
 
   input(state, playerId, payload, ctx) {
     if (state.stage !== "question") return;
-    if (!ctx.players.some((p) => p.id === playerId) || state.answers.has(playerId)) return; // une seule réponse, définitive
+    if (state.answers.has(playerId)) return; // une seule réponse, définitive
     const p = payload as { choice?: unknown; ms?: unknown; value?: unknown } | null;
     if (state.kind === "qcm") {
       if (typeof p?.choice !== "number" || !Number.isInteger(p.choice) || p.choice < 0 || p.choice >= state.choices.length) return;
@@ -270,11 +259,11 @@ export default defineMiniGame<Cfg, Item, State>({
       const sorted = [...state.answers]
         .map(([playerId, a]) => ({ playerId, value: a.value!, gap: Math.abs(a.value! - exact) }))
         .sort((x, y) => x.gap - y.gap);
-      answers = [];
-      sorted.forEach((g, i) => {
-        const rank = i > 0 && sorted[i - 1]!.gap === g.gap ? answers[i - 1]!.rank! : i + 1; // ex æquo : même rang
+      const ranks = tieRanks(sorted, (g) => g.gap); // ex æquo : même rang
+      answers = sorted.map((g, i) => {
+        const rank = ranks[i]!;
         const points = Math.max(0, estimation_premier - (rank - 1) * estimation_decroissance);
-        answers.push({ playerId: g.playerId, choice: null, value: g.value, ms: null, correct: rank === 1, gap: g.gap, rank, points });
+        return { playerId: g.playerId, choice: null, value: g.value, ms: null, correct: rank === 1, gap: g.gap, rank, points };
       });
     }
     for (const a of answers) scores[a.playerId] = a.points;

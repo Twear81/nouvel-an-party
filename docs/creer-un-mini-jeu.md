@@ -58,7 +58,9 @@ Le moteur envoie `publicView` / `privateView` à chaque changement (après un `i
 En test, `makeCtx` expose `ctx.setConnected(id, false)` ; appelez ensuite `game.onPresenceChange!(state, ctx)`.
 
 ### Aides (`src/minigames/helpers.ts`)
-`questionSchema` / `normalizeQuestion` (question en texte ou objet avec `duree`), `fillPlayer` (joker `{joueur}`), `argmaxAll` (vainqueurs ex æquo), `allConnectedDone` (fin anticipée sur les joueurs connectés).
+`questionSchema` / `normalizeQuestion` (question en texte ou objet avec `duree`), `fillPlayer` (joker `{joueur}`), `argmaxAll` (vainqueurs ex æquo), `allConnectedDone` (fin anticipée sur les joueurs connectés), `endWhenAllDone(ctx, (id) => aRépondu(id))` (le cas courant : termine la manche quand tous les connectés ont répondu), `playerIds(ctx)`, `shuffle(liste, ctx.rng)` (Fisher-Yates reproductible) ; côté `src/shared/ranking.ts`, `tieRanks(trié, clé)` donne les rangs ex æquo « 1, 1, 3 ».
+
+Le moteur refuse déjà les `input` des non-participants : inutile de re-vérifier que `playerId` est un joueur dans `input`.
 
 ## 3. views.tsx : `MiniGameViews`
 ```tsx

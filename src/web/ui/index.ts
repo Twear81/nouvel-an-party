@@ -8,3 +8,7 @@ export * from "./confetti";
 export * from "./ConfirmDialog";
 export * from "./Icons";
 export * from "./typo";
+export * from "./AnsweredRoster";
+export * from "./NumPad";
+export * from "./SelectedBadge";
+export * from "./VoteDots";

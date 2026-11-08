@@ -2,6 +2,11 @@
 import { z } from "zod";
 import type { PublicPlayer } from "../shared/types";
 
+export { shuffle } from "../shared/shuffle";
+
+/** Ids de tous les joueurs de la manche. */
+export const playerIds = (ctx: { players: PublicPlayer[] }): string[] => ctx.players.map((p) => p.id);
+
 /**
  * Règle « tout le monde a répondu » : vrai quand tous les joueurs CONNECTÉS parmi `ids` sont servis par `done`.
  * Un joueur déconnecté (téléphone planté) ne bloque pas la fin anticipée ; si personne n'est connecté on n'arrête rien
@@ -10,6 +15,14 @@ import type { PublicPlayer } from "../shared/types";
 export function allConnectedDone(ctx: { isConnected: (id: string) => boolean }, ids: string[], done: (id: string) => boolean): boolean {
   const here = ids.filter((id) => ctx.isConnected(id));
   return here.length > 0 && here.every(done);
+}
+
+/** Fin anticipée de la manche dès que tous les joueurs connectés sont servis par `done` (voir `allConnectedDone`). */
+export function endWhenAllDone(
+  ctx: { players: PublicPlayer[]; isConnected: (id: string) => boolean; end: () => void },
+  done: (id: string) => boolean,
+): void {
+  if (allConnectedDone(ctx, playerIds(ctx), done)) ctx.end();
 }
 
 /** Une question peut s'écrire en texte simple, ou en objet pour surcharger la durée. */
