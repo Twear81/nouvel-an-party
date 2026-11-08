@@ -4,7 +4,7 @@
 // Rien ne trahit l'imposteur avant les résultats : même vue privée pour tous, aucune info sur lui dans la vue publique.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, playerIds, shuffle } from "../helpers";
+import { allConnectedDone, playerIds, shuffle, startGraceOnce } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("L'imposteur"),
@@ -286,15 +286,11 @@ function beginVote(state: State, ctx: Ctx) {
 }
 
 function checkDecided(state: State, ctx: Ctx) {
-  if (state.step !== "decision" || state.graceStarted) return;
-  if (!allConnectedDone(ctx, playerIds(ctx), (id) => state.choices.has(id))) return;
-  state.graceStarted = true;
-  ctx.countdown(GRACE_SECONDS, () => resolveDecision(state, ctx));
+  if (state.step !== "decision" || !allConnectedDone(ctx, playerIds(ctx), (id) => state.choices.has(id))) return;
+  startGraceOnce(state, ctx, GRACE_SECONDS, () => resolveDecision(state, ctx));
 }
 
 function checkVoted(state: State, ctx: Ctx) {
-  if (state.step !== "vote" || state.graceStarted) return;
-  if (!allConnectedDone(ctx, playerIds(ctx), (id) => state.votes.has(id))) return;
-  state.graceStarted = true;
-  ctx.countdown(GRACE_SECONDS, () => ctx.end());
+  if (state.step !== "vote" || !allConnectedDone(ctx, playerIds(ctx), (id) => state.votes.has(id))) return;
+  startGraceOnce(state, ctx, GRACE_SECONDS, () => ctx.end());
 }

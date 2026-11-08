@@ -2,14 +2,12 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { cleanText } from "../../shared/clean-text";
 import { AnsweredCount, AnsweredRoster, Button, CheckIcon, fireConfetti, PlayerAvatar, SelectedBadge, typo, VoteDots } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results, Verdict } from "./game";
 
 type Props = MiniGameViewProps<Pub, Priv, Results>;
-
-/** Même nettoyage que le serveur, pour savoir si ce qui est tapé est déjà envoyé. */
-const clean = (s: string) => s.replace(/\s+/g, " ").trim();
 
 // Rythme de la révélation (s), partagé par la TV et les téléphones : les téléphones n'affichent le verdict
 // qu'en même temps que la TV (pas de spoil). Compté depuis l'affichage de la révélation.
@@ -199,7 +197,7 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
   const sent = priv?.text ?? null;
   const [draft, setDraft] = useState(sent ?? "");
   const [busy, setBusy] = useState(false);
-  const typed = clean(draft);
+  const typed = cleanText(draft);
   const isSent = sent !== null && typed === sent;
   const canSend = !busy && !isSent && (typed !== "" || sent !== null);
 

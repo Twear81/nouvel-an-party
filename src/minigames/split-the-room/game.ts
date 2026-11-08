@@ -3,7 +3,7 @@
 // Une manche, trois étapes : écrire (chrono 1), puis une phrase à la fois : vote (chrono 2) + révélation (chrono 3).
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, playerIds, shuffle } from "../helpers";
+import { allConnectedDone, cleanText, playerIds, shuffle, startGraceOnce } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Split the Room"),
@@ -99,12 +99,6 @@ export interface ResultSentence {
 export interface Results {
   start: string;
   sentences: ResultSentence[];
-}
-
-/** Texte nettoyé : espaces réduits, coupé à la longueur max. Chaîne vide = pas de phrase. */
-export function cleanText(raw: unknown, max: number): string {
-  if (typeof raw !== "string") return "";
-  return raw.replace(/\s+/g, " ").trim().slice(0, max).trim();
 }
 
 /** Verdict et points de l'auteur d'après le nombre de OUI / NON. */
@@ -220,9 +214,8 @@ const allWritten = (state: State, ctx: Ctx) => allConnectedDone(ctx, playerIds(c
 
 /** Tous les joueurs connectés ont écrit : court délai pour corriger, puis on enchaîne. */
 function checkWritten(state: State, ctx: Ctx) {
-  if (state.step !== "write" || state.graceStarted || !allWritten(state, ctx)) return;
-  state.graceStarted = true;
-  ctx.countdown(GRACE_SECONDS, () => startVoting(state, ctx));
+  if (state.step !== "write" || !allWritten(state, ctx)) return;
+  startGraceOnce(state, ctx, GRACE_SECONDS, () => startVoting(state, ctx));
 }
 
 /** Tous les votants connectés (tout le monde sauf l'auteur) ont voté : on révèle sans attendre le chrono. */
