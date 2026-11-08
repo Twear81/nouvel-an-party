@@ -20,6 +20,9 @@ const writeToken = (token: string | null) => {
   }
 };
 
+/** Envoie une action au serveur et n'en garde que la réussite ou l'échec (la réponse est ignorée). */
+const send = (...args: Parameters<typeof call>): Promise<void> => call(...args).then(() => {});
+
 export function useGame(role: "tv" | "phone") {
   const [snapshot, setSnapshot] = useState<GameSnapshot | null>(null);
   const [connected, setConnected] = useState(socket.connected);
@@ -78,22 +81,22 @@ export function useGame(role: "tv" | "phone") {
     };
   }, [role]);
 
-  const setup = useCallback((s: Setup) => call("host:setup", s).then(() => {}), []);
+  const setup = useCallback((s: Setup) => send("host:setup", s), []);
   const actions = useMemo(
     () => ({
       setup,
-      start: () => call("host:start").then(() => {}),
-      resumeSave: () => call("host:resumeSave").then(() => {}),
-      skip: () => call("host:skip").then(() => {}),
-      pause: () => call("host:pause").then(() => {}),
-      resume: () => call("host:resume").then(() => {}),
-      addTime: (seconds: number) => call("host:addTime", seconds).then(() => {}),
-      kick: (id: PlayerId) => call("host:kick", id).then(() => {}),
-      lobby: () => call("host:lobby").then(() => {}),
-      setProfile: (p: Profile) => call("player:profile", p).then(() => {}),
+      start: () => send("host:start"),
+      resumeSave: () => send("host:resumeSave"),
+      skip: () => send("host:skip"),
+      pause: () => send("host:pause"),
+      resume: () => send("host:resume"),
+      addTime: (seconds: number) => send("host:addTime", seconds),
+      kick: (id: PlayerId) => send("host:kick", id),
+      lobby: () => send("host:lobby"),
+      setProfile: (p: Profile) => send("player:profile", p),
       uploadPhoto: (data: ArrayBuffer) => call<{ url: string }>("player:photo", data).then((r) => r.url),
-      input: (payload: unknown) => call("player:input", payload).then(() => {}),
-      continue: () => call("player:continue").then(() => {}),
+      input: (payload: unknown) => send("player:input", payload),
+      continue: () => send("player:continue"),
     }),
     [setup],
   );

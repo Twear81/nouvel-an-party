@@ -167,7 +167,7 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
         {error && <p className="text-center text-sm font-semibold text-bad">{error}</p>}
         <div className="flex items-center gap-2">
           {onCancel && (
-            <Button type="button" variant="secondary" size="md" onClick={onCancel}>
+            <Button type="button" variant="secondary" onClick={onCancel}>
               Annuler
             </Button>
           )}
