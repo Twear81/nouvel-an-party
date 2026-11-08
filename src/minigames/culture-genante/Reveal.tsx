@@ -3,7 +3,7 @@
 // constantes que l'animation (la TV cache les points et les téléphones restent sur « Regarde la TV » pendant ce temps).
 import { motion } from "motion/react";
 import type { MiniGameViewProps } from "../views-contract";
-import { PlayerAvatar } from "../../web/ui";
+import { PlayerAvatar, typo } from "../../web/ui";
 import type { Priv, Pub, ResultAnswer, Results } from "./game";
 import { withUnit } from "./number";
 import { fitText, LETTERS, Unbroken } from "./Serious";
@@ -60,7 +60,7 @@ function QcmRows({ results, playerById }: { results: Results; playerById: MiniGa
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: ANSWER_AT_S }} className={`absolute inset-0 border-2 ${correct ? "border-serious-good bg-serious-good/10" : "bg-serious-bg/60"}`} />
             <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-serious-accent text-2xl text-serious-accent">{LETTERS[c]}</span>
             <span className="relative min-w-0 flex-1 truncate leading-tight" style={{ fontSize: `${fitText(label, 30, 1.7, 2.4)}rem` }}>
-              {label}
+              {typo(label)}
               {correct && (
                 <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: ANSWER_AT_S }} className="ml-4 text-serious-good">
                   ✓
@@ -116,8 +116,8 @@ export function TvResults({ results, playerById }: MiniGameViewProps<Pub, Priv, 
   const missing = results.missingIds.map((id) => playerById(id)?.profile?.name).filter(Boolean);
   return (
     <div data-testid="cg-results" data-kind={results.kind} className="flex min-h-0 flex-1 flex-col gap-3 rounded-card bg-serious px-14 py-6 font-serious text-serious-ink shadow-card">
-      <h1 className="shrink-0 text-balance text-center leading-tight text-serious-muted" style={{ fontSize: `${fitText(results.question, 100, 1.9, 2.6, 2)}rem` }}>
-        <Unbroken text={results.question} />
+      <h1 className="shrink-0 text-balance text-center leading-tight text-serious-muted" style={{ fontSize: `${fitText(typo(results.question), 100, 1.9, 2.6, 2)}rem` }}>
+        <Unbroken text={typo(results.question)} />
       </h1>
       {results.kind === "qcm" ? <QcmRows results={results} playerById={playerById} /> : <EstimationRows results={results} playerById={playerById} />}
       <div className="flex shrink-0 flex-col items-center gap-1">

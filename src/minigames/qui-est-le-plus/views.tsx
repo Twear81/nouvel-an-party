@@ -1,6 +1,6 @@
 // Écrans de "Qui est le plus… ?" : n'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
-import { CheckIcon, PlayerAvatar } from "../../web/ui";
+import { CheckIcon, PlayerAvatar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -11,7 +11,7 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-12 text-center">
       <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-[88rem] text-balance text-[6rem] font-extrabold leading-[1.05]">
-        {pub.question}
+        {typo(pub.question)}
       </motion.h1>
       <div data-testid="tv-answered-count" className="font-display text-5xl text-ink-muted">
         <span className="text-accent">{voted}</span> / {voters.length}
@@ -40,7 +40,7 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
   const tiny = options.length > 6;
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <h1 className="shrink-0 text-balance text-center text-xl font-extrabold leading-tight min-[400px]:text-2xl">{pub.question}</h1>
+      <h1 className="shrink-0 text-balance text-center text-xl font-extrabold leading-tight min-[400px]:text-2xl">{typo(pub.question)}</h1>
       <div className="grid min-h-0 flex-1 grid-cols-2 content-start gap-2 overflow-y-auto overscroll-contain px-1 pb-1 pt-1">
         {options.map((p) => {
           const selected = voted === p.id;
@@ -89,7 +89,7 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
   const barH = n <= 4 ? "h-20" : n <= 6 ? "h-[4.25rem]" : "h-[3.75rem]";
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <h1 className="text-balance text-center text-5xl font-extrabold leading-tight">{results.question}</h1>
+      <h1 className="text-balance text-center text-5xl font-extrabold leading-tight">{typo(results.question)}</h1>
       <div data-testid="tally" className="flex min-h-0 flex-1 flex-col justify-center gap-2">
         {n === 0 && <p className="text-center text-5xl text-ink-muted">Personne n'a voté…</p>}
         {results.tally.map((t, i) => {

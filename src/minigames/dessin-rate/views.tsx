@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { CheckIcon, fireConfetti, PlayerAvatar, TrashIcon, UndoIcon } from "../../web/ui";
+import { CheckIcon, fireConfetti, PlayerAvatar, TrashIcon, typo, UndoIcon } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { Drawing, DrawingPad, PEN_BG } from "./drawing";
 import type { Priv, Pub, Results, ResultCard, TvPub } from "./game";
@@ -110,7 +110,7 @@ function TvGallery({ pub, playerById }: MiniGameViewProps<Pub>) {
         </span>
         <p className="text-3xl font-semibold text-ink-muted">Le mot secret était</p>
         <h1 data-testid="tv-gallery-word" className={`text-balance break-words font-extrabold leading-[1.05] text-gold-gradient ${size}`}>
-          {cur.word}
+          {typo(cur.word)}
         </h1>
         <div className="flex items-center gap-5">
           <PlayerAvatar profile={author?.profile ?? null} size="lg" />
@@ -149,7 +149,7 @@ function TvVote({ pub }: MiniGameViewProps<Pub>) {
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05, type: "spring" }} className="min-h-0 w-full flex-1">
               <Drawing strokes={c.strokes} blankLabel="Page blanche" />
             </motion.div>
-            <span className="line-clamp-2 max-w-full shrink-0 text-balance text-center text-3xl font-bold leading-tight">{c.word}</span>
+            <span className="line-clamp-2 max-w-full shrink-0 text-balance text-center text-3xl font-bold leading-tight">{typo(c.word)}</span>
           </Tile>
         ))}
       </TvGrid>
@@ -348,11 +348,14 @@ const votesLabel = (n: number) => `${n} vote${n > 1 ? "s" : ""}`;
 function ResultCaption({ card, props, big, crown, noVotes }: { card: ResultCard; props: Props; big?: boolean; crown?: boolean; noVotes?: boolean }) {
   const author = props.playerById(card.playerId);
   return (
-    <div className="flex max-w-full shrink-0 flex-col items-center gap-1">
-      <span className={`line-clamp-2 text-balance text-center font-extrabold leading-tight ${big ? "text-5xl text-gold-gradient" : "text-2xl"}`}>{card.word}</span>
-      <div className="flex max-w-full items-center gap-3">
-        <PlayerAvatar profile={author?.profile ?? null} size={big ? "md" : "xs"} />
-        <span className={`truncate font-bold ${big ? "text-4xl" : "text-xl"}`}>{author?.profile?.name}</span>
+    <div className={`flex max-w-full shrink-0 flex-col items-center ${big ? "gap-2" : "gap-1"}`}>
+      <span className={`line-clamp-2 text-balance text-center font-extrabold leading-tight ${big ? "text-5xl text-gold-gradient" : "text-2xl"}`}>{typo(card.word)}</span>
+      {/* Pseudo puis badge de votes sur deux lignes : le badge « rebondit » à l'arrivée, il ne doit jamais toucher le pseudo. */}
+      <div className={`flex max-w-full flex-col items-center ${big ? "gap-4" : "gap-1"}`}>
+        <div className="flex max-w-full items-center gap-3">
+          <PlayerAvatar profile={author?.profile ?? null} size={big ? "md" : "xs"} />
+          <span className={`min-w-0 truncate font-bold ${big ? "text-4xl" : "text-xl"}`}>{author?.profile?.name}</span>
+        </div>
         {!noVotes && <motion.span
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -413,12 +416,12 @@ function TvResults(props: Props) {
   const bigCols = Math.min(3, Math.ceil(Math.sqrt(Math.max(1, big.length))));
   return (
     <div data-testid="dessin-results" data-revealed={k} data-total={steps} data-done={done} className="flex min-h-0 flex-1 flex-col gap-2">
-      <h1 className="shrink-0 text-center text-4xl font-extrabold">
+      <h1 className="shrink-0 pb-4 text-center text-4xl font-extrabold">
         {done ? (parts.winners.length > 1 ? "Les mieux dessinés !" : "Le mieux dessiné !") : "Du moins voté au plus voté…"}
       </h1>
       <div className="flex min-h-0 flex-1 gap-6">
-        <div className="min-h-0 min-w-0 flex-1">
-          <div className="grid size-full gap-4" style={{ gridTemplateColumns: `repeat(${bigCols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${Math.max(1, Math.ceil(big.length / bigCols))}, minmax(0, 1fr))` }}>
+        <div className="min-h-0 min-w-0 flex-1 px-4 pb-2 pt-8">
+          <div className="grid size-full gap-6" style={{ gridTemplateColumns: `repeat(${bigCols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${Math.max(1, Math.ceil(big.length / bigCols))}, minmax(0, 1fr))` }}>
             {big.length === 0 && (
               <div className="col-span-full flex items-center justify-center">
                 <motion.span animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="font-display text-[12rem] leading-none text-gold-gradient">

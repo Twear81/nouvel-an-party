@@ -2,7 +2,7 @@
 // Pour changer la mise en scène : modifier ce composant (aucune logique de jeu ici).
 import { motion } from "motion/react";
 import type { PublicPlayer, RoundInfo } from "../../shared/types";
-import { CheckIcon, PlayerAvatar } from "../../web/ui";
+import { CheckIcon, PlayerAvatar, typo } from "../../web/ui";
 import type { Pub } from "./game";
 import { fitText, LETTERS, SeriousTimer, Unbroken } from "./Serious";
 
@@ -51,7 +51,7 @@ function AnsweredStrip({ pub, round, players }: { pub: Pub; round: RoundInfo; pl
 }
 
 export function Question({ pub, round, players }: { pub: Pub; round: RoundInfo; players: PublicPlayer[] }) {
-  const text = pub.question ?? "";
+  const text = typo(pub.question ?? "");
   const choices = pub.choices;
   return (
     <div data-testid="cg-question" className="flex min-h-0 flex-1 flex-col gap-6">
@@ -70,7 +70,7 @@ export function Question({ pub, round, players }: { pub: Pub; round: RoundInfo; 
       {choices ? (
         <div className={`grid min-h-0 flex-1 content-center gap-5 ${choices.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
           {choices.map((label, i) => (
-            <Plaque key={i} letter={LETTERS[i]!} label={label} i={i} count={choices.length} />
+            <Plaque key={i} letter={LETTERS[i]!} label={typo(label)} i={i} count={choices.length} />
           ))}
         </div>
       ) : (
