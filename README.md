@@ -17,7 +17,7 @@ Fonctionne en local sur le wifi, sans internet ni installation sur les télépho
 | Comme les autres | Chacun tape une réponse libre : on marque quand d'autres ont tapé la même chose | [README](src/minigames/comme-les-autres/README.md) |
 | Le bon prix | Un objet s'affiche : le prix le plus proche gagne (bonus si pile le bon) | [README](src/minigames/le-bon-prix/README.md) |
 | Split the Room | On termine une situation (« Tu gagnes 1 million, mais… ») ; la salle vote OUI/NON, l'auteur marque quand elle est coupée en deux | [README](src/minigames/split-the-room/README.md) |
-| Compte à rebours chaotique | Chacun son tour, on arrête un compteur devenu fou pile à l'heure cible | [README](src/minigames/compte-a-rebours/README.md) |
+| Compte à rebours chaotique | Tout le monde en même temps : STOP quand un compteur fou (5 designs) atteint la cible tirée au hasard | [README](src/minigames/compte-a-rebours/README.md) |
 | Simon | La TV joue une suite de couleurs qui s'allonge ; le dernier à la reproduire sans faute gagne | [README](src/minigames/simon/README.md) |
 | Pierre-feuille-ciseaux | Tournoi à élimination directe, duels sur les téléphones | [README](src/minigames/pierre-feuille-ciseaux/README.md) |
 | Culture gênante (surprise) | Jeu interlude : entre deux jeux, la TV casse l'ambiance (« Bon. Plus sérieusement. ») avec une question qui met mal à l'aise, QCM ou estimation | [README](src/minigames/culture-genante/README.md) |

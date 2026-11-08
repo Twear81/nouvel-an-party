@@ -1,7 +1,8 @@
 # Mini-jeu "Compte à rebours chaotique" — doc : src/minigames/compte-a-rebours/README.md
-# Chacun son tour, un gros bouton à presser pile à l'heure cible. Le compteur est visible sur la TV
-# pendant quelques secondes, puis il devient fou : il faut finir de compter dans sa tête.
-# Le plus proche de la cible gagne. Modifier ce fichier demande de relancer NouvelAn.exe.
+# TOUT LE MONDE joue en même temps : la TV annonce une cible (ex. « Arrêtez-vous à 8,0 s ! »), puis « 3… 2… 1… GO ».
+# Chacun appuie sur STOP sur son téléphone quand il pense que la cible est atteinte. Le compteur de la TV est lisible
+# quelques secondes puis devient fou : il faut finir de compter dans sa tête. Le plus proche de la cible gagne.
+# Modifier ce fichier demande de relancer NouvelAn.exe.
 
 # false = le jeu n'apparaît pas dans la partie (le fichier est conservé)
 actif: true
@@ -11,55 +12,41 @@ manches_max: 3
 
 # Titre et phrase d'explication affichés sur la TV
 nom: "Compte à rebours chaotique"
-description: "Arrêtez le compteur pile à l'heure… quand il devient fou, comptez dans votre tête !"
+description: "Appuie sur STOP quand le compteur fou atteint la cible : le plus proche gagne !"
 
-# Temps (en secondes) laissé à un joueur pour appuyer sur START. Passé ce délai, son tour est sauté (0 point).
-delai_depart: 10
+# Secondes d'annonce de la cible (très grand sur la TV) avant le « 3… 2… 1… GO »
+annonce: 6
 
-# Durée (en secondes) d'affichage de l'écart ("+0,23 s trop tard") entre deux joueurs
-duree_revelation: 3.5
+# La cible est tirée au hasard à chaque manche, au demi-seconde (6, 6,5, 7… 12), entre ces deux bornes (en secondes)
+cible_min: 6
+cible_max: 12
 
-# Temps (en secondes) estimé pour lire les résultats ; sert uniquement au calcul de durée de la soirée
-temps_resultats: 15
+# Secondes pendant lesquelles le compteur est lisible avant de devenir chaotique (tirées au hasard entre les deux, au dixième).
+# 0 = chaotique d'emblée.
+visible_min: 2
+visible_max: 3
+
+# Le compteur continue jusqu'à ce que tout le monde ait appuyé, ou au plus tard jusqu'à cible + marge_max secondes.
+# Ceux qui n'ont pas appuyé à ce moment-là sont ratés (0 point).
+marge_max: 4
+
+# Temps (en secondes) estimé pour la révélation et les résultats ; sert uniquement au calcul de durée de la soirée
+temps_resultats: 25
 
 # Points par place : le 1er touche le 1er nombre, le 2e le 2e, etc. Place absente de la liste = 0 point.
 # Égalité (même écart au centième de seconde) : les ex æquo touchent tous les points de la meilleure place.
-# Un joueur qui n'a pas joué (tour sauté, jamais arrêté, déconnecté) ne marque rien.
 points: [150, 100, 70, 50, 30, 20, 10, 0]
 
-# Une manche = UNE variante tirée au hasard ; tous les joueurs jouent la même, chacun leur tour (ordre aléatoire).
-# Chaque variante :
-#   titre:    nom affiché sur la TV
-#   cible:    la seconde à viser, en secondes (au moins 1). Le tour est raté si on n'appuie pas avant 3 × cible.
-#   visible:  pendant combien de secondes le compteur est lisible avant de devenir chaotique (0 = chaotique d'emblée).
-#   decompte: true = le compteur descend de "cible" jusqu'à 0 (effet minuit) ; false (défaut) = il monte de 0 à "cible".
-# Maximum conseillé : 25 variantes.
-variantes:
-  - titre: "Pile à minuit"
-    cible: 10
-    visible: 3
-    decompte: true
-  - titre: "Dix secondes pile"
-    cible: 10
-    visible: 3
-  - titre: "Les douze coups"
-    cible: 12
-    visible: 4
-    decompte: true
-  - titre: "Cinq secondes à l'aveugle"
-    cible: 5
-    visible: 1
-  - titre: "Un petit tour d'horloge"
-    cible: 15
-    visible: 5
-  - titre: "Le dernier souffle de l'année"
-    cible: 8
-    visible: 2
-    decompte: true
-  - titre: "Presque à la seconde"
-    cible: 7
-    visible: 0
-  - titre: "Compte à rebours express"
-    cible: 6
-    visible: 2
-    decompte: true
+# Les looks de compteur possibles, un par manche (tirés au hasard, sans répétition dans une partie).
+# Chacun devient chaotique à sa façon. Retirez une ligne pour désactiver un design :
+#   digital  - chronomètre digital : les chiffres sautent, tournent, s'effacent, repartent à l'envers
+#   horloge  - horloge à trotteuse : l'aiguille s'affole, se dédouble, puis disparaît
+#   meche    - bombe à mèche : l'étincelle avance par saccades, une fumée masque la mèche
+#   coupe    - coupe de champagne qui se remplit : le niveau saute, déborde, se vide
+#   minuit   - décompte du Nouvel An : le chiffre compte n'importe comment, l'anneau tourne
+designs:
+  - digital
+  - horloge
+  - meche
+  - coupe
+  - minuit

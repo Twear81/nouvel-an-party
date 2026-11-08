@@ -1,130 +1,84 @@
-// "Compte à rebours chaotique" : un gros bouton à presser pile à l'heure cible, un joueur après l'autre.
-// Le compteur est visible quelques secondes sur la TV, puis il devient fou : il faut finir de compter dans sa tête.
+// "Compte à rebours chaotique" : tout le monde joue en même temps. La TV annonce une cible (ex. 8,0 s), puis « 3… 2… 1… GO »
+// lance un compteur qui devient fou après quelques secondes. Chacun appuie sur STOP quand il pense que la cible est atteinte.
 // Le téléphone mesure lui-même le temps (performance.now) : la latence du wifi n'avantage ni ne pénalise personne.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
+import { allConnectedDone } from "../helpers";
 import { rankByError } from "./rank";
 
-const variantSchema = z.object({
-  titre: z.string().min(1),
-  cible: z.number().min(1, "cible : au moins 1 seconde"),
-  visible: z.number().nonnegative().default(3),
-  decompte: z.boolean().default(false),
-});
+export const DESIGN_IDS = ["digital", "horloge", "meche", "coupe", "minuit"] as const;
+export type DesignId = (typeof DESIGN_IDS)[number];
 
-const configSchema = z.object({
-  nom: z.string().default("Compte à rebours chaotique"),
-  description: z.string().default("Arrêtez le compteur pile à l'heure… quand il devient fou, comptez dans votre tête !"),
-  delai_depart: z.number().positive().default(10),
-  duree_revelation: z.number().nonnegative().default(3.5),
-  temps_resultats: z.number().nonnegative().default(15),
-  points: z.array(z.number()).default([150, 100, 70, 50, 30, 20, 10, 0]),
-  variantes: z.array(variantSchema).min(1, "Ajoute au moins une variante"),
-});
+const configSchema = z
+  .object({
+    nom: z.string().default("Compte à rebours chaotique"),
+    description: z.string().default("Tout le monde appuie sur STOP quand le compteur fou atteint la cible : le plus proche gagne !"),
+    annonce: z.number().positive().default(6),
+    cible_min: z.number().min(1, "cible_min : au moins 1 seconde").default(6),
+    cible_max: z.number().min(1, "cible_max : au moins 1 seconde").default(12),
+    visible_min: z.number().nonnegative().default(2),
+    visible_max: z.number().nonnegative().default(3),
+    marge_max: z.number().nonnegative().default(4),
+    temps_resultats: z.number().nonnegative().default(25),
+    points: z.array(z.number()).default([150, 100, 70, 50, 30, 20, 10, 0]),
+    designs: z.array(z.enum(DESIGN_IDS)).min(1, "Ajoute au moins un design").default([...DESIGN_IDS]),
+  })
+  .refine((c) => c.cible_max >= c.cible_min, { message: "cible_max doit être ≥ cible_min", path: ["cible_max"] })
+  .refine((c) => c.visible_max >= c.visible_min, { message: "visible_max doit être ≥ visible_min", path: ["visible_max"] });
 
 type Cfg = z.infer<typeof configSchema>;
-type Item = z.infer<typeof variantSchema>;
+type Item = { design: DesignId };
 type Ctx = RoundContext<Cfg>;
-
-/** Un passage de joueur. */
-export interface Turn {
-  id: string;
-  status: "pending" | "current" | "done" | "missed";
-  /** Temps mesuré (ms) quand il a appuyé sur STOP. */
-  elapsedMs: number | null;
-  /** Temps mesuré − cible (ms) : négatif = trop tôt. */
-  signedMs: number | null;
-  /** Pourquoi le tour est raté : pas parti à temps, jamais arrêté, ou déconnecté. */
-  reason: "no-start" | "no-stop" | "absent" | null;
-}
-
-type Phase = "idle" | "waiting" | "running" | "reveal" | "done";
+type Phase = "announce" | "ready" | "running";
 
 interface State {
-  item: Item;
+  design: DesignId;
+  /** Cible en secondes (au demi-seconde). */
+  cible: number;
+  /** Secondes pendant lesquelles le compteur est lisible. */
+  visible: number;
+  /** Graine du chaos : le même compteur est rejoué à l'identique après un rechargement. */
+  seed: number;
   phase: Phase;
-  turns: Turn[];
-  /** Numéro du tour en cours (sert aussi à ignorer les timers d'un tour déjà terminé). */
-  turnNo: number;
-  /** Joueur du tour en cours ; reste le même pendant la révélation de son résultat. */
-  currentId: string | null;
+  /** Heure serveur (ms) du GO, annoncée pendant le « 3… 2… 1… ». */
+  goAt: number | null;
   startedAt: number | null;
+  /** Temps mesuré par chaque téléphone (ms). Jamais publié avant les résultats. */
+  stops: Map<string, number>;
 }
 
 export interface Pub {
-  titre: string;
+  design: DesignId;
+  seed: number;
   cible: number;
   visible: number;
-  decompte: boolean;
   phase: Phase;
-  /** Joueur dont c'est le tour. */
-  currentId: string | null;
-  /** Numéro du tour (change à chaque joueur). */
-  turnNo: number;
-  /** Heure serveur (ms) du départ : la TV en déduit le compteur. */
+  goAt: number | null;
   startedAt: number | null;
-  turns: Turn[];
+  /** Qui a stoppé (sans le temps). */
+  stoppedIds: string[];
 }
 export type Priv = { id: string };
 export interface Results {
-  titre: string;
+  design: DesignId;
   cible: number;
   ranking: { playerId: string; rank: number; elapsedMs: number; signedMs: number }[];
-  missed: { playerId: string; reason: NonNullable<Turn["reason"]> }[];
+  missed: { playerId: string }[];
 }
 
-const current = (s: State) => s.turns.find((t) => t.id === s.currentId && t.status === "current") ?? null;
-/** Sécurité : si personne n'appuie sur STOP avant cible × 3, le tour est raté. */
-const CAP_FACTOR = 3;
-/** Écart toléré entre le temps du téléphone et celui vu par le serveur (sinon on croit le serveur). */
-const TRUST_MS = 2000;
+/** Délai entre l'affichage du « 3 » et le GO. */
+export const GO_LEAD_MS = 3000;
+/** Un téléphone ne peut pas avoir mesuré plus longtemps que le serveur (plus cette tolérance de latence). */
+const TRUST_MS = 1500;
 
-/** Passe au joueur suivant (ou termine la manche). */
-function nextTurn(s: State, ctx: Ctx) {
-  for (;;) {
-    const t = s.turns.find((x) => x.status === "pending");
-    if (!t) {
-      s.phase = "done";
-      s.currentId = null;
-      ctx.clearCountdown();
-      ctx.end();
-      return;
-    }
-    s.turnNo++;
-    s.startedAt = null;
-    // Présence en direct : un absent est passé tout de suite, mais s'il revient avant son tour il joue.
-    if (!ctx.isConnected(t.id)) {
-      t.status = "missed";
-      t.reason = "absent";
-      continue;
-    }
-    t.status = "current";
-    s.currentId = t.id;
-    s.phase = "waiting";
-    const no = s.turnNo;
-    ctx.countdown(ctx.cfg.delai_depart, () => {
-      if (s.turnNo === no && s.phase === "waiting") miss(s, ctx, "no-start");
-    });
-    return;
-  }
-}
+const everyoneStopped = (s: State, ctx: Ctx) =>
+  allConnectedDone(ctx, ctx.players.map((p) => p.id), (id) => s.stops.has(id));
 
-/** Le joueur courant rate son tour : court affichage puis suite. */
-function miss(s: State, ctx: Ctx, reason: "no-start" | "no-stop") {
-  const t = current(s);
-  if (!t) return;
-  t.status = "missed";
-  t.reason = reason;
-  reveal(s, ctx);
-}
-
-function reveal(s: State, ctx: Ctx) {
-  s.phase = "reveal";
-  const no = s.turnNo;
-  ctx.clearCountdown();
-  ctx.setTimeout(ctx.cfg.duree_revelation * 1000, () => {
-    if (s.turnNo === no && s.phase === "reveal") nextTurn(s, ctx);
-  });
+function go(s: State, ctx: Ctx) {
+  s.phase = "running";
+  s.startedAt = ctx.now();
+  ctx.setTimeout((s.cible + ctx.cfg.marge_max) * 1000, () => ctx.end());
+  ctx.update();
 }
 
 export default defineMiniGame<Cfg, Item, State>({
@@ -132,84 +86,71 @@ export default defineMiniGame<Cfg, Item, State>({
   configSchema,
   name: (cfg) => cfg.nom,
   description: (cfg) => cfg.description,
-  items: (cfg) => cfg.variantes,
+  items: (cfg) => [...new Set(cfg.designs)].map((design) => ({ design })),
   roundSeconds: () => null,
-  // Estimation pour 8 joueurs : départ ~3 s + cible moyenne + révélation, puis les résultats.
-  estimateSeconds: (cfg) => {
-    const avg = cfg.variantes.reduce((a, v) => a + v.cible, 0) / cfg.variantes.length;
-    return Math.round(8 * (3 + avg + cfg.duree_revelation) + cfg.temps_resultats);
-  },
+  // Annonce + « 3 2 1 » + cible moyenne + retardataires, puis la révélation et les résultats.
+  estimateSeconds: (cfg) => Math.round(cfg.annonce + GO_LEAD_MS / 1000 + (cfg.cible_min + cfg.cible_max) / 2 + 2 + cfg.temps_resultats),
 
   start(item, ctx) {
-    // Ordre de passage aléatoire (mélange de Fisher-Yates avec le rng du moteur).
-    const ids = ctx.players.map((p) => p.id);
-    for (let i = ids.length - 1; i > 0; i--) {
-      const j = Math.floor(ctx.rng() * (i + 1));
-      [ids[i], ids[j]] = [ids[j]!, ids[i]!];
-    }
-    const turns: Turn[] = ids.map((id) => ({ id, status: "pending", elapsedMs: null, signedMs: null, reason: null }));
-    return { item, phase: "idle", turns, turnNo: 0, currentId: null, startedAt: null };
+    const { cfg } = ctx;
+    // Cible au demi-seconde, durée de lisibilité au dixième, graine du chaos : tout est tiré ici, côté serveur.
+    const halves = Math.round((cfg.cible_max - cfg.cible_min) * 2);
+    const cible = cfg.cible_min + Math.floor(ctx.rng() * (halves + 1)) / 2;
+    const visible = Math.round((cfg.visible_min + ctx.rng() * (cfg.visible_max - cfg.visible_min)) * 10) / 10;
+    const seed = Math.floor(ctx.rng() * 1_000_000);
+    return { design: item.design, cible, visible, seed, phase: "announce", goAt: null, startedAt: null, stops: new Map() };
   },
 
-  onPlay: (s, ctx) => nextTurn(s, ctx),
+  onPlay(s, ctx) {
+    ctx.countdown(ctx.cfg.annonce, () => {
+      s.phase = "ready";
+      s.goAt = ctx.now() + GO_LEAD_MS;
+      ctx.clearCountdown();
+      ctx.setTimeout(GO_LEAD_MS, () => go(s, ctx));
+      ctx.update();
+    });
+  },
 
-  // Le joueur dont c'est le tour (pas encore parti) se déconnecte : on ne lui laisse pas le délai de départ.
+  // Un téléphone qui plante ne bloque pas la manche.
   onPresenceChange(s, ctx) {
-    const t = current(s);
-    if (!t || s.phase !== "waiting" || ctx.isConnected(t.id)) return;
-    t.status = "missed";
-    t.reason = "absent";
-    nextTurn(s, ctx);
+    if (s.phase === "running" && everyoneStopped(s, ctx)) ctx.end();
   },
 
   input(s, playerId, payload, ctx) {
-    const who = current(s);
-    if (!who || who.id !== playerId || typeof payload !== "object" || payload === null) return;
-    const p = payload as { action?: unknown; ms?: unknown };
-
-    if (p.action === "start" && s.phase === "waiting") {
-      s.phase = "running";
-      s.startedAt = ctx.now();
-      ctx.clearCountdown();
-      const no = s.turnNo;
-      ctx.setTimeout(s.item.cible * CAP_FACTOR * 1000, () => {
-        if (s.turnNo === no && s.phase === "running") miss(s, ctx, "no-stop");
-      });
-    } else if (p.action === "stop" && s.phase === "running" && s.startedAt !== null) {
-      const serverMs = ctx.now() - s.startedAt;
-      let ms = serverMs;
-      if (typeof p.ms === "number" && Number.isFinite(p.ms) && p.ms >= 0 && Math.abs(p.ms - serverMs) <= TRUST_MS) ms = p.ms;
-      who.status = "done";
-      who.elapsedMs = Math.round(ms);
-      who.signedMs = Math.round(ms - s.item.cible * 1000);
-      reveal(s, ctx);
-    }
+    if (s.phase !== "running" || s.startedAt === null) return;
+    if (!ctx.players.some((p) => p.id === playerId) || s.stops.has(playerId)) return;
+    if (typeof payload !== "object" || payload === null) return;
+    const ms = (payload as { ms?: unknown }).ms;
+    if (typeof ms !== "number" || !Number.isFinite(ms) || ms < 0) return;
+    const serverMs = ctx.now() - s.startedAt;
+    if (ms > serverMs + TRUST_MS || ms > (s.cible + ctx.cfg.marge_max) * 1000 + TRUST_MS) return;
+    s.stops.set(playerId, Math.round(ms));
+    if (everyoneStopped(s, ctx)) ctx.end();
   },
 
   publicView: (s): Pub => ({
-    titre: s.item.titre,
-    cible: s.item.cible,
-    visible: s.item.visible,
-    decompte: s.item.decompte,
+    design: s.design,
+    seed: s.seed,
+    cible: s.cible,
+    visible: s.visible,
     phase: s.phase,
-    currentId: s.currentId,
-    turnNo: s.turnNo,
+    goAt: s.goAt,
     startedAt: s.startedAt,
-    turns: s.turns,
+    stoppedIds: [...s.stops.keys()],
   }),
 
   privateView: (_s, playerId): Priv => ({ id: playerId }),
 
   finish(s, ctx) {
-    const done = s.turns.filter((t) => t.status === "done");
-    const ranked = rankByError(done, (t) => t.signedMs!);
+    const entries = [...s.stops].map(([playerId, elapsedMs]) => ({ playerId, elapsedMs, signedMs: elapsedMs - s.cible * 1000 }));
+    const ranked = rankByError(entries, (e) => e.signedMs);
     const scores: Record<string, number> = {};
-    for (const r of ranked) scores[r.item.id] = ctx.cfg.points[r.rank - 1] ?? 0;
+    for (const r of ranked) scores[r.item.playerId] = ctx.cfg.points[r.rank - 1] ?? 0;
     const results: Results = {
-      titre: s.item.titre,
-      cible: s.item.cible,
-      ranking: ranked.map((r) => ({ playerId: r.item.id, rank: r.rank, elapsedMs: r.item.elapsedMs!, signedMs: r.item.signedMs! })),
-      missed: s.turns.filter((t) => t.status !== "done").map((t) => ({ playerId: t.id, reason: t.reason ?? "no-start" })),
+      design: s.design,
+      cible: s.cible,
+      ranking: ranked.map((r) => ({ ...r.item, rank: r.rank })),
+      missed: ctx.players.filter((p) => !s.stops.has(p.id)).map((p) => ({ playerId: p.id })),
     };
     return { results, scores };
   },
