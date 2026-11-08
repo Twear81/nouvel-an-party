@@ -41,6 +41,7 @@ export function makeCtx<Cfg>(cfg: Cfg, players: PublicPlayer[], rng: () => numbe
     },
     rng,
     now: () => now,
+    activeNow: () => now,
     setTimeout: (ms, fn) => {
       timers.push({ at: now + ms, seq: seq++, fn });
     },

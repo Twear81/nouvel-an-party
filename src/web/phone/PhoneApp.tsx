@@ -1,6 +1,7 @@
 // Application téléphone : profil → lobby → manches → classement final.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { rankOf } from "../../shared/ranking";
 import type { GameSnapshot, RoundInfo } from "../../shared/types";
 import { webGames } from "../../minigames/registry.web";
 import type { MiniGameViewProps } from "../../minigames/views-contract";
@@ -101,7 +102,7 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
       return <ResultsPhone snapshot={snapshot} round={round} me={me} actions={actions} />;
     case "final": {
       const pos = rank.findIndex((p) => p.id === me.id);
-      return <FinalPhone rank={pos + 1} total={rank.length} score={me.score} profile={me.profile} />;
+      return <FinalPhone rank={pos < 0 ? rank.length + 1 : rankOf(rank, pos)} total={rank.length} score={me.score} profile={me.profile} />;
     }
   }
 }

@@ -75,6 +75,10 @@ export interface RoundInfo {
   deltas: Record<PlayerId, number> | null;
   /** Heure serveur (ms) à laquelle la phase "results" a commencé ; null avant. Sert à synchroniser les révélations. */
   resultsAt: number | null;
+  /** Durée cumulée (ms) des pauses déjà terminées de la manche. Sert à figer un compteur affiché (voir `activeNow`). */
+  pausedMs: number;
+  /** Heure serveur du début de la pause en cours ; null si pas en pause. */
+  pausedSince: number | null;
 }
 
 /** Ce que chaque écran reçoit à chaque changement (événement "state"). */

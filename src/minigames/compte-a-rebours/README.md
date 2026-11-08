@@ -7,7 +7,7 @@
 2. **« 3… 2… 1… GO »** : synchronisé sur tous les écrans. Au GO, le compteur démarre sur la TV et chaque téléphone affiche un énorme bouton **STOP** (aucun compteur sur le téléphone : ce serait de la triche).
 3. **Chacun appuie une seule fois** : le choix est définitif (« Stoppé ! » sur le téléphone, une pastille verte sur la TV, sans révéler le temps).
 4. Le compteur continue jusqu'à ce que **tous les joueurs connectés aient stoppé**, ou au plus tard jusqu'à `cible + marge_max` secondes. Ceux qui n'ont pas appuyé sont ratés (0 point).
-5. **Révélation sur la TV** : les joueurs tombent un par un sur un axe « trop tôt / trop tard » autour de la cible, du plus éloigné au plus proche. Le dernier à tomber, le plus proche, gagne. Le classement se remplit en même temps.
+5. **Révélation sur la TV** : les joueurs tombent un par un sur un axe « trop tôt / trop tard » autour de la cible, du plus éloigné au plus proche, chacun dans son étiquette (rangées décalées : jamais de chevauchement, même à 8 joueurs très serrés). Le dernier à tomber, le plus proche, gagne. Le classement se remplit en même temps.
 
 Le temps est **mesuré sur le téléphone** (depuis l'affichage du bouton STOP sur ce téléphone) puis envoyé au serveur, qui le vérifie (jamais plus long que la manche réelle) : la latence du wifi n'avantage ni ne pénalise personne.
 

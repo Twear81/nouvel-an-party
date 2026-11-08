@@ -4,6 +4,8 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { AnimatePresence, motion } from "motion/react";
 import { useLayoutEffect, useRef, useState } from "react";
+import { activeNow } from "../../shared/clock";
+import type { RoundInfo } from "../../shared/types";
 import { serverNow } from "../../web/net/socket";
 import { PlayerAvatar } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
@@ -15,16 +17,16 @@ import { fmtCible, fmtSigned, ordinal, QUALITY_TEXT, quality } from "./rank";
 type Props = MiniGameViewProps<Pub, Priv, Results>;
 
 /** Le « 3… 2… 1… » calculé depuis l'heure du GO (serveur) : tout le monde le voit au même rythme. */
-function useLead(pub: Pub): number {
+function useLead(pub: Pub, round: RoundInfo): number {
   useFrame(pub.phase === "ready");
   if (pub.phase !== "ready" || pub.goAt === null) return 0;
-  return Math.min(GO_LEAD_MS / 1000, Math.max(1, Math.ceil((pub.goAt - serverNow()) / 1000)));
+  return Math.min(GO_LEAD_MS / 1000, Math.max(1, Math.ceil((pub.goAt - activeNow(round, serverNow())) / 1000)));
 }
 
 // ───────────────────────── TV ─────────────────────────
 
 const Tv = ({ pub, playerById, round }: Props) => {
-  const lead = useLead(pub);
+  const lead = useLead(pub, round);
   return (
     <div data-testid="cabr-tv" data-stage={pub.phase} className="flex min-h-0 flex-1 flex-col items-center justify-between py-2 text-center">
       <div className="flex h-[7rem] items-center">
@@ -56,7 +58,7 @@ const Tv = ({ pub, playerById, round }: Props) => {
             <span className="font-display text-5xl text-ink-muted">Prépare ton doigt…</span>
           </div>
         )}
-        {pub.phase === "running" && <Counter pub={pub} />}
+        {pub.phase === "running" && <Counter pub={pub} round={round} />}
       </div>
       <div data-testid="cabr-chips" className="flex min-h-[8rem] flex-wrap items-center justify-center gap-4">
         {round.participants.map((id) => {
@@ -83,11 +85,15 @@ const Tv = ({ pub, playerById, round }: Props) => {
 // ───────────────────────── Téléphone ─────────────────────────
 
 /** Le gros bouton STOP. Réagit au contact (pointerdown), pas au relâchement, pour ne pas perdre ~100 ms. */
-function StopPad({ pub, sendInput }: { pub: Pub; sendInput: Props["sendInput"] }) {
+function StopPad({ pub, round, sendInput }: { pub: Pub; round: RoundInfo; sendInput: Props["sendInput"] }) {
   // Le temps est mesuré ICI : depuis l'affichage du bouton sur ce téléphone (performance.now), jamais à l'arrivée au serveur.
   const t0 = useRef(0);
+  // Les pauses de l'hôte ne comptent pas : on retire celles survenues depuis l'affichage du bouton.
+  const pausedAtStart = useRef(round.pausedMs);
+  const roundRef = useRef(round);
+  roundRef.current = round;
   // Page rechargée en plein jeu : le chrono local est perdu, on retombe sur l'heure serveur.
-  const late = useRef(pub.startedAt !== null && serverNow() - pub.startedAt > 1500);
+  const late = useRef(pub.startedAt !== null && activeNow(round, serverNow()) - pub.startedAt > 1500);
   const done = useRef(false);
   const [sent, setSent] = useState(false);
   useLayoutEffect(() => {
@@ -99,7 +105,8 @@ function StopPad({ pub, sendInput }: { pub: Pub; sendInput: Props["sendInput"] }
     // Verrou de 250 ms : un doigt encore posé après « GO » ne déclenche pas STOP sans le vouloir.
     if (done.current || (!late.current && now - t0.current < 250)) return;
     done.current = true;
-    const ms = late.current ? serverNow() - (pub.startedAt ?? serverNow()) : now - t0.current;
+    const r = roundRef.current;
+    const ms = late.current ? activeNow(r, serverNow()) - (pub.startedAt ?? activeNow(r, serverNow())) : now - t0.current - (r.pausedMs - pausedAtStart.current);
     setSent(true);
     void sendInput({ ms }).catch(() => {
       done.current = false;
@@ -137,7 +144,7 @@ function Stopped() {
 }
 
 const Phone = ({ pub, snapshot, round, sendInput }: Props) => {
-  const lead = useLead(pub);
+  const lead = useLead(pub, round);
   const myId = snapshot.me?.id ?? "";
   const target = (
     <div className="flex flex-col items-center gap-1 text-center">
@@ -155,7 +162,7 @@ const Phone = ({ pub, snapshot, round, sendInput }: Props) => {
     return (
       <div data-testid="cabr-phone" data-stage="running" className="flex min-h-0 flex-1 flex-col gap-3">
         <div className="pt-1">{target}</div>
-        <StopPad pub={pub} sendInput={sendInput} />
+        <StopPad pub={pub} round={round} sendInput={sendInput} />
       </div>
     );
   }

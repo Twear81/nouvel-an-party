@@ -69,6 +69,8 @@ interface CurrentRound {
   results: unknown;
   deltas: Record<PlayerId, number> | null;
   resultsAt: number | null;
+  pausedMs: number; // durée cumulée des pauses terminées de cette manche
+  pausedSince: number | null; // début de la pause en cours
 }
 
 export class GameEngine {
@@ -183,6 +185,7 @@ export class GameEngine {
   pause() {
     if (!this.current || this.paused) return;
     this.paused = true;
+    this.current.pausedSince = this.clock.now();
     this.current.timers.pause();
     this.changed();
   }
@@ -190,6 +193,8 @@ export class GameEngine {
   resume() {
     if (!this.current || !this.paused) return;
     this.paused = false;
+    if (this.current.pausedSince !== null) this.current.pausedMs += this.clock.now() - this.current.pausedSince;
+    this.current.pausedSince = null;
     this.current.timers.resume();
     // Les arrivées/départs survenus pendant la pause n'ont pas été signalés au jeu.
     this.notifyPresence();
@@ -267,12 +272,15 @@ export class GameEngine {
       results: null,
       deltas: null,
       resultsAt: null,
+      pausedMs: 0,
+      pausedSince: null,
       ctx: {
         cfg: loaded.cfg,
         players: this.publicPlayers().filter((p) => p.profile),
         isConnected: (id) => (this.players.get(id)?.sockets ?? 0) > 0,
         rng: this.rng,
         now: () => this.clock.now(),
+        activeNow: () => (round.pausedSince ?? this.clock.now()) - round.pausedMs,
         setTimeout: (ms, fn) => {
           timers.add(ms, () => {
             if (this.current !== round) return;
@@ -432,6 +440,8 @@ export class GameEngine {
         results: this.phase === "results" ? c.results : null,
         deltas: this.phase === "results" ? c.deltas : null,
         resultsAt: this.phase === "results" ? c.resultsAt : null,
+        pausedMs: c.pausedMs,
+        pausedSince: this.paused ? c.pausedSince : null,
       };
       if (viewer && g.privateView) priv = safe(() => g.privateView!(c.state, viewer, c.ctx));
     }
