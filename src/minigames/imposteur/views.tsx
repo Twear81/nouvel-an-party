@@ -3,7 +3,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Button, CheckIcon, fireConfetti, PlayerAvatar, SelectedBadge } from "../../web/ui";
+import { Button, CheckIcon, fireConfetti, Panel, PlayerAvatar, SelectedBadge } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -359,8 +359,8 @@ function TvResults({ results, playerById }: Props) {
               {results.unmasked ? "Démasqué !" : "Il s'en sort !"}
             </p>
             <div className="flex items-center gap-10 text-5xl font-extrabold">
-              <span className="glass rounded-card px-8 py-3">Vous aviez : <span data-testid="tv-word-majority" className="text-accent">{results.majorityWord}</span></span>
-              <span className="glass rounded-card px-8 py-3">Lui avait : <span data-testid="tv-word-imposter" className="text-accent">{results.imposterWord}</span></span>
+              <Panel className="px-8 py-3">Vous aviez : <span data-testid="tv-word-majority" className="text-accent">{results.majorityWord}</span></Panel>
+              <Panel className="px-8 py-3">Lui avait : <span data-testid="tv-word-imposter" className="text-accent">{results.imposterWord}</span></Panel>
             </div>
           </motion.div>
         )}
