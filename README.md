@@ -16,7 +16,6 @@ Fonctionne en local sur le wifi, sans internet ni installation sur les télépho
 | Tier list | Chacun range tous les invités dans des étages S/A/B/C ; on marque quand on a placé quelqu'un comme la tablée | [README](src/minigames/tier-list/README.md) |
 | Comme les autres | Chacun tape une réponse libre : on marque quand d'autres ont tapé la même chose | [README](src/minigames/comme-les-autres/README.md) |
 | Le bon prix | Un objet s'affiche : le prix le plus proche gagne (bonus si pile le bon) | [README](src/minigames/le-bon-prix/README.md) |
-| Qui a dit ça ? | Chacun écrit une phrase anonyme ; on devine qui l'a écrite, les piégeurs marquent | [README](src/minigames/qui-a-dit/README.md) |
 | Split the Room | On termine une situation (« Tu gagnes 1 million, mais… ») ; la salle vote OUI/NON, l'auteur marque quand elle est coupée en deux | [README](src/minigames/split-the-room/README.md) |
 | Compte à rebours chaotique | Chacun son tour, on arrête un compteur devenu fou pile à l'heure cible | [README](src/minigames/compte-a-rebours/README.md) |
 | Simon | La TV joue une suite de couleurs qui s'allonge ; le dernier à la reproduire sans faute gagne | [README](src/minigames/simon/README.md) |

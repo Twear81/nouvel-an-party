@@ -9,7 +9,6 @@ export const GAME_NAMES = {
   "tier-list": "Tier list",
   "comme-les-autres": "Comme les autres",
   "le-bon-prix": "Le bon prix",
-  "qui-a-dit": "Qui a dit ça ?",
   "split-the-room": "Split the Room",
   "compte-a-rebours": "Compte à rebours chaotique",
   simon: "Simon",
