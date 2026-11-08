@@ -16,6 +16,8 @@ Un fichier `partie.yaml` absent ou vide utilise les valeurs par défaut. Une fau
 | `duree_cible_minutes` | `60` | Durée visée : sert à proposer, sur l'écran de lancement, un nombre de manches par défaut (chaque mini-jeu au moins une fois). Le réglage reste modifiable sur la TV |
 | `ordre` | `melange` | `melange` : on alterne les mini-jeux ; `groupe` : toutes les manches d'un mini-jeu à la suite |
 | `intro_secondes` | `4` | Durée de l'écran d'annonce avant chaque manche |
+| `skins` | tous | Liste d'habillages utilisés (au moins un ; id inconnu = erreur de config). Voir [skins.md](skins.md) |
+| `skins_ordre` | `melange` | `melange` : ordre tiré au hasard au lancement de la partie ; `liste` : ordre de `skins`. Le skin ne change qu'à l'annonce d'une manche |
 | `port_http` | `3000` | Port HTTP (la TV : `http://localhost:3000/tv`) |
 | `port_https` | `3443` | Port HTTPS pour les téléphones (`https://<IP>:3443/play`) |
 | `ip` | `auto` | `auto` : détection de l'IP wifi. Sinon une IP forcée (ex. `"192.168.1.42"`) si le QR code pointe vers la mauvaise carte réseau |
@@ -32,6 +34,8 @@ titre: "Nouvel An 2027"
 duree_cible_minutes: 90
 ordre: melange
 intro_secondes: 4
+skins: [dofus, overwatch, league-of-legends, rocket-league, gunz, mario-odyssey, plague-tale]
+skins_ordre: melange
 ip: auto
 ```
 

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
+import { SKINS, type SkinId } from "../../src/shared/skins";
 import { activeNow } from "../../src/shared/clock";
 import { GameEngine, GameError } from "../../src/server/engine/engine";
 import { createTestEngine, MemoryPersistence, validProfile } from "./helpers/engine-setup";
@@ -725,5 +726,109 @@ describe("manches interlude (jeu surprise)", () => {
     const after = engine.snapshot(null);
     expect(after).toMatchObject({ phase: "playing", round: { index: savedIndex, interlude: true } });
     expect(s.calls).toEqual(["start", "onPlay"]);
+  });
+});
+
+describe("skins", () => {
+  type T = ReturnType<typeof createTestEngine>;
+  const skinOf = (t: T) => t.engine.snapshot(null).skin;
+  /** Termine la manche en cours (intro → jeu → résultats) et passe à la suivante (ou au final). */
+  function nextRound(t: T) {
+    t.clock.advance(4000);
+    t.clock.advance(10_000);
+    t.engine.skip();
+  }
+  const restartWith = (t: T, persistence: MemoryPersistence, settings: object, seed: number) =>
+    new GameEngine({
+      games: [t.fake.loaded],
+      settings: { title: "Test", targetMinutes: 1, order: "melange", introSeconds: 4, ...settings },
+      joinUrl: "http://test",
+      clock: new FakeClock(),
+      rng: seededRng(seed),
+      persistence,
+    });
+
+  it("lobby : premier skin de la config (tous les skins par défaut)", () => {
+    expect(skinOf(createTestEngine())).toBe(SKINS[0]);
+    expect(skinOf(createTestEngine({ settings: { skins: ["gunz", "dofus"] } }))).toBe("gunz");
+  });
+
+  it("ordre `liste` : un skin par tranche de manches, il ne change qu'au passage à la manche suivante", () => {
+    const t = createTestEngine({ rounds: 4, settings: { skins: ["gunz", "dofus"], skinsOrder: "liste" } });
+    t.engine.start();
+    const seen: SkinId[] = [];
+    for (let i = 0; i < 4; i++) {
+      expect(t.engine.snapshot(null).phase).toBe("intro");
+      seen.push(skinOf(t));
+      t.clock.advance(4000);
+      expect(skinOf(t)).toBe(seen[i]!); // pas de changement pendant le jeu
+      t.clock.advance(10_000);
+      expect(t.engine.snapshot(null).phase).toBe("results");
+      expect(skinOf(t)).toBe(seen[i]!); // ni pendant les résultats
+      t.engine.skip();
+    }
+    expect(seen).toEqual(["gunz", "gunz", "dofus", "dofus"]);
+    expect(t.engine.snapshot(null).phase).toBe("final");
+    expect(skinOf(t)).toBe("dofus"); // dernière manche jouée
+  });
+
+  it("ordre `melange` : permutation des skins de la config, tirée avec le rng du moteur", () => {
+    const t = createTestEngine({ rounds: 5, settings: { skins: SKINS.slice(0, 5) } });
+    t.engine.start();
+    const seen: SkinId[] = [];
+    for (let i = 0; i < 5; i++) {
+      seen.push(skinOf(t));
+      nextRound(t);
+    }
+    expect([...seen].sort()).toEqual([...SKINS.slice(0, 5)].sort());
+    const again = createTestEngine({ rounds: 5, settings: { skins: SKINS.slice(0, 5) } });
+    again.engine.start();
+    expect(skinOf(again)).toBe(seen[0]!); // même graine, même ordre
+  });
+
+  it("retour au lobby : on retrouve le premier skin de la config", () => {
+    const t = createTestEngine({ rounds: 4, settings: { skins: ["gunz", "dofus"], skinsOrder: "liste" } });
+    t.engine.start();
+    nextRound(t);
+    nextRound(t);
+    expect(skinOf(t)).toBe("dofus");
+    t.engine.backToLobby();
+    expect(skinOf(t)).toBe("gunz");
+  });
+
+  it("l'ordre est sauvegardé et conservé à la reprise", () => {
+    const persistence = new MemoryPersistence();
+    const settings = { skins: [...SKINS] };
+    const t = createTestEngine({ rounds: 5, persistence, settings });
+    t.engine.start();
+    nextRound(t);
+    nextRound(t);
+    t.clock.advance(4000);
+    const saved = persistence.data!.skinOrder!;
+    expect([...saved].sort()).toEqual([...SKINS].sort());
+    const expected = skinOf(t);
+
+    // Redémarrage avec un autre rng : l'ordre ne doit pas être retiré à nouveau.
+    const engine = restartWith(t, persistence, settings, 999);
+    expect(engine.snapshot(null).skin).toBe(SKINS[0]); // lobby
+    engine.resumeSave();
+    expect(engine.snapshot(null).skin).toBe(expected);
+    expect(JSON.parse(JSON.stringify(persistence.data)).skinOrder).toEqual(saved);
+  });
+
+  it("vieille sauvegarde sans ordre : reprenable, ordre de la config", () => {
+    const persistence = new MemoryPersistence();
+    const settings = { skins: ["gunz", "dofus"], skinsOrder: "liste" };
+    const t = createTestEngine({ rounds: 4, persistence, settings: settings as never });
+    t.engine.start();
+    nextRound(t);
+    nextRound(t);
+    t.clock.advance(4000);
+    delete persistence.data!.skinOrder;
+    const engine = restartWith(t, persistence, { ...settings, skinsOrder: "melange" }, 5);
+    engine.resumeSave();
+    const s = engine.snapshot(null);
+    expect(s.phase).toBe("intro");
+    expect(s.skin).toBe("dofus"); // manche 3/4 sur l'ordre de la config [gunz, dofus]
   });
 });

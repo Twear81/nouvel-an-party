@@ -2,6 +2,7 @@ import { afterAll, beforeEach, afterEach, describe, expect, it, spyOn } from "bu
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { SKINS } from "../../src/shared/skins";
 import { serverGames } from "../../src/minigames/registry.server";
 import { ConfigError, loadConfig } from "../../src/server/config";
 
@@ -79,6 +80,8 @@ describe("loadConfig", () => {
       duree_cible_minutes: 60,
       ordre: "melange",
       intro_secondes: 4,
+      skins: [...SKINS],
+      skins_ordre: "melange",
       port_http: 3000,
       port_https: 3443,
       ip: "auto",
@@ -95,6 +98,19 @@ describe("loadConfig", () => {
   it("lit les valeurs de partie.yaml", () => {
     const dir = tmpConfig({ "partie.yaml": "titre: Test\nordre: groupe\nintro_secondes: 0\n", "minijeux/ceci-ou-cela.yaml": CECI });
     expect(loadConfig(dir).settings).toMatchObject({ titre: "Test", ordre: "groupe", intro_secondes: 0 });
+  });
+
+  it("skins : lit la liste et l'ordre", () => {
+    const dir = tmpConfig({ "partie.yaml": "skins: [gunz, dofus]\nskins_ordre: liste\n", "minijeux/ceci-ou-cela.yaml": CECI });
+    expect(loadConfig(dir).settings).toMatchObject({ skins: ["gunz", "dofus"], skins_ordre: "liste" });
+  });
+
+  it("skins : id inconnu, liste vide ou ordre invalide = erreur claire", () => {
+    const e1 = errorOf(() => loadConfig(tmpConfig({ "partie.yaml": "skins: [dofus, zelda]\n" })));
+    expect(e1.message).toContain("partie.yaml");
+    expect(e1.message).toContain("zelda");
+    expect(errorOf(() => loadConfig(tmpConfig({ "partie.yaml": "skins: []\n" }))).message).toContain("skins");
+    expect(errorOf(() => loadConfig(tmpConfig({ "partie.yaml": "skins_ordre: hasard\n" }))).message).toContain("skins_ordre");
   });
 
   it("actif: false désactive le mini-jeu", () => {

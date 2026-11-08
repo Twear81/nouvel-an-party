@@ -22,6 +22,7 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
 - À chaque changement, chaque écran reçoit un `GameSnapshot` complet (`src/shared/types.ts`).
   Les écrans n'ont pas d'état de jeu à eux : un téléphone qui recharge la page retrouve tout.
 - Les actions passent par les événements de `src/shared/protocol.ts`.
+- Le snapshot porte aussi `skin` (habillage courant, identique TV + téléphones) : calculé par le moteur depuis l'ordre des skins fixé au lancement (`skinOrder`, sauvegardé dans `save.json`) et `skinForRound` ; voir [skins.md](skins.md#rotation).
 
 ## Déroulé
 `lobby → (intro → playing → results) × N → final`

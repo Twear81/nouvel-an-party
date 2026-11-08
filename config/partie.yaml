@@ -12,6 +12,19 @@ ordre: melange
 # Durée de l'écran d'annonce avant chaque manche
 intro_secondes: 4
 
+# Habillage visuel (voir docs/skins.md) : il change au fil de la partie, TV et téléphones ensemble.
+# Skins utilisés, dans l'ordre (retire des lignes pour en désactiver ; au moins un).
+skins:
+  - dofus
+  - overwatch
+  - league-of-legends
+  - rocket-league
+  - gunz
+  - mario-odyssey
+  - plague-tale
+# melange = ordre tiré au hasard au lancement de chaque partie ; liste = l'ordre ci-dessus
+skins_ordre: melange
+
 # Réseau (à ne changer que si nécessaire)
 port_http: 3000
 port_https: 3443

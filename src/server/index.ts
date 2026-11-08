@@ -40,6 +40,8 @@ async function main() {
       targetMinutes: settings.duree_cible_minutes,
       order: settings.ordre,
       introSeconds: settings.intro_secondes,
+      skins: settings.skins,
+      skinsOrder: settings.skins_ordre,
     },
     joinUrl,
     onChange: broadcast,
