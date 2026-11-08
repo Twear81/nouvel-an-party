@@ -108,7 +108,6 @@ describe("culture-genante : étapes", () => {
     const r = round({ ...qcm, duree: 40 });
     r.toQuestion();
     expect(r.ctx.countdownState!.seconds).toBe(40);
-    expect(r.pub().questionMs).toBe(40_000);
   });
 
   it("rien ne fuit avant l'étape question (ni question, ni choix, ni bonne réponse)", () => {

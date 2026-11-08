@@ -128,7 +128,6 @@ describe("tier-list : consensus et points", () => {
       { playerId: "p3", tier: 1, percent: 67, votes: 3 },
       { playerId: "p1", tier: 2, percent: 33, votes: 1 },
     ]);
-    expect(r.unrated).toEqual(["p2"]);
     // p1 et p2 avaient mis p3 en S : pas A. Seul p2 avait mis p1 en B : +25. p3 n'a rien d'aligné.
     expect(scores).toEqual({ p2: 25 });
     expect(r.hits.p2).toEqual({ good: ["p1"], rated: 2 });
@@ -156,7 +155,6 @@ describe("tier-list : consensus et points", () => {
     const { finish } = round(3);
     const { results, scores } = finish();
     expect((results as Results).placements).toEqual([]);
-    expect((results as Results).unrated).toEqual(["p1", "p2", "p3"]);
     expect(scores).toEqual({});
   });
 

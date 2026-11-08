@@ -1,6 +1,6 @@
 // Composition de la partie : combien de manches par mini-jeu, et dans quel ordre.
 import { shuffle } from "../../shared/shuffle";
-import { interludeCounts, type InterludeSource } from "../../shared/interlude";
+import { interludeCounts } from "../../shared/interlude";
 import type { CatalogEntry, Setup } from "../../shared/types";
 import type { MiniGame } from "../../minigames/contract";
 
@@ -24,6 +24,11 @@ export function interludeEvery(game: MiniGame, cfg: unknown): number | null {
   return typeof n === "number" && Number.isFinite(n) && n >= 1 ? Math.floor(n) : null;
 }
 
+/** Nombre de manches jouables d'un jeu : ses éléments, plafonnés par `manches_max`. */
+function availableRounds(game: MiniGame, cfg: unknown, maxRounds: number | undefined): number {
+  return Math.min(game.items(cfg).length, maxRounds ?? Infinity);
+}
+
 export function buildCatalog(games: LoadedGame[], introSeconds: number): CatalogEntry[] {
   return games.map(({ game, cfg, maxRounds }) => {
     const every = interludeEvery(game, cfg);
@@ -31,19 +36,12 @@ export function buildCatalog(games: LoadedGame[], introSeconds: number): Catalog
       id: game.id,
       name: game.name(cfg),
       description: game.description(cfg),
-      available: Math.min(game.items(cfg).length, maxRounds ?? Infinity),
+      available: availableRounds(game, cfg, maxRounds),
       // Un interlude n'a pas d'annonce : pas d'intro à compter.
       secondsPerRound: Math.round(game.estimateSeconds(cfg) + (every === null ? introSeconds : 0)),
       ...(every === null ? {} : { interlude: every }),
     };
   });
-}
-
-/** Sources d'interludes du catalogue, pour `interludeCounts` (estimation du lobby). */
-export function interludeSources(catalog: CatalogEntry[], setup: Setup): InterludeSource[] {
-  return catalog
-    .filter((c) => c.interlude !== undefined)
-    .map((c) => ({ id: c.id, every: c.interlude!, available: c.available, enabled: (setup.counts[c.id] ?? 0) > 0 }));
 }
 
 /**
@@ -118,7 +116,7 @@ function insertInterludes(normalPlan: PlannedRound[], games: LoadedGame[], setup
   const sources = games.map(({ game, cfg, maxRounds }) => ({
     id: game.id,
     every: interludeEvery(game, cfg)!,
-    available: Math.min(game.items(cfg).length, maxRounds ?? Infinity),
+    available: availableRounds(game, cfg, maxRounds),
     enabled: (setup.counts[game.id] ?? 0) > 0,
   }));
   const n = normalPlan.length;

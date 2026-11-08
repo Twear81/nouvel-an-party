@@ -58,7 +58,7 @@ export interface Pub {
   /** Qui a stoppé (sans le temps). */
   stoppedIds: string[];
 }
-export type Priv = { id: string };
+export type Priv = null; // rien de privé dans ce jeu
 export interface Results {
   design: DesignId;
   cible: number;
@@ -139,7 +139,6 @@ export default defineMiniGame<Cfg, Item, State>({
     stoppedIds: [...s.stops.keys()],
   }),
 
-  privateView: (_s, playerId): Priv => ({ id: playerId }),
 
   finish(s, ctx) {
     const entries = [...s.stops].map(([playerId, elapsedMs]) => ({ playerId, elapsedMs, signedMs: elapsedMs - s.cible * 1000 }));

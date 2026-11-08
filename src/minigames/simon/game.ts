@@ -65,7 +65,6 @@ interface State {
   /** Éliminés, dans l'ordre : longueur de la suite à laquelle ils sont tombés. */
   out: { id: string; length: number; reason: OutReason }[];
   show: { startAt: number; noteMs: number } | null;
-  over: boolean;
   winners: string[];
 }
 
@@ -169,7 +168,6 @@ function endStep(state: State, ctx: Ctx) {
     return;
   }
   state.stage = "over";
-  state.over = true;
   ctx.setTimeout(OVER_MS, () => ctx.end());
 }
 
@@ -217,7 +215,6 @@ const game = defineMiniGame<Cfg, Item, State>({
       stepsDone: new Map(),
       out: [],
       show: null,
-      over: false,
       winners: [],
     };
   },
@@ -257,7 +254,7 @@ const game = defineMiniGame<Cfg, Item, State>({
       progress: Object.fromEntries(state.progress),
       // La suite elle-même n'est envoyée qu'à la TV (voir tvView) : un téléphone ne peut pas la lire.
       show: state.stage === "show" && state.show ? { ...state.show, sequence: [] } : null,
-      winners: state.over ? state.winners : [],
+      winners: state.stage === "over" ? state.winners : [],
     };
   },
 
@@ -268,10 +265,10 @@ const game = defineMiniGame<Cfg, Item, State>({
 
   privateView(state, playerId): Priv {
     let status: Priv["status"];
-    if (state.over && state.winners.includes(playerId)) status = "win";
+    if (state.stage === "over" && state.winners.includes(playerId)) status = "win";
     else if (!state.alive.has(playerId)) status = "out";
     else if (state.stage === "play") status = state.done.has(playerId) ? "done" : "play";
-    else if (state.stage === "between" || state.over) status = "done";
+    else if (state.stage === "between" || state.stage === "over") status = "done";
     else status = "watch";
     return {
       status,
@@ -283,7 +280,7 @@ const game = defineMiniGame<Cfg, Item, State>({
 
   finish(state, ctx) {
     // Si le maître du jeu passe la manche avant la fin, ceux qui sont encore debout l'emportent.
-    const winners = state.over ? state.winners : [...state.alive];
+    const winners = state.stage === "over" ? state.winners : [...state.alive];
     const base = state.item.start - 1;
     const rows: PlayerResult[] = ctx.players.map((p) => {
       const steps = state.stepsDone.get(p.id) ?? 0;

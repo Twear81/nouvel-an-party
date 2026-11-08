@@ -1,5 +1,4 @@
 // Où trouver config/ et data/ : à côté du .exe en version portable, à la racine du projet en dev.
-import { existsSync } from "node:fs";
 import path from "node:path";
 
 /** Vrai quand on tourne depuis l'exécutable compilé par `bun build --compile`. */
@@ -23,9 +22,3 @@ export const paths = {
 export const flags = {
   noOpen: process.argv.includes("--no-open"),
 };
-
-export function ensureConfigDir() {
-  if (!existsSync(paths.config)) {
-    throw new Error(`Dossier de configuration introuvable : ${paths.config}`);
-  }
-}

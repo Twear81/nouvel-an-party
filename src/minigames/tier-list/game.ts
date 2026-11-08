@@ -54,8 +54,6 @@ export interface Results {
   tiers: string[];
   /** Invités classés, du mieux au moins bien classé. */
   placements: Placement[];
-  /** Invités que personne n'a notés. */
-  unrated: string[];
   /** Toutes les notes, révélées en fin de manche : votant → invité → étage. */
   ratings: Record<string, Record<string, number>>;
   /** Pour chaque votant : invités placés dans le bon étage, et nombre d'invités notés. */
@@ -144,7 +142,6 @@ export default defineMiniGame<Cfg, Item, State>({
       question: state.question,
       tiers: ctx.cfg.tiers,
       placements,
-      unrated: ctx.players.filter((p) => !tierOf.has(p.id)).map((p) => p.id),
       ratings,
       hits,
     };

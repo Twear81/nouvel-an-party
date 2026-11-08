@@ -8,6 +8,7 @@
 // Une manche « interlude » (jeu surprise) saute l'intro : lobby/results ──► playing directement.
 import { randomBytes, randomUUID } from "node:crypto";
 import type { RoundContext } from "../../minigames/contract";
+import { activeNow } from "../../shared/clock";
 import { profileSchema } from "../../shared/schemas";
 import type { GameSnapshot, Phase, PlayerId, Profile, PublicPlayer, RoundInfo, Setup } from "../../shared/types";
 import { realClock, TimerGroup, type Clock } from "./clock";
@@ -280,7 +281,7 @@ export class GameEngine {
         isConnected: (id) => (this.players.get(id)?.sockets ?? 0) > 0,
         rng: this.rng,
         now: () => this.clock.now(),
-        activeNow: () => (round.pausedSince ?? this.clock.now()) - round.pausedMs,
+        activeNow: () => activeNow(round, this.clock.now()),
         setTimeout: (ms, fn) => {
           timers.add(ms, () => {
             if (this.current !== round) return;

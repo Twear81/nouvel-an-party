@@ -110,8 +110,6 @@ export interface Pub {
   unit: string | null;
   /** Qui a répondu (pas quoi). */
   answeredIds: string[];
-  /** Durée de la question (ms), pour le chrono. */
-  questionMs: number;
 }
 /** Vue de la TV : en plus, les textes de la mise en scène (les téléphones n'en ont pas besoin). */
 export interface TvPub extends Pub {
@@ -171,7 +169,6 @@ function publicOf(state: State): Pub {
     choices: asked && state.kind === "qcm" ? state.choices : null,
     unit: asked ? (state.item.unite ?? null) : null,
     answeredIds: [...state.answers.keys()],
-    questionMs: state.durationS * 1000,
   };
 }
 

@@ -44,8 +44,6 @@ export interface AnswerGroup {
   /** Réponse la plus fréquente dans le groupe, telle que tapée. */
   label: string;
   playerIds: string[];
-  /** Ce que chaque membre a tapé exactement. */
-  answers: { playerId: string; text: string }[];
   /** Points gagnés par chaque membre grâce à ce groupe. */
   points: number;
   /** Groupe(s) le plus nombreux, taille >= 2. */
@@ -139,7 +137,6 @@ export function groupAnswers(byPlayer: Map<string, string[]>, tolerance: boolean
     return {
       label: capitalize(best),
       playerIds: [...members.keys()],
-      answers: [...members].map(([playerId, text]) => ({ playerId, text })),
     };
   });
   return groups.sort((a, b) => b.playerIds.length - a.playerIds.length || a.label.localeCompare(b.label, "fr"));
