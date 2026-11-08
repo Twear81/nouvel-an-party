@@ -44,6 +44,7 @@ Le moteur envoie `publicView` / `privateView` à chaque changement (après un `i
 | `players` | joueurs de la manche (`PublicPlayer`, profil validé) |
 | `rng()` | aléatoire (0..1), déterministe en test. **Jamais `Math.random`** |
 | `now()` | heure du serveur en ms |
+| `activeNow()` | comme `now()` mais l'horloge **s'arrête pendant les pauses** : pour un compteur affiché (`startedAt = ctx.activeNow()`). Côté écran : `activeNow(round, serverNow())` (`src/shared/clock.ts`) |
 | `setTimeout(ms, fn)` | timer annulé en fin de manche, **figé pendant une pause**. Jamais le `setTimeout` global |
 | `update()` | à appeler après une modification d'état **faite hors d'un `input`** (typiquement dans un timer), pour renvoyer les vues |
 | `end()` | termine la manche tout de suite (ex. tout le monde a répondu) |

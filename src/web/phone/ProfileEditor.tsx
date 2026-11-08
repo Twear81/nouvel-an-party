@@ -96,7 +96,7 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
         </div>
       </div>
 
-      <div className="px-1.5 pb-2">
+      <div className="px-1.5 pb-6">
         <SectionTitle>Avatar</SectionTitle>
         <div className="grid grid-cols-5 gap-2">
           <button

@@ -5,7 +5,7 @@ Une manche = **un tournoi à élimination directe** entre tous les joueurs. Le j
 ## Déroulé d'une manche
 1. **Tirage** (5 s) : la TV dessine l'arbre de gauche à droite. Si le nombre de joueurs n'est pas une puissance de 2 (3, 5, 6, 7…), certains joueurs tirés au hasard sont **qualifiés d'office** au premier tour (case « Qualifié d'office » sur la TV, icône ⏭ sur les téléphones).
 2. **Lancer** : tous les duels du tour se jouent **en même temps**. Chaque duelliste voit son adversaire et trois gros boutons ; il a `duree` secondes pour choisir. Le choix reste secret ; la TV montre seulement ✓ quand quelqu'un a choisi. Dès que tous les duellistes ont choisi, on passe à la suite.
-3. **Révélation** : sur la TV, les poings tremblent (« pierre… feuille… ciseaux ! ») puis les mains apparaissent ; le gagnant brille, le perdant s'efface. Chaque téléphone affiche aussi « Gagné ! / Perdu… / Égalité ! ».
+3. **Révélation** : sur la TV, deux « ? » tremblent (« pierre… feuille… ciseaux ! »), sans rien laisser deviner, puis les mains apparaissent ; le gagnant brille, le perdant s'efface. Chaque téléphone affiche aussi « Gagné ! / Perdu… / Égalité ! ».
 4. **Égalité** : seul ce duel se rejoue (chrono `duree_rejouer`), les autres attendent. Après `rejouer_max` rejeux, le gagnant est tiré au sort (🎲).
 5. **Avancée** : les gagnants passent dans la colonne suivante de l'arbre, puis le tour suivant commence. La **finale** se joue en grand au centre de la TV.
 6. **Champion** : couronne et confettis, puis l'écran des résultats montre l'arbre complet.

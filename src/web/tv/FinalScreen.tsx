@@ -1,16 +1,12 @@
 // Classement final : révélation suspense de la dernière à la première place, puis podium et confettis.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import type { GameSnapshot, PublicPlayer } from "../../shared/types";
+import { rankOf } from "../../shared/ranking";
+import type { GameSnapshot } from "../../shared/types";
 import { fireConfetti, PlayerAvatar } from "../ui";
 
 const STEP_MS = 1700; // suspense pour le podium
 const FAST_STEP_MS = 1000; // du dernier au 4e : plus vite
-
-function rankOf(sorted: PublicPlayer[], i: number) {
-  // Ex æquo : même rang que le premier joueur ayant le même score.
-  return sorted.findIndex((p) => p.score === sorted[i]!.score) + 1;
-}
 
 export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   const sorted = useMemo(

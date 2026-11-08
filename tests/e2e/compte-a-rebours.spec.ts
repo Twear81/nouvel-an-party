@@ -64,4 +64,26 @@ test.describe("Compte à rebours chaotique", () => {
     await expect(tv.getByTestId("cabr-axis")).toBeVisible();
     await expect(tv.getByTestId(`cabr-drop-${phones[0]!.id}`)).toBeVisible();
   });
+
+  test("pause de l'hôte : le compteur de la TV se fige puis reprend là où il était", async ({ party }) => {
+    const { tv } = party;
+    const phones = await party.addPhones("Gus", "Hana");
+    await party.startGame({ "compte-a-rebours": 1 });
+    for (const p of phones) await expect(p.t("cabr-stop")).toBeVisible({ timeout: 20_000 });
+    const counter = tv.getByTestId("tv-counter");
+    const elapsed = async () => Number(await counter.getAttribute("data-elapsed"));
+    await expect.poll(elapsed).toBeGreaterThan(100);
+
+    await tv.getByTestId("host-pause").click();
+    await expect(tv.getByTestId("paused-overlay")).toBeVisible();
+    const frozen = await elapsed();
+    await tv.waitForTimeout(1500); // pas de signal à attendre : on vérifie justement que rien ne bouge
+    expect(await elapsed()).toBe(frozen);
+
+    await tv.getByTestId("host-pause").click();
+    await expect(tv.getByTestId("paused-overlay")).toHaveCount(0);
+    // Reprise : ça repart de la valeur figée, sans saut de la durée de la pause.
+    await expect.poll(elapsed).toBeGreaterThan(frozen);
+    expect(await elapsed()).toBeLessThan(frozen + 1200);
+  });
 });

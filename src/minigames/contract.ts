@@ -20,6 +20,8 @@ export interface RoundContext<Cfg> {
   rng: () => number;
   /** Heure du serveur (ms). */
   now: () => number;
+  /** Comme `now()`, mais l'horloge s'arrête pendant les pauses de l'hôte (pour mesurer un temps écoulé affiché). */
+  activeNow: () => number;
   /** Timer annulé automatiquement en fin de manche et figé pendant une pause. */
   setTimeout: (ms: number, fn: () => void) => void;
   /** À appeler après une modification de l'état faite hors d'un input (ex : dans un timer). */

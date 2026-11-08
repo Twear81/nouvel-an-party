@@ -47,7 +47,7 @@ function stageName(roundCount: number, round: number) {
 
 /**
  * Une main dans un cercle. `pick` : « ? » puis ✓ quand le joueur a choisi.
- * `reveal` : le poing tremble (« pierre… feuille… ciseaux ! »), puis le vrai choix éclate.
+ * `reveal` : un « ? » tremble (« pierre… feuille… ciseaux ! », jamais un vrai coup avant la révélation), puis le vrai choix éclate.
  */
 function Hand({ mode, choice, picked, em, side, outcome }: { mode: "pick" | "reveal"; choice?: Choice | null; picked?: boolean; em: number; side: 0 | 1; outcome?: "win" | "lose" | "tie" | null }) {
   const shown = useAfter(REVEAL_AT, null);
@@ -74,11 +74,12 @@ function Hand({ mode, choice, picked, em, side, outcome }: { mode: "pick" | "rev
       {!shown ? (
         <motion.span
           key="shake"
-          className="leading-none"
+          data-testid="pfc-hidden-hand"
+          className="font-display text-[0.7em] leading-none text-accent"
           animate={{ y: ["0em", "-0.25em", "0em", "-0.25em", "0em", "-0.25em", "0em"], rotate: [0, 12 * tilt, 0, 12 * tilt, 0, 12 * tilt, 0] }}
           transition={{ duration: REVEAL_AT / 1000, ease: "easeInOut" }}
         >
-          ✊
+          ?
         </motion.span>
       ) : (
         <motion.span key="shown" className="leading-none" initial={{ scale: 0.2, rotate: -20 * tilt }} animate={{ scale: [0.2, 1.3, 1], rotate: 0 }} transition={{ duration: 0.45 }}>

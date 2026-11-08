@@ -76,7 +76,7 @@ const everyoneStopped = (s: State, ctx: Ctx) =>
 
 function go(s: State, ctx: Ctx) {
   s.phase = "running";
-  s.startedAt = ctx.now();
+  s.startedAt = ctx.activeNow();
   ctx.setTimeout((s.cible + ctx.cfg.marge_max) * 1000, () => ctx.end());
   ctx.update();
 }
@@ -104,7 +104,7 @@ export default defineMiniGame<Cfg, Item, State>({
   onPlay(s, ctx) {
     ctx.countdown(ctx.cfg.annonce, () => {
       s.phase = "ready";
-      s.goAt = ctx.now() + GO_LEAD_MS;
+      s.goAt = ctx.activeNow() + GO_LEAD_MS;
       ctx.clearCountdown();
       ctx.setTimeout(GO_LEAD_MS, () => go(s, ctx));
       ctx.update();
@@ -122,7 +122,7 @@ export default defineMiniGame<Cfg, Item, State>({
     if (typeof payload !== "object" || payload === null) return;
     const ms = (payload as { ms?: unknown }).ms;
     if (typeof ms !== "number" || !Number.isFinite(ms) || ms < 0) return;
-    const serverMs = ctx.now() - s.startedAt;
+    const serverMs = ctx.activeNow() - s.startedAt;
     if (ms > serverMs + TRUST_MS || ms > (s.cible + ctx.cfg.marge_max) * 1000 + TRUST_MS) return;
     s.stops.set(playerId, Math.round(ms));
     if (everyoneStopped(s, ctx)) ctx.end();

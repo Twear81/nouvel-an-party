@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
+import { activeNow } from "../../src/shared/clock";
 import { GameEngine, GameError } from "../../src/server/engine/engine";
 import { createTestEngine, MemoryPersistence, validProfile } from "./helpers/engine-setup";
 import { FakeClock } from "./helpers/fake-clock";
@@ -281,6 +282,21 @@ describe("pause, reprise et temps ajouté", () => {
     expect(t.engine.snapshot(null).phase).toBe("playing");
     t.clock.advance(1);
     expect(t.engine.snapshot(null).phase).toBe("results");
+  });
+
+  it("l'horloge active (activeNow) s'arrête pendant la pause et ne saute pas à la reprise", () => {
+    const t = startPlaying();
+    t.clock.advance(2000);
+    t.engine.pause();
+    const at = t.clock.now();
+    const frozen = activeNow(t.engine.snapshot(null).round!, at);
+    t.clock.advance(5000);
+    expect(activeNow(t.engine.snapshot(null).round!, t.clock.now())).toBe(frozen);
+    t.engine.resume();
+    expect(t.engine.snapshot(null).round).toMatchObject({ pausedMs: 5000, pausedSince: null });
+    expect(activeNow(t.engine.snapshot(null).round!, t.clock.now())).toBe(frozen);
+    t.clock.advance(1000);
+    expect(activeNow(t.engine.snapshot(null).round!, t.clock.now())).toBe(frozen + 1000);
   });
 
   it("la pause fige aussi l'intro", () => {
