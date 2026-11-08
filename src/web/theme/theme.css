@@ -167,6 +167,10 @@ button:disabled { cursor: not-allowed; }
 img { -webkit-touch-callout: none; }
 }
 
+/* ── Choix corrigé (Choice, data-state) : hors couche pour primer sur le fond du ton ; un skin le redéfinit. */
+[data-ui="choice"][data-state="correct"] { border-color: var(--color-good); background-color: color-mix(in srgb, var(--color-good) 25%, transparent); }
+[data-ui="choice"][data-state="wrong"] { border-color: var(--color-bad); background-color: color-mix(in srgb, var(--color-bad) 20%, transparent); }
+
 /* ── Cadre commun d'un écran de mini-jeu (TV) : invisible ici, dessiné par chaque skin (docs/skins.md). */
 [data-ui="game-frame-title"] { display: none; }
 

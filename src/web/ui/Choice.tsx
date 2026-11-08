@@ -21,12 +21,6 @@ const TONES: Record<ChoiceTone, { idle: string; selected: string }> = {
   bad: { idle: "bg-bad text-bg shadow-[0_0.35rem_0_var(--color-bad-deep)]", selected: "bg-bad text-bg shadow-[0_0.35rem_0_var(--color-bad-deep)] ring-[0.4rem] ring-ink" },
   plain: { idle: "shadow-card", selected: "shadow-card ring-[0.35rem] ring-ink" },
 };
-const STATES: Record<ChoiceState, string> = {
-  idle: "",
-  correct: "!border-good !bg-good/25",
-  wrong: "!border-bad !bg-bad/20",
-  faded: "",
-};
 
 export interface ChoiceProps extends Omit<HTMLMotionProps<"button">, "ref" | "children"> {
   /** Choix enregistré : ✓ intégré, mise en avant. */
@@ -66,7 +60,7 @@ export function Choice({
       data-ui="choice"
       data-selected={selected ? "true" : "false"}
       data-state={state}
-      className={`relative flex items-center justify-center rounded-card ${TONES[tone][selected ? "selected" : "idle"]} ${STATES[state]} ${className}`}
+      className={`relative flex items-center justify-center rounded-card ${TONES[tone][selected ? "selected" : "idle"]} ${className}`}
     >
       {keyLabel != null && (
         <span data-ui="choice-key" className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-btn border-2 border-current font-display text-xl">
