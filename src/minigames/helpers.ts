@@ -90,3 +90,11 @@ export function normalizeAnswer(text: string): string {
     .map((w) => (w.length > 3 && /[sx]$/.test(w) ? w.slice(0, -1) : w))
     .join(" ");
 }
+
+/**
+ * Compteur commun pour `MiniGame.progress` : `expected` = joueurs de la manche (déconnectés compris),
+ * `done` = ceux d'entre eux que `done(id)` valide.
+ */
+export function progressOf(ctx: { players: PublicPlayer[] }, done: (id: string) => boolean): { done: number; expected: number } {
+  return { done: ctx.players.filter((p) => done(p.id)).length, expected: ctx.players.length };
+}

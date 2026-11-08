@@ -272,3 +272,15 @@ describe("compte-a-rebours : à travers le moteur", () => {
     expect(t.engine.snapshot(null).round!.deltas).toEqual({ [b]: 150, [a]: 100 });
   });
 });
+
+describe("compte-a-rebours : progress", () => {
+  it("compte ceux qui ont stoppé, déconnectés compris", () => {
+    const { ctx, state, goNow, stop } = round(3, {}, () => 0.5, ["p3"]);
+    expect(game.progress!(state, ctx)).toEqual({ done: 0, expected: 3 });
+    goNow();
+    ctx.advance(9_600);
+    stop("p1", 9000);
+    stop("p3", 9500); // déconnecté mais sa réponse est acceptée
+    expect(game.progress!(state, ctx)).toEqual({ done: 2, expected: 3 });
+  });
+});

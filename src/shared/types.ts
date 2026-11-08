@@ -69,6 +69,8 @@ export interface RoundInfo {
   pausedRemainingMs: number | null;
   /** Durée totale du chrono en cours (ms), pour dessiner la barre. Un mini-jeu peut enchaîner plusieurs chronos. */
   timerTotalMs: number | null;
+  /** Compteur commun « qui a répondu » de l'étape en cours (nombres seulement). null = hors réponse ou jeu sans compteur. */
+  progress: { done: number; expected: number } | null;
   /** État public du mini-jeu (question, nb de réponses…), propre à chaque mini-jeu. */
   public: unknown;
   /** Résultats du mini-jeu, présents uniquement en phase "results". */

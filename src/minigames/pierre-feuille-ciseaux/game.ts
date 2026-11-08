@@ -273,6 +273,15 @@ export default defineMiniGame<Cfg, Item, State>({
 
   onPresenceChange: checkAllPicked,
 
+  // Seuls les duels en cours comptent (les qualifiés d'office ou éliminés n'ont rien à jouer).
+  progress(s) {
+    if (s.step !== "pick") return null;
+    const ids = pendingDuels(s.bracket, s.round)
+      .filter(({ index }) => s.active.has(index))
+      .flatMap(({ duel: d }) => [d.a!, d.b!]);
+    return { done: ids.filter((id) => s.picks.has(id)).length, expected: ids.length };
+  },
+
   publicView: (s): Pub => ({
     variant: s.item.title,
     step: s.step,

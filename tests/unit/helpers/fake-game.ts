@@ -7,6 +7,7 @@
 //   { endWhenAlone: true } onPresenceChange termine la manche s'il reste au plus 1 joueur connecté
 //   { boom: true }       lève une Error ordinaire (bug du mini-jeu)
 //   { gameError: true }  lève une GameError
+//   { badProgress: true } fait lever `progress` (bug du mini-jeu)
 import { z } from "zod";
 import { GameError } from "../../../src/server/engine/engine";
 import type { LoadedGame } from "../../../src/server/engine/planner";
@@ -20,6 +21,7 @@ export interface FakeState {
   presence: string[];
   /** Termine la manche quand il reste au plus un joueur connecté. */
   endWhenAlone?: boolean;
+  badProgress?: boolean;
 }
 
 export interface FakeGameOptions {
@@ -30,6 +32,8 @@ export interface FakeGameOptions {
   estimate?: number;
   failStart?: (item: string) => boolean;
   failFinish?: boolean;
+  /** Le jeu n'implémente pas `progress`. */
+  noProgress?: boolean;
   /** Fait du jeu un interlude : « une fois toutes les N manches normales ». */
   interlude?: number;
 }
@@ -72,7 +76,14 @@ export function makeFakeGame(opts: FakeGameOptions = {}) {
       if (typeof p.timer === "number") ctx.setTimeout(p.timer, () => void state.fired++);
       if (p.end) ctx.end();
       if (p.endWhenAlone) state.endWhenAlone = true;
+      if (p.badProgress) state.badProgress = true;
     },
+    progress: opts.noProgress
+      ? undefined
+      : (s, ctx) => {
+          if (s.badProgress) throw new Error("progress cassé");
+          return { done: s.inputs.size, expected: ctx.players.length };
+        },
     publicView: (s) => ({ item: s.item, n: s.inputs.size }),
     privateView: (s, pid) => ({ mine: s.inputs.get(pid) ?? null }),
     finish(s) {

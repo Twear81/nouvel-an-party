@@ -3,7 +3,7 @@
 // pour chaque invité qu'il a placé dans son étage consensus.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { normalizeQuestion, questionSchema, endWhenAllDone } from "../helpers";
+import { normalizeQuestion, questionSchema, endWhenAllDone, progressOf } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Tier list"),
@@ -94,6 +94,8 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 
   onPresenceChange: checkAllRated,
+
+  progress: (state, ctx) => progressOf(ctx, (id) => isComplete(state, id, ctx)),
 
   publicView: (state, ctx): Pub => ({
     question: state.question,

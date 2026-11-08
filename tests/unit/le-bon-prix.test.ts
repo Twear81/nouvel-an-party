@@ -232,3 +232,14 @@ describe("le-bon-prix : via le moteur", () => {
     expect(s.round!.deltas).toEqual({ [b]: 250, [a]: 100, [c]: 60 });
   });
 });
+
+describe("le-bon-prix : progress", () => {
+  it("compte les prix proposés", () => {
+    const { ctx, state, guess } = round(4);
+    expect(game.progress!(state, ctx)).toEqual({ done: 0, expected: 4 });
+    guess("p1", 150);
+    guess("p2", 90);
+    guess("p3", "n'importe quoi"); // invalide : ignoré
+    expect(game.progress!(state, ctx)).toEqual({ done: 2, expected: 4 });
+  });
+});

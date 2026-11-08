@@ -186,3 +186,14 @@ describe("tier-list : via le moteur", () => {
     expect(s.round!.deltas).toEqual({ [a]: 75, [b]: 75, [c]: 75 });
   });
 });
+
+describe("tier-list : progress", () => {
+  it("un votant compte quand il a noté tous les invités attendus", () => {
+    const { ctx, state, rate } = round(3, { noter_soi_meme: false });
+    expect(game.progress!(state, ctx)).toEqual({ done: 0, expected: 3 });
+    rate("p1", "p2", 0);
+    expect(game.progress!(state, ctx)).toEqual({ done: 0, expected: 3 }); // il en reste un
+    rate("p1", "p3", 1);
+    expect(game.progress!(state, ctx)).toEqual({ done: 1, expected: 3 });
+  });
+});

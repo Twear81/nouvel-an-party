@@ -31,7 +31,7 @@ export function PlayingScreen({ snapshot, round }: { snapshot: GameSnapshot; rou
   return (
     <div data-testid="tv-playing" data-interlude="false" className="flex min-h-0 flex-1 flex-col">
       <RoundHeader round={round}>
-        <Countdown round={round} size="tv" />
+        <Countdown round={round} size="tv" answeredCount={round.progress?.done} waitingCount={round.progress ? Math.max(0, round.progress.expected - round.progress.done) : undefined} />
       </RoundHeader>
       <div className="flex min-h-0 flex-1 flex-col px-14 pb-4 pt-4">
         <TvGameView snapshot={snapshot} round={round} kind="Tv" />

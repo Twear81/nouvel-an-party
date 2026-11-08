@@ -32,6 +32,7 @@ tests/unit/<id>.test.ts        tests de la logique
 | `privateView?(state, playerId, ctx)` | ce que voit un seul téléphone (« tu as voté pour X ») |
 | `tvView?(state, ctx)` | optionnel : remplace `publicView` pour la TV seulement. Pour ce que les téléphones ne doivent pas recevoir, même caché (ex : la suite de Simon) |
 | `onPresenceChange?(state, ctx)` | optionnel : un participant se connecte ou se déconnecte pendant le jeu (voir ci-dessous) |
+| `progress?(state, ctx)` | optionnel : compteur commun « qui a répondu » du chrono de la TV : `{ done, expected }` (nombres seulement, rien de secret), ou `null` hors étape de réponse (révélation, tour par tour, animation). `expected` = participants concernés par l'étape en cours, déconnectés compris (c'est un affichage, pas une condition de fin). Helper `progressOf(ctx, (id) => state.votes.has(id))`. Le moteur le recopie dans `round.progress` (null hors phase `playing`, si le jeu ne l'implémente pas, ou s'il lève une exception) |
 | `interlude?(cfg)` | optionnel : renvoie N = « une fois toutes les N manches » pour faire de ce jeu une surprise sans annonce (voir « Jeux interlude » plus bas) ; absent ou `null` = jeu normal |
 | `finish(state, ctx)` | fin de manche : renvoie `{ results, scores }`. `results` est libre (affiché par `TvResults`), `scores` = points gagnés **dans cette manche** par `playerId` (absents = 0) |
 

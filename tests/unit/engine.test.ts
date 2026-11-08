@@ -151,6 +151,44 @@ describe("entrées des joueurs", () => {
   });
 });
 
+describe("compteur commun des réponses (progress)", () => {
+  it("null hors de la phase de jeu, puis suit les réponses", () => {
+    const t = createTestEngine();
+    const prog = () => t.engine.snapshot(null).round?.progress;
+    expect(t.engine.snapshot(null).round).toBeNull();
+    t.engine.start();
+    expect(prog()).toBeNull(); // intro
+    t.clock.advance(T.intro);
+    expect(prog()).toEqual({ done: 0, expected: 3 });
+    t.engine.input(t.ids[0]!, { v: 1 });
+    expect(prog()).toEqual({ done: 1, expected: 3 });
+    t.engine.input(t.ids[1]!, { v: 2 });
+    expect(t.engine.snapshot(t.ids[0]!).round?.progress).toEqual({ done: 2, expected: 3 });
+    t.clock.advance(T.round);
+    expect(prog()).toBeNull(); // résultats
+  });
+
+  it("un joueur déconnecté reste compté parmi les attendus", () => {
+    const t = startPlaying();
+    t.engine.disconnect(t.ids[2]!);
+    expect(t.engine.snapshot(null).round?.progress).toEqual({ done: 0, expected: 3 });
+  });
+
+  it("null si le jeu n'implémente pas progress", () => {
+    const t = startPlaying({ game: { noProgress: true } });
+    expect(t.engine.snapshot(null).round?.progress).toBeNull();
+  });
+
+  it("une exception de progress ne casse pas le snapshot", () => {
+    const t = startPlaying();
+    t.engine.input(t.ids[0]!, { badProgress: true });
+    const snap = t.engine.snapshot(null);
+    expect(snap.round?.progress).toBeNull();
+    expect(snap.phase).toBe("playing");
+    expect(snap.round?.public).toBeTruthy();
+  });
+});
+
 describe("bouton Continuer", () => {
   function toResults() {
     const t = startPlaying();

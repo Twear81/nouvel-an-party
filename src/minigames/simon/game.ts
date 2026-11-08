@@ -243,6 +243,13 @@ const game = defineMiniGame<Cfg, Item, State>({
 
   onPresenceChange: checkStepDone,
 
+  // Étape de reproduction seulement : les joueurs encore en lice au début de l'étape ; terminé = suite finie ou tombé.
+  progress(state) {
+    if (state.stage !== "play") return null;
+    const finished = state.startAlive.filter((id) => state.done.has(id) || !state.alive.has(id));
+    return { done: finished.length, expected: state.startAlive.length };
+  },
+
   publicView(state): Pub {
     return {
       stage: state.stage,

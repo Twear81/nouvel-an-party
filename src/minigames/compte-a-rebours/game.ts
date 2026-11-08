@@ -3,7 +3,7 @@
 // Le téléphone mesure lui-même le temps (performance.now) : la latence du wifi n'avantage ni ne pénalise personne.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, playerIds } from "../helpers";
+import { allConnectedDone, playerIds, progressOf } from "../helpers";
 import { rankByError } from "./rank";
 
 export const DESIGN_IDS = ["digital", "horloge", "meche", "coupe", "minuit"] as const;
@@ -127,6 +127,8 @@ export default defineMiniGame<Cfg, Item, State>({
     s.stops.set(playerId, Math.round(ms));
     if (everyoneStopped(s, ctx)) ctx.end();
   },
+
+  progress: (state, ctx) => progressOf(ctx, (id) => state.stops.has(id)),
 
   publicView: (s): Pub => ({
     design: s.design,

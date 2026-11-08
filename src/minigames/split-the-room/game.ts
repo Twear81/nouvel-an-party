@@ -3,7 +3,7 @@
 // Une manche, trois étapes : écrire (chrono 1), puis une phrase à la fois : vote (chrono 2) + révélation (chrono 3).
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, cleanText, playerIds, shuffle, startGraceOnce } from "../helpers";
+import { allConnectedDone, cleanText, playerIds, shuffle, startGraceOnce, progressOf } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("Split the Room"),
@@ -157,6 +157,15 @@ export default defineMiniGame<Cfg, Item, State>({
   onPresenceChange(state, ctx) {
     checkWritten(state, ctx);
     checkVoted(state, ctx);
+  },
+
+  // Écriture, puis vote sur la phrase en cours (l'auteur ne vote pas) ; null pendant la révélation.
+  progress(state, ctx) {
+    if (state.step === "write") return progressOf(ctx, (id) => state.texts.has(id));
+    const sentence = state.sentences[state.index];
+    if (state.step !== "vote" || !sentence) return null;
+    const voters = { players: ctx.players.filter((p) => p.id !== sentence.authorId) };
+    return progressOf(voters, (id) => sentence.votes.has(id));
   },
 
   publicView(state, ctx): Pub {
