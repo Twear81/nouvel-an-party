@@ -278,3 +278,22 @@ describe("dessin-rate : points", () => {
     expect(res.cards.find((c) => c.playerId === "p1")!.votes).toBe(1);
   });
 });
+
+describe("dessin-rate : progress", () => {
+  it("null pendant le dessin et la galerie, compte les votes pendant le vote", () => {
+    const r = round(4);
+    r.draw("p1", [line()]);
+    expect(game.progress!(r.state, r.ctx)).toBeNull();
+    for (const id of ["p1", "p2", "p3", "p4"]) r.draw(id, [line()]);
+    r.ctx.finishCountdown();
+    expect(r.pub().step).toBe("gallery");
+    expect(game.progress!(r.state, r.ctx)).toBeNull();
+    r.toVote();
+    expect(r.pub().step).toBe("vote");
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 0, expected: 4 });
+    r.vote("p1", "p2");
+    r.vote("p2", "p3");
+    r.vote("p2", "p4"); // changement d'avis : compte une fois
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 2, expected: 4 });
+  });
+});

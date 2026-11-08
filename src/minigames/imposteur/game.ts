@@ -4,7 +4,7 @@
 // Rien ne trahit l'imposteur avant les résultats : même vue privée pour tous, aucune info sur lui dans la vue publique.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, playerIds, shuffle, startGraceOnce } from "../helpers";
+import { allConnectedDone, playerIds, shuffle, startGraceOnce, progressOf } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("L'imposteur"),
@@ -172,6 +172,13 @@ export default defineMiniGame<Cfg, Item, State>({
     }
     checkDecided(state, ctx);
     checkVoted(state, ctx);
+  },
+
+  // Décision et vote seulement : mot et parole (tour par tour) n'ont pas d'étape de réponse simultanée.
+  progress(state, ctx) {
+    if (state.step === "decision") return progressOf(ctx, (id) => state.choices.has(id));
+    if (state.step === "vote") return progressOf(ctx, (id) => state.votes.has(id));
+    return null;
   },
 
   publicView(state, ctx): Pub {

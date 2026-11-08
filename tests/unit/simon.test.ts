@@ -282,3 +282,27 @@ describe("simon : avec le moteur", () => {
     expect((snap.round!.results as Results).rows[0]!.playerId).toBe(a);
   });
 });
+
+describe("simon : progress", () => {
+  it("null hors reproduction ; compte ceux qui ont fini ou sont tombés", () => {
+    const r = setup(3);
+    expect(game.progress!(r.state, r.ctx)).toBeNull(); // wait
+    r.toPlay();
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 0, expected: 3 });
+    r.playAll("p1");
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 1, expected: 3 });
+    r.wrong("p2"); // tombé : plus rien à jouer
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 2, expected: 3 });
+  });
+
+  it("à l'étape suivante, seuls les survivants sont attendus", () => {
+    const r = setup(3);
+    r.toPlay();
+    r.playAll("p1");
+    r.playAll("p2");
+    r.wrong("p3");
+    r.toPlay(); // between, puis nouvelle séquence montrée, puis reproduction
+    expect(r.seq()).toHaveLength(4);
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 0, expected: 2 });
+  });
+});

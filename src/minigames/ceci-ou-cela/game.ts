@@ -4,7 +4,7 @@
 //  - sans {joueur} : on gagne si on est dans le camp majoritaire (égalité : tout le monde gagne).
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { fillPlayer, endWhenAllDone } from "../helpers";
+import { fillPlayer, endWhenAllDone, progressOf } from "../helpers";
 
 const choicesSchema = z.tuple([z.string().min(1), z.string().min(1)]);
 
@@ -94,6 +94,8 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 
   onPresenceChange: checkAllAnswered,
+
+  progress: (state, ctx) => progressOf(ctx, (id) => state.answers.has(id)),
 
   publicView: (state): Pub => ({
     question: state.question,

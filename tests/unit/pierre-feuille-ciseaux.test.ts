@@ -497,3 +497,17 @@ describe("pfc : à travers le moteur", () => {
     expect((me.private as Priv).status).toBe("champion");
   });
 });
+
+describe("pfc : progress", () => {
+  it("null pendant le tirage, puis compte les choix des duels en cours", () => {
+    const t = setup(6);
+    expect(game.progress!(t.state, t.ctx)).toBeNull();
+    t.ctx.advance(TIMINGS.draw);
+    const duelists = t.pub().bracket[0]!.filter((m) => m.active).flatMap((m) => [m.a!, m.b!]);
+    expect(game.progress!(t.state, t.ctx)).toEqual({ done: 0, expected: duelists.length });
+    t.pick(duelists[0]!, ROCK);
+    expect(game.progress!(t.state, t.ctx)).toEqual({ done: 1, expected: duelists.length });
+    t.playRound();
+    expect(game.progress!(t.state, t.ctx)).toBeNull(); // révélation
+  });
+});

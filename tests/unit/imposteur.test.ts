@@ -505,3 +505,25 @@ describe("imposteur : à travers le moteur", () => {
     expect(words).toContain(results.majorityWord);
   });
 });
+
+describe("imposteur : progress", () => {
+  it("null pendant le mot et la parole, puis décision, puis vote", () => {
+    const r = round(5);
+    expect(game.progress!(r.state, r.ctx)).toBeNull(); // mot
+    r.toSpeech();
+    expect(game.progress!(r.state, r.ctx)).toBeNull(); // parole
+    r.speakAll();
+    expect(r.pub().step).toBe("decision");
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 0, expected: 5 });
+    r.send("p1", { choice: "vote" });
+    r.send("p2", { choice: "tour" });
+    r.send("p2", { choice: "vote" });
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 2, expected: 5 });
+    r.ctx.finishCountdown();
+    expect(r.pub().step).toBe("vote");
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 0, expected: 5 });
+    r.send("p1", { target: "p2" });
+    r.ctx.setConnected("p5", false);
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 1, expected: 5 });
+  });
+});

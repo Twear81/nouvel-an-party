@@ -95,6 +95,14 @@ export interface MiniGame<Cfg = any, Item = any, State = any> {
   tvView?: (state: State, ctx: RoundContext<Cfg>) => unknown;
   /** Ce que voit un seul téléphone (ex : "tu as voté pour X"). */
   privateView?: (state: State, playerId: PlayerId, ctx: RoundContext<Cfg>) => unknown;
+  /**
+   * Optionnel : compteur commun « qui a répondu » affiché par l'écran de chrono de la TV (sans que l'écran connaisse
+   * le jeu). `expected` = participants concernés par l'étape de réponse en cours (un joueur déconnecté reste compté :
+   * c'est un nombre affiché, pas une condition de fin) ; `done` = ceux qui ont répondu. `null` = pas d'étape de réponse
+   * en cours (révélation intermédiaire, tour par tour…). Ne renvoyer que des nombres : rien de secret.
+   * Appelé à chaque snapshot, protégé : une exception équivaut à `null`.
+   */
+  progress?: (state: State, ctx: RoundContext<Cfg>) => { done: number; expected: number } | null;
   /** Fin de manche : calcule résultats et points. */
   finish: (state: State, ctx: RoundContext<Cfg>) => RoundOutcome;
 }

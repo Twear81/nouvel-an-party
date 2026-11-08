@@ -327,3 +327,26 @@ describe("split-the-room : à travers le moteur", () => {
     expect(state.round!.deltas).toEqual(Object.fromEntries(t.ids.map((id) => [id, 300])));
   });
 });
+
+describe("split-the-room : progress", () => {
+  it("écriture, puis vote sans l'auteur, null à la révélation", () => {
+    const r = round(4);
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 0, expected: 4 });
+    r.write("p1", "abc");
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 1, expected: 4 });
+    for (const id of ["p2", "p3", "p4"]) r.write(id, `t${id}`);
+    r.ctx.finishCountdown();
+    expect(r.pub().step).toBe("vote");
+    const author = r.currentAuthor();
+    const voters = ["p1", "p2", "p3", "p4"].filter((i) => i !== author);
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 0, expected: 3 });
+    r.vote(author, true); // l'auteur ne vote pas
+    r.vote(voters[0]!, true);
+    r.ctx.setConnected(voters[2]!, false);
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 1, expected: 3 });
+    r.vote(voters[1]!, false);
+    r.vote(voters[2]!, true);
+    expect(r.pub().step).toBe("reveal");
+    expect(game.progress!(r.state, r.ctx)).toBeNull();
+  });
+});
