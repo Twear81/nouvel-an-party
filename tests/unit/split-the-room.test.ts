@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import splitTheRoom, { cleanText, GRACE_SECONDS, scoreSplit, type Priv, type Pub, type Results } from "../../src/minigames/split-the-room/game";
+import splitTheRoom, { GRACE_SECONDS, scoreSplit, type Priv, type Pub, type Results } from "../../src/minigames/split-the-room/game";
 import { createTestEngine } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 import { seededRng } from "./helpers/rng";
@@ -76,9 +76,6 @@ describe("split-the-room : écriture", () => {
   });
 
   it("nettoie le texte, le coupe à la longueur max, vide = rien", () => {
-    expect(cleanText("  salut   les\n amis ", 80)).toBe("salut les amis");
-    expect(cleanText("x".repeat(200), 80)).toHaveLength(80);
-    expect(cleanText(42, 80)).toBe("");
     const r = round(3, { longueur_max: 12 });
     r.write("p1", "abcdefghijklmnopqrstuvwxyz");
     expect(r.priv("p1").text).toBe("abcdefghijkl");

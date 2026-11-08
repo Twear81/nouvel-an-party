@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { fireConfetti, PlayerAvatar, SelectedBadge, TrashIcon, typo, UndoIcon, VoteDots } from "../../web/ui";
+import { fireConfetti, Panel, PlayerAvatar, SelectedBadge, TrashIcon, typo, UndoIcon, VoteDots } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { Drawing, DrawingPad, PEN_BG } from "./drawing";
 import type { Priv, Pub, Results, ResultCard, TvPub } from "./game";
@@ -195,11 +195,11 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
   const word = priv?.word ?? "";
   return (
     <div data-testid="phone-dessin" data-stage="draw" className="flex min-h-0 flex-1 flex-col gap-2 pb-2">
-      <div className="glass flex min-h-[3.5rem] shrink-0 items-center justify-center rounded-card px-4 py-1.5">
+      <Panel className="flex min-h-[3.5rem] shrink-0 items-center justify-center px-4 py-1.5">
         <h1 data-testid="draw-word" className={`line-clamp-2 text-balance text-center font-extrabold leading-tight ${word.length > 28 ? "text-xl" : "text-2xl"}`}>
           {word}
         </h1>
-      </div>
+      </Panel>
       <div className="order-2 min-h-0 flex-1">
         <DrawingPad strokes={strokes} color={color} width={width} disabled={snapshot.paused} onChange={change} />
       </div>

@@ -4,7 +4,7 @@
 // Rien ne trahit l'imposteur avant les résultats : même vue privée pour tous, aucune info sur lui dans la vue publique.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { allConnectedDone, playerIds, shuffle } from "../helpers";
+import { allConnectedDone, playerIds, shuffle, startGraceOnce } from "../helpers";
 
 const configSchema = z.object({
   nom: z.string().default("L'imposteur"),
@@ -60,8 +60,6 @@ export interface Pub {
   step: Step;
   tour: number;
   tours: number;
-  /** Joueurs de la manche, toujours dans le même ordre. */
-  playerIds: string[];
   /** Étape « parole » : ordre de passage, orateur courant (null hors parole) et ceux qui ont déjà parlé. */
   order: string[];
   currentId: string | null;
@@ -90,7 +88,6 @@ export interface Results {
   imposterWord: string;
   /** L'imposteur a strictement le plus de votes. */
   unmasked: boolean;
-  playerIds: string[];
   votes: VoteInfo[];
   /** Points gagnés par l'imposteur s'il n'est pas démasqué (0 sinon). */
   imposterGain: number;
@@ -184,7 +181,6 @@ export default defineMiniGame<Cfg, Item, State>({
       step: state.step,
       tour: state.tour,
       tours: ctx.cfg.tours_max,
-      playerIds: playerIds(ctx),
       order: speaking ? state.order : [],
       currentId: speaking ? (state.order[state.speaker] ?? null) : null,
       spokenIds: speaking ? [...state.spoken] : [],
@@ -220,7 +216,6 @@ export default defineMiniGame<Cfg, Item, State>({
       majorityWord: state.majorityWord,
       imposterWord: state.imposterWord,
       unmasked,
-      playerIds: playerIds(ctx),
       votes: [...state.votes].map(([voterId, targetId]) => ({ voterId, targetId })),
       imposterGain: !unmasked && imp ? ctx.cfg.points.imposteur_survit : 0,
       rightPoints: ctx.cfg.points.bon_vote,
@@ -286,15 +281,11 @@ function beginVote(state: State, ctx: Ctx) {
 }
 
 function checkDecided(state: State, ctx: Ctx) {
-  if (state.step !== "decision" || state.graceStarted) return;
-  if (!allConnectedDone(ctx, playerIds(ctx), (id) => state.choices.has(id))) return;
-  state.graceStarted = true;
-  ctx.countdown(GRACE_SECONDS, () => resolveDecision(state, ctx));
+  if (state.step !== "decision" || !allConnectedDone(ctx, playerIds(ctx), (id) => state.choices.has(id))) return;
+  startGraceOnce(state, ctx, GRACE_SECONDS, () => resolveDecision(state, ctx));
 }
 
 function checkVoted(state: State, ctx: Ctx) {
-  if (state.step !== "vote" || state.graceStarted) return;
-  if (!allConnectedDone(ctx, playerIds(ctx), (id) => state.votes.has(id))) return;
-  state.graceStarted = true;
-  ctx.countdown(GRACE_SECONDS, () => ctx.end());
+  if (state.step !== "vote" || !allConnectedDone(ctx, playerIds(ctx), (id) => state.votes.has(id))) return;
+  startGraceOnce(state, ctx, GRACE_SECONDS, () => ctx.end());
 }

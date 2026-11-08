@@ -2,6 +2,7 @@
 import { z } from "zod";
 import type { PublicPlayer } from "../shared/types";
 
+export { cleanText } from "../shared/clean-text";
 export { shuffle } from "../shared/shuffle";
 
 /** Ids de tous les joueurs de la manche. */
@@ -23,6 +24,22 @@ export function endWhenAllDone(
   done: (id: string) => boolean,
 ): void {
   if (allConnectedDone(ctx, playerIds(ctx), done)) ctx.end();
+}
+
+/**
+ * Délai de grâce « tout le monde a répondu » : lance une seule fois (`state.graceStarted`) un petit countdown
+ * avant `next`, pour laisser corriger. À remettre `graceStarted` à false à chaque nouvelle étape. Renvoie true si lancé.
+ */
+export function startGraceOnce(
+  state: { graceStarted: boolean },
+  ctx: { countdown: (seconds: number, onEnd: () => void) => void },
+  seconds: number,
+  next: () => void,
+): boolean {
+  if (state.graceStarted) return false;
+  state.graceStarted = true;
+  ctx.countdown(seconds, next);
+  return true;
 }
 
 /** Une question peut s'écrire en texte simple, ou en objet pour surcharger la durée. */

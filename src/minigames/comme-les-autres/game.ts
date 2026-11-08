@@ -2,7 +2,7 @@
 // On marque quand sa réponse est la même que celle d'autres joueurs ; la plus répandue rapporte un bonus.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { normalizeAnswer, normalizeQuestion, questionSchema, endWhenAllDone, playerIds } from "../helpers";
+import { normalizeAnswer, normalizeQuestion, questionSchema, cleanText, endWhenAllDone, playerIds } from "../helpers";
 
 export const MAX_LENGTH = 40;
 
@@ -78,14 +78,6 @@ export function withinOneEdit(a: string, b: string): boolean {
 
 /** Une faute n'est tolérée que sur de vrais mots d'au moins 5 lettres (jamais sur "chat"/"chien", ni sur les nombres). */
 const fuzzyEligible = (key: string) => key.length >= 5 && /^[a-z ]+$/.test(key);
-
-/** Nettoie une saisie : espaces réduits, caractères de contrôle retirés, 40 caractères max. */
-export function cleanText(raw: string): string {
-  return Array.from(raw.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim())
-    .slice(0, MAX_LENGTH)
-    .join("")
-    .trim();
-}
 
 const capitalize = (s: string) => (s ? s[0]!.toUpperCase() + s.slice(1) : s);
 
@@ -165,7 +157,7 @@ export default defineMiniGame<Cfg, Item, State>({
     const cleaned: string[] = [];
     for (const r of raw) {
       if (typeof r !== "string") continue;
-      const text = cleanText(r);
+      const text = cleanText(r, MAX_LENGTH);
       const key = normalizeAnswer(text);
       if (!key || seen.has(key)) continue; // vide, ou doublon : ne compte qu'une fois
       seen.add(key);

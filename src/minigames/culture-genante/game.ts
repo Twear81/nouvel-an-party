@@ -117,8 +117,8 @@ export interface TvPub extends Pub {
   accrocheS: number;
   basculeS: number;
 }
+/** Ma réponse (QCM : `choice`, estimation : `value`) ; les deux à null = pas encore répondu. */
 export interface Priv {
-  answered: boolean;
   choice: number | null;
   value: number | null;
 }
@@ -237,7 +237,7 @@ export default defineMiniGame<Cfg, Item, State>({
 
   privateView: (state, playerId): Priv => {
     const a = state.answers.get(playerId);
-    return { answered: !!a, choice: a?.choice ?? null, value: a?.value ?? null };
+    return { choice: a?.choice ?? null, value: a?.value ?? null };
   },
 
   finish(state, ctx) {

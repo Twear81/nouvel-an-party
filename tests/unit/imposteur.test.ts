@@ -459,7 +459,6 @@ describe("imposteur : vote et points", () => {
     const res = r.finish().results as Results;
     expect([res.majorityWord, res.imposterWord].sort()).toEqual([...PAIR].sort());
     expect(res.votes).toEqual([{ voterId: "p1", targetId: "p2" }]);
-    expect(res.playerIds).toEqual(["p1", "p2", "p3"]);
     expect("clues" in res).toBe(false);
   });
 

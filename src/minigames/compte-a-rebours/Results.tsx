@@ -2,7 +2,7 @@
 // du plus éloigné au plus proche ; le dernier à tomber (le plus proche) gagne. Le classement se remplit en même temps.
 import { motion } from "motion/react";
 import { useEffect } from "react";
-import { fireConfetti, PlayerAvatar } from "../../web/ui";
+import { fireConfetti, Panel, PlayerAvatar } from "../../web/ui";
 import type { MiniGameViewProps } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 import { AXIS_W_REM, LABEL_W_REM, LANE_REM, layoutLanes, STEM_OFFSET_REM } from "./layout";
@@ -119,7 +119,7 @@ export const TvResults = ({ results, playerById }: Props) => {
           </div>
         )}
       </div>
-      <div className="glass flex w-[30rem] shrink-0 flex-col justify-center gap-2 rounded-card p-4">
+      <Panel className="flex w-[30rem] shrink-0 flex-col justify-center gap-2 p-4">
         {byRank.map((e) => (
           <motion.div
             key={e.playerId}
@@ -144,7 +144,7 @@ export const TvResults = ({ results, playerById }: Props) => {
             <span className="text-xl text-ink-muted">pas stoppé</span>
           </div>
         ))}
-      </div>
+      </Panel>
     </div>
   );
 };

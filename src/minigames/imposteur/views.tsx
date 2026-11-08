@@ -3,7 +3,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Button, CheckIcon, fireConfetti, PlayerAvatar, SelectedBadge } from "../../web/ui";
+import { Button, CheckIcon, fireConfetti, Panel, PlayerAvatar, SelectedBadge } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -93,8 +93,8 @@ function TvDecision({ pub }: Props) {
   );
 }
 
-function TvVote({ pub, playerById }: Props) {
-  const list = pub.playerIds;
+function TvVote({ pub, round, playerById }: Props) {
+  const list = round.participants;
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Title sub={<span data-testid="tv-vote-count"><span className="text-accent">{pub.votedCount}</span> / {list.length} ont voté</span>} testId="tv-imposteur-title">
@@ -244,9 +244,9 @@ function PhoneDecision({ priv, sendInput }: Props) {
   );
 }
 
-function PhoneVote({ pub, priv, sendInput, playerById, snapshot }: Props) {
+function PhoneVote({ round, priv, sendInput, playerById, snapshot }: Props) {
   const myId = snapshot.me?.id;
-  const options = pub.playerIds.filter((id) => id !== myId);
+  const options = round.participants.filter((id) => id !== myId);
   const vote = priv?.vote ?? null;
   const dense = options.length > 4;
   return (
@@ -304,7 +304,7 @@ const unveilAt = (n: number) => VOTES_START_S + n * VOTE_STEP_S + SUSPENSE_S;
 /** Durée totale (s) de l'animation pour `n` votes. */
 export const revealSeconds = (n: number) => unveilAt(n) + SETTLE_S;
 
-function TvResults({ results, playerById }: Props) {
+function TvResults({ results, round, playerById }: Props) {
   const votes = results?.votes ?? [];
   const at = unveilAt(votes.length);
   const [unveiled, setUnveiled] = useState(false);
@@ -316,12 +316,12 @@ function TvResults({ results, playerById }: Props) {
     return () => clearTimeout(id);
   }, [at, results?.unmasked]);
   if (!results) return null;
-  const crowd = results.playerIds.length > 6;
+  const crowd = round.participants.length > 6;
   return (
     <div data-testid="tv-imposteur-results" data-unveiled={unveiled} className="flex min-h-0 flex-1 flex-col items-center justify-between gap-4 text-center">
       <h1 className="shrink-0 text-[4rem] font-extrabold leading-tight">{unveiled ? "L'imposteur était…" : "Les votes tombent…"}</h1>
       <div className="flex flex-wrap items-start justify-center gap-x-3 gap-y-6">
-        {results.playerIds.map((id) => {
+        {round.participants.map((id) => {
           const isImp = id === results.imposterId;
           const mine = votes.map((v, k) => ({ ...v, k })).filter((v) => v.targetId === id);
           return (
@@ -359,8 +359,8 @@ function TvResults({ results, playerById }: Props) {
               {results.unmasked ? "Démasqué !" : "Il s'en sort !"}
             </p>
             <div className="flex items-center gap-10 text-5xl font-extrabold">
-              <span className="glass rounded-card px-8 py-3">Vous aviez : <span data-testid="tv-word-majority" className="text-accent">{results.majorityWord}</span></span>
-              <span className="glass rounded-card px-8 py-3">Lui avait : <span data-testid="tv-word-imposter" className="text-accent">{results.imposterWord}</span></span>
+              <Panel className="px-8 py-3">Vous aviez : <span data-testid="tv-word-majority" className="text-accent">{results.majorityWord}</span></Panel>
+              <Panel className="px-8 py-3">Lui avait : <span data-testid="tv-word-imposter" className="text-accent">{results.imposterWord}</span></Panel>
             </div>
           </motion.div>
         )}

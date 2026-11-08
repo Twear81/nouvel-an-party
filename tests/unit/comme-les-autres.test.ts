@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import commeLesAutres, { cleanText, groupAnswers, withinOneEdit, type Pub, type Results } from "../../src/minigames/comme-les-autres/game";
+import { cleanText } from "../../src/minigames/helpers";
+import commeLesAutres, { MAX_LENGTH, groupAnswers, withinOneEdit, type Pub, type Results } from "../../src/minigames/comme-les-autres/game";
 import { createTestEngine } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
@@ -99,7 +100,7 @@ describe("comme-les-autres : réponses", () => {
     const { ctx, state, answer } = round(3);
     answer("p1", "  a    b  ".padEnd(100, "z"));
     expect(state.answers.get("p1")![0]!.length).toBe(40);
-    expect(cleanText("  tout   seul \n")).toBe("tout seul");
+    expect(cleanText("  tout   seul \n", MAX_LENGTH)).toBe("tout seul");
     for (const payload of [null, undefined, "x", 42, {}, { answers: "pomme" }, { answers: [1, null, {}] }, { answers: ["", "   ", "!!!"] }]) {
       game.input(state, "p2", payload, ctx);
     }

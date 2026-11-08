@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { endWhenAllDone, playerIds, shuffle } from "../../src/minigames/helpers";
+import { cleanText, endWhenAllDone, playerIds, shuffle, startGraceOnce } from "../../src/minigames/helpers";
 import { tieRanks } from "../../src/shared/ranking";
 
 const fakeCtx = (ids: string[], connected: string[]) => {
@@ -45,5 +45,33 @@ describe("shuffle", () => {
     const out = shuffle(src, () => 0.3);
     expect(src).toEqual([1, 2, 3, 4, 5]);
     expect([...out].sort()).toEqual(src);
+  });
+});
+
+describe("cleanText", () => {
+  it("réduit les espaces et retire les caractères de contrôle", () => {
+    expect(cleanText("  salut   les\n amis \u0007", 80)).toBe("salut les amis");
+  });
+  it("coupe à la longueur max (en caractères, emoji compris)", () => {
+    expect(cleanText("x".repeat(200), 80)).toHaveLength(80);
+    expect(cleanText("😀😀😀😀", 2)).toBe("😀😀");
+  });
+  it("renvoie une chaîne vide pour un non-texte", () => {
+    expect(cleanText(42, 80)).toBe("");
+    expect(cleanText(undefined)).toBe("");
+  });
+});
+
+describe("startGraceOnce", () => {
+  it("ne lance le countdown qu'une fois jusqu'à la remise à zéro", () => {
+    const calls: number[] = [];
+    const ctx = { countdown: (s: number, _f: () => void) => void calls.push(s) };
+    const state = { graceStarted: false };
+    expect(startGraceOnce(state, ctx, 2, () => {})).toBe(true);
+    expect(startGraceOnce(state, ctx, 2, () => {})).toBe(false);
+    expect(calls).toEqual([2]);
+    state.graceStarted = false;
+    expect(startGraceOnce(state, ctx, 3, () => {})).toBe(true);
+    expect(calls).toEqual([2, 3]);
   });
 });

@@ -8,7 +8,7 @@ import type { MiniGameViewProps } from "../../minigames/views-contract";
 import { gameViewProps, playersWithProfile, waitingPlayers } from "../net/helpers";
 import { useGame, type GameActions } from "../net/useGame";
 import { useRevealed } from "../net/useReveal";
-import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
+import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, Panel, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
 import { ProfileEditor } from "./ProfileEditor";
 import { useWakeLock } from "./useWakeLock";
 
@@ -76,7 +76,7 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
             </div>
           )}
           <p className="animate-pulse-soft text-ink-muted">En attente du lancement…</p>
-          <Button data-testid="edit-profile" variant="secondary" size="md" onClick={onEdit}>
+          <Button data-testid="edit-profile" variant="secondary" onClick={onEdit}>
             Modifier mon profil
           </Button>
         </Center>
@@ -193,9 +193,9 @@ function ResultsPhone({ snapshot, round, me, actions }: Pick<ScreenProps, "snaps
       </div>
       <div className="shrink-0 pb-3">
         {done ? (
-          <div data-testid="waiting-others" className="glass rounded-card py-5 text-center text-xl font-bold text-ink-muted animate-pulse-soft">
+          <Panel data-testid="waiting-others" className="py-5 text-center text-xl font-bold text-ink-muted animate-pulse-soft">
             En attente des autres ({doneCount}/{waiting.length})
-          </div>
+          </Panel>
         ) : (
           <Button
             data-testid="continue-button"
