@@ -3,7 +3,7 @@
 // Téléphone : un champ + un bouton qui change d'état (Envoyer → Envoyé → Renvoyer si on modifie).
 import { motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button, CheckIcon, fireConfetti, PlayerAvatar } from "../../web/ui";
+import { Button, CheckIcon, fireConfetti, PlayerAvatar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { AnswerGroup, Priv, Pub, Results } from "./game";
 
@@ -21,7 +21,7 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-9 text-center">
       <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-[90rem] text-balance text-[5.75rem] font-extrabold leading-[1.05]">
-        {pub.question}
+        {typo(pub.question)}
       </motion.h1>
       {pub.perPlayer > 1 && (
         <motion.div data-testid="tv-per-player" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className="glass rounded-chip px-10 py-2 font-display text-4xl text-accent">
@@ -120,7 +120,7 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
       }}
       className="flex min-h-0 flex-1 flex-col gap-4"
     >
-      <h1 className="shrink-0 text-balance text-center text-[1.65rem] font-extrabold leading-tight">{pub.question}</h1>
+      <h1 className="shrink-0 text-balance text-center text-[1.65rem] font-extrabold leading-tight">{typo(pub.question)}</h1>
 
       <div className="flex shrink-0 flex-col gap-3">
         {fields.map((i) => {
@@ -295,7 +295,7 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
 
   return (
     <div data-testid="comme-results" data-groups={results.groups.length} data-done={done ? "true" : "false"} className="flex min-h-0 flex-1 flex-col gap-4">
-      <h1 className="line-clamp-2 shrink-0 text-balance text-center text-5xl font-extrabold leading-tight">{results.question}</h1>
+      <h1 className="line-clamp-2 shrink-0 text-balance text-center text-5xl font-extrabold leading-tight">{typo(results.question)}</h1>
 
       <div className="flex min-h-0 flex-1 items-center justify-center">
         {n > 0 ? (

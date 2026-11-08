@@ -1,7 +1,7 @@
 // Écrans de "Ceci ou Cela" : deux réponses face à face (couleurs neutres bleu / rose : ce n'est pas "bien / mal").
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
-import { CheckIcon, PlayerAvatar } from "../../web/ui";
+import { CheckIcon, PlayerAvatar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -45,7 +45,7 @@ const Tv = ({ pub, round, playerById, players }: MiniGameViewProps<Pub>) => {
     <div className="flex min-h-0 flex-1 flex-col items-center justify-between gap-4 text-center">
       <ModeChip pub={pub} playerById={playerById} />
       <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="max-w-[90rem] text-balance text-[4.75rem] font-extrabold leading-[1.05]">
-        {pub.question}
+        {typo(pub.question)}
       </motion.h1>
 
       <div className="relative flex w-full max-w-[96rem] items-stretch gap-8">
@@ -58,7 +58,7 @@ const Tv = ({ pub, round, playerById, players }: MiniGameViewProps<Pub>) => {
             className={`flex min-h-[13rem] flex-1 items-center justify-center rounded-card px-6 py-8 shadow-card ${TONES[i]!.solid}`}
           >
             <span data-testid={`tv-choice-${i}`} className="text-balance break-words font-display leading-tight" style={{ fontSize: `${fit(label, 38, 3, 8)}rem` }}>
-              {label}
+              {typo(label)}
             </span>
           </motion.div>
         ))}
@@ -93,7 +93,7 @@ const Phone = ({ pub, priv, sendInput, playerById }: MiniGameViewProps<Pub, Priv
   const target = pub.targetId ? playerById(pub.targetId) : undefined;
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight">{pub.question}</h1>
+      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight">{typo(pub.question)}</h1>
       {priv?.isTarget ? (
         <div data-testid="phone-mode-cible" className="flex shrink-0 items-center justify-center gap-2 text-balance rounded-chip border-2 border-accent bg-accent/15 px-3 py-1.5 text-base font-bold text-accent">
           <GuessIcon /> Tu réponds pour de vrai !
@@ -200,10 +200,10 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
   else explain = `La majorité a choisi « ${results.choices[results.winner!]} » : ce camp gagne !`;
   return (
     <div data-testid="ceci-results" data-mode={results.mode} className="flex min-h-0 flex-1 flex-col gap-3">
-      <h1 className="text-balance text-center text-5xl font-extrabold leading-tight">{results.question}</h1>
+      <h1 className="text-balance text-center text-5xl font-extrabold leading-tight">{typo(results.question)}</h1>
       <div className="relative flex min-h-0 flex-1 gap-8">
         {([0, 1] as const).map((i) => (
-          <Camp key={i} index={i} label={results.choices[i]} ids={results.picks[i]} winner={results.winner === i} tie={tie} total={total} results={results} playerById={playerById} />
+          <Camp key={i} index={i} label={typo(results.choices[i])} ids={results.picks[i]} winner={results.winner === i} tie={tie} total={total} results={results} playerById={playerById} />
         ))}
         <div className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[0.4rem] border-bg bg-gold font-display text-4xl text-accent-ink shadow-glow">
           {tie ? "=" : "VS"}

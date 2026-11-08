@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Button, CheckIcon, fireConfetti, PlayerAvatar } from "../../web/ui";
+import { Button, CheckIcon, fireConfetti, PlayerAvatar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results, Verdict } from "./game";
 
@@ -52,7 +52,7 @@ const tvSize = (len: number) => (len <= 50 ? 6 : len <= 80 ? 5.25 : len <= 110 ?
 function Sentence({ start, ending, size, testId }: { start: string; ending: string; size: number; testId?: string }) {
   return (
     <p data-testid={testId} className="text-balance break-words font-extrabold leading-[1.1]" style={{ fontSize: `${size}rem` }}>
-      <span>{start}</span> <span className="text-accent">{ending}</span>
+      <span>{typo(start)}</span> <span className="text-accent">{typo(ending)}</span>
     </p>
   );
 }
@@ -227,7 +227,7 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center gap-3 pb-3">
-      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight min-[400px]:text-3xl">{pub.start}</h1>
+      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight min-[400px]:text-3xl">{typo(pub.start)}</h1>
       <div className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
         <textarea
           data-testid="split-input"
@@ -269,7 +269,7 @@ function PhoneVote({ pub, priv, sendInput }: Props) {
     <div className="flex min-h-0 flex-1 flex-col gap-3 pb-1">
       <div className="glass shrink-0 rounded-card px-4 py-3 text-center">
         <p data-testid="phone-sentence" className={`text-balance break-words font-extrabold leading-tight ${long ? "text-xl" : "text-2xl"}`}>
-          <span>{pub.start}</span> <span className="text-accent">{ending}</span>
+          <span>{typo(pub.start)}</span> <span className="text-accent">{typo(ending)}</span>
         </p>
       </div>
       {priv?.isAuthor ? (
@@ -322,7 +322,7 @@ function PhoneReveal({ pub, priv, snapshot, playerById }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 text-center">
       <p className="line-clamp-3 text-balance px-2 text-xl font-bold leading-tight text-ink-muted">
-        {pub.start} {ending}
+        {typo(pub.start)} {typo(ending)}
       </p>
       {!verdict ? (
         <p data-testid="reveal-wait" className="font-display text-3xl text-accent">Regarde la TV !</p>
@@ -369,7 +369,7 @@ const TvResults = ({ results, playerById }: Props) => {
   const n = results.sentences.length;
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <h1 className="shrink-0 text-balance text-center text-4xl font-extrabold leading-tight">{results.start}</h1>
+      <h1 className="shrink-0 text-balance text-center text-4xl font-extrabold leading-tight">{typo(results.start)}</h1>
       <div data-testid="sentences-recap" className={`grid min-h-0 flex-1 auto-rows-fr content-center gap-3 ${n > 3 ? "grid-cols-2" : "grid-cols-1"}`}>
         {n === 0 && <p className="text-center text-5xl text-ink-muted">Personne n'a écrit…</p>}
         {results.sentences.map((s, i) => {
@@ -384,12 +384,12 @@ const TvResults = ({ results, playerById }: Props) => {
               transition={{ delay: RECAP_FIRST_S + i * RECAP_STEP_S, type: "spring" }}
               className={`flex min-h-0 items-center gap-4 rounded-card px-4 py-2 ${s.best ? "border-[0.25rem] border-accent bg-accent/15 shadow-glow" : "glass"}`}
             >
-              <div className="flex w-[7.5rem] shrink-0 flex-col items-center gap-0.5">
+              <div className="flex w-[11rem] shrink-0 flex-col items-center gap-0.5">
                 <PlayerAvatar profile={author?.profile ?? null} size="sm" badge={s.best ? <span aria-hidden>✂️</span> : undefined} />
-                <span className="w-full truncate text-center text-lg font-bold">{author?.profile?.name}</span>
+                <span className="line-clamp-2 w-full break-words text-center text-lg font-bold leading-tight">{author?.profile?.name}</span>
               </div>
               <p className="min-w-0 flex-1 text-balance break-words text-2xl font-bold leading-tight">
-                <span className="text-ink-muted">{results.start}</span> <span className="text-accent">{s.text}</span>
+                <span className="text-ink-muted">{typo(results.start)}</span> <span className="text-accent">{typo(s.text)}</span>
               </p>
               {s.played && (
                 <div className="shrink-0 text-center font-display leading-none">

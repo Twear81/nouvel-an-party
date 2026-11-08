@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useState } from "react";
-import { CheckIcon, PlayerAvatar } from "../../web/ui";
+import { CheckIcon, PlayerAvatar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { centsToDraft, draftToCents, formatCents, formatDraft, pressKey } from "./amount";
 import type { Priv, Pub, Results } from "./game";
@@ -29,11 +29,11 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
         className="max-w-[100rem] text-balance font-display leading-tight text-gold-gradient"
         style={{ fontSize: `${fit(pub.nom, 96, 3.5, 6)}rem` }}
       >
-        {pub.nom}
+        {typo(pub.nom)}
       </motion.h1>
       {pub.details && (
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-balance text-4xl font-semibold text-ink-muted">
-          {pub.details}
+          {typo(pub.details)}
         </motion.p>
       )}
 

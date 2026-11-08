@@ -1,7 +1,7 @@
 // Écrans de "Tier list" : n'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { CheckIcon, fireConfetti, PlayerAvatar } from "../../web/ui";
+import { CheckIcon, fireConfetti, PlayerAvatar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 import { TIER_BG, TIER_BORDER, TIER_TEXT, TierBadge, TierBoard } from "./tiers";
@@ -14,7 +14,7 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-balance text-center text-5xl font-extrabold leading-tight">
-        {pub.question}
+        {typo(pub.question)}
       </motion.h1>
       <TierBoard tiers={pub.tiers} testId="tier-board">
         {() => null}
@@ -55,7 +55,7 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
   const manyTiers = pub.tiers.length > 4;
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <h1 className="shrink-0 text-balance text-center text-lg font-extrabold leading-tight min-[400px]:text-xl">{pub.question}</h1>
+      <h1 className="shrink-0 text-balance text-center text-lg font-extrabold leading-tight min-[400px]:text-xl">{typo(pub.question)}</h1>
       <div data-testid="rate-progress" className="flex h-6 shrink-0 items-center gap-2">
         {complete ? (
           <motion.p initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex w-full items-center justify-center gap-2 text-base font-bold text-good">
@@ -166,7 +166,7 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
   const size = results.tiers.length > 5 ? "sm" : "md";
   return (
     <div data-testid="tier-results" data-revealed={revealed} data-total={order.length} className="flex min-h-0 flex-1 flex-col gap-3">
-      <h1 className="text-balance text-center text-4xl font-extrabold leading-tight">{results.question}</h1>
+      <h1 className="text-balance text-center text-4xl font-extrabold leading-tight">{typo(results.question)}</h1>
       {order.length === 0 ? (
         <p className="flex flex-1 items-center justify-center text-5xl text-ink-muted">Personne n'a noté…</p>
       ) : (

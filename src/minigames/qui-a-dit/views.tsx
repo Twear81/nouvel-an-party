@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Button, CheckIcon, fireConfetti, PlayerAvatar } from "../../web/ui";
+import { Button, CheckIcon, fireConfetti, PlayerAvatar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -59,7 +59,7 @@ function TvWrite({ pub, round, players }: Props) {
         ✍️
       </motion.span>
       <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} data-testid="tv-prompt" className="max-w-[92rem] text-balance text-[5.75rem] font-extrabold leading-[1.05]">
-        {pub.prompt}
+        {typo(pub.prompt)}
       </motion.h1>
       <div data-testid="tv-written-count" className={`font-display text-5xl ${pub.allWritten ? "text-good" : "text-ink-muted"}`}>
         <span className={pub.allWritten ? "" : "text-accent"}>{done}</span> / {writers.length}
@@ -86,7 +86,7 @@ function TvGuess({ pub, playerById }: Props) {
         <span data-testid="tv-quote-index" className="rounded-chip bg-surface-strong px-5 py-1 font-display text-3xl text-accent">
           {pub.index + 1} / {pub.total}
         </span>
-        <span className="min-w-0 truncate text-3xl text-ink-muted">{pub.prompt}</span>
+        <span className="min-w-0 truncate text-3xl text-ink-muted">{typo(pub.prompt)}</span>
       </div>
 
       <div className="flex min-h-0 w-full flex-1 items-center justify-center">
@@ -211,7 +211,7 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center gap-3 pb-3">
-      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight min-[400px]:text-3xl">{pub.prompt}</h1>
+      <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight min-[400px]:text-3xl">{typo(pub.prompt)}</h1>
       <div className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
         <textarea
           data-testid="quote-input"
@@ -365,7 +365,7 @@ const TvResults = ({ results, playerById }: Props) => {
   const n = results.quotes.length;
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
-      <h1 className="shrink-0 text-balance text-center text-4xl font-extrabold leading-tight">{results.prompt}</h1>
+      <h1 className="shrink-0 text-balance text-center text-4xl font-extrabold leading-tight">{typo(results.prompt)}</h1>
       {(results.trickster || results.detective) && (
         <div className="flex shrink-0 flex-wrap items-center justify-center gap-6">
           {results.trickster && results.trickster.playerIds.length <= 3 && <Award testId="award-trickster" icon="🎭" title="Meilleur piégeur" ids={results.trickster.playerIds} detail={`${results.trickster.fooled} trompé${results.trickster.fooled > 1 ? "s" : ""}`} playerById={playerById} />}
@@ -383,7 +383,7 @@ const TvResults = ({ results, playerById }: Props) => {
                 <PlayerAvatar profile={author?.profile ?? null} size="sm" />
                 <span className="w-full truncate text-center text-lg font-bold">{author?.profile?.name}</span>
               </div>
-              <p className="min-w-0 flex-1 text-balance break-words text-2xl font-bold italic leading-tight">“{q.text}”</p>
+              <p className="min-w-0 flex-1 text-balance break-words text-2xl font-bold italic leading-tight">“{typo(q.text)}”</p>
               {q.played && (
                 <div className="shrink-0 text-center font-display leading-none">
                   <div className="text-3xl text-accent">{good}/{q.votes.length}</div>

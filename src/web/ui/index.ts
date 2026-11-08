@@ -7,3 +7,4 @@ export * from "./Stage";
 export * from "./confetti";
 export * from "./ConfirmDialog";
 export * from "./Icons";
+export * from "./typo";
