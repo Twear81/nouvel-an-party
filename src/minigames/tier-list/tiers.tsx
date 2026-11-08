@@ -10,7 +10,7 @@ export const TIER_BORDER = ["border-tier-1", "border-tier-2", "border-tier-3", "
 /** Pastille colorée d'un étage (lettre sur fond de l'étage). */
 export function TierBadge({ index, label, className = "" }: { index: number; label: string; className?: string }) {
   return (
-    <span className={`flex items-center justify-center font-display text-accent-ink ${TIER_BG[index]} ${className}`}>{label}</span>
+    <span data-ui="tier-label" data-tier={index} className={`flex items-center justify-center font-display text-accent-ink ${TIER_BG[index]} ${className}`}>{label}</span>
   );
 }
 
@@ -33,8 +33,8 @@ export function TierBoard({
   return (
     <div data-testid={testId} className="flex min-h-0 flex-1 flex-col gap-2">
       {tiers.map((label, i) => (
-        <div key={label} data-testid={`tier-row-${i}`} className="glass flex max-h-44 min-h-0 flex-1 rounded-btn">
-          <div className={`flex w-[9rem] shrink-0 items-center justify-center rounded-l-btn ${TIER_BG[i]}`}>
+        <div key={label} data-ui="tier-row" data-tier={i} data-testid={`tier-row-${i}`} className="glass flex max-h-44 min-h-0 flex-1 rounded-btn">
+          <div data-ui="tier-label" data-tier={i} className={`flex w-[9rem] shrink-0 items-center justify-center rounded-l-btn ${TIER_BG[i]}`}>
             <motion.span
               key={pulse(i)}
               initial={pulse(i) > 0 ? { scale: 1.45, rotate: -8 } : false}

@@ -131,12 +131,12 @@ function WordPeek({ word }: { word: string }) {
     return () => clearTimeout(id);
   }, [shown]);
   return (
-    <button
-      type="button"
+    <Button
+      variant="secondary"
       data-testid="word-peek"
       data-shown={shown}
       onClick={() => setShown((s) => !s)}
-      className="glass flex h-[3.25rem] w-full shrink-0 items-center justify-center gap-2 rounded-btn px-4 text-xl font-bold [-webkit-touch-callout:none]"
+      className="flex h-[3.25rem] w-full shrink-0 items-center justify-center gap-2 !px-4 !py-0 !text-xl !font-bold [-webkit-touch-callout:none]"
     >
       {shown ? (
         <span data-testid="word-peek-word" className="truncate font-display text-2xl text-accent">{word}</span>
@@ -145,7 +145,7 @@ function WordPeek({ word }: { word: string }) {
           <span aria-hidden>🔒</span> <span className="text-ink-muted">Voir mon mot</span>
         </>
       )}
-    </button>
+    </Button>
   );
 }
 

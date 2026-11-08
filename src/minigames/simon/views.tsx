@@ -37,6 +37,7 @@ function TvPad({ index, lit, note, dim }: { index: number; lit: boolean; note: n
   const pad = PADS[index]!;
   return (
     <motion.div
+      data-ui="pad"
       data-testid={`simon-tv-pad-${index}`}
       data-lit={lit ? "true" : "false"}
       animate={{ scale: lit ? 1.05 : 1, opacity: dim && !lit ? 0.5 : 1 }}
@@ -62,7 +63,7 @@ function Disc({ pub }: { pub: Pub }) {
           <TvPad key={i} index={i} lit={lit === i} note={note} dim={pub.stage === "show" || pub.stage === "wait"} />
         ))}
       </div>
-      <div className="absolute left-1/2 top-1/2 flex h-[10rem] w-[10rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border-[0.6rem] border-surface-strong bg-bg shadow-card">
+      <div data-ui="hub" className="absolute left-1/2 top-1/2 flex h-[10rem] w-[10rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border-[0.6rem] border-surface-strong bg-bg shadow-card">
         <motion.span key={pub.length} initial={{ scale: 1.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 260, damping: 14 }} data-testid="simon-length" className="font-display text-[4.5rem] leading-none text-gold-gradient">
           {pub.length}
         </motion.span>
@@ -180,6 +181,7 @@ function PhonePad({ index, active, flashed, onTap }: { index: number; active: bo
       disabled={!active}
       whileTap={active ? { scale: 0.94, y: 6 } : undefined}
       animate={{ opacity: active ? 1 : 0.35 }}
+      data-ui="pad"
       // pointerdown plutôt que click : la touche part dès le contact du doigt
       onPointerDown={(e) => {
         e.preventDefault();

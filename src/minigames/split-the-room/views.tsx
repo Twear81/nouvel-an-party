@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { cleanText } from "../../shared/clean-text";
-import { AnsweredCount, AnsweredRoster, Button, CheckIcon, Choice, fireConfetti, PlayerAvatar, SelectedBadge, typo, VoteDots } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, Button, CheckIcon, Choice, DuelGauge, fireConfetti, PlayerAvatar, SelectedBadge, typo, VoteDots } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results, Verdict } from "./game";
 
@@ -130,11 +130,7 @@ function Gauge({ sequence, shown }: { sequence: boolean[]; shown: number }) {
           <span className="text-5xl">NON</span> {no}
         </span>
       </div>
-      <div data-testid="tv-gauge" className="relative h-20 w-full overflow-hidden rounded-chip bg-surface-strong">
-        <div className="absolute inset-y-0 left-0 bg-good transition-[width] duration-300" style={{ width: n ? `${(yes / n) * 100}%` : 0 }} />
-        <div className="absolute inset-y-0 right-0 bg-bad transition-[width] duration-300" style={{ width: n ? `${(no / n) * 100}%` : 0 }} />
-        <div className="absolute inset-y-0 left-1/2 w-1.5 -translate-x-1/2 bg-ink" />
-      </div>
+      <DuelGauge data-testid="tv-gauge" className="h-20 w-full" left={n ? yes / n : 0} right={n ? no / n : 0} />
     </div>
   );
 }

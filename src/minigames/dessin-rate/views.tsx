@@ -203,7 +203,7 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
       <div className="order-2 min-h-0 flex-1">
         <DrawingPad strokes={strokes} color={color} width={width} disabled={snapshot.paused} onChange={change} />
       </div>
-      <div data-testid="draw-tools" className="order-1 -mx-3 flex shrink-0 items-center justify-center gap-1">
+      <div data-ui="toolbar" data-testid="draw-tools" className="order-1 -mx-3 flex shrink-0 items-center justify-center gap-1">
         {Array.from({ length: PALETTE }, (_, i) => (
           <button
             key={i}
@@ -211,6 +211,8 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
             data-testid={`draw-color-${i}`}
             aria-label={`Couleur ${i + 1}`}
             aria-pressed={color === i}
+            data-ui="tool" data-kind="pen"
+            data-selected={color === i}
             onClick={() => setColor(i)}
             className={`${TOOL} ${PEN_BG[i]} ${color === i ? "scale-110 border-accent shadow-glow" : "border-ink/40"}`}
           />
@@ -222,16 +224,18 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
             data-testid={`draw-width-${i}`}
             aria-label={i === 0 ? "Trait fin" : "Trait épais"}
             aria-pressed={width === i}
+            data-ui="tool" data-kind="width"
+            data-selected={width === i}
             onClick={() => setWidth(i)}
             className={`${TOOL} bg-surface-strong ${width === i ? "border-accent" : "border-transparent"}`}
           >
             <span className={`rounded-full bg-ink ${i === 0 ? "h-1.5 w-1.5" : "h-3.5 w-3.5"}`} />
           </button>
         ))}
-        <button type="button" data-testid="draw-undo" aria-label="Annuler le dernier trait" disabled={strokes.length === 0} onClick={() => change(strokes.slice(0, -1), true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
+        <button type="button" data-ui="tool" data-kind="action" data-selected="false" data-testid="draw-undo" aria-label="Annuler le dernier trait" disabled={strokes.length === 0} onClick={() => change(strokes.slice(0, -1), true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
           <UndoIcon />
         </button>
-        <button type="button" data-testid="draw-clear" aria-label="Tout effacer" disabled={strokes.length === 0} onClick={() => change([], true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
+        <button type="button" data-ui="tool" data-kind="action" data-selected="false" data-testid="draw-clear" aria-label="Tout effacer" disabled={strokes.length === 0} onClick={() => change([], true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
           <TrashIcon />
         </button>
       </div>

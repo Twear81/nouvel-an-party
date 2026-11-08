@@ -14,3 +14,4 @@ export * from "./SelectedBadge";
 export * from "./VoteDots";
 export * from "./Choice";
 export * from "./ResultBar";
+export * from "./DuelGauge";

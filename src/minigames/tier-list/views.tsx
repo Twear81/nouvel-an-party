@@ -1,7 +1,7 @@
 // Écrans de "Tier list" : n'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { AnsweredCount, AnsweredRoster, CheckIcon, fireConfetti, PlayerAvatar, ResultBar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, CheckIcon, Choice, fireConfetti, PlayerAvatar, ResultBar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 import { TIER_BG, TIER_BORDER, TIER_TEXT, TierBadge, TierBoard } from "./tiers";
@@ -85,20 +85,20 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
                 {pub.tiers.map((label, i) => {
                   const selected = tier === i;
                   return (
-                    <motion.button
+                    <Choice
                       key={label}
-                      type="button"
+                      tone="flat"
+                      radius="btn"
+                      showCheck={false}
+                      selected={selected}
+                      state={tier !== undefined && !selected ? "faded" : "idle"}
                       data-testid={`rate-${p.id}-${i}`}
-                      aria-pressed={selected}
                       aria-label={`${p.profile!.name} : ${label}`}
-                      whileTap={{ scale: 0.88 }}
-                      animate={{ scale: selected ? 1.08 : 1, opacity: tier !== undefined && !selected ? 0.4 : 1 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 18 }}
                       onClick={() => void sendInput({ target: p.id, tier: i }).catch(() => {})}
-                      className={`min-w-0 flex-1 rounded-btn border-2 font-display text-lg leading-none ${TIER_BORDER[i]} ${selected ? `${TIER_BG[i]} text-accent-ink shadow-glow` : `bg-bg/40 ${TIER_TEXT[i]}`}`}
+                      className={`min-w-0 flex-1 border-2 font-display text-lg leading-none ${TIER_BORDER[i]} ${selected ? `${TIER_BG[i]} text-accent-ink` : `bg-bg/40 ${TIER_TEXT[i]}`}`}
                     >
                       {label}
-                    </motion.button>
+                    </Choice>
                   );
                 })}
               </div>

@@ -10,7 +10,7 @@ export type ChoiceState = "idle" | "correct" | "wrong" | "faded";
  * Couleur de fond. `glass` (défaut) : verre, cadre accent quand il est choisi. `cool` / `hot` / `good` / `bad` : plein,
  * anneau quand il est choisi (camps face à face, oui / non). `plain` : aucun fond, le contenu ou `className` le fournit.
  */
-export type ChoiceTone = "glass" | "cool" | "hot" | "good" | "bad" | "plain";
+export type ChoiceTone = "glass" | "cool" | "hot" | "good" | "bad" | "plain" | "flat";
 
 // Classes écrites en toutes lettres pour que Tailwind les repère.
 const TONES: Record<ChoiceTone, { idle: string; selected: string }> = {
@@ -20,6 +20,8 @@ const TONES: Record<ChoiceTone, { idle: string; selected: string }> = {
   good: { idle: "bg-good text-bg shadow-[0_0.35rem_0_var(--color-good-deep)]", selected: "bg-good text-bg shadow-[0_0.35rem_0_var(--color-good-deep)] ring-[0.4rem] ring-ink" },
   bad: { idle: "bg-bad text-bg shadow-[0_0.35rem_0_var(--color-bad-deep)]", selected: "bg-bad text-bg shadow-[0_0.35rem_0_var(--color-bad-deep)] ring-[0.4rem] ring-ink" },
   plain: { idle: "shadow-card", selected: "shadow-card ring-[0.35rem] ring-ink" },
+  // Sans relief ni anneau (petits boutons serrés, ex. notes d'une tier list) : `className` fournit couleurs et bordure.
+  flat: { idle: "", selected: "shadow-glow" },
 };
 const STATES: Record<ChoiceState, string> = {
   idle: "",
@@ -36,6 +38,10 @@ export interface ChoiceProps extends Omit<HTMLMotionProps<"button">, "ref" | "ch
   /** Lettre ou numéro affiché en pastille avant le contenu (A, B…). */
   keyLabel?: string;
   tone?: ChoiceTone;
+  /** Rayon : `card` (grande carte, défaut) ou `btn` (petit bouton). */
+  radius?: "card" | "btn";
+  /** Pastille ✓ sur le choix enregistré (défaut) ; faux pour les petits boutons où la sélection se voit déjà. */
+  showCheck?: boolean;
   /** Pastille ✓ : taille, couleur (voir SelectedBadge) et position (`absolute right-3 top-3` par défaut). */
   checkSize?: "sm" | "md" | "lg";
   checkTone?: "ink" | "accent" | "good";
@@ -48,6 +54,8 @@ export function Choice({
   state = "idle",
   keyLabel,
   tone = "glass",
+  radius = "card",
+  showCheck = true,
   checkSize = "lg",
   checkTone = "ink",
   checkClassName = "absolute right-3 top-3",
@@ -66,7 +74,7 @@ export function Choice({
       data-ui="choice"
       data-selected={selected ? "true" : "false"}
       data-state={state}
-      className={`relative flex items-center justify-center rounded-card ${TONES[tone][selected ? "selected" : "idle"]} ${STATES[state]} ${className}`}
+      className={`relative flex items-center justify-center ${radius === "btn" ? "rounded-btn" : "rounded-card"} ${TONES[tone][selected ? "selected" : "idle"]} ${STATES[state]} ${className}`}
     >
       {keyLabel != null && (
         <span data-ui="choice-key" className="mr-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-btn border-2 border-current font-display text-xl">
@@ -77,7 +85,7 @@ export function Choice({
       <span data-ui="choice-label" className="contents">
         {children}
       </span>
-      {selected && <SelectedBadge ui="choice-check" tone={checkTone} size={checkSize} className={checkClassName} />}
+      {selected && showCheck && <SelectedBadge ui="choice-check" tone={checkTone} size={checkSize} className={checkClassName} />}
     </motion.button>
   );
 }
