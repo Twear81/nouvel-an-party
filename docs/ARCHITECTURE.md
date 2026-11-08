@@ -34,6 +34,10 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   comptent depuis `round.resultsAt` (heure serveur) : un téléphone qui recharge en pleine révélation est resynchronisé.
 - **final** : classement.
 
+Les jeux « interlude » (surprises, ex. Culture gênante) s'insèrent dans le plan environ toutes les N manches
+normales, sans **intro** (le moteur passe directement de la manche précédente à `playing`) et avec une TV en plein
+écran gérée par le jeu ; ils ne comptent pas dans « Manche x / y ». Voir `docs/creer-un-mini-jeu.md`, « Jeux interlude ».
+
 ## Mini-jeux (`src/minigames/<id>/`)
 | Fichier | Rôle |
 |---|---|

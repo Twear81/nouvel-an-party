@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
-import { GameError } from "../../src/server/engine/engine";
-import { createTestEngine, validProfile } from "./helpers/engine-setup";
+import { GameEngine, GameError } from "../../src/server/engine/engine";
+import { createTestEngine, MemoryPersistence, validProfile } from "./helpers/engine-setup";
+import { FakeClock } from "./helpers/fake-clock";
+import { makeFakeGame } from "./helpers/fake-game";
+import { seededRng } from "./helpers/rng";
 
 // Les erreurs de mini-jeu sont loguées par le moteur : on les fait taire pour garder une sortie lisible.
 let errSpy: ReturnType<typeof spyOn>;
@@ -598,5 +601,113 @@ describe("robustesse face aux bugs d'un mini-jeu", () => {
     t.engine.input(t.ids[1]!, { v: 3 });
     t.clock.advance(T.round);
     expect(t.engine.snapshot(null).round!.deltas).toEqual({ [t.ids[1]!]: 3 });
+  });
+});
+
+describe("manches interlude (jeu surprise)", () => {
+  /** Jeu normal « a » + interlude « s » (une fois toutes les 2 manches normales). */
+  function withInterlude(counts: Record<string, number>, o: Parameters<typeof createTestEngine>[0] = {}) {
+    const a = makeFakeGame({ id: "a", items: 6 });
+    const s = makeFakeGame({ id: "s", items: 4, interlude: 2 });
+    const t = createTestEngine({ ...o, games: [a.loaded, s.loaded] });
+    t.engine.setSetup({ counts });
+    return { ...t, a, s };
+  }
+
+  it("saute l'écran d'annonce : directement en playing, onPlay appelé, chrono lancé", () => {
+    const t = withInterlude({ a: 0, s: 1 });
+    t.engine.start();
+    const s = t.engine.snapshot(null);
+    expect(s.phase).toBe("playing");
+    expect(s.round).toMatchObject({ gameId: "s", interlude: true });
+    expect(s.round!.deadline).toBe(t.clock.now() + T.round);
+    expect(t.s.calls).toEqual(["start", "onPlay"]);
+  });
+
+  it("une manche normale garde son annonce", () => {
+    const t = withInterlude({ a: 1, s: 1 });
+    t.engine.start();
+    expect(t.engine.snapshot(null)).toMatchObject({ phase: "intro", round: { interlude: false } });
+  });
+
+  it("l'interlude s'intercale dans le plan et ne compte pas dans « Manche x / y »", () => {
+    const t = withInterlude({ a: 4, s: 1 });
+    t.engine.start();
+    const seen: { game: string; number: number; normalTotal: number; total: number; interlude: boolean }[] = [];
+    for (let guard = 0; guard < 20; guard++) {
+      const s = t.engine.snapshot(null);
+      if (s.phase === "final") break;
+      if (s.phase === "intro") t.clock.advance(T.intro);
+      else if (s.phase === "playing") t.clock.advance(T.round);
+      else {
+        seen.push({ game: s.round!.gameId, number: s.round!.number, normalTotal: s.round!.normalTotal, total: s.round!.total, interlude: s.round!.interlude });
+        t.engine.skip();
+      }
+    }
+    expect(seen).toHaveLength(6); // 4 manches normales + 2 interludes
+    expect(seen.filter((r) => r.interlude)).toHaveLength(2);
+    expect(seen.every((r) => r.normalTotal === 4 && r.total === 6)).toBe(true);
+    expect(seen.filter((r) => !r.interlude).map((r) => r.number)).toEqual([1, 2, 3, 4]);
+    expect(seen[0]!.interlude).toBe(false);
+  });
+
+  it("pause, +10 s et « Passer » restent disponibles pendant un interlude", () => {
+    const t = withInterlude({ a: 0, s: 1 });
+    t.engine.start();
+    t.engine.pause();
+    expect(t.engine.snapshot(null).paused).toBe(true);
+    t.clock.advance(60_000);
+    expect(t.engine.snapshot(null).phase).toBe("playing");
+    t.engine.resume();
+    t.engine.addTime(10);
+    expect(t.engine.snapshot(null).round!.timerTotalMs).toBe(T.round + 10_000);
+    t.engine.skip();
+    expect(t.engine.snapshot(null).phase).toBe("results");
+  });
+
+  it("les résultats d'un interlude marquent des points normalement", () => {
+    const t = withInterlude({ a: 0, s: 1 });
+    t.engine.start();
+    t.engine.input(t.ids[0]!, { v: 25 });
+    t.clock.advance(T.round);
+    const s = t.engine.snapshot(null);
+    expect(s.phase).toBe("results");
+    expect(s.round!.deltas).toEqual({ [t.ids[0]!]: 25 });
+    expect(s.players.find((p) => p.id === t.ids[0])!.score).toBe(25);
+  });
+
+  it("la sauvegarde contient les interludes ; la reprise rejoue l'interlude interrompu sans annonce", () => {
+    const persistence = new MemoryPersistence();
+    const t = withInterlude({ a: 2, s: 1 }, { persistence });
+    t.engine.start();
+    for (let guard = 0; guard < 10 && !t.engine.snapshot(null).round!.interlude; guard++) {
+      const phase = t.engine.snapshot(null).phase;
+      if (phase === "intro") t.clock.advance(T.intro);
+      else if (phase === "playing") t.clock.advance(T.round);
+      else t.engine.skip();
+    }
+    expect(t.engine.snapshot(null)).toMatchObject({ phase: "playing", round: { interlude: true } });
+    expect(persistence.data!.phase).toBe("playing");
+    expect(persistence.data!.plan.filter((r) => r.interlude)).toHaveLength(1);
+    const savedIndex = persistence.data!.roundIndex;
+
+    // Redémarrage du serveur
+    const a = makeFakeGame({ id: "a", items: 6 });
+    const s = makeFakeGame({ id: "s", items: 4, interlude: 2 });
+    const clock = new FakeClock();
+    const engine = new GameEngine({
+      games: [a.loaded, s.loaded],
+      settings: { title: "Test", targetMinutes: 1, order: "melange", introSeconds: 4 },
+      joinUrl: "http://test",
+      clock,
+      rng: seededRng(1),
+      persistence,
+    });
+    // « Manche 1/2 » : l'interlude n'est pas compté dans la proposition de reprise.
+    expect(engine.snapshot(null).resumable).toMatchObject({ total: 2 });
+    engine.resumeSave();
+    const after = engine.snapshot(null);
+    expect(after).toMatchObject({ phase: "playing", round: { index: savedIndex, interlude: true } });
+    expect(s.calls).toEqual(["start", "onPlay"]);
   });
 });

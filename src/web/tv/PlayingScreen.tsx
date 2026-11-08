@@ -6,9 +6,12 @@ export function RoundHeader({ round, children }: { round: RoundInfo; children?: 
   return (
     <header className="flex items-center justify-between gap-8 px-14 pt-8">
       <div className="flex items-center gap-5">
-        <span className="rounded-chip bg-surface-strong px-6 py-2 font-display text-3xl text-accent">
-          {round.index + 1} / {round.total}
-        </span>
+        {/* Un interlude n'a pas de numéro : le compter dévoilerait sa venue. */}
+        {!round.interlude && (
+          <span className="rounded-chip bg-surface-strong px-6 py-2 font-display text-3xl text-accent">
+            {round.number} / {round.normalTotal}
+          </span>
+        )}
         <span className="font-display text-3xl text-ink-muted">{round.gameName}</span>
       </div>
       {children}
@@ -17,8 +20,16 @@ export function RoundHeader({ round, children }: { round: RoundInfo; children?: 
 }
 
 export function PlayingScreen({ snapshot, round }: { snapshot: GameSnapshot; round: RoundInfo }) {
+  // Interlude : pas de cadre (en-tête, chrono standard). Le jeu met tout en scène, en plein écran.
+  if (round.interlude) {
+    return (
+      <div data-testid="tv-playing" data-interlude="true" className="flex min-h-0 flex-1 flex-col">
+        <TvGameView snapshot={snapshot} round={round} kind="Tv" />
+      </div>
+    );
+  }
   return (
-    <div data-testid="tv-playing" className="flex min-h-0 flex-1 flex-col">
+    <div data-testid="tv-playing" data-interlude="false" className="flex min-h-0 flex-1 flex-col">
       <RoundHeader round={round}>
         <Countdown round={round} size="tv" />
       </RoundHeader>

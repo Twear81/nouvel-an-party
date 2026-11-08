@@ -2,6 +2,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import QRCode from "qrcode";
 import { useEffect, useRef, useState } from "react";
+import { interludeCounts } from "../../shared/interlude";
 import type { GameSnapshot } from "../../shared/types";
 import type { GameActions } from "../net/useGame";
 import { Button, CloseIcon, ConfirmDialog, Panel, PlayerAvatar, type AvatarSize } from "../ui";
@@ -39,8 +40,18 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   const [kicking, setKicking] = useState<{ id: string; name: string } | null>(null);
 
   const many = catalog.length > 4;
-  const totalRounds = catalog.reduce((n, g) => n + (setup.counts[g.id] ?? 0), 0);
-  const totalSeconds = catalog.reduce((n, g) => n + (setup.counts[g.id] ?? 0) * g.secondsPerRound, 0);
+  // Au-delà de 10 mini-jeux, les deux colonnes se serrent pour laisser sa place au QR code et aux invités.
+  const crowded = catalog.length > 10;
+  const normalGames = catalog.filter((g) => g.interlude === undefined);
+  const normalRounds = normalGames.reduce((n, g) => n + (setup.counts[g.id] ?? 0), 0);
+  // Les interludes (surprises) sont des interrupteurs : leur nombre de manches découle des manches normales choisies.
+  const planned = interludeCounts(
+    normalRounds,
+    catalog.filter((g) => g.interlude !== undefined).map((g) => ({ id: g.id, every: g.interlude!, available: g.available, enabled: (setup.counts[g.id] ?? 0) > 0 })),
+  );
+  const roundsOf = (g: (typeof catalog)[number]) => (g.interlude === undefined ? (setup.counts[g.id] ?? 0) : (planned[g.id] ?? 0));
+  const totalRounds = catalog.reduce((n, g) => n + roundsOf(g), 0);
+  const totalSeconds = catalog.reduce((n, g) => n + roundsOf(g) * g.secondsPerRound, 0);
   const ready = players.filter((p) => p.profile && p.connected).length;
 
   const setCount = (id: string, value: number, max: number) => {
@@ -55,7 +66,10 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   else if (totalRounds === 0) blocked = "Choisis au moins une manche";
 
   // Peu de joueurs : grands avatars pour que le lobby ne paraisse pas vide ; 8 et plus : tout tient sur deux rangées.
-  const avatarSize: AvatarSize = players.length <= 3 ? "2xl" : players.length <= 8 ? "xl" : "lg";
+  // Beaucoup de mini-jeux : le panneau du bas est plus haut, les avatars rétrécissent d'un cran.
+  const SMALLER: Record<AvatarSize, AvatarSize> = { "2xl": "xl", xl: "lg", lg: "md", md: "md", sm: "sm", xs: "xs" };
+  const baseSize: AvatarSize = players.length <= 3 ? "2xl" : players.length <= 8 ? "xl" : "lg";
+  const avatarSize = crowded ? SMALLER[baseSize] : baseSize;
   const tileWidth = players.length <= 3 ? "w-[17rem]" : "w-[14rem]";
 
   return (
@@ -116,38 +130,70 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
       </div>
 
       {/* Réglage de la partie */}
-      <Panel className="flex shrink-0 flex-col gap-3 px-8 py-5">
+      <Panel className={`flex shrink-0 flex-col gap-3 px-8 ${crowded ? "py-3" : "py-5"}`}>
         {resumable && host && (
           <div className="flex items-center justify-between rounded-btn bg-accent/15 px-6 py-3">
             <span className="text-2xl font-semibold text-accent">Une partie interrompue a été trouvée.</span>
             <Button data-testid="resume-game" size="md" onClick={() => void actions.resumeSave().catch((e: Error) => setError(e.message))}>
-              Reprendre la partie (manche {resumable.roundIndex + 1}/{resumable.total})
+              Reprendre la partie{resumable.total > 0 && ` (manche ${resumable.roundIndex + 1}/${resumable.total})`}
             </Button>
           </div>
         )}
         {/* Beaucoup de mini-jeux : deux colonnes, pour laisser la place aux invités. */}
-        <div className={many ? "grid grid-cols-2 gap-x-12 gap-y-2" : "flex flex-col gap-2"}>
+        <div className={many ? `grid grid-cols-2 gap-x-12 ${crowded ? "gap-y-1" : "gap-y-2"}` : "flex flex-col gap-2"}>
           {catalog.map((g) => {
             const count = setup.counts[g.id] ?? 0;
+            const rowClass = `flex items-center ${many ? "gap-4" : "gap-6"}`;
+            const nameClass = `truncate font-display leading-tight ${crowded ? "text-xl" : many ? "text-2xl" : "text-3xl"}`;
+            const subClass = `truncate ${crowded ? "text-base leading-tight" : many ? "text-lg" : "text-xl"}`;
+            const btnSize = crowded ? "sm" : "md";
+            const durationClass = `text-right text-ink-muted ${many ? "w-20 text-xl" : "w-32 text-2xl"}`;
+            if (g.interlude !== undefined) {
+              // Jeu surprise : un interrupteur au lieu d'un nombre de manches.
+              const on = count > 0;
+              return (
+                <div key={g.id} data-testid={`setup-row-${g.id}`} data-interlude="true" className={rowClass}>
+                  <div className="min-w-0 flex-1">
+                    <div className={nameClass}>{g.name}</div>
+                    <div className={`${subClass} text-accent`}>Surprise · ~1 fois tous les {g.interlude} jeux</div>
+                  </div>
+                  <Button
+                    data-testid={`setup-toggle-${g.id}`}
+                    data-on={on ? "true" : "false"}
+                    role="switch"
+                    aria-checked={on}
+                    variant={on ? "primary" : "secondary"}
+                    size={btnSize}
+                    className="w-[11.5rem] shrink-0"
+                    disabled={!host || g.available === 0}
+                    onClick={() => setCount(g.id, on ? 0 : 1, 1)}
+                  >
+                    {on ? "Activé" : "Désactivé"}
+                  </Button>
+                  <div className={durationClass}>{formatDuration(roundsOf(g) * g.secondsPerRound)}</div>
+                </div>
+              );
+            }
             return (
-              <div key={g.id} data-testid={`setup-row-${g.id}`} className={`flex items-center ${many ? "gap-4" : "gap-6"}`}>
+              <div key={g.id} data-testid={`setup-row-${g.id}`} className={rowClass}>
                 <div className="min-w-0 flex-1">
-                  <div className={`truncate font-display ${many ? "text-2xl" : "text-3xl"}`}>{g.name}</div>
-                  <div className={`truncate text-ink-muted ${many ? "text-lg" : "text-xl"}`}>{g.description}</div>
+                  <div className={nameClass}>{g.name}</div>
+                  {/* Beaucoup de mini-jeux : on garde les lignes courtes, la description se lit dans l'annonce. */}
+                  {!crowded && <div className={`${subClass} text-ink-muted`}>{g.description}</div>}
                 </div>
                 <div className="flex items-center gap-3">
-                  <Button data-testid={`setup-dec-${g.id}`} variant="secondary" size="md" disabled={!host || count <= 0} onClick={() => setCount(g.id, count - 1, g.available)} aria-label="Moins">
+                  <Button data-testid={`setup-dec-${g.id}`} variant="secondary" size={btnSize} disabled={!host || count <= 0} onClick={() => setCount(g.id, count - 1, g.available)} aria-label="Moins">
                     −
                   </Button>
-                  <div className={many ? "w-16 text-center" : "w-24 text-center"}>
-                    <span data-testid={`setup-count-${g.id}`} className={`font-display text-accent ${many ? "text-4xl" : "text-5xl"}`}>{count}</span>
-                    <span className="block text-base text-ink-muted">sur {g.available}</span>
+                  <div className={crowded ? "flex w-24 items-baseline justify-center gap-1.5" : many ? "w-16 text-center" : "w-24 text-center"}>
+                    <span data-testid={`setup-count-${g.id}`} className={`font-display text-accent ${crowded ? "text-3xl" : many ? "text-4xl" : "text-5xl"}`}>{count}</span>
+                    <span className={`text-ink-muted ${crowded ? "text-sm" : "block text-base"}`}>sur {g.available}</span>
                   </div>
-                  <Button data-testid={`setup-inc-${g.id}`} variant="secondary" size="md" disabled={!host || count >= g.available} onClick={() => setCount(g.id, count + 1, g.available)} aria-label="Plus">
+                  <Button data-testid={`setup-inc-${g.id}`} variant="secondary" size={btnSize} disabled={!host || count >= g.available} onClick={() => setCount(g.id, count + 1, g.available)} aria-label="Plus">
                     +
                   </Button>
                 </div>
-                <div className={`text-right text-ink-muted ${many ? "w-20 text-xl" : "w-32 text-2xl"}`}>{formatDuration(count * g.secondsPerRound)}</div>
+                <div className={durationClass}>{formatDuration(count * g.secondsPerRound)}</div>
               </div>
             );
           })}

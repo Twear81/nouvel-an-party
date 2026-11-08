@@ -32,6 +32,7 @@ tests/unit/<id>.test.ts        tests de la logique
 | `privateView?(state, playerId, ctx)` | ce que voit un seul téléphone (« tu as voté pour X ») |
 | `tvView?(state, ctx)` | optionnel : remplace `publicView` pour la TV seulement. Pour ce que les téléphones ne doivent pas recevoir, même caché (ex : la suite de Simon) |
 | `onPresenceChange?(state, ctx)` | optionnel : un participant se connecte ou se déconnecte pendant le jeu (voir ci-dessous) |
+| `interlude?(cfg)` | optionnel : renvoie N = « une fois toutes les N manches » pour faire de ce jeu une surprise sans annonce (voir « Jeux interlude » plus bas) ; absent ou `null` = jeu normal |
 | `finish(state, ctx)` | fin de manche : renvoie `{ results, scores }`. `results` est libre (affiché par `TvResults`), `scores` = points gagnés **dans cette manche** par `playerId` (absents = 0) |
 
 Le moteur envoie `publicView` / `privateView` à chaque changement (après un `input` ou un `ctx.update()`).
@@ -244,6 +245,25 @@ Comme le temps est mesuré entre l'affichage du GO et le toucher **sur le même 
 Ajoutez le jeu aux deux registres (section 4), créez le README et le yaml, puis les tests : `finish` avec des temps connus (rang, égalités, points planchés à 0), `input` avec des `payload` invalides ou un temps avant le GO.
 
 > Cet exemple est de la documentation : les fichiers du jeu « plus-rapide » n'existent pas dans le dépôt.
+
+## Jeux « interlude » (jeux surprise)
+Un jeu qui ne se programme pas comme les autres : il surgit environ une fois toutes les N manches, sans annonce (modèle : `culture-genante`). On le déclare dans `game.ts` :
+```ts
+interlude: (cfg) => cfg.tous_les,   // N, lu dans le yaml du jeu (entier ≥ 1). null / absent = jeu normal
+```
+| Aspect | Comportement |
+|---|---|
+| Lobby TV | pas de compteur de manches : un **interrupteur** Activé / Désactivé (`Setup.counts[id]` = 1 / 0, 1 par défaut si le jeu a du contenu ; `sanitizeSetup` borne à 0/1), libellé « Surprise · ~1 fois tous les N jeux ». La durée estimée inclut les surprises prévues (`interludeCounts`, `src/shared/interlude.ts`, partagé entre lobby et planner) |
+| Planner (`buildPlan`) | plan normal d'abord, puis pour chaque bloc **complet** de N manches normales, UNE manche interlude insérée à une position aléatoire du bloc (après la 1re, 2e… ou dernière manche du bloc) : **jamais en première position, jamais deux de suite**. Éléments tirés sans répétition ; on s'arrête quand le jeu n'en a plus. Modes `melange` et `groupe` : même règle (on compte en manches normales) |
+| Aucune manche normale | si l'interlude est activé, le plan = une seule manche interlude (démo, tests) ; avec plusieurs jeux interlude, c'est le premier jeu activé du catalogue |
+| Plusieurs jeux interlude | chacun a son propre rythme (son N) ; ils se partagent les « trous » entre manches normales, et un jeu renonce à son interlude du bloc s'il n'y a plus de trou libre |
+| Déroulé | `RoundInfo.interlude = true` : **pas d'intro** (le moteur passe directement en `playing`, `start` puis `onPlay` à la suite), pas de « Prépare-toi ! » sur les téléphones. Phase résultats normale (sans numéro de manche) |
+| Écrans | la TV affiche le `Tv` du jeu **en plein écran**, sans l'en-tête (nom du jeu, numéro), sans le chrono standard : la mise en scène (y compris le chrono) est à la charge du jeu. Le jeu recouvre toute la TV avec `absolute inset-0` s'il veut changer de décor ; la barre de l'hôte (Pause, Passer, +10 s) reste posée par-dessus en bas à droite : laisser ce coin libre (`pb-20`). Pause et `PausedOverlay` fonctionnent. Le téléphone affiche directement `Phone`, sans chrono standard (utiliser `useRemainingMs` / `Countdown` du jeu si besoin) |
+| Numérotation | « Manche x / y » **ne compte pas les interludes** (sinon on les verrait venir) : `RoundInfo.number` / `normalTotal` pour l'affichage ; `index` / `total` restent les positions dans le plan, interludes compris |
+| Tests E2E | `data-interlude="true"` sur `tv-playing` et `phone-playing` ; `party.setCounts({ id: 1 })` / `startGame({ id: 1 })` actionnent l'interrupteur |
+| Sauvegarde | `PlannedRound.interlude` est dans `data/save.json` ; une manche interrompue est rejouée depuis son début à la reprise |
+
+Un interlude choisit lui-même ses étapes (ex. `culture-genante` : accroche → bascule → question, avec `roundSeconds: () => null` et des `ctx.countdown` en cascade) et expose l'étape dans `publicView` (`data-stage`).
 
 ## Briques pour les jeux plus riches
 

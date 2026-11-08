@@ -34,16 +34,29 @@ export interface CatalogEntry {
   description: string;
   available: number; // nombre max de manches (ex : nombre de questions dans le fichier)
   secondsPerRound: number; // estimation d'une manche complète (intro + jeu + résultats)
+  /**
+   * Présent seulement pour un jeu « interlude » : il surgit environ une fois toutes les N manches normales
+   * (valeur = N). Il n'a pas de compteur de manches mais un interrupteur (counts = 1 ou 0).
+   */
+  interlude?: number;
 }
 
-/** Nombre de manches choisi pour chaque mini-jeu (id → nombre). */
+/** Nombre de manches choisi pour chaque mini-jeu (id → nombre). Un jeu interlude : 1 = activé, 0 = désactivé. */
 export interface Setup {
   counts: Record<string, number>;
 }
 
 export interface RoundInfo {
-  index: number; // 0-based
+  /** Position dans le plan (0-based), interludes compris. Sert de clé technique, pas à l'affichage. */
+  index: number;
+  /** Longueur du plan, interludes compris. */
   total: number;
+  /** Numéro de la manche à AFFICHER (1-based) : les interludes ne comptent pas, sinon on spoilerait leur arrivée. */
+  number: number;
+  /** Nombre de manches normales du plan, à afficher en « Manche number / normalTotal ». */
+  normalTotal: number;
+  /** Manche surprise : pas d'annonce, TV plein écran sans cadre, mise en scène gérée par le jeu. */
+  interlude: boolean;
   gameId: string;
   gameName: string;
   /** Joueurs qui participent à cette manche (les retardataires jouent à la suivante). */
@@ -76,6 +89,7 @@ export interface GameSnapshot {
   catalog: CatalogEntry[];
   setup: Setup;
   /** Une partie interrompue (crash, fermeture) peut être reprise. */
+  /** Numérotation affichée (interludes non comptés) : « manche roundIndex + 1 / total ». */
   resumable: { roundIndex: number; total: number } | null;
   joinUrl: string;
   /** Uniquement pour un téléphone : son identité et sa vue privée du mini-jeu. */

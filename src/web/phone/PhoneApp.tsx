@@ -85,7 +85,7 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
       return (
         <Center testId="phone-intro">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xl font-bold uppercase tracking-widest text-ink-muted">
-            Manche {(round?.index ?? 0) + 1} / {round?.total}
+            Manche {round?.number} / {round?.normalTotal}
           </motion.p>
           <motion.h1 initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 140, damping: 12 }} className="font-display text-5xl text-gold-gradient">
             Prépare-toi !
@@ -140,10 +140,13 @@ function PlayingPhone({ snapshot, round, actions, late }: Pick<ScreenProps, "sna
   const View = webGames[round.gameId]?.Phone;
   if (late) return <Late testId="phone-playing" />;
   return (
-    <div data-testid="phone-playing" data-game={round.gameId} className="flex min-h-0 flex-1 flex-col gap-2">
-      <div className="shrink-0 pt-1">
-        <Countdown round={round} size="phone" />
-      </div>
+    <div data-testid="phone-playing" data-game={round.gameId} data-interlude={round.interlude ? "true" : "false"} className="flex min-h-0 flex-1 flex-col gap-2">
+      {/* Interlude : le jeu affiche lui-même son chrono (ou pas), sinon on dévoilerait la surprise. */}
+      {!round.interlude && (
+        <div className="shrink-0 pt-1">
+          <Countdown round={round} size="phone" />
+        </div>
+      )}
       <div className="flex min-h-0 flex-1 flex-col">
         {View ? (
           <View

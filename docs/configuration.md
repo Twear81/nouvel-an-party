@@ -21,7 +21,7 @@ Un fichier `partie.yaml` absent ou vide utilise les valeurs par défaut. Une fau
 | `ip` | `auto` | `auto` : détection de l'IP wifi. Sinon une IP forcée (ex. `"192.168.1.42"`) si le QR code pointe vers la mauvaise carte réseau |
 | `ouvrir_navigateur` | `true` | Ouvre automatiquement l'écran TV dans le navigateur au lancement |
 
-Le nombre de manches par mini-jeu n'est **pas** dans ce fichier : il se choisit sur l'écran TV avant de lancer la partie.
+Le nombre de manches par mini-jeu n'est **pas** dans ce fichier : il se choisit sur l'écran TV avant de lancer la partie. Les jeux « surprise » (interludes, ex. Culture gênante) n'ont pas de nombre de manches mais un interrupteur Activé / Désactivé ; leur rythme (« une fois tous les N jeux ») se règle dans le yaml du jeu (`tous_les`). `intro_secondes` ne s'applique pas à eux : pas d'annonce.
 
 ### Exemple
 ```yaml

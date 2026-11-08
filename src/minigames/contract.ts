@@ -62,6 +62,16 @@ export interface MiniGame<Cfg = any, Item = any, State = any> {
   /** Estimation (s) du jeu + lecture des résultats. Le moteur y ajoute l'intro. */
   estimateSeconds: (cfg: Cfg) => number;
 
+  /**
+   * Optionnel : fait de ce jeu un « interlude » (jeu surprise) au lieu d'un jeu normal.
+   * Renvoie N = « environ une fois toutes les N manches normales » (typiquement `cfg.tous_les`), ou null/absent
+   * pour un jeu normal. Un interlude : pas de nombre de manches dans le lobby (un interrupteur), jamais en
+   * première position, jamais deux de suite, pas d'écran d'annonce, `Tv` plein écran sans le cadre habituel
+   * (le jeu met tout en scène lui-même), numérotation « Manche x / y » qui ne le compte pas.
+   * Voir docs/creer-un-mini-jeu.md, section « Jeux interludes ».
+   */
+  interlude?: (cfg: Cfg) => number | null;
+
   /** Début de manche (pendant l'intro). */
   start: (item: Item, ctx: RoundContext<Cfg>) => State;
   /** Optionnel : appelé quand le chrono démarre (fin de l'intro). */
