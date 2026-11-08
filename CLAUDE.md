@@ -73,6 +73,20 @@ d'autres jeux), la documenter dans `creer-un-mini-jeu.md`, et la tester dans `te
 Côté fun : règles expliquables en une phrase (`description`), manches courtes, tout le monde joue en même temps
 autant que possible (ou spectateurs qui ont quelque chose à regarder), révélation qui crée du suspense sur la TV.
 
+## UX : si ça s'explique, c'est raté
+Si une action a besoin d'un texte d'aide, d'une infobulle ou d'une phrase « appuie ici pour… » pour être comprise,
+**c'est l'interface qu'il faut revoir**, pas l'explication à ajouter. Les invités jouent un verre à la main, sur un
+téléphone, en regardant la TV : ils ne lisent pas.
+- L'action se voit à sa forme : gros bouton plein, icône + un mot (« Valider », « Rejouer »), zone tactile évidente.
+  Un bouton qui dit ce qu'il fait n'est pas une explication.
+- L'état se voit sur l'élément lui-même : ✓ sur le choix enregistré, avatars grisés tant qu'on n'a pas répondu,
+  bouton inactif qui dit pourquoi (« Encore 2 à placer »).
+- Une seule chose à faire par écran de téléphone ; ce qui n'est pas actionnable n'y est pas.
+- On garde les textes qui sont du **contenu** (la question, « Anne-Sophie répond pour de vrai ») et la phrase de
+  règle de la manche, annoncée une fois sur la TV à l'intro (`description`) ; jamais de texte qui explique l'interface.
+- En revue (captures Playwright) : pour chaque écran, se demander « un invité qui n'a pas lu les règles sait-il quoi
+  toucher ? ». Si non, on change l'écran.
+
 ## Design : rester remplaçable
 - Jamais de couleur, police, taille ou ombre en dur : classes Tailwind issues de `src/web/theme/theme.css`
   (`bg-surface`, `text-accent`, `font-display`…).
