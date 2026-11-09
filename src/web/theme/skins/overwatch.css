@@ -167,6 +167,80 @@ html[data-skin="overwatch"] [data-ui="choice-label"] { font-family: var(--font-s
 html[data-skin="overwatch"] [data-ui="choice-check"],
 html[data-skin="overwatch"] [data-ui="selected-badge"] { background: var(--ow-navy-2); color: #fff; border-radius: 0; clip-path: var(--ow-hex); }
 
+/* Camps (cool / hot / good / bad + text-bg) : panneau ardoise, grosse barre de la couleur du camp à gauche, libellé blanc
+   en capitales à taille normale. Jamais d'aplat saturé : le texte resterait illisible dessus. */
+html[data-skin="overwatch"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg {
+  --camp: #1ba3d6;
+  color: #ffffff;
+  font-style: normal;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background-color: var(--ow-navy-2);
+  background-image: linear-gradient(90deg, var(--camp) 0 0.7rem, transparent 0.7rem), linear-gradient(115deg, transparent 0 62%, rgb(255 255 255 / 0.07) 62% 80%, transparent 80%);
+  box-shadow: 0 0.2rem 0 rgb(42 51 82 / 0.45);
+  border: 0;
+}
+html[data-skin="overwatch"] .bg-hot.text-bg { --camp: #f06a2e; }
+html[data-skin="overwatch"] .bg-good.text-bg { --camp: #57e03c; }
+html[data-skin="overwatch"] .bg-bad.text-bg { --camp: #ff4a5a; }
+html[data-skin="overwatch"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg { font-family: var(--font-sans); }
+html[data-skin="overwatch"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-selected="true"] {
+  background-color: #1d4f6e;
+  background-image: linear-gradient(90deg, var(--camp) 0 0.7rem, transparent 0.7rem), linear-gradient(90deg, rgb(46 230 242 / 0.3), transparent);
+  outline: 0.2rem solid var(--ow-cyan);
+  outline-offset: -0.2rem;
+  box-shadow: 0 0 1.1rem rgb(46 230 242 / 0.7);
+}
+/* Choix grisés (le mien est fait) ou inactifs : en retrait mais lisibles */
+html[data-skin="overwatch"] [data-ui="choice"][data-state="faded"],
+html[data-skin="overwatch"] [data-ui="choice"]:disabled { opacity: 0.75 !important; filter: grayscale(0.5); }
+
+/* Encadré d'annonce accent (ex. « C'est ta phrase ! ») : carte ardoise opaque, texte blanc, titre cyan */
+html[data-skin="overwatch"] :is(.border-accent.bg-accent\/15, .border-good.bg-good\/15, .border-bad.bg-bad\/15) {
+  --color-accent: #2ee6f2;
+  --color-ink-muted: #e3e9f5;
+  background: var(--ow-slate);
+  color: #ffffff;
+  border: 0;
+  border-top: 0.3rem solid var(--ow-cyan);
+  box-shadow: var(--shadow-card);
+}
+html[data-skin="overwatch"] .border-good.bg-good\/15 { border-top-color: var(--color-good); }
+html[data-skin="overwatch"] .border-bad.bg-bad\/15 { border-top-color: var(--color-bad); }
+
+/* Cadre de jeu TV : bandeau marine à grand titre blanc oblique, contenu sur carte ardoise */
+html[data-skin="overwatch"] [data-ui="game-frame"] {
+  --color-ink: #ffffff;
+  --color-ink-muted: #c9d3e6;
+  --color-accent: #2ee6f2;
+  --color-accent-strong: #9ff6fb;
+  --color-line: rgb(255 255 255 / 0.25);
+  --color-surface: #4b5877;
+  --color-surface-strong: #56657f;
+  --color-bg: #2a3352;
+  color: #ffffff;
+  padding: 0;
+  background: var(--ow-slate);
+  border-top: 0.25rem solid var(--ow-cyan);
+  box-shadow: var(--shadow-card);
+}
+html[data-skin="overwatch"] [data-ui="game-frame-title"] {
+  display: block;
+  margin: 0;
+  padding: 0.5rem 2rem 0.4rem;
+  background: var(--ow-navy);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 3.4rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+html[data-skin="overwatch"] [data-ui="game-frame-body"] { padding: 1.2rem 2rem 1.4rem; }
+
 /* Barre de résultat : rail clair, remplissage bleu biseauté ; gagnante = ambre */
 html[data-skin="overwatch"] [data-ui="result-bar"] { color: var(--ow-navy-2); --color-ink: #2a3352; --color-ink-muted: #3f4d6e; background: var(--ow-row); clip-path: var(--ow-bevel-r); box-shadow: none; }
 html[data-skin="overwatch"] [data-ui="result-bar-fill"] {
