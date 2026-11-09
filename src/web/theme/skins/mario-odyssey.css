@@ -11,21 +11,24 @@ html[data-skin="mario-odyssey"] {
   --color-bg: #f5202e;
   --color-bg-2: #ec1626;
   --color-bg-3: #c00e1c;
-  --color-surface: rgb(255 255 255 / 0.18);
-  --color-surface-strong: rgb(255 255 255 / 0.3);
-  --color-line: rgb(255 255 255 / 0.3);
+  /* Aucune surface translucide sur le rouge (elle virerait au rose délavé) : étiquettes grises pleines à texte blanc. */
+  --color-surface: #8c8c8c;
+  --color-surface-strong: #777777;
+  --color-line: #ffffff;
   --color-ink: #ffffff;
-  --color-ink-muted: #ffe3e5;
+  --color-ink-muted: #ffffff;
   --color-accent: #ffffff;
   --color-accent-strong: #ffffff;
   --color-accent-deep: #b8a000;
   --color-accent-ink: #4a4a4a;
-  --color-hot: #b30a18;
+  /* Camps à deux options : bleu Mario / or-olive (cool / hot), vert / gris foncé (good / bad), tous à texte blanc, bien
+     distincts entre eux et du rouge du fond (le rouge sombre disparaissait). */
+  --color-hot: #a89400;
   --color-cool: #1f6fd0;
   --color-good: #1f9a3c;
   --color-good-deep: #157028;
-  --color-bad: #6a0a14;
-  --color-bad-deep: #3a0a10;
+  --color-bad: #4a4a4a;
+  --color-bad-deep: #2e2e2e;
   --color-warn: #ffdc3c;
   --font-display: "Twemoji", "M PLUS 1p", "Rodin", "Segoe UI", sans-serif;
   --font-sans: "Twemoji", "M PLUS 1p", "Segoe UI", sans-serif;
@@ -48,6 +51,7 @@ html[data-skin="mario-odyssey"] {
 html[data-skin="mario-odyssey"] .glass,
 html[data-skin="mario-odyssey"] [data-ui="panel"],
 html[data-skin="mario-odyssey"] [data-ui="dialog"],
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"],
 html[data-skin="mario-odyssey"] [data-ui="roster"],
 html[data-skin="mario-odyssey"] [data-ui="host-bar"] {
   --color-ink: #4a4a4a;
@@ -76,22 +80,31 @@ html[data-skin="mario-odyssey"] .text-bg { color: #ffffff; } /* texte sur rempli
 html[data-skin="mario-odyssey"] .text-cool,
 html[data-skin="mario-odyssey"] .text-hot { color: #ffffff; }
 html[data-skin="mario-odyssey"] .text-good { color: #fff35c; text-shadow: 0 0.05em 0.1em rgb(120 0 10 / 0.4); }
-html[data-skin="mario-odyssey"] .text-bad { color: #4a0610; }
+html[data-skin="mario-odyssey"] .text-bad { color: #ffffff; text-shadow: 0 0.06em 0.12em rgb(120 0 10 / 0.6); }
 html[data-skin="mario-odyssey"] .glass .text-cool,
-html[data-skin="mario-odyssey"] [data-ui="panel"] .text-cool { color: #1f6fd0; }
+html[data-skin="mario-odyssey"] [data-ui="panel"] .text-cool,
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] .text-cool { color: #1f6fd0; }
 html[data-skin="mario-odyssey"] .glass .text-hot,
-html[data-skin="mario-odyssey"] [data-ui="panel"] .text-hot { color: #b30a18; }
+html[data-skin="mario-odyssey"] [data-ui="panel"] .text-hot,
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] .text-hot { color: #b30a18; }
 html[data-skin="mario-odyssey"] .glass .text-good,
-html[data-skin="mario-odyssey"] [data-ui="panel"] .text-good { color: #1f8a36; text-shadow: none; }
+html[data-skin="mario-odyssey"] [data-ui="panel"] .text-good,
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] .text-good { color: #1f8a36; text-shadow: none; }
 html[data-skin="mario-odyssey"] .glass .text-bad,
-html[data-skin="mario-odyssey"] [data-ui="panel"] .text-bad { color: #b30a18; }
+html[data-skin="mario-odyssey"] [data-ui="panel"] .text-bad,
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] .text-bad { color: #b30a18; }
 html[data-skin="mario-odyssey"] .text-gold-gradient { -webkit-text-fill-color: currentColor; color: #ffffff; background-image: none; }
 html[data-skin="mario-odyssey"] .glass .text-gold-gradient,
 html[data-skin="mario-odyssey"] [data-ui="panel"] .text-gold-gradient,
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] .text-gold-gradient,
 html[data-skin="mario-odyssey"] [data-ui="dialog"] .text-gold-gradient { color: #b8a000; text-shadow: none; }
 html[data-skin="mario-odyssey"] .glass h1,
 html[data-skin="mario-odyssey"] .glass h2,
 html[data-skin="mario-odyssey"] [data-ui="panel"] h2 { text-shadow: none; }
+
+/* Teintes translucides (bg-accent/15, bg-good/10…) : jamais de rose sur le rouge, un rouge plus sombre ; olive pâle sur surface claire */
+html[data-skin="mario-odyssey"] :is([class*="bg-accent/"], [class*="bg-good/"], [class*="bg-bad/"], [class*="bg-cool/"], [class*="bg-hot/"], [class*="bg-warn/"]) { background-color: rgb(120 0 10 / 0.35); }
+html[data-skin="mario-odyssey"] :is(.glass, [data-ui="panel"], [data-ui="game-frame-body"], [data-ui="dialog"]) :is([class*="bg-accent/"], [class*="bg-good/"], [class*="bg-bad/"], [class*="bg-cool/"], [class*="bg-hot/"], [class*="bg-warn/"]) { background-color: rgb(184 160 0 / 0.16); }
 
 /* panel / verre : carte claire à carte du monde en filigrane */
 html[data-skin="mario-odyssey"] .glass,
@@ -106,6 +119,28 @@ html[data-skin="mario-odyssey"] [data-ui="panel"] {
   box-shadow: 0 0.3rem 0.9rem rgb(120 0 10 / 0.35);
 }
 html[data-skin="mario-odyssey"] [data-ui="panel-title"] { color: #b8a000; font-weight: 800; }
+/* Une carte posée sur une surface claire : blanche, filet gris (sinon elle se fond dans le gris clair). */
+html[data-skin="mario-odyssey"] [data-ui="panel"] .glass,
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] .glass,
+html[data-skin="mario-odyssey"] [data-ui="dialog"] .glass { background-image: none; background-color: #ffffff; box-shadow: 0 0 0 1px rgb(0 0 0 / 0.12); }
+
+/* game-frame : le titre de manche flotte en blanc penché sur le rouge (comme .game de la maquette) ; le contenu est la carte
+   grise claire, dont le titre h1 (la question) devient le bandeau or-olive à double liseré blanc (.q de la maquette). */
+html[data-skin="mario-odyssey"] [data-ui="game-frame"] { padding: 0; }
+html[data-skin="mario-odyssey"] [data-ui="game-frame-title"] {
+  display: block; margin: 0 0 0.7rem 0.4rem; font-family: var(--font-display); font-weight: 800; font-size: 3.4rem; line-height: 1.05;
+  color: #ffffff; rotate: -3deg; transform-origin: left center; text-shadow: 0 0.06em 0.12em rgb(120 0 10 / 0.35);
+}
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] {
+  padding: 1.4rem 2rem 1.6rem; border-radius: 0.2rem; overflow: hidden; color: #4a4a4a;
+  background-color: #f2f2f2;
+  background-image: repeating-radial-gradient(circle at 80% 150%, transparent 0 6rem, rgb(0 0 0 / 0.05) 6rem calc(6rem + 1px)), linear-gradient(#f2f2f2, #f2f2f2);
+  box-shadow: 0 0.3rem 0.9rem rgb(120 0 10 / 0.35);
+}
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] h1[class] {
+  background-image: none; background-color: #b8a000; color: #ffffff; -webkit-text-fill-color: currentColor; rotate: 0deg; text-shadow: none;
+  align-self: stretch; padding: 0.4em 0.75em; box-shadow: 0 0.09rem 0 #ffffff, 0 -0.09rem 0 #ffffff, 0 0.17rem 0 #b8a000, 0 -0.17rem 0 #b8a000;
+}
 
 /* button : barre blanche inclinée à casquette (action principale), étiquettes des commandes pour le reste */
 html[data-skin="mario-odyssey"] [data-ui="button"] { font-family: var(--font-display); font-weight: 800; letter-spacing: 0; border-radius: 0.15rem; box-shadow: 0 0.15rem 0.35rem rgb(120 0 10 / 0.4); }
@@ -114,7 +149,7 @@ html[data-skin="mario-odyssey"] [data-ui="button"][data-variant="primary"]::befo
   content: ""; display: inline-block; width: 1.1em; height: 0.7em; margin-right: 0.5em; vertical-align: 0.05em;
   background: #e60012; border-radius: 0.6em 0.6em 0.15em 0.15em;
 }
-html[data-skin="mario-odyssey"] [data-ui="button"][data-variant="secondary"] { background-image: none; background-color: #9c9c9c; color: #ffffff; }
+html[data-skin="mario-odyssey"] [data-ui="button"][data-variant="secondary"] { background-image: none; background-color: #8c8c8c; color: #ffffff; text-shadow: 0 0.06em 0.1em rgb(0 0 0 / 0.3); box-shadow: 0 0 0 0.14rem #ffffff, 0 0.15rem 0.35rem rgb(120 0 10 / 0.4); }
 html[data-skin="mario-odyssey"] [data-ui="button"][data-variant="danger"] { background-color: #e60012; color: #ffffff; box-shadow: 0 0 0 0.12rem #ffffff, 0 0.15rem 0.35rem rgb(120 0 10 / 0.4); }
 html[data-skin="mario-odyssey"] [data-ui="button"][data-variant="good"] { background-color: #1f9a3c; color: #ffffff; box-shadow: 0 0 0 0.12rem #ffffff, 0 0.15rem 0.35rem rgb(120 0 10 / 0.4); }
 html[data-skin="mario-odyssey"] [data-ui="button"][data-variant="bad"] { background-color: #6a0a14; color: #ffffff; box-shadow: 0 0 0 0.12rem #ffffff, 0 0.15rem 0.35rem rgb(120 0 10 / 0.4); }
@@ -128,6 +163,12 @@ html[data-skin="mario-odyssey"] [data-ui="panel"] [data-ui="button"][data-varian
 html[data-skin="mario-odyssey"] [data-ui="dialog"] [data-ui="button"][data-variant="primary"]::before { background: #ffffff; }
 html[data-skin="mario-odyssey"] .glass [data-ui="button"][data-variant="ghost"],
 html[data-skin="mario-odyssey"] [data-ui="panel"] [data-ui="button"][data-variant="ghost"] { color: #7a7a7a; }
+
+/* Bouton inactif : étiquette claire à texte gris (jamais une version délavée du bouton actif, qui virerait au rose) */
+html[data-skin="mario-odyssey"] [data-ui="button"]:disabled { opacity: 1; background-image: none; background-color: #d4d4d4; color: #7a7a7a; box-shadow: none; }
+html[data-skin="mario-odyssey"] [data-ui="button"]:disabled::before { background: #9c9c9c; }
+html[data-skin="mario-odyssey"] input::placeholder,
+html[data-skin="mario-odyssey"] textarea::placeholder { color: #ffffff; opacity: 0.85; }
 
 /* choice : étiquette grise à case blanche (écran des commandes) ; choisi = étiquette rouge cerclée de blanc */
 html[data-skin="mario-odyssey"] [data-ui="choice"] { --color-ink: #ffffff; --color-ink-muted: #f0f0f0; --color-accent: #ffffff; --color-line: rgb(255 255 255 / 0.5); border-radius: 0; font-weight: 800; }
@@ -144,6 +185,11 @@ html[data-skin="mario-odyssey"] [data-ui="choice"][data-selected="true"] [data-u
 html[data-skin="mario-odyssey"] [data-ui="choice"][data-state="correct"] [data-ui="choice-key"] { color: #1f9a3c; }
 html[data-skin="mario-odyssey"] [data-ui="choice-check"] { background: #ffffff; color: #e60012; }
 
+/* Choix « autres » une fois le sien fait : grisés mais lisibles (l'opacité inline 0.45 les rendrait roses sur le rouge). */
+html[data-skin="mario-odyssey"] [data-ui="choice"][data-state="faded"] { opacity: 0.8 !important; filter: saturate(0.45) brightness(0.9); }
+/* Petits boutons de notation (étages) : case gris foncé à lettre de la couleur de l'étage, lisible ; choisi = case pleine de l'étage */
+html[data-skin="mario-odyssey"] [data-ui="choice"].bg-bg\/40 { background-color: #4a4a4a; font-size: 1.7rem; font-weight: 800; border-radius: 0; }
+
 /* result-bar : rail sombre translucide, remplissage blanc ; vainqueur = bandeau or-olive à double liseré blanc */
 html[data-skin="mario-odyssey"] [data-ui="result-bar"] { border-radius: 0.15rem; background-color: rgb(120 0 10 / 0.3); }
 html[data-skin="mario-odyssey"] [data-ui="result-bar-fill"] { border-radius: 0.15rem; color: #4a4a4a; --color-ink: #4a4a4a; --color-bg: #4a4a4a; --color-ink-muted: #4a4a4a; }
@@ -151,7 +197,8 @@ html[data-skin="mario-odyssey"] [data-ui="result-bar"][data-highlight="true"] [d
   background-image: linear-gradient(#b8a000, #b8a000); color: #ffffff; --color-ink: #ffffff; --color-bg: #ffffff; --color-ink-muted: #ffffff;
   box-shadow: inset 0 0.09rem 0 #ffffff, inset 0 -0.09rem 0 #ffffff, 0 0 0 0.12rem #ffffff;
 }
-html[data-skin="mario-odyssey"] .glass [data-ui="result-bar"] { background-color: rgb(0 0 0 / 0.1); }
+html[data-skin="mario-odyssey"] .glass [data-ui="result-bar"],
+html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] [data-ui="result-bar"] { background-color: rgb(0 0 0 / 0.1); }
 
 /* countdown : rond or-olive façon bouton « A », chiffre blanc, anneau blanc qui se vide (--p) */
 html[data-skin="mario-odyssey"] [data-ui="countdown"][data-variant="coin"] [data-ui="countdown-shape"] {
