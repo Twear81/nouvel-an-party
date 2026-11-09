@@ -3,7 +3,8 @@
 L'habillage du jeu change au fil de la soirée : chaque **skin** reprend l'interface d'un jeu vidéo (polices, bordures,
 couleurs, effets) **sans logo ni élément officiel**. La disposition, les tailles et les zones tactiles ne changent pas :
 seule la peau change. Référence visuelle validée : [maquettes/skins.html](maquettes/skins.html) (ouvrir dans un
-navigateur, flèches ← → pour changer de skin).
+navigateur, flèches ← → pour changer de skin). Captures du vrai jeu : [maquettes/references/](maquettes/references/).
+Avancement du chantier : [skins-suivi.md](skins-suivi.md).
 
 | id | Jeu | Signature |
 |---|---|---|

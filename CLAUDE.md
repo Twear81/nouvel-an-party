@@ -23,6 +23,8 @@ Tout le projet (code, commentaires, docs, commits, textes affichés) est **en fr
 | Créer un mini-jeu (contrat `MiniGame`, `ctx`, vues, enregistrement, exemple complet) | [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md) |
 | Design : thème, composants, écrans, règles d'ergonomie mobile | [docs/changer-le-design.md](docs/changer-le-design.md) |
 | `config/partie.yaml`, dossier `data/` | [docs/configuration.md](docs/configuration.md) |
+| Skins (habillages imitant des jeux vidéo) : contrat, marqueurs, rotation | [docs/skins.md](docs/skins.md) |
+| Skins : avancement du chantier, maquette validée, captures de référence, reprise | [docs/skins-suivi.md](docs/skins-suivi.md) |
 | Règles et contenu d'un mini-jeu | `src/minigames/<id>/README.md` |
 | Commandes, dev depuis WSL avec de vrais téléphones | [README.md](README.md) |
 
