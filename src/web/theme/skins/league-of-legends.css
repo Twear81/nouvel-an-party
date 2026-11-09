@@ -191,7 +191,6 @@ html[data-skin="league-of-legends"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).te
 html[data-skin="league-of-legends"] .bg-hot.text-bg { --camp: #e8546c; background-color: #3e1119; }
 html[data-skin="league-of-legends"] .bg-good.text-bg { --camp: #84d65a; background-color: #1d3412; }
 html[data-skin="league-of-legends"] .bg-bad.text-bg { --camp: #e84057; background-color: #3a0f17; }
-html[data-skin="league-of-legends"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg { font-size: 1.05em; }
 html[data-skin="league-of-legends"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-selected="true"] { outline-width: 2px; outline-color: #c8aa6e; background-image: linear-gradient(90deg, var(--camp) 0 0.35rem, transparent 0.35rem), linear-gradient(90deg, rgb(200 170 110 / 0.22), transparent); }
 /* Choix grisés (le mien est fait) ou inactifs : toujours lisibles, juste en retrait */
 html[data-skin="league-of-legends"] [data-ui="choice"][data-state="faded"],
