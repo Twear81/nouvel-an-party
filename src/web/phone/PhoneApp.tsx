@@ -92,7 +92,7 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
             Manche {round?.number} / {round?.normalTotal}
           </motion.p>
           <motion.h1 initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 140, damping: 12 }} className="font-display text-5xl text-gold-gradient">
-            Prépare-toi !
+            Prépare-toi&nbsp;!
           </motion.h1>
           <p className="font-display text-2xl text-ink">{round?.gameName}</p>
         </Center>
