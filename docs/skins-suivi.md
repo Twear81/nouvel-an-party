@@ -35,16 +35,15 @@
 | Skin | État | Écarts connus avec la maquette |
 |---|---|---|
 | `rocket-league` | ✅ revu sur captures et validé par l'utilisateur | — |
-| `dofus` | à revoir | cadre de jeu TV (fenêtre ardoise + barre de titre) non dessiné ; camps de Ceci ou Cela en aplats bleu clair/rose ; barre bordeaux à motif non utilisée pour le classement ; ✻ des kamas seulement au classement final |
-| `overwatch` | à revoir | cadre de jeu TV non dessiné ; choix en aplats bleu/orange/vert fluo à texte marine italique peu lisible (maquette : rangées blanches, sélection cyan) ; encadré « C'est ta phrase ! » translucide peu contrasté |
-| `league-of-legends` | à revoir | **texte doré sur cyan/vert/rouge illisible sur téléphone** (choix, OUI/NON, PFC) ; cadre de jeu TV non dessiné ; trait turquoise reliant les portraits absent ; camps de Ceci ou Cela en aplats cyan/rose ; « PRÉPARE-TOI ! » coupé avant le « ! » |
-| `gunz` | à revoir | cadre de jeu TV (cadre métal vissé) non dessiné ; camps Ceci ou Cela / OUI-NON bleu clair et rouge vif hors palette ; avatars ronds au lieu de cases carrées (`avatar-face`) ; 1er du classement pas en ligne blanche texte noir |
-| `mario-odyssey` | à revoir | **le plus éloigné** : surfaces translucides (`bg-surface`, champs, cases du tournoi, boutons désactivés) en rose délavé sur le rouge ; question TV en texte blanc au lieu du bandeau olive dans la carte grise (cadre de jeu absent) ; texte rouge sombre sur rouge illisible (« NON », camp « Non ») ; « Voir mon mot » gris sur gris ; « On vote / Encore un tour » bleu/rouge hors palette |
-| `plague-tale` | à revoir | cadre de jeu TV non dessiné ; avatars ronds au lieu des cases brunes carrées ; camps en aplats bleu-gris/rouille ; textes secondaires (« Total : … pts ») trop peu contrastés ; « PRÉPARE-TOI ! » coupé avant le « ! » |
+| `dofus` | corrigé le 9/11 (cadre de jeu, camps, lisibilité), à valider par l'utilisateur sur captures | — |
+| `overwatch` | corrigé le 9/11 (cadre de jeu, camps, lisibilité), à valider par l'utilisateur sur captures | — |
+| `league-of-legends` | corrigé le 9/11 (cadre de jeu, camps, lisibilité), à valider par l'utilisateur sur captures | — |
+| `gunz` | corrigé le 9/11 (cadre de jeu, camps, lisibilité), à valider par l'utilisateur sur captures | — |
+| `mario-odyssey` | corrigé le 9/11 (cadre de jeu, camps, lisibilité), à valider par l'utilisateur sur captures | — |
+| `plague-tale` | corrigé le 9/11 (cadre de jeu, camps, lisibilité), à valider par l'utilisateur sur captures | — |
 
 Revue complète sur captures du 9 novembre 2026 : détail par skin dans `captures/REVUE.md` (dossier local, ignoré par git).
-Attention : sans police emoji installée (WSL : `sudo apt install fonts-noto-color-emoji`), avatars et icônes
-sortent vides ou en « ▯ » sur les captures — ce n'est pas un bug des skins.
+Les emojis sont embarqués (Twemoji, voir changer-le-design.md) : plus de dépendance à la police système.
 
 ## Procédure pour finir un skin (mode éco)
 1. `CAPTURES_SKIN=<id> CAPTURES_DIR=$PWD/captures/<id> bun run captures:skin` (en arrière-plan ; `captures/` est ignoré par git).
@@ -56,7 +55,7 @@ sortent vides ou en « ▯ » sur les captures — ce n'est pas un bug des skins
 5. `bun run typecheck && bun run test`, commit « Skin <Jeu> : … ».
 
 ## Reste à faire avant de proposer le merge
-- Finir les 6 skins ci-dessus.
+- Faire valider les 6 skins corrigés le 9/11 (captures dans `captures/<skin>/_planches/`).
 - Suite E2E complète sur machine calme (`bun run test:e2e`, Chromium + `@compat` Firefox/WebKit) : jamais lancée en
   entier depuis l'intégration (machine saturée pendant les runs des agents).
 - Vérifier le thème de base (sans skin) et le rideau de transition en conditions réelles (`bun run dev`, vrais téléphones).
