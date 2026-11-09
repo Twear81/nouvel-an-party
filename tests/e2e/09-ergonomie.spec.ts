@@ -135,8 +135,8 @@ test.describe("Ceci ou Cela : lisibilité", () => {
       await expect(party.tv.getByTestId("tv-playing")).toContainText(`${round} / 6`);
       await expect(a!.t("choice-0")).toBeVisible();
       await expect(a!.t("choice-1")).toBeVisible();
-      const left = await party.tv.getByTestId("tv-choice-0").innerText();
-      const right = await party.tv.getByTestId("tv-choice-1").innerText();
+      const left = await party.tv.getByTestId("tv-choice-0").textContent() ?? "";
+      const right = await party.tv.getByTestId("tv-choice-1").textContent() ?? "";
       expect(left).not.toBe(right);
       await expect(a!.t("choice-0")).toContainText(left);
       await expect(a!.t("choice-1")).toContainText(right);

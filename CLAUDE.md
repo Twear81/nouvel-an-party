@@ -115,6 +115,7 @@ On ne teste pas tout, on **automatise ce qui est jouable et critique** :
   WebKit (iPhone) — avec parcimonie, c'est lourd en CI.
 - Tests robustes : attendre des états (`toHaveAttribute("data-stage", …)`), jamais des `waitForTimeout` calés sur
   les animations ; pas de dépendance au timing fin (la CI est chargée).
+- Lire un texte avec `textContent()`, jamais `innerText()` : le skin (tiré au hasard) peut le passer en capitales.
 
 **Développement d'un mini-jeu : test manuel complet obligatoire en local avec Playwright**, avant de dire que c'est fini.
 On joue le jeu en entier (pas seulement le chemin automatisé) :

@@ -193,7 +193,7 @@ test.describe("Captures de tous les écrans par skin", () => {
     }
     for (let i = 0; i < 4; i++) {
       await expect(party.tv.getByTestId("tv-sentence-index")).toHaveText(`${i + 1} / 4`, { timeout: 30_000 });
-      const sentence = await party.tv.getByTestId("tv-sentence").innerText();
+      const sentence = await party.tv.getByTestId("tv-sentence").textContent() ?? "";
       const author = phones.find((p) => sentence.includes(`de ${p.name}`))!;
       const voters = phones.filter((p) => p !== author);
       if (i === 0) {
@@ -288,7 +288,7 @@ test.describe("Captures de tous les écrans par skin", () => {
             }
             const rock = p.t("pfc-choice-0");
             if (!(await rock.isVisible()) || !(await rock.isEnabled())) continue;
-            const opp = (await p.t("pfc-opponent").innerText()).trim();
+            const opp = (await p.t("pfc-opponent").textContent() ?? "").trim();
             const choice = names.indexOf(p.name) < names.indexOf(opp) ? 0 : 2;
             if (p === phones[0] && !shotStatuses.has("choix")) {
               shotStatuses.add("choix");
@@ -348,7 +348,7 @@ test.describe("Captures de tous les écrans par skin", () => {
     const tv = party.tv;
     await expect(tv.getByTestId("tv-word-title")).toBeVisible({ timeout: 15_000 });
     // L'étape « mot » ne dure que 2 s dans la config de test : on lit les mots d'abord (en parallèle), on photographie ensuite.
-    const words = await Promise.all(phones.map(async (p) => (await p.t("word-big").innerText()).toLowerCase()));
+    const words = await Promise.all(phones.map(async (p) => (await p.t("word-big").textContent() ?? "").toLowerCase()));
     await S.tel("mot");
     await S.tv("mots");
     const impIdx = words.findIndex((w) => words.filter((x) => x === w).length === 1);

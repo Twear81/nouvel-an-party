@@ -28,7 +28,7 @@ test.describe("Split the Room", () => {
     const seen: string[] = [];
     for (let i = 0; i < 4; i++) {
       await expect(tv.getByTestId("tv-sentence-index")).toHaveText(`${i + 1} / 4`, { timeout: 25_000 });
-      const sentence = await tv.getByTestId("tv-sentence").innerText();
+      const sentence = await tv.getByTestId("tv-sentence").textContent() ?? "";
       const author = phones.find((p) => sentence.includes(`de ${p.name}`))!;
       seen.push(author.name);
       const [v1, v2, v3] = phones.filter((p) => p !== author) as [typeof author, typeof author, typeof author];

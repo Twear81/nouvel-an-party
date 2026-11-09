@@ -289,7 +289,9 @@ html[data-skin="overwatch"] [data-ui="avatar"]::before {
   clip-path: var(--ow-hex);
 }
 html[data-skin="overwatch"] [data-ui="avatar-face"] { border-radius: 0; clip-path: var(--ow-hex); }
-html[data-skin="overwatch"] [data-ui="avatar"] > .frame { display: none; }
+/* Le cadre choisi par le joueur reste visible, découpé en hexagone (ses ombres internes suivent la forme). */
+html[data-skin="overwatch"] [data-ui="avatar"] > .frame { border-radius: 0; clip-path: var(--ow-hex); }
+html[data-skin="overwatch"] [data-ui="avatar"] > .frame-dashed { animation: none; }
 html[data-skin="overwatch"] [data-ui="avatar"][data-dimmed="true"]::before { background: #7d89a6; }
 html[data-skin="overwatch"] [data-ui="avatar-badge"] {
   border: 0;

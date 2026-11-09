@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./helpers/fixtures";
 
-const seconds = async (tv: Page) => Number((await tv.getByTestId("countdown").innerText()).trim());
+const seconds = async (tv: Page) => Number((await tv.getByTestId("countdown").textContent() ?? "").trim());
 
 test.describe("Contrôles du maître du jeu", () => {
   test("pause : écrans figés sur TV et téléphone, le chrono s'arrête puis repart", async ({ party }) => {

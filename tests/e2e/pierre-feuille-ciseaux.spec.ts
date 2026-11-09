@@ -20,7 +20,7 @@ async function playTournament(party: Party, phones: Phone[], opts: { tie?: boole
           if (status) seen.add(status);
           const rock = p.t("pfc-choice-0");
           if (!(await rock.isVisible()) || !(await rock.isEnabled())) continue;
-          const opp = (await p.t("pfc-opponent").innerText()).trim();
+          const opp = (await p.t("pfc-opponent").textContent() ?? "").trim();
           const pair = [p.name, opp].sort().join("|");
           let choice = names.indexOf(p.name) < names.indexOf(opp) ? 0 : 2;
           if (opts.tie) {
