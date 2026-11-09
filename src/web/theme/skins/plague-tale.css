@@ -25,9 +25,9 @@ html[data-skin="plague-tale"] {
   --color-bad: #c0604f;
   --color-bad-deep: #7a2f24;
   --color-warn: #d89c4a;
-  --font-display: "Cinzel", "Trajan Pro", serif;
-  --font-sans: "Barlow Condensed", "Arial Narrow", sans-serif;
-  --font-num: "Cinzel", "Trajan Pro", serif;
+  --font-display: "Twemoji", "Cinzel", "Trajan Pro", serif;
+  --font-sans: "Twemoji", "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-num: "Twemoji", "Cinzel", "Trajan Pro", serif;
   --radius-card: 0.1rem;
   --radius-btn: 0.1rem;
   --radius-chip: 0.1rem;

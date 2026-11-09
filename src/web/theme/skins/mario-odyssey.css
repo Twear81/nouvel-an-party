@@ -27,9 +27,9 @@ html[data-skin="mario-odyssey"] {
   --color-bad: #6a0a14;
   --color-bad-deep: #3a0a10;
   --color-warn: #ffdc3c;
-  --font-display: "M PLUS 1p", "Rodin", "Segoe UI", sans-serif;
-  --font-sans: "M PLUS 1p", "Segoe UI", sans-serif;
-  --font-num: "M PLUS 1p", "Rodin", "Segoe UI", sans-serif;
+  --font-display: "Twemoji", "M PLUS 1p", "Rodin", "Segoe UI", sans-serif;
+  --font-sans: "Twemoji", "M PLUS 1p", "Segoe UI", sans-serif;
+  --font-num: "Twemoji", "M PLUS 1p", "Rodin", "Segoe UI", sans-serif;
   --radius-card: 0.2rem;
   --radius-btn: 0.15rem;
   --radius-chip: 999px;

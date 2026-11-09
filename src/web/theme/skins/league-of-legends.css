@@ -25,9 +25,9 @@ html[data-skin="league-of-legends"] {
   --color-bad: #e84057;
   --color-bad-deep: #8c1c2c;
   --color-warn: #f0b232;
-  --font-display: "Cinzel", "Beaufort for LOL", serif;
-  --font-sans: "Lato", "Spiegel", sans-serif;
-  --font-num: "Cinzel", "Beaufort for LOL", serif;
+  --font-display: "Twemoji", "Cinzel", "Beaufort for LOL", serif;
+  --font-sans: "Twemoji", "Lato", "Spiegel", sans-serif;
+  --font-num: "Twemoji", "Cinzel", "Beaufort for LOL", serif;
   --radius-card: 0.15rem;
   --radius-btn: 0.1rem;
   --radius-chip: 0.15rem;

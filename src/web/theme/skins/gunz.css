@@ -27,9 +27,9 @@ html[data-skin="gunz"] {
   --color-bad: #ff3b1f;
   --color-bad-deep: #8a1a0a;
   --color-warn: #f0a020;
-  --font-display: "Jura", "Eurostile", sans-serif;
-  --font-sans: "Arimo", Arial, Helvetica, sans-serif;
-  --font-num: "Share Tech Mono", monospace;
+  --font-display: "Twemoji", "Jura", "Eurostile", sans-serif;
+  --font-sans: "Twemoji", "Arimo", Arial, Helvetica, sans-serif;
+  --font-num: "Twemoji", "Share Tech Mono", monospace;
   --radius-card: 0.2rem;
   --radius-btn: 0.15rem;
   --radius-chip: 0.2rem;

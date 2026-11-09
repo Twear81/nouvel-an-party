@@ -27,6 +27,11 @@ Les polices sont installées en local (pas d'internet pendant la soirée).
 2. L'importer dans `src/web/main.tsx`
 3. Mettre son nom dans `--font-display` (titres, gros chiffres) ou `--font-sans` (texte) de `theme.css`.
 
+**Emojis** : embarqués aussi (police Twemoji en couleur, paquet `twemoji-colr-font`, `@font-face` en tête de
+`theme.css`), pour qu'ils soient identiques sur la TV, les iPhone et les Android, sans police système. Toute pile
+`--font-*` (thème de base comme skins) **commence par `"Twemoji"`** : l'`unicode-range` de la police la réserve aux
+emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce premier élément.
+
 ### Avatars, cadres, couleurs
 - `AVATARS` : ajouter `{ id, label, emoji }`. L'`id` est enregistré dans le profil : ne pas renommer un id existant en cours de soirée.
   Pour utiliser des images à la place des emoji, adapter `PlayerAvatar.tsx` (une seule branche à changer).

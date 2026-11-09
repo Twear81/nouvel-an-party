@@ -25,9 +25,9 @@ html[data-skin="dofus"] {
   --color-bad: #e0564a;
   --color-bad-deep: #8a1f1a;
   --color-warn: #f0a030;
-  --font-display: "Fira Sans", "Segoe UI", sans-serif;
-  --font-sans: "Fira Sans", "Segoe UI", sans-serif;
-  --font-num: "Fira Sans", "Segoe UI", sans-serif;
+  --font-display: "Twemoji", "Fira Sans", "Segoe UI", sans-serif;
+  --font-sans: "Twemoji", "Fira Sans", "Segoe UI", sans-serif;
+  --font-num: "Twemoji", "Fira Sans", "Segoe UI", sans-serif;
   --scrim-blur: 0px;
   --radius-card: 0.35rem;
   --radius-btn: 0.25rem;
