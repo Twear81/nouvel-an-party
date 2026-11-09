@@ -272,3 +272,6 @@ html[data-skin="gunz"] [data-ui="backdrop-layer"][data-layer="3"] {
   html[data-skin="gunz"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-frame"]::after { animation: gz-led-low 0.8s steps(2, jump-none) infinite; }
   html[data-skin="gunz"] [data-ui="panel"] { animation: gz-panel-in 0.35s ease-out both; }
 }
+
+/* Avatars carrés : le cadre « pointillés » ne tourne pas (un carré qui tourne paraît de travers). */
+html[data-skin="gunz"] [data-ui="avatar"] .frame-dashed { animation: none; }

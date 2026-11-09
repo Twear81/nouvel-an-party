@@ -143,3 +143,6 @@ html[data-skin="dofus"] [data-ui="backdrop-layer"][data-layer="3"] { background:
   html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-shape"],
   html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-fill"] { animation: dofus-beat 0.8s ease-in-out infinite; }
 }
+
+/* Avatars carrés : le cadre « pointillés » ne tourne pas (un carré qui tourne paraît de travers). */
+html[data-skin="dofus"] [data-ui="avatar"] .frame-dashed { animation: none; }
