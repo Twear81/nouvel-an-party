@@ -35,15 +35,19 @@
 | Skin | État | Écarts connus avec la maquette |
 |---|---|---|
 | `rocket-league` | ✅ revu sur captures et validé par l'utilisateur | — |
-| `dofus` | à revoir | cadre de jeu TV (fenêtre ardoise + barre de titre) non dessiné ; barre bordeaux à motif non utilisée pour le classement ; ✻ des kamas seulement au classement final |
-| `overwatch` | à revoir | cadre de jeu TV non dessiné ; lobby et beaucoup d'écrans pas revus après les dernières corrections |
-| `league-of-legends` | à revoir | cadre de jeu TV non dessiné ; trait turquoise reliant les portraits absent ; camps de Ceci ou Cela en aplats cyan/rouge |
-| `gunz` | à revoir | cadre de jeu TV (cadre métal vissé) non dessiné ; avatars ronds au lieu de cases carrées (`avatar-face`) ; 1er du classement pas en ligne blanche texte noir |
-| `mario-odyssey` | à revoir | cadre de jeu TV non dessiné ; nombreux écrans non revus après corrections (Tier list, Split the Room, Imposteur…) ; texte des barres de résultat |
-| `plague-tale` | à revoir | cadre de jeu TV non dessiné ; avatars ronds au lieu des cases brunes carrées ; camps rouge/bleu trop vifs |
+| `dofus` | à revoir | cadre de jeu TV (fenêtre ardoise + barre de titre) non dessiné ; camps de Ceci ou Cela en aplats bleu clair/rose ; barre bordeaux à motif non utilisée pour le classement ; ✻ des kamas seulement au classement final |
+| `overwatch` | à revoir | cadre de jeu TV non dessiné ; choix en aplats bleu/orange/vert fluo à texte marine italique peu lisible (maquette : rangées blanches, sélection cyan) ; encadré « C'est ta phrase ! » translucide peu contrasté |
+| `league-of-legends` | à revoir | **texte doré sur cyan/vert/rouge illisible sur téléphone** (choix, OUI/NON, PFC) ; cadre de jeu TV non dessiné ; trait turquoise reliant les portraits absent ; camps de Ceci ou Cela en aplats cyan/rose ; « PRÉPARE-TOI ! » coupé avant le « ! » |
+| `gunz` | à revoir | cadre de jeu TV (cadre métal vissé) non dessiné ; camps Ceci ou Cela / OUI-NON bleu clair et rouge vif hors palette ; avatars ronds au lieu de cases carrées (`avatar-face`) ; 1er du classement pas en ligne blanche texte noir |
+| `mario-odyssey` | à revoir | **le plus éloigné** : surfaces translucides (`bg-surface`, champs, cases du tournoi, boutons désactivés) en rose délavé sur le rouge ; question TV en texte blanc au lieu du bandeau olive dans la carte grise (cadre de jeu absent) ; texte rouge sombre sur rouge illisible (« NON », camp « Non ») ; « Voir mon mot » gris sur gris ; « On vote / Encore un tour » bleu/rouge hors palette |
+| `plague-tale` | à revoir | cadre de jeu TV non dessiné ; avatars ronds au lieu des cases brunes carrées ; camps en aplats bleu-gris/rouille ; textes secondaires (« Total : … pts ») trop peu contrastés ; « PRÉPARE-TOI ! » coupé avant le « ! » |
+
+Revue complète sur captures du 9 novembre 2026 : détail par skin dans `captures/REVUE.md` (dossier local, ignoré par git).
+Attention : sans police emoji installée (WSL : `sudo apt install fonts-noto-color-emoji`), avatars et icônes
+sortent vides ou en « ▯ » sur les captures — ce n'est pas un bug des skins.
 
 ## Procédure pour finir un skin (mode éco)
-1. `CAPTURES_SKIN=<id> CAPTURES_DIR=<dossier> bun run captures:skin` (en arrière-plan).
+1. `CAPTURES_SKIN=<id> CAPTURES_DIR=$PWD/captures/<id> bun run captures:skin` (en arrière-plan ; `captures/` est ignoré par git).
 2. Regarder un échantillon d'écrans clés et les comparer à la maquette + aux références : lobby TV, un jeu TV (chrono),
    résultats TV, choix téléphone, Ceci ou Cela (camps), un jeu à étapes, pause, final.
 3. Corriger dans `src/web/theme/skins/<id>.css` uniquement (dessiner `game-frame` / `game-frame-title`, s'inspirer de

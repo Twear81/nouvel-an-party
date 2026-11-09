@@ -70,6 +70,8 @@ test.describe("Captures de tous les écrans par skin", () => {
     const S = shooter(party, id);
     // Les manches surprise (culture-genante) n'ont pas d'annonce.
     if (id !== "culture-genante" && (await party.tv.getByTestId("tv-intro").waitFor({ timeout: 8_000 }).then(() => true, () => false))) {
+      // La règle du jeu n'apparaît qu'à 1,6 s sous le titre (IntroScreen) : on attend qu'elle soit là.
+      await party.tv.waitForTimeout(1_500);
       await S.tv("intro");
       await S.tel("intro");
     }
