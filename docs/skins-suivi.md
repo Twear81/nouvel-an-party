@@ -55,8 +55,24 @@ Les emojis sont embarqués (Twemoji, voir changer-le-design.md) : plus de dépen
 5. `bun run typecheck && bun run test`, commit « Skin <Jeu> : … ».
 
 ## Reste à faire avant de proposer le merge
-- Faire valider les 6 skins corrigés le 9/11 (captures dans `captures/<skin>/_planches/`).
-- Suite E2E complète sur machine calme (`bun run test:e2e`, Chromium + `@compat` Firefox/WebKit) : jamais lancée en
-  entier depuis l'intégration (machine saturée pendant les runs des agents).
-- Vérifier le thème de base (sans skin) et le rideau de transition en conditions réelles (`bun run dev`, vrais téléphones).
-- Faire valider les captures par l'utilisateur, puis merge `--no-ff` dans `main` (« Merge skins »).
+1. **Cadres d'avatar par skin** (signalé par l'utilisateur) : les cadres choisis au profil (`.frame-*` de `theme.css`,
+   dessinés pour un avatar rond) ne vont pas avec les formes des skins (cases carrées Dofus / GunZ / Plague Tale,
+   hexagone Overwatch, cases Rocket League). Ex. : disque rond visible dans une case carrée (Dofus), pointillés qui
+   tournaient hors de l'hexagone (Overwatch, rotation coupée). À reprendre skin par skin : chaque cadre doit suivre la
+   forme de l'avatar du skin et rester reconnaissable (c'est l'identité du joueur).
+2. **Valider les 6 skins corrigés le 9/11** sur captures (`captures/<skin>/_planches/`), puis retouches.
+3. **WebKit (iPhone)** : installer les dépendances système (`sudo env "PATH=$PATH" bunx playwright install-deps`), puis
+   `bun run test:e2e` complet (Chromium + `@compat` Firefox/WebKit) et captures en `--project=webkit`. Aujourd'hui
+   seul Chromium est vérifié ; le test « navigateurs mixtes » échoue faute de WebKit.
+4. Vérifier le thème de base (sans skin) et le rideau de transition en conditions réelles (`bun run dev`, vrais téléphones).
+5. Merge `--no-ff` dans `main` (« Merge skins ») après validation de l'utilisateur.
+
+## Défauts connus
+- Nom du jeu affiché deux fois sur la TV (en-tête de manche + titre du cadre de jeu), dans tous les skins.
+- Pastilles du choix d'avatar à l'écran de profil restées rondes dans tous les skins (pas de marqueur `data-ui`).
+- Mario : choix non retenu un peu brunâtre sur téléphone ; champs texte gris au lieu de blancs ; contour du gros
+  chiffre de Compte à rebours bleu/olive peu joli ; écrans de l'Imposteur hors cadre de jeu restent sur le rouge.
+- Pierre-feuille-ciseaux : libellés Pierre / Feuille / Ciseaux plus petits que les autres camps (taille du composant).
+- Culture gênante (mode sérieux) : décor sombre à l'intérieur du cadre de jeu des skins, un peu hétérogène.
+- Captures : avec 4 workers sur machine chargée, des jeux échouent au hasard (relancer seuls) ; certaines étapes brèves
+  (« pick » de Pierre-feuille-ciseaux, mot de l'Imposteur) ne sont pas toujours photographiées.
