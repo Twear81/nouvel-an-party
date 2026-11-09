@@ -4,7 +4,7 @@
 **comment reprendre**. À mettre à jour à chaque étape, à supprimer (ou réduire) une fois le chantier fusionné dans `main`.
 
 ## Références
-- **Maquette validée par l'utilisateur** : [maquettes/skins.html](maquettes/skins.html), à ouvrir dans un navigateur
+- **Maquette validée par l'utilisateur** : **https://claude.ai/code/artifact/63f8e7a3-35e1-4279-886f-feffba7ec5bc** (fait foi) ; copie locale [maquettes/skins.html](maquettes/skins.html), à ouvrir dans un navigateur
   (← → pour changer de skin, chrono de démo qui tourne). C'est LA référence visuelle : couleurs, polices, formes, détails.
   Son CSS (`[data-skin="dofus"]`, `ow`, `lol`, `rl`, `gunz`, `mario`, `plague`) est la source à reproduire.
 - **Captures du vrai jeu fournies par l'utilisateur** : [maquettes/references/](maquettes/references/), un dossier par
