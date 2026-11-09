@@ -15,6 +15,19 @@
 /* Tailwind ne regarde pas hors de src/web par défaut : on lui indique les écrans des mini-jeux. */
 @source "../../minigames";
 
+/* Emojis embarqués (Twemoji en couleur, paquet twemoji-colr-font) : mêmes dessins sur la TV et tous les téléphones,
+   sans internet ni police système. Placée en tête de chaque pile de polices (--font-*), elle ne sert qu'aux caractères
+   emoji grâce à unicode-range : lettres, chiffres et symboles du jeu (─ → ✓ ✻ ►) restent dans la police du skin. */
+@font-face {
+  font-family: "Twemoji";
+  src: url("../../../node_modules/twemoji-colr-font/twemoji.woff2") format("woff2");
+  font-display: block;
+  unicode-range: U+00A9, U+00AE, U+200D, U+203C, U+2049, U+20E3, U+2122, U+2139, U+2194-2199, U+21A9-21AA, U+231A-231B,
+    U+2328, U+23CF, U+23E9-23F3, U+23F8-23FA, U+24C2, U+25AA-25AB, U+25B6, U+25C0, U+25FB-25FE, U+2600-27BF,
+    U+2934-2935, U+2B05-2B07, U+2B1B-2B1C, U+2B50, U+2B55, U+3030, U+303D, U+3297, U+3299, U+FE0F, U+1F000-1FAFF,
+    U+E0020-E007F;
+}
+
 @theme static {
   /* ── Fonds (thème de base, hors skins : bleu Karmine Corp) */
   --color-bg: #040b1e;
@@ -62,9 +75,9 @@
   --color-pen-4: #f08a1c;
 
   /* ── Polices (embarquées via @fontsource, voir main.tsx) */
-  --font-display: "Bungee", "Outfit Variable", system-ui, sans-serif;
-  --font-sans: "Outfit Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-num: "Bungee", "Outfit Variable", system-ui, sans-serif; /* chiffres du chrono et des scores */
+  --font-display: "Twemoji", "Bungee", "Outfit Variable", system-ui, sans-serif;
+  --font-sans: "Twemoji", "Outfit Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-num: "Twemoji", "Bungee", "Outfit Variable", system-ui, sans-serif; /* chiffres du chrono et des scores */
 
   /* ── Rayons */
   --radius-card: 1.5rem;
@@ -242,7 +255,7 @@ img { -webkit-touch-callout: none; }
   --color-serious-accent: #d6cfbd;
   --color-serious-good: #8fc2a1;
   --color-serious-bad: #cf8f8f;
-  --font-serious: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
+  --font-serious: "Twemoji", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
   --gradient-serious: radial-gradient(90% 70% at 50% 35%, var(--color-serious-bg-2) 0%, var(--color-serious-bg) 100%);
 }
 @utility bg-serious {

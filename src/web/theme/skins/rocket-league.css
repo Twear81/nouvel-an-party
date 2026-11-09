@@ -25,10 +25,10 @@ html[data-skin="rocket-league"] {
   --color-bad: #ff4d5a;
   --color-bad-deep: #a8202c;
   --color-warn: #f2a83a;
-  --font-display: "Exo 2", "Eurostile", sans-serif;
-  --font-sans: "Arimo", Arial, Helvetica, sans-serif;
+  --font-display: "Twemoji", "Exo 2", "Eurostile", sans-serif;
+  --font-sans: "Twemoji", "Arimo", Arial, Helvetica, sans-serif;
   /* Exo 2 fin : chiffres de tableau d'affichage, sans le zéro barré d'Orbitron (illisible : « ∅ »). */
-  --font-num: "Exo 2", "Eurostile", sans-serif;
+  --font-num: "Twemoji", "Exo 2", "Eurostile", sans-serif;
   --radius-card: 0.2rem;
   --radius-btn: 0.15rem;
   --radius-chip: 0.2rem;

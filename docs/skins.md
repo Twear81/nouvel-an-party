@@ -105,7 +105,7 @@ Sur le téléphone, le chrono garde une forme compacte (barre) habillée par le 
 ## Ajouter un skin
 1. Ajouter l'id dans `SKINS` (`src/shared/skins.ts`).
 2. Créer `src/web/theme/skins/<id>.css` (jetons + composants + fond + animations) et l'importer dans `theme.css`.
-3. Ajouter la variante de chrono si besoin (`Countdown`) et les polices (`@fontsource`, importées dans `main.tsx`).
+3. Ajouter la variante de chrono si besoin (`Countdown`) et les polices (`@fontsource`, importées dans `main.tsx`) ; chaque `--font-*` commence par `"Twemoji"` (emojis embarqués).
 4. Vérifier tous les écrans dans le nouveau skin : `CAPTURES_SKIN=<id> bun run captures:skin` (spec `tests/e2e/skins-captures.spec.ts`)
    photographie la TV (1920x1080) et des téléphones 360x640 : lobby, profil, intro/jeu/choix/résultats de chaque
    mini-jeu, pause, confirmation, classement final. PNG dans `test-results/skins/<id>/` (ou `CAPTURES_DIR=<dossier>`),
