@@ -8,7 +8,7 @@ ils emploient les classes Tailwind issues du thème (`bg-surface`, `text-accent`
 | Je veux changer… | Fichier |
 |---|---|
 | Couleurs, polices, rayons, ombres, dégradés, animations | `src/web/theme/theme.css` (bloc `@theme static`) |
-| Cadres d'avatar (dessin CSS) | `src/web/theme/theme.css` (section « Cadres d'avatar », classes `.frame-*`) |
+| Cadres d'avatar (tracés SVG et décor CSS) | `src/web/ui/AvatarFrame.tsx` + `src/web/theme/theme.css` (section « Avatars », classes `.frame-*`) |
 | Liste des avatars, cadres proposés, couleurs de profil | `src/web/theme/profile-options.ts` |
 | Fonts embarquées | `src/web/main.tsx` (imports `@fontsource…`) + `--font-*` dans `theme.css` |
 
@@ -19,7 +19,7 @@ Dans `theme.css`, modifier les variables `--color-*` :
 Les dégradés (`--gradient-bg`, `--gradient-gold`…) sont construits à partir de ces couleurs.
 Classes disponibles : `bg-bg`, `text-ink`, `text-ink-muted`, `bg-accent`, `text-accent`, `bg-gold`, `bg-night`, `glass`, `text-gold-gradient`…
 
-Le mode « sérieux » de Culture gênante (décor sombre, typo solennelle) a ses propres jetons : `--color-serious-*`, `--font-serious`, `--gradient-serious` (classes `bg-serious`, `text-serious-ink`, `font-serious`…), dans la section `culture-genante` de `theme.css`. Sous un skin, ces jetons sont **dérivés** de ceux du skin (fond plus sombre et désaturé, texte et accent du skin, police `--font-sans`) par la règle `html[data-skin]` de la même section : le mode sérieux reste dans l'univers du skin. `--color-shade` (ombre portée d'un objet posé sur le décor) suit la même logique.
+Le mode « sérieux » de Culture gênante (décor sombre, typo solennelle) a ses propres jetons : `--color-serious-*`, `--font-serious`, `--gradient-serious` (classes `bg-serious`, `text-serious-ink`, `font-serious`…), dans la section `culture-genante` de `theme.css`. Sous un skin, ces jetons sont **dérivés** de ceux du skin (fond plus sombre et désaturé, texte et accent éclaircis pour rester lisibles même si le skin est clair, police `--font-sans`) par la règle `html[data-skin]` de la même section : le mode sérieux reste dans l'univers du skin. `--color-shade` (ombre portée d'un objet posé sur le décor) suit la même logique.
 
 ### Polices
 Les polices sont installées en local (pas d'internet pendant la soirée).
@@ -36,7 +36,9 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 - `AVATARS` : ajouter `{ id, label, emoji }`. L'`id` est enregistré dans le profil : ne pas renommer un id existant en cours de soirée.
   Pour utiliser des images à la place des emoji, adapter `PlayerAvatar.tsx` (une seule branche à changer).
 - `FRAMES` : ajouter `{ id, label, className }` puis écrire la classe `.frame-<nom>` dans `theme.css`
-  (`--p` = couleur du joueur, `1em` = 1/10 de la taille de l'avatar, donc le cadre suit toutes les tailles).
+  (`--p` = couleur du joueur ; traits SVG `avatar-frame-outer` / `avatar-frame-inner`, coordonnées sur 100).
+  Le skin choisit la silhouette via les jetons `--avatar-*` : voir [le contrat des avatars](skins.md#avatars-et-cadres--contrat-commun).
+  Ne pas redessiner le portrait dans le profil : les choix et aperçus réutilisent `PlayerAvatar`, y compris pour les photos.
 - `COLORS` : liste de couleurs hex.
 
 ## Où est chaque écran

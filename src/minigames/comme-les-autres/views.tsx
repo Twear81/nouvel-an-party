@@ -107,9 +107,10 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
         {fields.map((i) => {
           const done = state === "sent" && !!values[i]?.trim();
           return (
-            <div key={i} className="relative">
+            <div key={i} data-ui="text-field-shell" className="relative">
               {n > 1 && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-display text-xl text-accent">{i + 1}</span>}
               <input
+                data-ui="text-field"
                 ref={(el) => {
                   refs.current[i] = el;
                 }}

@@ -42,7 +42,7 @@ const Tv = ({ pub, playerById, round }: Props) => {
             <span data-testid="cabr-target-big" className="font-display text-7xl">
               Arrêtez-vous à
             </span>
-            <span className="font-display text-[19rem] leading-none text-accent" style={{ textShadow: "0 0 4rem var(--color-accent-deep)" }}>
+            <span data-ui="animated-number" className="font-display text-[19rem] leading-none text-accent" style={{ textShadow: "0 0 4rem var(--color-accent-deep)" }}>
               {fmtCible(pub.cible)} s
             </span>
             <span className="text-4xl text-ink-muted">Le compteur va devenir fou : finissez de compter dans votre tête !</span>

@@ -6,6 +6,10 @@
 
 /* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
 html[data-skin="rocket-league"] {
+  /* Forme partagée par les portraits et tous les cadres du profil. */
+  --avatar-radius: .2em;
+  --avatar-circle: none;
+  --avatar-square: inline;
   --color-bg: #0b1420;
   --color-bg-2: #182230;
   --color-bg-3: #0f2c4c;
@@ -238,9 +242,6 @@ html[data-skin="rocket-league"] [data-ui="countdown"][data-low="true"] [data-ui=
 html[data-skin="rocket-league"] [data-ui="countdown"][data-variant="bar"] [data-ui="countdown-num"] { font-weight: 400; }
 
 /* Avatars : cadre argenté carré, badge de niveau doré */
-html[data-skin="rocket-league"] [data-ui="avatar"],
-html[data-skin="rocket-league"] [data-ui="avatar-face"],
-html[data-skin="rocket-league"] [data-ui="avatar"] .frame { border-radius: 0.18em; }
 html[data-skin="rocket-league"] [data-ui="avatar"] { box-shadow: 0 0 0 0.1em #d7dee8, 0 0 0 0.18em #5a6470; }
 html[data-skin="rocket-league"] [data-ui="avatar-badge"] {
   border-radius: 0 0 0.5em 0.5em;
@@ -342,6 +343,3 @@ html[data-skin="rocket-league"] [data-ui="backdrop-layer"][data-layer="3"] {
 @keyframes rl-open { from { opacity: 0; transform: translateY(0.6rem); } to { opacity: 1; transform: none; } }
 @keyframes rl-halo { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 @keyframes rl-sweep { from { transform: translateX(0); } to { transform: translateX(400%); } }
-
-/* Avatars carrés : le cadre « pointillés » ne tourne pas (un carré qui tourne paraît de travers). */
-html[data-skin="rocket-league"] [data-ui="avatar"] .frame-dashed { animation: none; }

@@ -6,6 +6,10 @@
 
 /* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
 html[data-skin="dofus"] {
+  /* Forme partagée par les portraits et tous les cadres du profil. */
+  --avatar-radius: .2em;
+  --avatar-circle: none;
+  --avatar-square: inline;
   --color-bg: #1e1710;
   --color-bg-2: #33344a;
   --color-bg-3: #45465f;
@@ -163,8 +167,6 @@ html[data-skin="dofus"] [data-ui="countdown"][data-variant="bar"][data-low="true
 html[data-skin="dofus"] [data-ui="countdown"][data-variant="bar"] [data-ui="countdown-num"] { color: #fff; font-weight: 900; text-shadow: 0 0 0.1em #4a0a12, 0.05em 0.05em 0 #4a0a12, -0.05em -0.05em 0 #4a0a12; }
 
 /* Avatars : cases d'inventaire carrées (le cadre suit) */
-html[data-skin="dofus"] [data-ui="avatar"], html[data-skin="dofus"] [data-ui="avatar-face"], html[data-skin="dofus"] [data-ui="avatar"] .frame { border-radius: 0.25em; }
-html[data-skin="dofus"] [data-ui="avatar"], html[data-skin="dofus"] [data-ui="avatar-face"], html[data-skin="dofus"] [data-ui="avatar"] .frame { border-radius: 0.25em !important; }
 html[data-skin="dofus"] [data-ui="avatar-face"] { background: linear-gradient(180deg, #5d5e7e, #4b4c6a) !important; border: 1px solid #1d1e2c; box-shadow: inset 0 1px 0 #7d7ea0; }
 html[data-skin="dofus"] [data-ui="roster-item"][data-done="true"] [data-ui="avatar-face"] { background: linear-gradient(180deg, #f6e977, #c4ab22) !important; }
 html[data-skin="dofus"] [data-ui="roster-item"] > span { text-shadow: 0 1px 2px #000; }
@@ -209,6 +211,3 @@ html[data-skin="dofus"] [data-ui="backdrop-layer"][data-layer="3"] { background:
   html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-shape"],
   html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-fill"] { animation: dofus-beat 0.8s ease-in-out infinite; }
 }
-
-/* Avatars carrés : le cadre « pointillés » ne tourne pas (un carré qui tourne paraît de travers). */
-html[data-skin="dofus"] [data-ui="avatar"] .frame-dashed { animation: none; }

@@ -12,7 +12,7 @@ export function RoundHeader({ round, children }: { round: RoundInfo; children?: 
             {round.number} / {round.normalTotal}
           </span>
         )}
-        <span className="font-display text-3xl text-ink-muted">{round.gameName}</span>
+        <span data-ui="round-game-name" className="font-display text-3xl text-ink-muted">{round.gameName}</span>
       </div>
       {children}
     </header>

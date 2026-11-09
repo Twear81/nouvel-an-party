@@ -114,9 +114,6 @@
 @keyframes wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
 @keyframes nudge { 0%, 100% { transform: translateX(-0.4rem); } 50% { transform: translateX(0.5rem); } }
 @keyframes attention { 0%, 100% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0); transform: scale(1); } 50% { box-shadow: 0 0 1.8rem 0.2rem var(--color-warn); transform: scale(1.03); } }
-@keyframes spin-slow { to { transform: rotate(360deg); } }
-@property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
-@keyframes angle-spin { to { --angle: 360deg; } }
 
 /* ── Utilitaires de thème */
 @utility bg-gold { background-image: var(--gradient-gold); }
@@ -189,20 +186,39 @@ img { -webkit-touch-callout: none; }
 
 /* ── Cadre commun d'un écran de mini-jeu (TV) : invisible ici, dessiné par chaque skin (docs/skins.md). */
 [data-ui="game-frame-title"] { display: none; }
+/* Le nom est déjà dans la fenêtre dessinée par les skins ; le thème de base le garde dans l'en-tête. */
+html[data-skin] [data-ui="round-game-name"] { display: none; }
 
-/* ── Cadres d'avatar (choisis dans profile-options.ts ; --p = couleur du joueur ; 1em = 1/10 de la taille) */
-.frame { position: absolute; inset: 0; border-radius: 999px; pointer-events: none; }
-.frame-none { box-shadow: inset 0 0 0 0.1em var(--color-line); }
-.frame-gold { box-shadow: inset 0 0 0 0.4em var(--color-accent), inset 0 0 0 0.55em var(--color-accent-deep), 0 0 1.2em rgb(246 205 114 / 0.5); }
-.frame-neon { box-shadow: inset 0 0 0 0.3em var(--p), inset 0 0 0.8em 0.1em var(--p), 0 0 0.6em var(--p), 0 0 1.6em var(--p); }
-.frame-double { box-shadow: inset 0 0 0 0.25em var(--p), inset 0 0 0 0.5em var(--color-bg), inset 0 0 0 0.75em var(--color-accent); }
-.frame-dashed { border: 0.35em dashed var(--p); animation: spin-slow 14s linear infinite; }
-.frame-sparkle {
-  background: conic-gradient(from var(--angle, 0deg), var(--color-accent-strong), var(--p), var(--color-ink), var(--color-accent), var(--color-accent-strong));
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 0.45em), #000 calc(100% - 0.4em));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 0.45em), #000 calc(100% - 0.4em));
-  animation: angle-spin 3s linear infinite; /* sans @property (très vieux navigateurs) le cadre reste fixe */
-  filter: drop-shadow(0 0 0.3em var(--color-accent));
+/* ── Avatars : une forme commune au portrait, aux choix de profil et aux six cadres SVG.
+ * Le skin ne règle que ces jetons ; aucun masque circulaire ni rotation de la silhouette. */
+:root {
+  --avatar-radius: 50%;
+  --avatar-clip: none;
+  --avatar-circle: inline;
+  --avatar-square: none;
+  --avatar-hexagon: none;
+}
+[data-ui="avatar"], [data-ui="avatar-face"], [data-ui="avatar-option"] { border-radius: var(--avatar-radius); }
+[data-ui="avatar-face"] { clip-path: var(--avatar-clip); }
+[data-ui="avatar-option"] { position: relative; }
+[data-ui="avatar-option"] > [data-ui="avatar"] { pointer-events: none; }
+[data-ui="avatar-frame"] { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; fill: none; stroke-linejoin: round; }
+[data-avatar-shape="circle"] { display: var(--avatar-circle); }
+[data-avatar-shape="square"] { display: var(--avatar-square); }
+[data-avatar-shape="hexagon"] { display: var(--avatar-hexagon); }
+[data-ui="avatar-frame-outer"] { stroke: var(--color-line); stroke-width: 1; }
+[data-ui="avatar-frame-inner"] { display: none; }
+.frame-gold [data-ui="avatar-frame-outer"] { stroke: var(--color-accent); stroke-width: 4; filter: drop-shadow(0 0 0.35em var(--color-accent)); }
+.frame-gold [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--color-accent-deep); stroke-width: 1.5; }
+.frame-neon [data-ui="avatar-frame-outer"] { stroke: var(--p); stroke-width: 3; filter: drop-shadow(0 0 0.6em var(--p)); }
+.frame-double [data-ui="avatar-frame-outer"] { stroke: var(--p); stroke-width: 2.5; }
+.frame-double [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--color-accent); stroke-width: 2.5; }
+.frame-dashed [data-ui="avatar-frame-outer"] { stroke: var(--p); stroke-width: 3.5; stroke-dasharray: 3 2; animation: avatar-dashes 14s linear infinite; }
+.frame-sparkle [data-ui="avatar-frame-outer"] { stroke: var(--frame-shimmer); stroke-width: 4; filter: drop-shadow(0 0 0.3em var(--color-accent)); }
+.frame-sparkle [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--color-ink); stroke-width: 2; stroke-dasharray: 1 9; animation: avatar-dashes 3s linear infinite; }
+@keyframes avatar-dashes { to { stroke-dashoffset: -100; } }
+@media (prefers-reduced-motion: reduce) {
+  [data-ui="avatar-frame"] :is([data-ui="avatar-frame-outer"], [data-ui="avatar-frame-inner"]) { animation: none; }
 }
 
 /* ─── mini-jeu tier-list ─── */
@@ -268,10 +284,11 @@ img { -webkit-touch-callout: none; }
 html[data-skin] {
   --color-serious-bg: color-mix(in oklab, var(--color-bg) 28%, #050506);
   --color-serious-bg-2: color-mix(in oklab, var(--color-bg) 45%, #0c0c0f);
-  --color-serious-ink: var(--color-ink);
-  --color-serious-muted: color-mix(in oklab, var(--color-ink-muted) 80%, #8d9099);
-  --color-serious-line: color-mix(in srgb, var(--color-ink) 20%, transparent);
-  --color-serious-accent: color-mix(in oklab, var(--color-accent) 75%, var(--color-ink));
+  /* Le texte d'un skin clair (Overwatch) peut être marine : sur ce décor sombre, l'éclaircir est indispensable. */
+  --color-serious-ink: color-mix(in oklab, var(--color-ink) 35%, #ffffff);
+  --color-serious-muted: color-mix(in oklab, var(--color-ink-muted) 45%, #d3d6dd);
+  --color-serious-line: color-mix(in srgb, var(--color-serious-ink) 20%, transparent);
+  --color-serious-accent: color-mix(in oklab, var(--color-accent) 35%, #ffffff);
   --color-serious-good: color-mix(in oklab, var(--color-good) 65%, #9a9ca3);
   --color-serious-bad: color-mix(in oklab, var(--color-bad) 65%, #9a9ca3);
   --font-serious: var(--font-sans);

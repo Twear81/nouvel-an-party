@@ -6,6 +6,10 @@
 
 /* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
 html[data-skin="plague-tale"] {
+  /* Forme partagée par les portraits et tous les cadres du profil. */
+  --avatar-radius: .2em;
+  --avatar-circle: none;
+  --avatar-square: inline;
   --color-bg: #181818;
   --color-bg-2: #34332f;
   --color-bg-3: #5d5c57;
@@ -284,9 +288,6 @@ html[data-skin="plague-tale"] [data-ui="countdown-fill"] { border-radius: 0; bac
 html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-fill"] { background-image: linear-gradient(90deg, #7a2f24, #c0604f); }
 
 /* Avatar : case brune carrée (dégradé Van Dyke), fin liseré sombre ; les pastilles restent carrées aussi */
-html[data-skin="plague-tale"] [data-ui="avatar"],
-html[data-skin="plague-tale"] [data-ui="avatar-face"],
-html[data-skin="plague-tale"] [data-ui="avatar"] .frame { border-radius: 0.1em !important; }
 html[data-skin="plague-tale"] [data-ui="avatar"] { box-shadow: 0 0.15em 0.5em rgb(0 0 0 / 0.55); }
 html[data-skin="plague-tale"] [data-ui="avatar-face"] {
   background: var(--plague-tile) !important;

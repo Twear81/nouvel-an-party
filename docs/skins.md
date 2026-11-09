@@ -59,10 +59,13 @@ redéfinit pas.
 | `backdrop` | `Backdrop` | rendu propre au skin |
 | `panel` | `Panel` | `panel-title` (prop `title`, facultative) |
 | `button` | `Button` | `data-variant` (`primary`, `secondary`, `danger`, `ghost`, `good`, `bad`), `data-size` |
-| `choice` | `Choice` (carte de choix cliquable des téléphones et ses reflets TV) | `data-selected`, `data-state` (`idle`, `correct`, `wrong`, `faded`), parties `choice-key`, `choice-label`, `choice-check` |
+| `choice` | `Choice` (carte de choix cliquable des téléphones et ses reflets TV) | `data-tone` (`glass`, `cool`, `hot`, `good`, `bad`, `plain`, `flat`), `data-selected`, `data-state` (`idle`, `correct`, `wrong`, `faded`), parties `choice-key`, `choice-label`, `choice-check` |
 | `result-bar` | `ResultBar` (barre de résultat animée) | `data-highlight`, partie `result-bar-fill` |
 | `countdown` | `Countdown` | `data-low`, `data-variant` (voir « Chrono »), `--p` = part restante (0 → 1) |
-| `avatar` | `PlayerAvatar` | `data-dimmed`, parties `avatar-face` (disque intérieur : forme, fond), `avatar-badge` |
+| `avatar` | `PlayerAvatar` | `data-frame`, `data-dimmed`, parties `avatar-face` (portrait : forme, fond), `avatar-frame` (SVG), `avatar-frame-outer`, `avatar-frame-inner`, `avatar-badge` |
+| `avatar-option`, `frame-option` | choix du profil | `data-selected` ; les portraits et aperçus réutilisent `PlayerAvatar` |
+| `text-field`, `text-field-shell` | champs de pseudo, mot et phrase ; enveloppe des préfixes et compteurs | `:focus`, `::placeholder` ; garder les bordures d'état (`border-good`…) |
+| `animated-number` | grand chiffre animé | le skin peut régler son ombre sans changer le mouvement |
 | `roster`, `roster-item` | `AnsweredRoster` | `data-done` |
 | `answered-count` | `AnsweredCount` | |
 | `selected-badge` | `SelectedBadge` | |
@@ -74,7 +77,7 @@ redéfinit pas.
 | `vote-dots` | `VoteDots` | |
 | `dialog` | `ConfirmDialog` | |
 | `game-frame` | cadre commun de l'écran d'un mini-jeu sur la TV (jeu et résultats, hors interludes) : invisible dans le thème de base, le skin le dessine en fenêtre de son jeu | parties `game-frame-title` (nom du jeu, masqué par défaut : `display` à rétablir), `game-frame-body` |
-| `round-header`, `round-tag` | en-tête TV d'une manche (`PlayingScreen`, `IntroScreen`) | |
+| `round-header`, `round-tag` | en-tête TV d'une manche (`PlayingScreen`, `IntroScreen`) | `round-game-name` : masqué sous un skin, car le nom est déjà dans `game-frame-title` ; conservé en thème de base |
 | `host-bar`, `host-button` | `HostBar` | |
 | `score-row` | lignes de classement (résultats, final, téléphone) | `data-rank`, `data-highlight` |
 | `podium` | podium du classement final | |
@@ -95,6 +98,20 @@ encombrement, seule la forme change.
 | `plague-tale` | `ring` (fin, or) |
 Sur le téléphone, le chrono garde une forme compacte (barre) habillée par le skin.
 
+### Avatars et cadres : contrat commun
+Le profil conserve ses identifiants d'avatar et de cadre ; un changement de skin ne les modifie pas.
+`PlayerAvatar` affiche le contenu (emoji ou photo) et `AvatarFrame` trace le décor, sans connaître les skins.
+Pour remplacer les emojis par d'autres portraits, modifier le contenu de `PlayerAvatar` : les choix du profil,
+les aperçus des six cadres et les écrans de jeu en profitent ensemble.
+
+Le skin définit sa silhouette avec `--avatar-radius`, `--avatar-clip` et les trois commutateurs
+`--avatar-circle`, `--avatar-square`, `--avatar-hexagon` (`inline` pour la forme choisie, `none` pour les autres).
+Par défaut : cercle, rayon `50%`, aucun découpage. Dofus, GunZ, Rocket League et Plague Tale emploient le carré
+arrondi (`.2em`), Overwatch l'hexagone, LoL et Mario le cercle. Portrait, cadre et boutons du profil suivent ces jetons.
+Les tracés SVG normalisés suivent toutes les tailles (`xs` à `2xl`). Les effets `.frame-*` dessinent les traits
+extérieur/intérieur : ne pas ajouter de masque radial ni faire tourner la silhouette. Les pointillés et étincelles
+avancent le long du tracé ; `prefers-reduced-motion` les fige. Le badge reste à l'extérieur du portrait, sans être coupé.
+
 ### Animations
 - **Changement de skin** : rideau neutre (6 volets qui balaient l'écran, ~0,6 s), le skin bascule au milieu.
   Pas d'annonce ni de texte.
@@ -110,3 +127,9 @@ Sur le téléphone, le chrono garde une forme compacte (barre) habillée par le 
    photographie la TV (1920x1080) et des téléphones 360x640 : lobby, profil, intro/jeu/choix/résultats de chaque
    mini-jeu, pause, confirmation, classement final. PNG dans `test-results/skins/<id>/` (ou `CAPTURES_DIR=<dossier>`),
    nommés `<n°>-<jeu>-<étape>-tv|tel.png`. Le skin est forcé sur tous les appareils ; sans `CAPTURES_SKIN`, le spec est ignoré.
+
+Pour vérifier les téléphones iPhone ou Firefox :
+`CAPTURES_SKIN=<id> CAPTURES_DIR=$PWD/captures/<id>/webkit bunx playwright test skins-captures --project=webkit --workers=1`
+(remplacer `webkit` par `firefox` selon le moteur). La TV reste un Chromium, forcé sur le même skin.
+`13-avatars-skins.spec.ts` vérifie les six cadres, leur conservation après rechargement et les photos sur les trois
+moteurs ; ses captures des cadres et du profil 360×640 sont dans `test-results/`.

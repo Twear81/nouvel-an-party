@@ -12,6 +12,12 @@ const PHONE_SIZE = { width: 390, height: 844 };
 const { defaultBrowserType: _a, ...pixel } = devices["Pixel 7"];
 const { defaultBrowserType: _b, ...iphone } = devices["iPhone 14"];
 
+// WebKit sous Linux utilise le proxy de l'environnement, même pour nos serveurs locaux.
+// Conserver les exclusions existantes et ajouter celles de la fixture (y compris les navigateurs mixtes).
+const proxyBypass = [process.env.NO_PROXY, process.env.no_proxy, "localhost", "127.0.0.1", "::1"].filter(Boolean).join(",");
+process.env.NO_PROXY = proxyBypass;
+process.env.no_proxy = proxyBypass;
+
 export default defineConfig<TestOptions>({
   testDir: "tests/e2e",
   globalSetup: "./tests/e2e/global-setup.ts",

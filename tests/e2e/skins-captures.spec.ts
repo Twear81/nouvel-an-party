@@ -17,27 +17,32 @@ const SMALL = { width: 360, height: 640 }; // le plus petit téléphone à suppo
 // Force le skin dans tous les contextes créés par la fixture `party` (TV et téléphones), avant le chargement de l'app.
 const test = base.extend<{ forceSkin: void }>({
   forceSkin: [
-    async ({ browser }, use) => {
-      const original = browser.newContext.bind(browser);
-      browser.newContext = (async (...args: Parameters<typeof original>) => {
-        const context = await original(...args);
-        await context.addInitScript((skin) => {
-          try {
-            localStorage.setItem("skin-force", skin);
-          } catch {}
-        }, SKIN);
-        return context;
-      }) as typeof browser.newContext;
-      await use();
-      browser.newContext = original;
+    async ({ browser, tvBrowser }, use) => {
+      const originals = [...new Set([browser, tvBrowser])].map((target) => {
+        const original = target.newContext.bind(target);
+        target.newContext = (async (...args: Parameters<typeof original>) => {
+          const context = await original(...args);
+          await context.addInitScript((skin) => {
+            try {
+              localStorage.setItem("skin-force", skin);
+            } catch {}
+          }, SKIN);
+          return context;
+        }) as typeof target.newContext;
+        return { target, original };
+      });
+      try {
+        await use();
+      } finally {
+        for (const { target, original } of originals) target.newContext = original;
+      }
     },
     { auto: true },
   ],
 });
 
-test.describe("Captures de tous les écrans par skin", () => {
+test.describe("Captures de tous les écrans par skin", { tag: "@compat" }, () => {
   test.skip(!SKIN, "outil : définir CAPTURES_SKIN=<id> (voir docs/skins.md)");
-  test.skip(({ browserName }) => browserName !== "chromium", "chromium uniquement");
   test.beforeAll(() => {
     if (SKIN && !isSkinId(SKIN)) throw new Error(`CAPTURES_SKIN inconnu : « ${SKIN} » (skins : ${SKINS.join(", ")})`);
     mkdirSync(DIR, { recursive: true });

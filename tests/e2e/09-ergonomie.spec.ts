@@ -72,10 +72,11 @@ test.describe("Ergonomie téléphone", () => {
     await expect(option).toHaveAttribute("aria-pressed", "false");
     await option.click();
     await expect(option).toHaveAttribute("aria-pressed", "true");
-    await expect(option.locator("svg")).toHaveCount(1); // pastille ✓
+    await expect(option.locator('[data-ui="choice-check"]')).toBeVisible();
     // La TV montre que ce joueur a voté, sans dire pour qui.
     await expect(party.tv.getByTestId("tv-answered-count")).toContainText("1 / 2");
-    await expect(party.tv.getByTestId("tv-answered").locator("svg")).toHaveCount(1); // un seul ✓ sur son avatar
+    await expect(party.tv.getByTestId("tv-answered").locator('[data-ui="roster-item"][data-done="true"]')).toHaveCount(1);
+    await expect(party.tv.getByTestId("tv-answered").locator('[data-ui="avatar-badge"]')).toBeVisible();
   });
 });
 

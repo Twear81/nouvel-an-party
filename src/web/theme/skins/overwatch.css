@@ -7,6 +7,11 @@
 /* ── Jetons : le fond est CLAIR (bleu-gris), donc --color-ink est marine ; les « fenêtres » ardoise redéfinissent
    ink / ink-muted / accent en blanc / cyan (voir « Portée sombre » plus bas). */
 html[data-skin="overwatch"] {
+  /* Forme partagée par les portraits et tous les cadres du profil. */
+  --avatar-radius: 0;
+  --avatar-circle: none;
+  --avatar-hexagon: inline;
+  --avatar-clip: var(--ow-hex);
   --color-bg: #b4c1da;
   --color-bg-2: #d3dcec;
   --color-bg-3: #8e9ec0;
@@ -145,13 +150,13 @@ html[data-skin="overwatch"] [data-ui="choice"] {
   border: 0;
   box-shadow: 0 0.2rem 0 rgb(42 51 82 / 0.35);
 }
-html[data-skin="overwatch"] [data-ui="choice"].glass { background: var(--ow-row); border-left: 0.35rem solid var(--ow-blue); }
+html[data-skin="overwatch"] [data-ui="choice"][data-tone="glass"] { background: var(--ow-row); border-left: 0.35rem solid var(--ow-blue); }
 html[data-skin="overwatch"] [data-ui="choice"][data-selected="true"] {
   outline: 0.18rem solid #fff;
   outline-offset: -0.18rem;
   box-shadow: 0 0 0 0.12rem var(--ow-navy-2), 0 0 1.1rem rgb(46 230 242 / 0.7);
 }
-html[data-skin="overwatch"] [data-ui="choice"].glass[data-selected="true"] { background: var(--ow-cyan); border-left-color: var(--ow-navy-2); }
+html[data-skin="overwatch"] [data-ui="choice"][data-tone="glass"][data-selected="true"] { background: var(--ow-cyan); border-left-color: var(--ow-navy-2); }
 html[data-skin="overwatch"] [data-ui="choice"][data-state="correct"] { background: #7fe86a !important; border-color: #2b9a1a !important; }
 html[data-skin="overwatch"] [data-ui="choice"][data-state="wrong"] { background: #ffb3ba !important; border-color: #d83a4a !important; }
 html[data-skin="overwatch"] [data-ui="choice-key"] {
@@ -288,10 +293,6 @@ html[data-skin="overwatch"] [data-ui="avatar"]::before {
   background: #9be4ff;
   clip-path: var(--ow-hex);
 }
-html[data-skin="overwatch"] [data-ui="avatar-face"] { border-radius: 0; clip-path: var(--ow-hex); }
-/* Le cadre choisi par le joueur reste visible, découpé en hexagone (ses ombres internes suivent la forme). */
-html[data-skin="overwatch"] [data-ui="avatar"] > .frame { border-radius: 0; clip-path: var(--ow-hex); }
-html[data-skin="overwatch"] [data-ui="avatar"] > .frame-dashed { animation: none; }
 html[data-skin="overwatch"] [data-ui="avatar"][data-dimmed="true"]::before { background: #7d89a6; }
 html[data-skin="overwatch"] [data-ui="avatar-badge"] {
   border: 0;

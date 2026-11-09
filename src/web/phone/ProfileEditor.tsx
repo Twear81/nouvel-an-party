@@ -73,13 +73,14 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
       // Tout défile (même l'en-tête) pour que le bouton, collé en bas, reste visible sur les très petits écrans.
       className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
     >
-      <div className="flex shrink-0 items-center gap-4 pb-2 pt-1">
+      <div data-testid="profile-preview" className="flex shrink-0 items-center gap-4 pb-2 pt-1">
         <PlayerAvatar profile={previewProfile} size="md" />
         <div className="min-w-0 flex-1">
           <label htmlFor="pseudo" className="text-sm font-bold uppercase tracking-widest text-ink-muted">
             {initial ? "Ton profil" : "Crée ton profil"}
           </label>
           <input
+            data-ui="text-field"
             id="pseudo"
             data-testid="profile-name"
             value={name}
@@ -102,6 +103,8 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
           <button
             type="button"
             data-testid="take-photo"
+            data-ui="avatar-option"
+            data-selected={avatar.kind === "photo"}
             onClick={() => setCamera(true)}
             className={`flex aspect-square flex-col items-center justify-center rounded-full border-2 border-dashed text-2xl ${avatar.kind === "photo" ? "border-accent bg-accent/20" : "border-line bg-surface"}`}
             aria-label="Prendre une photo"
@@ -116,31 +119,35 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
                 type="button"
                 key={a.id}
                 data-testid="avatar-option"
+                data-ui="avatar-option"
+                data-selected={selected}
                 aria-label={a.label}
                 aria-pressed={selected}
                 onClick={() => setAvatar({ kind: "preset", id: a.id })}
                 className={`flex aspect-square items-center justify-center rounded-full border-2 text-3xl transition-transform ${selected ? "scale-110 border-accent bg-accent/25" : "border-transparent bg-surface"}`}
               >
-                {a.emoji}
+                <PlayerAvatar profile={{ ...profile, avatar: { kind: "preset", id: a.id }, frame: "none" }} size="sm" />
               </button>
             );
           })}
         </div>
 
         <SectionTitle>Cadre</SectionTitle>
-        <div className="grid grid-cols-6 gap-2">
+        <div data-testid="profile-frames" className="grid grid-cols-3 gap-3">
           {FRAMES.map((f) => (
             <button
               type="button"
               key={f.id}
               data-testid="frame-option"
+              data-ui="frame-option"
+              data-selected={frame === f.id}
               aria-label={f.label}
               aria-pressed={frame === f.id}
               onClick={() => setFrame(f.id)}
               className={`flex flex-col items-center gap-1 rounded-btn p-1 ${frame === f.id ? "bg-accent/25 ring-2 ring-accent" : "bg-surface"}`}
             >
-              <PlayerAvatar profile={{ ...profile, avatar: { kind: "preset", id: "fete" }, frame: f.id }} size="sm" />
-              <span className="text-[0.6rem] font-bold text-ink-muted">{f.label}</span>
+              <PlayerAvatar profile={{ ...previewProfile, frame: f.id }} size="sm" />
+              <span className="text-xs font-bold text-ink-muted">{f.label}</span>
             </button>
           ))}
         </div>
@@ -167,11 +174,11 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
         {error && <p className="text-center text-sm font-semibold text-bad">{error}</p>}
         <div className="flex items-center gap-2">
           {onCancel && (
-            <Button type="button" variant="secondary" onClick={onCancel}>
+            <Button type="button" variant="secondary" className="min-w-0 flex-1 !px-2 !text-base" onClick={onCancel}>
               Annuler
             </Button>
           )}
-          <Button type="submit" data-testid="profile-submit" size="md" block disabled={busy || !name.trim()}>
+          <Button type="submit" data-testid="profile-submit" size="md" className="min-w-0 flex-1 !px-2 !text-base" disabled={busy || !name.trim()}>
             {!name.trim() ? "Choisis un pseudo" : initial ? "Enregistrer" : "C'est parti !"}
           </Button>
         </div>

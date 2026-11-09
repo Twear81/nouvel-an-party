@@ -66,6 +66,7 @@ export function Choice({
       animate={{ scale: selected ? 1.02 : 1, opacity: faded ? 0.45 : 1 }}
       {...rest}
       data-ui="choice"
+      data-tone={tone}
       data-selected={selected ? "true" : "false"}
       data-state={state}
       className={`relative flex items-center justify-center ${radius === "btn" ? "rounded-btn" : "rounded-card"} ${TONES[tone][selected ? "selected" : "idle"]} ${className}`}

@@ -8,6 +8,10 @@
 
 /* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
 html[data-skin="gunz"] {
+  /* Forme partagée par les portraits et tous les cadres du profil. */
+  --avatar-radius: .2em;
+  --avatar-circle: none;
+  --avatar-square: inline;
   --color-bg: #000000;
   --color-bg-2: #141310;
   --color-bg-3: #262626;
@@ -198,12 +202,12 @@ html[data-skin="gunz"] [data-ui="choice"] {
   letter-spacing: 0;
   border-radius: 0.15rem;
 }
-html[data-skin="gunz"] [data-ui="choice"].glass {
+html[data-skin="gunz"] [data-ui="choice"][data-tone="glass"] {
   border: 1px solid #555;
   box-shadow: none;
   color: #fff;
 }
-html[data-skin="gunz"] [data-ui="choice"][data-selected="true"].glass {
+html[data-skin="gunz"] [data-ui="choice"][data-selected="true"][data-tone="glass"] {
   background-color: #fff;
   border-color: #fff;
   color: #000;
@@ -214,7 +218,7 @@ html[data-skin="gunz"] [data-ui="choice"][data-selected="true"] [data-ui="choice
 html[data-skin="gunz"] [data-ui="choice"][data-state="correct"] { background-color: rgb(155 226 45 / 0.22) !important; border-color: #9be22d !important; color: #fff; }
 html[data-skin="gunz"] [data-ui="choice"][data-state="wrong"] { background-color: rgb(255 59 31 / 0.2) !important; border-color: #ff3b1f !important; color: #fff; }
 html[data-skin="gunz"] [data-ui="choice-key"] { background: var(--gz-metal); color: #cfcfcf; border: 1px solid #777; font-family: var(--font-display); }
-html[data-skin="gunz"] [data-ui="choice"][data-selected="true"].glass [data-ui="choice-key"] { color: #fff; border-color: #000; }
+html[data-skin="gunz"] [data-ui="choice"][data-selected="true"][data-tone="glass"] [data-ui="choice-key"] { color: #fff; border-color: #000; }
 html[data-skin="gunz"] [data-ui="choice-check"],
 html[data-skin="gunz"] [data-ui="selected-badge"] { background: #000; color: #9be22d; border: 2px solid #9be22d; border-radius: 0.2rem; box-shadow: 0 0 0.5rem rgb(155 226 45 / 0.6); }
 
@@ -253,9 +257,6 @@ html[data-skin="gunz"] [data-ui="countdown"][data-size="phone"] [data-ui="countd
 }
 
 /* Avatars : cases carrées noires à fin bord gris (le cadre suit) */
-html[data-skin="gunz"] [data-ui="avatar"],
-html[data-skin="gunz"] [data-ui="avatar-face"],
-html[data-skin="gunz"] [data-ui="avatar"] .frame { border-radius: 0.2em !important; }
 html[data-skin="gunz"] [data-ui="avatar"] { outline: 1px solid #6a6a6a; outline-offset: 2px; }
 html[data-skin="gunz"] [data-ui="avatar-face"] { background: linear-gradient(180deg, #1c1c1c, #0a0a0a) !important; border: 1px solid #5a5a5a; box-shadow: inset 0 0 0 1px #000; }
 html[data-skin="gunz"] [data-ui="roster-item"] > span { color: #fff; }
@@ -343,10 +344,7 @@ html[data-skin="gunz"] [data-ui="backdrop-layer"][data-layer="3"] {
   html[data-skin="gunz"] [data-ui="button"]:not(:disabled):active,
   html[data-skin="gunz"] [data-ui="numpad-key"]:not(:disabled):active { border-color: #1a1a1a #9a9a9a #9a9a9a #1a1a1a; filter: brightness(0.85); }
   html[data-skin="gunz"] [data-ui="choice"]:not(:disabled):active { filter: brightness(1.4); }
-  html[data-skin="gunz"] [data-ui="choice"][data-selected="true"].glass { animation: gz-select 0.5s ease-out; }
+  html[data-skin="gunz"] [data-ui="choice"][data-selected="true"][data-tone="glass"] { animation: gz-select 0.5s ease-out; }
   html[data-skin="gunz"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-frame"]::after { animation: gz-led-low 0.8s steps(2, jump-none) infinite; }
   html[data-skin="gunz"] [data-ui="panel"] { animation: gz-panel-in 0.35s ease-out both; }
 }
-
-/* Avatars carrés : le cadre « pointillés » ne tourne pas (un carré qui tourne paraît de travers). */
-html[data-skin="gunz"] [data-ui="avatar"] .frame-dashed { animation: none; }

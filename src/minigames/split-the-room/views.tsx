@@ -208,8 +208,9 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center gap-3 pb-3">
       <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight min-[400px]:text-3xl">{typo(pub.start)}</h1>
-      <div className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
+      <div data-ui="text-field-shell" className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
         <textarea
+          data-ui="text-field"
           data-testid="split-input"
           value={draft}
           maxLength={pub.maxLength}

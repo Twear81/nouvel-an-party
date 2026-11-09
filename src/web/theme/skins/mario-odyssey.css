@@ -138,6 +138,8 @@ html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] {
   box-shadow: 0 0.3rem 0.9rem rgb(120 0 10 / 0.35);
 }
 html[data-skin="mario-odyssey"] [data-ui="game-frame-body"] h1[class] {
+  /* Le contenu accentué du titre (pseudo de l'orateur…) doit rester blanc sur le bandeau olive. */
+  --color-accent: #ffffff; --color-ink: #ffffff;
   background-image: none; background-color: #b8a000; color: #ffffff; -webkit-text-fill-color: currentColor; rotate: 0deg; text-shadow: none;
   align-self: stretch; padding: 0.4em 0.75em; box-shadow: 0 0.09rem 0 #ffffff, 0 -0.09rem 0 #ffffff, 0 0.17rem 0 #b8a000, 0 -0.17rem 0 #b8a000;
 }
@@ -167,26 +169,31 @@ html[data-skin="mario-odyssey"] [data-ui="panel"] [data-ui="button"][data-varian
 /* Bouton inactif : étiquette claire à texte gris (jamais une version délavée du bouton actif, qui virerait au rose) */
 html[data-skin="mario-odyssey"] [data-ui="button"]:disabled { opacity: 1; background-image: none; background-color: #d4d4d4; color: #7a7a7a; box-shadow: none; }
 html[data-skin="mario-odyssey"] [data-ui="button"]:disabled::before { background: #9c9c9c; }
-html[data-skin="mario-odyssey"] input::placeholder,
-html[data-skin="mario-odyssey"] textarea::placeholder { color: #ffffff; opacity: 0.85; }
+/* Champs blancs des menus : même contraste dans le profil, les mots et les phrases. */
+html[data-skin="mario-odyssey"] :is([data-ui="text-field"], [data-ui="text-field-shell"]) {
+  --color-ink: #4a4a4a; --color-ink-muted: #7a7a7a; --color-line: #d4d4d4; --color-accent: #b8a000;
+}
+html[data-skin="mario-odyssey"] [data-ui="text-field"] { background: #ffffff; color: var(--color-ink); }
+html[data-skin="mario-odyssey"] [data-ui="text-field"]::placeholder { color: #7a7a7a; opacity: 1; }
+html[data-skin="mario-odyssey"] [data-ui="animated-number"] { text-shadow: none !important; }
 
 /* choice : étiquette grise à case blanche (écran des commandes) ; choisi = étiquette rouge cerclée de blanc */
 html[data-skin="mario-odyssey"] [data-ui="choice"] { --color-ink: #ffffff; --color-ink-muted: #f0f0f0; --color-accent: #ffffff; --color-line: rgb(255 255 255 / 0.5); border-radius: 0; font-weight: 800; }
-html[data-skin="mario-odyssey"] [data-ui="choice"].glass {
+html[data-skin="mario-odyssey"] [data-ui="choice"][data-tone="glass"] {
   border: 0; background-image: linear-gradient(#9c9c9c, #9c9c9c); background-color: #9c9c9c; color: #ffffff; box-shadow: 0 0.15rem 0.35rem rgb(120 0 10 / 0.35);
 }
-html[data-skin="mario-odyssey"] [data-ui="choice"].glass[data-selected="true"] {
+html[data-skin="mario-odyssey"] [data-ui="choice"][data-tone="glass"][data-selected="true"] {
   background-image: linear-gradient(#e60012, #e60012); background-color: #e60012; box-shadow: 0 0 0 0.18rem #ffffff, 0 0.2rem 0.5rem rgb(120 0 10 / 0.5);
 }
-html[data-skin="mario-odyssey"] [data-ui="choice"].glass[data-state="correct"] { background-image: linear-gradient(#1f9a3c, #1f9a3c); box-shadow: 0 0 0 0.18rem #ffffff; }
-html[data-skin="mario-odyssey"] [data-ui="choice"].glass[data-state="wrong"] { background-image: linear-gradient(#6a0a14, #6a0a14); }
+html[data-skin="mario-odyssey"] [data-ui="choice"][data-tone="glass"][data-state="correct"] { background-image: linear-gradient(#1f9a3c, #1f9a3c); box-shadow: 0 0 0 0.18rem #ffffff; }
+html[data-skin="mario-odyssey"] [data-ui="choice"][data-tone="glass"][data-state="wrong"] { background-image: linear-gradient(#6a0a14, #6a0a14); }
 html[data-skin="mario-odyssey"] [data-ui="choice-key"] { background: #ffffff; color: #9c9c9c; border: 0; border-radius: 0; font-weight: 800; }
 html[data-skin="mario-odyssey"] [data-ui="choice"][data-selected="true"] [data-ui="choice-key"] { color: #e60012; }
 html[data-skin="mario-odyssey"] [data-ui="choice"][data-state="correct"] [data-ui="choice-key"] { color: #1f9a3c; }
 html[data-skin="mario-odyssey"] [data-ui="choice-check"] { background: #ffffff; color: #e60012; }
 
 /* Choix « autres » une fois le sien fait : grisés mais lisibles (l'opacité inline 0.45 les rendrait roses sur le rouge). */
-html[data-skin="mario-odyssey"] [data-ui="choice"][data-state="faded"] { opacity: 0.8 !important; filter: saturate(0.45) brightness(0.9); }
+html[data-skin="mario-odyssey"] [data-ui="choice"][data-state="faded"] { opacity: 1 !important; filter: grayscale(1); }
 /* Petits boutons de notation (étages) : case gris foncé à lettre de la couleur de l'étage, lisible ; choisi = case pleine de l'étage */
 html[data-skin="mario-odyssey"] [data-ui="choice"].bg-bg\/40 { background-color: #4a4a4a; font-size: 1.7rem; font-weight: 800; border-radius: 0; }
 

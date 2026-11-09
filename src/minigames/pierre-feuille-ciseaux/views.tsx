@@ -458,7 +458,7 @@ function PickButtons({ myPick, sendInput }: { myPick: Choice | null; sendInput: 
             className={`min-h-[4.5rem] flex-1 gap-4 px-4 disabled:cursor-default ${h.solid}`}
           >
             <span className="text-[3.25rem] leading-none">{h.emoji}</span>
-            <span className="font-display text-2xl">{h.label}</span>
+            <span className="font-display text-3xl">{h.label}</span>
           </ChoiceCard>
         );
       })}
