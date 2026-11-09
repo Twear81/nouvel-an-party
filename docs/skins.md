@@ -64,6 +64,7 @@ redéfinit pas.
 | `countdown` | `Countdown` | `data-low`, `data-variant` (voir « Chrono »), `--p` = part restante (0 → 1) |
 | `avatar` | `PlayerAvatar` | `data-frame`, `data-dimmed`, parties `avatar-face` (portrait : forme, fond), `avatar-frame` (SVG), `avatar-frame-outer`, `avatar-frame-inner`, `avatar-badge` |
 | `avatar-option`, `frame-option` | choix du profil | `data-selected` ; les portraits et aperçus réutilisent `PlayerAvatar` |
+| `remove-player` | croix de retrait d'un joueur dans le lobby TV | action distincte des cartes de choix ; fond uni rouge vif (Overwatch) ou rouge sombre (LoL) |
 | `text-field`, `text-field-shell` | champs de pseudo, mot et phrase ; enveloppe des préfixes et compteurs | `:focus`, `::placeholder` ; garder les bordures d'état (`border-good`…) |
 | `animated-number` | grand chiffre animé | le skin peut régler son ombre sans changer le mouvement |
 | `roster`, `roster-item` | `AnsweredRoster` | `data-done` |

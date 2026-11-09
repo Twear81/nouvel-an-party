@@ -174,7 +174,7 @@ html[data-skin="overwatch"] [data-ui="selected-badge"] { background: var(--ow-na
 
 /* Camps (cool / hot / good / bad + text-bg) : panneau ardoise, grosse barre de la couleur du camp à gauche, libellé blanc
    en capitales à taille normale. Jamais d'aplat saturé : le texte resterait illisible dessus. */
-html[data-skin="overwatch"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg {
+html[data-skin="overwatch"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg:where(:not(button), [data-ui="choice"]) {
   --camp: #1ba3d6;
   color: #ffffff;
   font-style: normal;
@@ -189,6 +189,8 @@ html[data-skin="overwatch"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg {
 html[data-skin="overwatch"] .bg-hot.text-bg { --camp: #f06a2e; }
 html[data-skin="overwatch"] .bg-good.text-bg { --camp: #57e03c; }
 html[data-skin="overwatch"] .bg-bad.text-bg { --camp: #ff4a5a; }
+/* La croix de retrait est une action : rouge plein, sans le bandeau latéral des camps. */
+html[data-skin="overwatch"] [data-ui="remove-player"] { background: #ff4a5a; color: #ffffff; }
 html[data-skin="overwatch"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg { font-family: var(--font-sans); }
 html[data-skin="overwatch"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-selected="true"] {
   background-color: #1d4f6e;
@@ -261,7 +263,8 @@ html[data-skin="overwatch"] [data-ui="result-bar"][data-highlight="true"] [data-
 /* Chrono TV : chiffre marine dans un hexagone blanc ; la barre dessous se vide avec --p */
 html[data-skin="overwatch"] [data-ui="countdown"][data-variant="hex"] { position: relative; }
 html[data-skin="overwatch"] [data-ui="countdown"][data-variant="hex"] [data-ui="countdown-shape"] polygon { fill: #fff; stroke: var(--ow-blue); stroke-width: 3; }
-html[data-skin="overwatch"] [data-ui="countdown"][data-variant="hex"] [data-ui="countdown-num"] { color: var(--ow-navy-2); font-style: italic; }
+/* Bebas Neue italique décale l'encre d'environ +0,08em / -0,05em par rapport au centre de sa boîte. */
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="hex"] [data-ui="countdown-num"] { color: var(--ow-navy-2); font-style: italic; translate: -0.08em 0.05em; }
 html[data-skin="overwatch"] [data-ui="countdown"][data-variant="hex"]::after {
   content: "";
   position: absolute;
@@ -335,7 +338,7 @@ html[data-skin="overwatch"] [data-ui="dialog"] { background: var(--ow-slate); bo
 html[data-skin="overwatch"] [data-testid="confirm-dialog"] { background: rgb(42 51 82 / 0.7); }
 
 /* En-tête de manche : bandeau marine, étiquette cyan */
-html[data-skin="overwatch"] [data-ui="round-header"] { background: var(--ow-navy); padding-bottom: 0.8rem; box-shadow: 0 0.3rem 0.8rem rgb(30 40 80 / 0.3); }
+html[data-skin="overwatch"] [data-ui="round-header"] { background: var(--ow-navy); padding-block: 1.4rem; box-shadow: 0 0.3rem 0.8rem rgb(30 40 80 / 0.3); }
 html[data-skin="overwatch"] [data-ui="round-header"] > div > span:not([data-ui]) { font-style: italic; font-size: 2.6rem; line-height: 1; color: #fff; }
 html[data-skin="overwatch"] [data-ui="round-tag"] {
   background: var(--ow-cyan);

@@ -180,7 +180,7 @@ html[data-skin="league-of-legends"] [data-ui="selected-badge"] {
 
 /* Camps à deux ou trois options (cool / hot / good / bad + text-bg) : panneau sombre, filet de la couleur du camp à gauche,
    libellé crème très contrasté. Jamais d'aplat clair : le texte clair resterait illisible dessus. */
-html[data-skin="league-of-legends"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg {
+html[data-skin="league-of-legends"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg:where(:not(button), [data-ui="choice"]) {
   --camp: #0ac8b9;
   color: #f0e6d2;
   background-color: #07343b;
@@ -191,6 +191,8 @@ html[data-skin="league-of-legends"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).te
 html[data-skin="league-of-legends"] .bg-hot.text-bg { --camp: #e8546c; background-color: #3e1119; }
 html[data-skin="league-of-legends"] .bg-good.text-bg { --camp: #84d65a; background-color: #1d3412; }
 html[data-skin="league-of-legends"] .bg-bad.text-bg { --camp: #e84057; background-color: #3a0f17; }
+/* La croix de retrait garde le rouge sombre, uni sur toute sa surface. */
+html[data-skin="league-of-legends"] [data-ui="remove-player"] { background: #3a0f17; color: #f0e6d2; }
 html[data-skin="league-of-legends"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-selected="true"] { outline-width: 2px; outline-color: #c8aa6e; background-image: linear-gradient(90deg, var(--camp) 0 0.35rem, transparent 0.35rem), linear-gradient(90deg, rgb(200 170 110 / 0.22), transparent); }
 /* Choix grisés (le mien est fait) ou inactifs : toujours lisibles, juste en retrait */
 html[data-skin="league-of-legends"] [data-ui="choice"][data-state="faded"],

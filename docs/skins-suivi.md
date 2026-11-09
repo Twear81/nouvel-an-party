@@ -39,6 +39,9 @@
   textes accentués des titres blancs sur le bandeau olive (nom de l'orateur de l'Imposteur compris).
 - WebKit : dépendances installées par l'utilisateur ; contournement du proxy pour les serveurs locaux dans
   `playwright.config.ts`. L'outil de captures fonctionne aussi en Firefox/WebKit et force le même skin sur la TV Chromium.
+- Retouches après revue utilisateur : croix de retrait unies (rouge vif Overwatch, rouge sombre LoL), séparées des
+  cartes de camp ; chrono Overwatch centré dans le bandeau (marges haute/basse égales) et chiffres recentrés
+  optiquement dans l'hexagone pour compenser la police italique.
 
 ## État par skin
 | Skin | État | Écarts connus avec la maquette |
@@ -73,6 +76,15 @@ Les emojis sont embarqués (Twemoji, voir changer-le-design.md) : plus de dépen
   `captures/revue-avatars/` (63 PNG), `captures/revue-finition/index.html` (galerie, régénérable avec
   `python3 captures/revue-finition/generer-galerie.py`). Ce sont des contrôles locaux, sans validation utilisateur
   ni essai sur les vrais appareils de la soirée.
+
+### Retouches des croix et du chrono après la revue utilisateur
+- Croix Overwatch `#ff4a5a` et LoL `#3a0f17`, sans image de fond ; les bandes et les fonds des camps restent inchangés.
+- Chrono Overwatch : centre du bandeau et centre du chrono confondus ; encre des chiffres centrée dans l'hexagone
+  (écart mesuré d'environ 0,11 px pour « 30 » et moins de 0,4 px pour « 8 »).
+- Validation : TypeScript et **498 unitaires** verts ; **2 E2E ciblés** verts (retrait et choix enregistré) ;
+  captures lobby à 8 + Ceci ou Cela : **2/2 Overwatch**, **2/2 LoL**, relues localement.
+- Avant/après et mesures : `captures/retouche-croix-chrono/index.html` ; journaux dans son dossier `validation/`.
+  Les captures Chromium de la galerie principale sont actualisées.
 
 ## Procédure pour finir un skin (mode éco)
 1. `CAPTURES_SKIN=<id> CAPTURES_DIR=$PWD/captures/<id> bun run captures:skin` (en arrière-plan ; `captures/` est ignoré par git).
