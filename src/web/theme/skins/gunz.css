@@ -95,6 +95,74 @@ html[data-skin="gunz"] [data-ui="panel-title"] {
   text-shadow: 0 -1px 0 #000, 0 1px 0 #666;
 }
 
+/* Cadre de jeu TV : cadre de métal gris vissé (rivets aux 4 coins, bord biseauté clair/sombre), intérieur noir ;
+   le titre de la manche est l'onglet de métal posé sur le bord haut, en vert lumineux */
+html[data-skin="gunz"] [data-ui="game-frame"] {
+  padding: 0.9rem 1rem 1rem;
+  background:
+    var(--gz-screw) left 0.2rem top 0.2rem / 1.4rem 1.4rem no-repeat,
+    var(--gz-screw) right 0.2rem top 0.2rem / 1.4rem 1.4rem no-repeat,
+    var(--gz-screw) left 0.2rem bottom 0.2rem / 1.4rem 1.4rem no-repeat,
+    var(--gz-screw) right 0.2rem bottom 0.2rem / 1.4rem 1.4rem no-repeat,
+    #000;
+  border: 0.5rem solid #3a3a3a;
+  border-radius: 1rem;
+  box-shadow: 0 0 0 0.12rem #8a8a8a, inset 0 0 0 0.12rem #111, inset 0 0 0 0.25rem #5a5a5a, 0 0.8rem 1.8rem rgb(0 0 0 / 0.85);
+}
+html[data-skin="gunz"] [data-ui="game-frame-title"] {
+  display: block;
+  width: fit-content;
+  margin: -0.3rem 0 0.4rem 1.2rem;
+  padding: 0.2rem 1.8rem;
+  background: var(--gz-metal);
+  border: 1px solid #888;
+  border-bottom: 0;
+  border-radius: 0.6rem 0.6rem 0 0;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #b6f04f;
+  text-shadow: 0 0 0.45em rgb(155 226 45 / 0.8), 0 -1px 0 #000;
+}
+html[data-skin="gunz"] [data-ui="game-frame-body"] { padding: 0.4rem 1.2rem 0.4rem; }
+
+/* Camps (cool / hot / good / bad + text-bg) : cases noires ou métal, liseré et texte de la couleur du camp, jamais d'aplat vif.
+   cool = métal gris à texte blanc ; hot = rouge LED ; good = vert néon ; bad = rouge sombre. Les boutons gardent leur style. */
+html[data-skin="gunz"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg:is(:not(button), [data-ui="choice"]) {
+  --camp: #c8c8c8;
+  background-color: #0a0a0a;
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.08), transparent 50%);
+  color: #ffffff;
+  font-weight: 700;
+  border: 0.2rem solid var(--camp);
+  border-radius: 0.2rem;
+  box-shadow: inset 0 0 0 1px #000, 0 0 0.9rem color-mix(in srgb, var(--camp) 35%, transparent);
+  text-shadow: 0 1px 0 #000;
+}
+html[data-skin="gunz"] .bg-cool.text-bg:is(:not(button), [data-ui="choice"]) {
+  background-color: #3a3a3a;
+  background-image: linear-gradient(180deg, #5c5c5c 0%, #3a3a3a 50%, #262626 100%);
+  border-color: #b8b8b8 #555 #555 #b8b8b8;
+  box-shadow: 0 0 0 1px #000, inset 0 1px 0 rgb(255 255 255 / 0.25);
+}
+html[data-skin="gunz"] .bg-hot.text-bg:is(:not(button), [data-ui="choice"]) { --camp: #ff3b1f; color: #ff7a5c; text-shadow: 0 0 0.4em rgb(255 59 31 / 0.8); }
+html[data-skin="gunz"] .bg-good.text-bg:is(:not(button), [data-ui="choice"]) { --camp: #9be22d; color: #c4f06a; text-shadow: 0 0 0.4em rgb(155 226 45 / 0.7); }
+html[data-skin="gunz"] .bg-bad.text-bg:is(:not(button), [data-ui="choice"]) { --camp: #ff3b1f; color: #ff7a5c; text-shadow: 0 0 0.4em rgb(255 59 31 / 0.8); }
+html[data-skin="gunz"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-selected="true"] {
+  border-color: #fff;
+  box-shadow: 0 0 0 0.15rem #000, 0 0 0 0.3rem #fff, 0 0 1.2rem rgb(255 255 255 / 0.5);
+}
+html[data-skin="gunz"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-state="faded"],
+html[data-skin="gunz"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad):disabled { opacity: 0.72 !important; filter: grayscale(0.4); }
+
+/* Encadrés d'annonce (border-accent bg-accent/15) : case noire opaque à liseré de couleur, texte blanc */
+html[data-skin="gunz"] :is(.border-accent.bg-accent\/15, .border-good.bg-good\/15, .border-bad.bg-bad\/15) {
+  --color-ink-muted: #d0d0d0;
+  background-color: #000;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #111, 0 0.2rem 0.6rem rgb(0 0 0 / 0.7);
+}
+
 /* Boutons : gris en relief (bord clair en haut à gauche, sombre en bas à droite), texte blanc Arial */
 html[data-skin="gunz"] [data-ui="button"] {
   background: var(--gz-relief);
@@ -184,8 +252,13 @@ html[data-skin="gunz"] [data-ui="countdown"][data-size="phone"] [data-ui="countd
   box-shadow: 0 0 6px rgb(255 59 31 / 0.7);
 }
 
-/* Avatars : case sombre à fin bord gris, pastille carrée de métal */
+/* Avatars : cases carrées noires à fin bord gris (le cadre suit) */
+html[data-skin="gunz"] [data-ui="avatar"],
+html[data-skin="gunz"] [data-ui="avatar-face"],
+html[data-skin="gunz"] [data-ui="avatar"] .frame { border-radius: 0.2em !important; }
 html[data-skin="gunz"] [data-ui="avatar"] { outline: 1px solid #6a6a6a; outline-offset: 2px; }
+html[data-skin="gunz"] [data-ui="avatar-face"] { background: linear-gradient(180deg, #1c1c1c, #0a0a0a) !important; border: 1px solid #5a5a5a; box-shadow: inset 0 0 0 1px #000; }
+html[data-skin="gunz"] [data-ui="roster-item"] > span { color: #fff; }
 html[data-skin="gunz"] [data-ui="avatar-badge"] { background: var(--gz-metal); color: #fff; border: 1px solid #aaa; border-radius: 0.2em; }
 html[data-skin="gunz"] [data-ui="roster"] { background: var(--gz-rivets) top / 0.7em 0.35em repeat-x; padding-top: 0.6em; }
 html[data-skin="gunz"] [data-ui="roster-item"][data-done="true"] [data-ui="avatar"] { outline-color: #9be22d; box-shadow: 0 0 0.8rem rgb(155 226 45 / 0.5); }
@@ -234,8 +307,10 @@ html[data-skin="gunz"] [data-ui="round-header"] .font-display {
 html[data-skin="gunz"] [data-ui="round-tag"] { background: none; border-radius: 0; color: #fff; font-family: var(--font-sans); letter-spacing: 0; }
 html[data-skin="gunz"] [data-ui="host-bar"] { background: var(--gz-rivets) top / 0.7rem 0.35rem repeat-x, var(--gz-brushed); border-top: 0.1rem solid #555; padding-top: 0.6rem; }
 
-/* Classement : lignes de liste sur noir, rang 1 en vert lumineux */
+/* Classement : lignes de liste sur noir ; la ligne du 1er est blanche à texte noir (comme la ligne sélectionnée) */
 html[data-skin="gunz"] [data-ui="score-row"].glass { border-radius: 0.15rem; }
+html[data-skin="gunz"] [data-ui="score-row"].glass[data-rank="1"] { background-color: #fff; border-color: #fff; color: #000; --color-ink-muted: #000; --color-accent: #000; }
+html[data-skin="gunz"] [data-ui="score-row"].glass[data-rank="1"] * { color: #000; text-shadow: none; }
 html[data-skin="gunz"] [data-ui="score-row"][data-rank="1"] .font-num,
 html[data-skin="gunz"] [data-ui="score-row"][data-highlight="true"] { text-shadow: 0 0 0.35em rgb(155 226 45 / 0.6); }
 html[data-skin="gunz"] [data-ui="podium"] > div > div:last-child { border-radius: 0.2rem 0.2rem 0 0; border: 1px solid #777; }
