@@ -347,10 +347,10 @@ test.describe("Captures de tous les écrans par skin", () => {
     const { phones, S } = await begin(party, "imposteur");
     const tv = party.tv;
     await expect(tv.getByTestId("tv-word-title")).toBeVisible({ timeout: 15_000 });
-    await S.tv("mots");
+    // L'étape « mot » ne dure que 2 s dans la config de test : on lit les mots d'abord (en parallèle), on photographie ensuite.
+    const words = await Promise.all(phones.map(async (p) => (await p.t("word-big").innerText()).toLowerCase()));
     await S.tel("mot");
-    const words: string[] = [];
-    for (const p of phones) words.push((await p.t("word-big").innerText()).toLowerCase());
+    await S.tv("mots");
     const impIdx = words.findIndex((w) => words.filter((x) => x === w).length === 1);
     const imp = phones[impIdx]!;
     const others = phones.filter((p) => p !== imp);
