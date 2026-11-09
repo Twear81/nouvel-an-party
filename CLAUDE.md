@@ -159,4 +159,8 @@ Règles :
 - L'orchestrateur **vérifie** le résultat (diff, tests) avant de commiter : un compte rendu de sous-agent n'est pas
   une preuve.
 - Une petite tâche (quelques lignes, un fichier) se fait directement, sans sous-agent.
+- Lancer tests, E2E et captures : sous-agent `verificateur` (Haiku, `.claude/agents/verificateur.md`), jamais Sonnet.
+- Au plus 2 sous-agents en parallèle (au-delà, la machine sature et les runs Playwright expirent).
+- Un sous-agent ne regarde qu'un échantillon de captures (≤ 15, les écrans à risque) ; l'orchestrateur relit.
+- Avant de relancer un sous-agent, se demander si l'orchestrateur ne peut pas faire la retouche directement.
 - En cas de flou sur les règles d'un jeu, le fun ou le design : **demander à l'utilisateur** plutôt que deviner.
