@@ -27,7 +27,8 @@ html[data-skin="rocket-league"] {
   --color-warn: #f2a83a;
   --font-display: "Exo 2", "Eurostile", sans-serif;
   --font-sans: "Arimo", Arial, Helvetica, sans-serif;
-  --font-num: "Orbitron", "Exo 2", sans-serif;
+  /* Exo 2 fin : chiffres de tableau d'affichage, sans le zéro barré d'Orbitron (illisible : « ∅ »). */
+  --font-num: "Exo 2", "Eurostile", sans-serif;
   --radius-card: 0.2rem;
   --radius-btn: 0.15rem;
   --radius-chip: 0.2rem;
@@ -77,11 +78,26 @@ html[data-skin="rocket-league"] .bg-hot-gradient { background-image: var(--rl-or
 
 /* Fenêtre */
 html[data-skin="rocket-league"] [data-ui="panel"],
+html[data-skin="rocket-league"] [data-ui="game-frame"],
 html[data-skin="rocket-league"] [data-ui="dialog"] {
   border-radius: 0.2rem;
   background-image: var(--rl-frame);
   border: 1px solid #4a9be6;
   box-shadow: 0 0 1rem rgb(40 130 230 / 0.45), inset 0 0 2rem rgb(0 0 0 / 0.4);
+}
+/* Cadre de jeu TV = fenêtre « ENTER CODE » : titre cyan fin centré. */
+html[data-skin="rocket-league"] [data-ui="game-frame"] { padding: 1.2rem 2rem 1.6rem; }
+html[data-skin="rocket-league"] [data-ui="game-frame-title"] {
+  display: block;
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 2.4rem;
+  line-height: 1;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--rl-title);
+  text-shadow: 0 0 0.3em rgb(90 180 255 / 0.6);
 }
 html[data-skin="rocket-league"] [data-ui="panel-title"] {
   font-weight: 300;

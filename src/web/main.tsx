@@ -21,8 +21,6 @@ import "@fontsource/exo-2/latin-300.css";
 import "@fontsource/exo-2/latin-400.css";
 import "@fontsource/exo-2/latin-500.css";
 import "@fontsource/exo-2/latin-600.css";
-import "@fontsource/orbitron/latin-400.css";
-import "@fontsource/orbitron/latin-500.css";
 import "@fontsource/arimo/latin-400.css";
 import "@fontsource/arimo/latin-700.css";
 import "@fontsource/jura/latin-500.css";
