@@ -108,7 +108,7 @@ une seule transition visible, pilotée par le serveur. `null` représente le th�
 La phase générique `transition` porte un petit descriptif sérialisable : nature (ouverture, changement, sortie),
 skin de départ et d'arrivée, instant de départ, durée et participants. Le moteur décide quand une scène commence
 et se termine ; React affiche son avancement à partir de l'horloge synchronisée. Les durées partagées sont dans
-`src/shared/transitions.ts` : ouverture 9 s, changement 4 s, sortie 2,4 s.
+`src/shared/transitions.ts` : ouverture 9 s, changement 6 s (`SKIN_TIMING` : dézoom 1 s, scène jusqu’à 4,6 s, replongeon jusqu’à 5,9 s), sortie 2,4 s.
 
 `TimerGroup` gère Pause/Reprendre/Passer et annule les échéances au retour au lobby. Aucun mini-jeu ni chrono
 ne démarre sous une scène. La sauvegarde garde progression, destination et un horodatage de contrôle :

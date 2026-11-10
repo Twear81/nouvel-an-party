@@ -2,11 +2,19 @@
 import { useLayoutEffect, useMemo, useRef, type CSSProperties } from "react";
 import { useReducedMotion } from "motion/react";
 import type { GameSnapshot } from "../../shared/types";
-import { OPENING_TIMING, transitionElapsed, type TransitionInfo } from "../../shared/transitions";
+import { OPENING_TIMING, SKIN_TIMING, transitionElapsed, type TransitionInfo } from "../../shared/transitions";
 import { serverNow } from "../net/socket";
 import roomReference from "../theme/assets/piece-reference.png";
 import { PlayerAvatar } from "./PlayerAvatar";
-import { RoomSignature, animateRoomSignature } from "./RoomSignature";
+import { RoomSignature, animateRoomSignature, legacyTime, signatureEnvelope } from "./RoomSignature";
+
+// Pièces transformées optionnelles (piece-<skin>.png) : un skin sans image n'a simplement pas de calque.
+// Vite remplace l'appel à la compilation ; sous Bun (tests unitaires) il n'existe pas : aucune image.
+function loadRoomSkins(): Record<string, string> {
+  try { return import.meta.glob<string>("../theme/assets/piece-*.png", { eager: true, import: "default" }); } catch { return {}; }
+}
+const roomSkins = loadRoomSkins();
+const roomSkinImage = (skin: string | null) => (skin ? roomSkins[`../theme/assets/piece-${skin}.png`] : undefined);
 
 export { roomReference };
 
@@ -27,7 +35,7 @@ function sceneStage(scene: TransitionInfo, elapsed: number) {
     return "room";
   }
   if (scene.kind === "closing") return elapsed < 1500 ? "zoom" : "table";
-  return elapsed < 1000 ? "room" : elapsed < 2600 ? "change" : "zoom";
+  return elapsed < SKIN_TIMING.zoomOutEndMs ? "room" : elapsed < SKIN_TIMING.plungeStartMs ? "change" : "zoom";
 }
 
 export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
@@ -37,6 +45,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
   const camera = useRef<HTMLDivElement>(null);
   const light = useRef<HTMLDivElement>(null);
   const signature = useRef<HTMLDivElement>(null);
+  const roomSkin = useRef<HTMLImageElement>(null);
   const tvLight = useRef<HTMLDivElement>(null);
   const cover = useRef<HTMLDivElement>(null);
   const animations = useRef<Animation[]>([]);
@@ -83,22 +92,23 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
     } else if (scene.kind === "skin") {
       animate(camera.current, [
         { at: 0, transform: zoom, easing: "cubic-bezier(.16, 1, .3, 1)" },
-        { at: 1000, transform: identity },
-        { at: 2600, transform: identity, easing: "cubic-bezier(.6, 0, .15, 1)" },
-        { at: 3900, transform: zoom }, { at: scene.durationMs, transform: zoom },
+        { at: SKIN_TIMING.zoomOutEndMs, transform: identity },
+        { at: SKIN_TIMING.plungeStartMs, transform: identity, easing: "cubic-bezier(.6, 0, .15, 1)" },
+        { at: SKIN_TIMING.plungeEndMs, transform: zoom }, { at: scene.durationMs, transform: zoom },
+      ]);
+      animate(roomSkin.current, [
+        { at: 0, opacity: 0 }, { at: SKIN_TIMING.zoomOutEndMs, opacity: 0 },
+        { at: SKIN_TIMING.roomSkinFadeEndMs, opacity: 1 }, { at: scene.durationMs, opacity: 1 },
       ]);
       animate(light.current, [
-        { at: 0, opacity: 0 }, { at: 1000, opacity: 0 }, { at: 1700, opacity: .32 },
-        { at: 3000, opacity: .32 }, { at: scene.durationMs, opacity: 0 },
+        { at: 0, opacity: 0 }, { at: legacyTime(1000), opacity: 0 }, { at: legacyTime(1700), opacity: .32 },
+        { at: legacyTime(3000), opacity: .32 }, { at: scene.durationMs, opacity: 0 },
       ]);
-      animate(signature.current, [
-        { at: 0, opacity: 0 }, { at: 850, opacity: 0 }, { at: 1200, opacity: 1 },
-        { at: 2900, opacity: 1 }, { at: 3500, opacity: 0 }, { at: scene.durationMs, opacity: 0 },
-      ]);
+      animate(signature.current, signatureEnvelope(scene.toSkin));
       animateRoomSignature(signature.current, scene.toSkin, reduced, animate);
       animate(cover.current, [
         { at: 0, opacity: 1 }, { at: 650, opacity: 0 },
-        { at: 3750, opacity: 0 }, { at: scene.durationMs, opacity: 1 },
+        { at: SKIN_TIMING.plungeEndMs - 150, opacity: 0 }, { at: scene.durationMs, opacity: 1 },
       ]);
     } else {
       animate(camera.current, [
@@ -140,7 +150,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
       list.forEach((animation) => animation.cancel());
       animations.current = [];
     };
-  }, [scene?.kind, scene?.startedAt, scene?.durationMs, participantKey, reduced]);
+  }, [scene?.kind, scene?.toSkin, scene?.startedAt, scene?.durationMs, participantKey, reduced]);
 
   useLayoutEffect(() => {
     if (!scene || !root.current) return;
@@ -160,6 +170,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
 
   if (!scene) return null;
   const tv = ROOM.tv;
+  const skinImage = scene.kind === "skin" ? roomSkinImage(scene.toSkin) : undefined;
   return (
     <div ref={root} data-testid="tv-transition" data-ui="room-scene" data-kind={scene.kind}
       data-room-skin={scene.toSkin ?? "base"} data-stage={sceneStage(scene, transitionElapsed(scene, serverNow()))}
@@ -169,6 +180,8 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
       <div ref={camera} className="room-camera" data-testid="transition-camera">
         <img src={roomReference} alt="" draggable={false} data-testid="transition-room" className="room-image"
           onLoad={(event) => { event.currentTarget.dataset.image = "ready"; }} />
+        {scene.kind === "skin" && skinImage && <img ref={roomSkin} src={skinImage} alt="" draggable={false} aria-hidden
+          data-testid="transition-room-skin" className="room-image room-image-skin" />}
         <div ref={light} className="room-light" aria-hidden />
         {scene.kind === "skin" && <div ref={signature} className="room-signature" aria-hidden><RoomSignature skin={scene.toSkin} /></div>}
         <div ref={tvLight} className="room-tv-light" aria-hidden />

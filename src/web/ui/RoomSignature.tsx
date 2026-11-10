@@ -1,8 +1,33 @@
 // Petites scènes originales, ancrées dans l'illustration et jouées uniquement aux changements d'univers.
 import type { SkinId } from "../../shared/skins";
+import { SKIN_TIMING } from "../../shared/transitions";
+import { RocketLeagueScene, animateRocketLeague } from "./signatures/RocketLeague";
 
 export type SignatureFrame = Keyframe & { at: number };
-type Animate = (element: Element | null, frames: SignatureFrame[]) => void;
+export type Animate = (element: Element | null, frames: SignatureFrame[]) => void;
+
+/**
+ * Les signatures historiques ont été écrites sur 4 s (scène visible de 1000 à 3500 ms) : leurs instants sont
+ * étirés pour occuper la fenêtre de 6 s (scène visible de zoomOutEndMs à plungeStartMs), sans les redessiner.
+ */
+export function legacyTime(at: number): number {
+  const start = SKIN_TIMING.zoomOutEndMs, end = SKIN_TIMING.plungeStartMs;
+  if (at <= 1000) return at;
+  if (at <= 3500) return start + (at - 1000) * (end - start) / 2500;
+  return end + (at - 3500) * (SKIN_TIMING.durationMs - end) / 500;
+}
+
+/** Enveloppe d'apparition du calque de signature (la scène Rocket League gère sa propre durée de vie). */
+export function signatureEnvelope(skin: SkinId | null): SignatureFrame[] {
+  if (skin === "rocket-league") return [
+    { at: 0, opacity: 0 }, { at: SKIN_TIMING.zoomOutEndMs - 200, opacity: 0 }, { at: SKIN_TIMING.zoomOutEndMs, opacity: 1 },
+    { at: SKIN_TIMING.plungeEndMs - 700, opacity: 1 }, { at: SKIN_TIMING.plungeEndMs, opacity: 0 }, { at: SKIN_TIMING.durationMs, opacity: 0 },
+  ];
+  return [
+    { at: 0, opacity: 0 }, { at: legacyTime(850), opacity: 0 }, { at: legacyTime(1200), opacity: 1 },
+    { at: legacyTime(2900), opacity: 1 }, { at: legacyTime(3500), opacity: 0 }, { at: SKIN_TIMING.durationMs, opacity: 0 },
+  ];
+}
 
 const SPARKLES = [[-110, -10], [-90, -110], [-35, -135], [65, -120], [110, -45], [95, 45], [-70, 65]];
 const BRANCHES = [
@@ -89,26 +114,6 @@ function LeagueScene() {
   </>;
 }
 
-function RocketScene() {
-  return <>
-    <ellipse data-room-motion="ball-shadow" className="sig-object-shadow" cx="1030" cy="812" rx="70" ry="14" />
-    <g data-room-motion="boost" className="sig-boost">
-      <path pathLength="1" d="M1140 783C980 790 925 680 850 725S735 800 705 681S692 474 749 386" />
-      <path pathLength="1" d="M1140 798C980 805 925 695 850 740S735 815 705 696S680 474 739 386" />
-    </g>
-    <g transform="translate(1030 760)">
-      <g data-room-motion="ball-flight">
-        <g data-room-motion="ball-spin" className="sig-ball">
-          <circle className="sig-ball-leather" r="55" />
-          <path className="sig-ball-panel" d="M0-26L25-8 15 20H-15L-25-8ZM-15-53L-25-33-47-27-50-42ZM45-32L33-13 43 11 55 8ZM39 40L17 34 3 53 23 51ZM-44 33L-25 29-14 48-32 43Z" />
-          <path className="sig-ball-seams" d="M0-26L0-51M25-8L44-22M15 20L27 41M-15 20L-30 40M-25-8L-44-21" />
-          <path className="sig-ball-shine" d="M-34-28Q-28-39-15-42" />
-        </g>
-      </g>
-    </g>
-  </>;
-}
-
 const COINS = [[687, 633], [773, 571], [857, 495], [852, 424]];
 function MarioScene() {
   return <>
@@ -145,14 +150,16 @@ function MaculaScene() {
 
 export function RoomSignature({ skin }: { skin: SkinId | null }) {
   const content = skin === "dofus" ? <DofusScene /> : skin === "overwatch" ? <OverwatchScene />
-    : skin === "league-of-legends" ? <LeagueScene /> : skin === "rocket-league" ? <RocketScene />
+    : skin === "league-of-legends" ? <LeagueScene /> : skin === "rocket-league" ? <RocketLeagueScene />
       : skin === "mario-odyssey" ? <MarioScene /> : skin === "plague-tale" ? <MaculaScene /> : null;
   return content && <svg className="room-signature-art" viewBox="0 0 1672 941" aria-hidden="true" data-testid="transition-signature" data-signature={skin}>{content}</svg>;
 }
 
 /** Les effets natifs sont ajoutés à la même liste que la caméra : aucun temps autonome. */
-export function animateRoomSignature(root: Element | null, skin: SkinId | null, reduced: boolean, animate: Animate) {
+export function animateRoomSignature(root: Element | null, skin: SkinId | null, reduced: boolean, animateNative: Animate) {
   if (!root) return;
+  if (skin === "rocket-league") { animateRocketLeague(root, reduced, animateNative); return; }
+  const animate: Animate = (element, frames) => animateNative(element, frames.map((frame) => ({ ...frame, at: legacyTime(frame.at) })));
   const select = (name: string) => root.querySelector(`[data-room-motion="${name}"]`);
   const all = (name: string) => root.querySelectorAll(`[data-room-motion="${name}"]`);
   const appear = (element: Element | null, delay = 0) => animate(element, [
@@ -189,29 +196,6 @@ export function animateRoomSignature(root: Element | null, skin: SkinId | null, 
       { at: 3400, opacity: 0, transform: "scaleX(1)" }, { at: 4000, opacity: 0, transform: "scaleX(1)" },
     ]);
     all("rune").forEach((element, i) => appear(element, i * 35));
-  } else if (skin === "rocket-league") {
-    animate(select("ball-flight"), reduced ? [
-      { at: 0, opacity: 0, transform: "translate(-225px, -50px)" }, { at: 1150, opacity: 1, transform: "translate(-225px, -50px)" },
-      { at: 2900, opacity: 1, transform: "translate(-225px, -50px)" }, { at: 4000, opacity: 0, transform: "translate(-225px, -50px)" },
-    ] : [
-      { at: 0, opacity: 0, transform: "translate(110px, 20px) scale(.8)" }, { at: 950, opacity: 0, transform: "translate(110px, 20px) scale(.8)" },
-      { at: 1250, opacity: 1, transform: "translate(0px, 15px) scale(1)" }, { at: 1550, opacity: 1, transform: "translate(-130px, -55px) scale(1)" },
-      { at: 1800, opacity: 1, transform: "translate(-225px, 10px) scale(1)" }, { at: 2100, opacity: 1, transform: "translate(-310px, -30px) scale(.95)" },
-      { at: 2400, opacity: 1, transform: "translate(-350px, -160px) scale(.65)" }, { at: 2800, opacity: .8, transform: "translate(-281px, -374px) scale(.18)" },
-      { at: 3000, opacity: 0, transform: "translate(-281px, -374px) scale(.1)" }, { at: 4000, opacity: 0, transform: "translate(-281px, -374px) scale(.1)" },
-    ]);
-    if (!reduced) animate(select("ball-spin"), [{ at: 0, transform: "rotate(0deg)" }, { at: 1000, transform: "rotate(0deg)" }, { at: 2800, transform: "rotate(-630deg)" }, { at: 4000, transform: "rotate(-630deg)" }]);
-    animate(select("ball-shadow"), reduced ? [
-      { at: 0, opacity: 0, transform: "translateX(-225px)" }, { at: 1200, opacity: .35, transform: "translateX(-225px)" },
-      { at: 2900, opacity: .35, transform: "translateX(-225px)" }, { at: 4000, opacity: 0, transform: "translateX(-225px)" },
-    ] : [
-      { at: 0, opacity: 0, transform: "translateX(110px)" }, { at: 1200, opacity: .35, transform: "translateX(0px)" },
-      { at: 2100, opacity: .35, transform: "translateX(-310px)" }, { at: 2400, opacity: 0, transform: "translateX(-350px)" }, { at: 4000, opacity: 0, transform: "translateX(-350px)" },
-    ]);
-    all("boost").forEach((element) => appear(element));
-    root.querySelectorAll(".sig-boost path").forEach((element) => animate(element, [
-      { at: 0, strokeDashoffset: reduced ? 0 : 1 }, { at: 1050, strokeDashoffset: reduced ? 0 : 1 }, { at: 2800, strokeDashoffset: 0 }, { at: 4000, strokeDashoffset: 0 },
-    ]));
   } else if (skin === "mario-odyssey") {
     animate(select("cap-flight"), reduced ? [
       { at: 0, opacity: 0, transform: "translate(175px, -20px)" }, { at: 1200, opacity: 1, transform: "translate(175px, -20px)" },

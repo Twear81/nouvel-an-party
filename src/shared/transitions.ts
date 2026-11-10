@@ -2,9 +2,18 @@
 import type { SkinId } from "./skins";
 
 export type TransitionKind = "opening" | "skin" | "closing";
+// Changement d'univers : la caméra dézoome (0 → zoomOutEndMs), la scène joue (jusqu'à plungeStartMs),
+// puis replonge dans la TV (plungeStartMs → plungeEndMs). Le skin bascule pendant que la scène couvre l'écran.
+export const SKIN_TIMING = {
+  durationMs: 6000, swapAtMs: 3000,
+  zoomOutEndMs: 1000, plungeStartMs: 4600, plungeEndMs: 5900,
+  /** Fin du fondu de la pièce transformée (le calque est ensuite pleinement visible). */
+  roomSkinFadeEndMs: 1800,
+} as const;
+
 export const TRANSITION_TIMING = {
   opening: { durationMs: 9000, swapAtMs: 8400 },
-  skin: { durationMs: 4000, swapAtMs: 2000 },
+  skin: { durationMs: SKIN_TIMING.durationMs, swapAtMs: SKIN_TIMING.swapAtMs },
   closing: { durationMs: 2400, swapAtMs: 1200 },
 } as const;
 
