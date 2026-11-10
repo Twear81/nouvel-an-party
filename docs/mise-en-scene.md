@@ -72,20 +72,23 @@ dans le navigateur. Chaque univers dispose de sa proposition animée, avec lectu
 La galerie utilise `RoomTransition` et les signatures du jeu : elle n'entretient pas une seconde version des effets.
 Son contrôleur emploie des snapshots de démonstration, sans lancer de partie ni se connecter au serveur.
 
-Ces propositions visuelles sont **en attente de validation par l'organisateur** :
+Première série jugée trop peu reconnaissable (petits dessins plats sur une pièce inchangée). Refonte validée
+par l'organisateur le **10 novembre 2026** :
 
-| Univers | Petite scène proposée |
+- **Pièce transformée** : une variante peinte de l'illustration par univers (`src/web/theme/assets/piece-<id>.png`),
+  en fondu pendant la scène ; les animations restent dessinées par-dessus. Prompts : [prompts-pieces.md](maquettes/prompts-pieces.md).
+- **Pas de carton titre** : le jeu n'est jamais nommé, c'est la scène puis l'interface qui le font deviner.
+- Éléments ressemblant aux jeux autorisés (usage privé, local, non commercial), sans reprendre de logo.
+
+| Univers | Scène retenue |
 |---|---|
-| Dofus | Un œuf vert apparaît au-dessus de la table ; des cases et des étincelles l'accompagnent. |
-| Overwatch | La TV projette un hologramme : balayage, hexagones et viseur orange. |
-| League of Legends | Un portail hextech bleu et doré s'ouvre dans le salon. |
-| Rocket League | Un ballon rebondit avec une traînée de boost bleue et orange, puis rejoint la TV. |
-| Mario Odyssey | Une casquette rouge à yeux traverse la pièce, accompagnée de pièces dorées. |
-| Resonance : A Plague Tale Legacy | La Macula gagne les murs par des ramifications noires depuis la cheminée ; une pulsation ambrée traverse le réseau. |
+| Rocket League | Une voiture en boost traverse le tapis, saute et frappe le gros ballon gris lumineux vers la TV ; explosion de but bleue et orange. |
+| Dofus | Le sol devient la grille isométrique de placement, cases rouges et bleues, les avatars des invités posés dessus ; un Bouftou et un Tofu passent. |
+| Overwatch | « Action de la partie » : bandeaux blanc et orange en biais qui balaient l'écran. |
+| League of Legends | Un nexus apparaît sur la table basse, se fissure et explose. |
+| Mario Odyssey | Un Mario en pixel art 8-bit court sur la bande pixelisée du mur et saute dans la TV. |
+| Resonance : A Plague Tale Legacy | Ambiance sombre ; la Macula rouge sombre, organique et veinée, gagne les murs depuis le poêle en pulsant. |
 
-Pour Resonance, cette interprétation visuelle part de la Macula et de la lumière décrites dans le
-[devblog officiel](https://community.focus-entmt.com/focus-entertainment/a-plague-tale-series/blogs/433-devblog-5-seadogs).
-Elle remplace les anciennes bandes de brume. Les scènes restent muettes et durent quatre secondes.
 Tous les mouvements suivent la même horloge que la caméra ; la pause et le mouvement réduit s'appliquent aux détails.
 
 ## Changements techniques nécessaires
