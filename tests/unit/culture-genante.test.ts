@@ -6,7 +6,7 @@ import cultureGenante, { type Pub, type Priv, type Results, type TvPub } from ".
 import { draftToValue, formatNumber, pressKey } from "../../src/minigames/culture-genante/number";
 import { revealSeconds, statLine } from "../../src/minigames/culture-genante/Reveal";
 import { buildCatalog } from "../../src/server/engine/planner";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
 const game = cultureGenante;
@@ -358,7 +358,7 @@ describe("culture-genante : dans le moteur", () => {
     const cfg = parse({ duree_accroche: 1, duree_bascule: 1, duree_question: 5 });
     const t = createTestEngine({ games: [{ game, cfg }] });
     t.engine.setSetup({ counts: { "culture-genante": 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     let s = t.engine.snapshot(null);
     expect(s).toMatchObject({ phase: "playing", round: { interlude: true, gameId: "culture-genante" } });
     expect((s.round!.public as TvPub).stage).toBe("accroche");

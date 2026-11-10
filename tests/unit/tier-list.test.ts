@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import tierList, { type Pub, type Results } from "../../src/minigames/tier-list/game";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
 const game = tierList;
@@ -174,7 +174,7 @@ describe("tier-list : via le moteur", () => {
     const cfg = parse();
     const t = createTestEngine({ games: [{ game, cfg }], players: 3 });
     t.engine.setSetup({ counts: { "tier-list": 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(4000);
     const [a, b, c] = t.ids as [string, string, string];
     for (const voter of [a, b, c]) for (const target of [a, b, c]) {

@@ -3,6 +3,7 @@ import { shuffle } from "../../shared/shuffle";
 import { interludeCounts } from "../../shared/interlude";
 import type { CatalogEntry, Setup } from "../../shared/types";
 import type { MiniGame } from "../../minigames/contract";
+import { SKINS, type SkinId } from "../../shared/skins";
 
 export interface LoadedGame {
   game: MiniGame;
@@ -16,6 +17,10 @@ export interface PlannedRound {
   item: unknown;
   /** Manche d'un jeu interlude (surprise). Absent = manche normale. */
   interlude?: boolean;
+  /** Frontière d'univers après ses résultats, indépendante du fait d'être un interlude. */
+  changeSkinAfter?: boolean;
+  /** Univers figé lors de la préparation du plan et conservé après redémarrage. */
+  skin?: SkinId;
 }
 
 /** N du jeu s'il est un interlude (entier ≥ 1), sinon null. */
@@ -98,7 +103,28 @@ function canFinishWithoutRepeat(pools: { items: unknown[] }[], pick: { items: un
 export function buildPlan(games: LoadedGame[], setup: Setup, order: "melange" | "groupe", rng: () => number): PlannedRound[] {
   const interludes = games.filter(({ game, cfg }) => interludeEvery(game, cfg) !== null);
   const normal = games.filter((g) => !interludes.includes(g));
-  return insertInterludes(buildNormalPlan(normal, setup, order, rng), interludes, setup, rng);
+  return insertInterludes(buildNormalPlan(normal, setup, order, rng), interludes, setup, rng).map((round) => {
+    const game = games.find((g) => g.game.id === round.gameId)!.game;
+    return game.changeSkinAfter ? { ...round, changeSkinAfter: true } : round;
+  });
+}
+
+/** Prépare les univers aux seules frontières prévues ; les cycles suivants ne commencent pas par le dernier skin. */
+export function assignRoundSkins(plan: PlannedRound[], firstOrder: readonly SkinId[], rng: () => number): PlannedRound[] {
+  let order = firstOrder.length ? [...firstOrder] : [...SKINS];
+  let position = 0;
+  return plan.map((round, index) => {
+    if (index > 0 && plan[index - 1]!.changeSkinAfter) {
+      position++;
+      if (position === order.length) {
+        const last = order[position - 1]!;
+        order = shuffle([...SKINS], rng);
+        if (order[0] === last && order.length > 1) [order[0], order[1]] = [order[1]!, order[0]!];
+        position = 0;
+      }
+    }
+    return { ...round, skin: order[position]! };
+  });
 }
 
 /**

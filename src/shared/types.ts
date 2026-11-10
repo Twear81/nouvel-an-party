@@ -3,6 +3,7 @@
 
 import type { SkinId } from "./skins";
 import type { FinalRevealInfo } from "./final-reveal";
+import type { TransitionInfo } from "./transitions";
 
 export type PlayerId = string;
 
@@ -24,9 +25,10 @@ export interface PublicPlayer {
 
 /**
  * Déroulé d'une partie :
- * lobby → (intro → playing → results) × N manches → final
+ * lobby → transition d'ouverture → (intro → playing → results) × N manches → transition de sortie → final.
+ * Une frontière d'univers insère aussi une transition après ses résultats.
  */
-export type Phase = "lobby" | "intro" | "playing" | "results" | "final";
+export type Phase = "lobby" | "transition" | "intro" | "playing" | "results" | "final";
 
 /** Un mini-jeu tel que présenté sur l'écran de configuration de la partie. */
 export interface CatalogEntry {
@@ -91,6 +93,8 @@ export interface GameSnapshot {
   paused: boolean;
   /** Départ serveur de la révélation finale ; null pendant les manches et au lobby. */
   finalReveal: FinalRevealInfo | null;
+  /** Scène synchronisée de la pièce ; aucune manche n'est démarrée pendant cette phase. */
+  transition: TransitionInfo | null;
   players: PublicPlayer[];
   round: RoundInfo | null;
   /** Joueurs ayant cliqué sur "Continuer" pendant les résultats. */
@@ -102,7 +106,7 @@ export interface GameSnapshot {
   resumable: { roundIndex: number; total: number } | null;
   joinUrl: string;
   /** Habillage visuel courant (docs/skins.md) : identique pour la TV et tous les téléphones. */
-  skin: SkinId;
+  skin: SkinId | null;
   /** Uniquement pour un téléphone : son identité et sa vue privée du mini-jeu. */
   me: { id: PlayerId; private: unknown; /** false si arrivé après le début de la manche */ inRound: boolean } | null;
 }

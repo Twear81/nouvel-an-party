@@ -15,3 +15,4 @@ export * from "./VoteDots";
 export * from "./Choice";
 export * from "./ResultBar";
 export * from "./DuelGauge";
+export * from "./RoomTransition";

@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
-import { SKINS, type SkinId } from "../../src/shared/skins";
+import { SKINS } from "../../src/shared/skins";
 import { activeNow } from "../../src/shared/clock";
 import { GameEngine, GameError } from "../../src/server/engine/engine";
-import { createTestEngine, MemoryPersistence, validProfile } from "./helpers/engine-setup";
+import { createTestEngine, MemoryPersistence, validProfile, startRounds } from "./helpers/engine-setup";
 import { FakeClock } from "./helpers/fake-clock";
 import { makeFakeGame } from "./helpers/fake-game";
 import { seededRng } from "./helpers/rng";
@@ -19,7 +19,7 @@ const T = { intro: 4000, round: 10_000 };
 /** Lance la partie et avance jusqu'à la phase de jeu de la première manche. */
 function startPlaying(o: Parameters<typeof createTestEngine>[0] = {}) {
   const t = createTestEngine(o);
-  t.engine.start();
+  startRounds(t.engine);
   t.clock.advance(T.intro);
   return t;
 }
@@ -41,7 +41,7 @@ describe("démarrage", () => {
 
   it("refuse hors du lobby, setSetup aussi", () => {
     const t = createTestEngine();
-    t.engine.start();
+    startRounds(t.engine);
     expect(() => t.engine.start()).toThrow("déjà commencé");
     expect(() => t.engine.setSetup({ counts: { fake: 1 } })).toThrow(GameError);
   });
@@ -58,7 +58,7 @@ describe("déroulé d'une manche", () => {
     const t = createTestEngine();
     const snap = () => t.engine.snapshot(null);
     expect(snap().phase).toBe("lobby");
-    t.engine.start();
+    startRounds(t.engine);
     expect(snap().phase).toBe("intro");
     expect(snap().round).toMatchObject({ index: 0, total: 2, gameId: "fake", deadline: null });
 
@@ -111,7 +111,7 @@ describe("déroulé d'une manche", () => {
   it("notifie onChange à chaque transition", () => {
     const t = createTestEngine();
     const before = t.changes.count;
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(T.intro);
     expect(t.changes.count).toBeGreaterThan(before + 1);
   });
@@ -121,7 +121,7 @@ describe("entrées des joueurs", () => {
   it("refusées hors phase playing", () => {
     const t = createTestEngine();
     expect(() => t.engine.input(t.ids[0]!, { v: 1 })).toThrow("Pas maintenant"); // lobby
-    t.engine.start();
+    startRounds(t.engine);
     expect(() => t.engine.input(t.ids[0]!, { v: 1 })).toThrow("Pas maintenant"); // intro
     t.clock.advance(T.intro + T.round);
     expect(() => t.engine.input(t.ids[0]!, { v: 1 })).toThrow("Pas maintenant"); // results
@@ -156,7 +156,7 @@ describe("compteur commun des réponses (progress)", () => {
     const t = createTestEngine();
     const prog = () => t.engine.snapshot(null).round?.progress;
     expect(t.engine.snapshot(null).round).toBeNull();
-    t.engine.start();
+    startRounds(t.engine);
     expect(prog()).toBeNull(); // intro
     t.clock.advance(T.intro);
     expect(prog()).toEqual({ done: 0, expected: 3 });
@@ -261,7 +261,7 @@ describe("bouton Continuer", () => {
 describe("Passer (skip)", () => {
   it("saute l'intro, sans laisser le chrono d'intro se déclencher plus tard", () => {
     const t = createTestEngine();
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(1000);
     t.engine.skip();
     expect(t.engine.snapshot(null).phase).toBe("playing");
@@ -286,6 +286,8 @@ describe("Passer (skip)", () => {
     t.engine.skip();
     t.engine.skip();
     t.engine.skip();
+    expect(t.engine.snapshot(null).transition?.kind).toBe("closing");
+    t.engine.skip();
     expect(t.engine.snapshot(null).phase).toBe("final");
   });
 
@@ -293,8 +295,10 @@ describe("Passer (skip)", () => {
     const t = createTestEngine({ rounds: 1 });
     t.engine.skip();
     expect(t.engine.snapshot(null).phase).toBe("lobby");
-    t.engine.start();
+    startRounds(t.engine);
     for (let i = 0; i < 3; i++) t.engine.skip();
+    expect(t.engine.snapshot(null).transition?.kind).toBe("closing");
+    t.engine.skip();
     expect(t.engine.snapshot(null).phase).toBe("final");
     t.engine.skip();
     expect(t.engine.snapshot(null).phase).toBe("final");
@@ -340,7 +344,7 @@ describe("pause, reprise et temps ajouté", () => {
 
   it("la pause fige aussi l'intro", () => {
     const t = createTestEngine();
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(1000);
     t.engine.pause();
     t.clock.advance(60_000);
@@ -378,7 +382,7 @@ describe("pause, reprise et temps ajouté", () => {
     const t = createTestEngine();
     t.engine.pause();
     expect(t.engine.snapshot(null).paused).toBe(false);
-    t.engine.start();
+    startRounds(t.engine);
     t.engine.resume();
     expect(t.engine.snapshot(null).paused).toBe(false);
   });
@@ -415,7 +419,7 @@ describe("pause, reprise et temps ajouté", () => {
 
   it("addTime est ignoré hors de la phase playing", () => {
     const t = createTestEngine();
-    t.engine.start();
+    startRounds(t.engine);
     t.engine.addTime(30);
     t.clock.advance(T.intro);
     expect(t.engine.snapshot(null).round!.deadline).toBe(t.clock.now() + T.round);
@@ -534,7 +538,7 @@ describe("présence en direct", () => {
 
   it("pas d'appel en intro, ni pour un non-participant, et rattrapage à la reprise après pause", () => {
     const t = createTestEngine();
-    t.engine.start(); // intro
+    startRounds(t.engine); // intro
     t.engine.disconnect(t.ids[0]!);
     expect(t.fake.calls).not.toContain("presence");
     t.clock.advance(T.intro);
@@ -590,6 +594,8 @@ describe("scores et snapshot", () => {
     const t = startPlaying({ rounds: 1 });
     t.clock.advance(T.round);
     for (const id of t.ids) t.engine.continue(id);
+    expect(t.engine.snapshot(null)).toMatchObject({ phase: "transition", round: null, transition: { kind: "closing" } });
+    t.engine.skip();
     const s = t.engine.snapshot(null);
     expect(s.phase).toBe("final");
     expect(s.round).toBeNull();
@@ -607,7 +613,7 @@ describe("scores et snapshot", () => {
     expect(s.players.every((p) => p.score === 0 && p.profile)).toBe(true);
     expect(t.clock.pendingCount).toBe(0);
     // on peut relancer une partie
-    t.engine.start();
+    startRounds(t.engine);
     expect(t.engine.snapshot(null).phase).toBe("intro");
   });
 
@@ -623,18 +629,22 @@ describe("scores et snapshot", () => {
 describe("robustesse face aux bugs d'un mini-jeu", () => {
   it("start() qui lève : la manche est sautée", () => {
     const t = createTestEngine({ rounds: 2, game: { items: ["ok", "bad"], failStart: (i) => i === "bad" } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(T.intro + T.round);
     // une seule manche jouable : après elle on arrive au final
     expect(t.engine.snapshot(null)).toMatchObject({ phase: "results" });
     for (const id of t.ids) t.engine.continue(id);
+    expect(t.engine.snapshot(null).transition?.kind).toBe("closing");
+    t.engine.skip();
     expect(t.engine.snapshot(null).phase).toBe("final");
     expect(t.fake.calls.filter((c) => c === "finish")).toHaveLength(1);
   });
 
   it("si toutes les manches plantent au démarrage, on va au final sans planter", () => {
     const t = createTestEngine({ game: { failStart: () => true } });
-    t.engine.start();
+    startRounds(t.engine);
+    expect(t.engine.snapshot(null).transition?.kind).toBe("closing");
+    t.engine.skip();
     expect(t.engine.snapshot(null).phase).toBe("final");
   });
 
@@ -671,7 +681,7 @@ describe("manches interlude (jeu surprise)", () => {
 
   it("saute l'écran d'annonce : directement en playing, onPlay appelé, chrono lancé", () => {
     const t = withInterlude({ a: 0, s: 1 });
-    t.engine.start();
+    startRounds(t.engine);
     const s = t.engine.snapshot(null);
     expect(s.phase).toBe("playing");
     expect(s.round).toMatchObject({ gameId: "s", interlude: true });
@@ -681,18 +691,19 @@ describe("manches interlude (jeu surprise)", () => {
 
   it("une manche normale garde son annonce", () => {
     const t = withInterlude({ a: 1, s: 1 });
-    t.engine.start();
+    startRounds(t.engine);
     expect(t.engine.snapshot(null)).toMatchObject({ phase: "intro", round: { interlude: false } });
   });
 
   it("l'interlude s'intercale dans le plan et ne compte pas dans « Manche x / y »", () => {
     const t = withInterlude({ a: 4, s: 1 });
-    t.engine.start();
+    startRounds(t.engine);
     const seen: { game: string; number: number; normalTotal: number; total: number; interlude: boolean }[] = [];
     for (let guard = 0; guard < 20; guard++) {
       const s = t.engine.snapshot(null);
       if (s.phase === "final") break;
-      if (s.phase === "intro") t.clock.advance(T.intro);
+      if (s.phase === "transition") t.engine.skip();
+      else if (s.phase === "intro") t.clock.advance(T.intro);
       else if (s.phase === "playing") t.clock.advance(T.round);
       else {
         seen.push({ game: s.round!.gameId, number: s.round!.number, normalTotal: s.round!.normalTotal, total: s.round!.total, interlude: s.round!.interlude });
@@ -708,7 +719,7 @@ describe("manches interlude (jeu surprise)", () => {
 
   it("pause, +10 s et « Passer » restent disponibles pendant un interlude", () => {
     const t = withInterlude({ a: 0, s: 1 });
-    t.engine.start();
+    startRounds(t.engine);
     t.engine.pause();
     expect(t.engine.snapshot(null).paused).toBe(true);
     t.clock.advance(60_000);
@@ -722,7 +733,7 @@ describe("manches interlude (jeu surprise)", () => {
 
   it("les résultats d'un interlude marquent des points normalement", () => {
     const t = withInterlude({ a: 0, s: 1 });
-    t.engine.start();
+    startRounds(t.engine);
     t.engine.input(t.ids[0]!, { v: 25 });
     t.clock.advance(T.round);
     const s = t.engine.snapshot(null);
@@ -734,7 +745,7 @@ describe("manches interlude (jeu surprise)", () => {
   it("la sauvegarde contient les interludes ; la reprise rejoue l'interlude interrompu sans annonce", () => {
     const persistence = new MemoryPersistence();
     const t = withInterlude({ a: 2, s: 1 }, { persistence });
-    t.engine.start();
+    startRounds(t.engine);
     for (let guard = 0; guard < 10 && !t.engine.snapshot(null).round!.interlude; guard++) {
       const phase = t.engine.snapshot(null).phase;
       if (phase === "intro") t.clock.advance(T.intro);
@@ -768,15 +779,7 @@ describe("manches interlude (jeu surprise)", () => {
 });
 
 describe("skins", () => {
-  type T = ReturnType<typeof createTestEngine>;
-  const skinOf = (t: T) => t.engine.snapshot(null).skin;
-  /** Termine la manche en cours (intro → jeu → résultats) et passe à la suivante (ou au final). */
-  function nextRound(t: T) {
-    t.clock.advance(4000);
-    t.clock.advance(10_000);
-    t.engine.skip();
-  }
-  const restart = (t: T, persistence: MemoryPersistence, seed: number) =>
+  const restart = (t: ReturnType<typeof createTestEngine>, persistence: MemoryPersistence, seed: number) =>
     new GameEngine({
       games: [t.fake.loaded],
       settings: { title: "Test", targetMinutes: 1, order: "melange", introSeconds: 4 },
@@ -786,102 +789,80 @@ describe("skins", () => {
       persistence,
     });
 
-  it("6 manches : les 6 skins passent chacun une fois, le lobby annonce le premier, rien ne change pendant une manche", () => {
-    const t = createTestEngine({ rounds: SKINS.length, game: { items: 20 } });
-    const lobby = skinOf(t);
-    t.engine.start();
-    const seen: SkinId[] = [];
-    for (let i = 0; i < SKINS.length; i++) {
-      expect(t.engine.snapshot(null).phase).toBe("intro");
-      seen.push(skinOf(t));
+  it("le lobby reste dans le thème de base ; sans frontière le premier skin reste sur toutes les manches", () => {
+    const t = createTestEngine({ rounds: 8, game: { items: 8 } });
+    expect(t.engine.snapshot(null).skin).toBeNull();
+    startRounds(t.engine);
+    const skin = t.engine.snapshot(null).skin;
+    expect(SKINS).toContain(skin!);
+    for (let i = 0; i < 8; i++) {
+      expect(t.engine.snapshot(null).skin).toBe(skin);
       t.clock.advance(4000);
-      expect(skinOf(t)).toBe(seen[i]!); // pas de changement pendant le jeu
+      expect(t.engine.snapshot(null).skin).toBe(skin);
       t.clock.advance(10_000);
-      expect(t.engine.snapshot(null).phase).toBe("results");
-      expect(skinOf(t)).toBe(seen[i]!); // ni pendant les résultats
+      expect(t.engine.snapshot(null)).toMatchObject({ phase: "results", skin });
       t.engine.skip();
     }
-    expect(seen[0]).toBe(lobby);
-    expect([...seen].sort()).toEqual([...SKINS].sort());
-    expect(t.engine.snapshot(null).phase).toBe("final");
-    expect(skinOf(t)).toBe(seen[SKINS.length - 1]!); // dernière manche jouée
+    expect(t.engine.snapshot(null).transition?.kind).toBe("closing");
+    t.engine.skip();
+    expect(t.engine.snapshot(null)).toMatchObject({ phase: "final", skin: null });
   });
 
-  it("12 manches : un changement toutes les 2 manches", () => {
-    const t = createTestEngine({ rounds: SKINS.length * 2, game: { items: 20 } });
-    t.engine.start();
-    const seen: SkinId[] = [];
-    for (let i = 0; i < SKINS.length * 2; i++) {
-      seen.push(skinOf(t));
-      nextRound(t);
-    }
-    for (let i = 0; i < SKINS.length * 2; i += 2) expect(seen[i + 1]).toBe(seen[i]!);
-    expect(new Set(seen).size).toBe(SKINS.length);
-  });
-
-  it("ordre tiré au hasard (rng du moteur), retiré à chaque retour au lobby", () => {
+  it("le premier ordre est tiré au hasard, sauvegardé et retiré au retour au lobby", () => {
     const orderOf = (seed: number) => {
-      const t = createTestEngine({ rounds: SKINS.length, seed, game: { items: 20 } });
-      t.engine.start();
-      const seen: SkinId[] = [];
-      for (let i = 0; i < SKINS.length; i++) {
-        seen.push(skinOf(t));
-        nextRound(t);
-      }
-      return seen;
+      const persistence = new MemoryPersistence();
+      const t = createTestEngine({ seed, persistence });
+      startRounds(t.engine);
+      return persistence.data!.skinOrder!;
     };
-    expect(orderOf(1)).toEqual(orderOf(1)); // même graine, même ordre
-    const many = new Set([1, 2, 3, 4, 5, 6].map((s) => orderOf(s).join()));
-    expect(many.size).toBeGreaterThan(1); // l'ordre varie d'une partie à l'autre
-
-    const t = createTestEngine({ rounds: SKINS.length, game: { items: 20 } });
-    const before = Array.from({ length: 6 }, () => {
+    expect(orderOf(1)).toEqual(orderOf(1));
+    expect(new Set([1, 2, 3, 4, 5, 6].map((seed) => orderOf(seed).join())).size).toBeGreaterThan(1);
+    const persistence = new MemoryPersistence();
+    const t = createTestEngine({ persistence });
+    const firsts = Array.from({ length: 6 }, () => {
       t.engine.backToLobby();
-      return skinOf(t);
+      expect(t.engine.snapshot(null).skin).toBeNull();
+      startRounds(t.engine);
+      return t.engine.snapshot(null).skin;
     });
-    expect(new Set(before).size).toBeGreaterThan(1);
+    expect(new Set(firsts).size).toBeGreaterThan(1);
   });
 
-  it("l'ordre est sauvegardé et conservé à la reprise", () => {
+  it("le plan enrichi de skins est conservé à la reprise, même avec un autre rng", () => {
     const persistence = new MemoryPersistence();
-    const t = createTestEngine({ rounds: SKINS.length, persistence, game: { items: 20 } });
-    t.engine.start();
-    nextRound(t);
-    nextRound(t);
-    t.clock.advance(4000);
-    const saved = persistence.data!.skinOrder!;
-    expect([...saved].sort()).toEqual([...SKINS].sort());
-    const expected = skinOf(t);
-
-    // Redémarrage avec un autre rng : l'ordre ne doit pas être retiré à nouveau.
+    const t = createTestEngine({ rounds: 3, persistence });
+    startRounds(t.engine);
+    t.clock.advance(14_000);
+    t.engine.skip();
+    const saved = structuredClone(persistence.data!);
+    const expected = t.engine.snapshot(null).skin;
     const engine = restart(t, persistence, 999);
     engine.resumeSave();
     expect(engine.snapshot(null).skin).toBe(expected);
-    expect(JSON.parse(JSON.stringify(persistence.data)).skinOrder).toEqual(saved);
+    expect(persistence.data!.plan).toEqual(saved.plan);
+    expect(persistence.data!.skinOrder).toEqual(saved.skinOrder);
   });
 
-  it("vieille sauvegarde sans ordre (ou ordre invalide) : reprenable, avec l'ordre tiré au démarrage", () => {
+  it("une ancienne sauvegarde sans ordre ou avec ordre invalide reste reprenable", () => {
     for (const bad of [undefined, ["dofus", "zelda"]]) {
       const persistence = new MemoryPersistence();
-      const t = createTestEngine({ rounds: SKINS.length, persistence, game: { items: 20 } });
-      t.engine.start();
-      nextRound(t);
+      const t = createTestEngine({ persistence });
+      startRounds(t.engine);
       (persistence.data as { skinOrder?: unknown }).skinOrder = bad;
+      for (const round of persistence.data!.plan) delete round.skin;
       const engine = restart(t, persistence, 5);
       engine.resumeSave();
-      const s = engine.snapshot(null);
-      expect(s.phase).toBe("intro");
-      expect(SKINS).toContain(s.skin);
+      expect(engine.snapshot(null).phase).toBe("intro");
+      expect(SKINS).toContain(engine.snapshot(null).skin!);
     }
   });
 
-  it("retire un ancien skin de la sauvegarde en gardant l'ordre des skins restants", () => {
+  it("retire GunZ d'un ancien ordre tout en conservant les six skins restants", () => {
     const persistence = new MemoryPersistence();
-    const t = createTestEngine({ rounds: SKINS.length, persistence, game: { items: 20 } });
-    t.engine.start();
+    const t = createTestEngine({ persistence });
+    startRounds(t.engine);
     const expected = [...persistence.data!.skinOrder!];
     (persistence.data as { skinOrder?: unknown }).skinOrder = [expected[0], "gunz", ...expected.slice(1)];
-
     const engine = restart(t, persistence, 999);
     engine.resumeSave();
     expect(persistence.data!.skinOrder).toEqual(expected);

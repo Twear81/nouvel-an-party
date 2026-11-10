@@ -3,7 +3,7 @@ import { chaosAt, shownMs } from "../../src/minigames/compte-a-rebours/chaos";
 import compte, { DESIGN_IDS, GO_LEAD_MS, type Pub, type Results } from "../../src/minigames/compte-a-rebours/game";
 import { fmtCible, fmtSeconds, fmtSigned, rankByError } from "../../src/minigames/compte-a-rebours/rank";
 import { revealSeconds } from "../../src/minigames/compte-a-rebours/Results";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
 const game = compte;
@@ -255,7 +255,7 @@ describe("compte-a-rebours : à travers le moteur", () => {
     const cfg = parse({ annonce: 2 });
     const t = createTestEngine({ games: [{ game, cfg }], players: 2 });
     t.engine.setSetup({ counts: { "compte-a-rebours": 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(4000); // intro
     const pub = () => t.engine.snapshot(null).round!.public as Pub;
     expect(pub().phase).toBe("announce");

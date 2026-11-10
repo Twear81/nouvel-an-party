@@ -1,15 +1,18 @@
 import { describe, expect, it } from "bun:test";
 import { finalRevealTimeline } from "../../src/shared/final-reveal";
-import { createTestEngine, MemoryPersistence, validProfile } from "./helpers/engine-setup";
+import { createTestEngine, MemoryPersistence, validProfile, startRounds } from "./helpers/engine-setup";
 
 describe("révélation finale synchronisée", () => {
   it("part du même instant pour la TV et les téléphones et résiste aux reconnexions", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ rounds: 1, players: 8, persistence });
     expect(t.engine.snapshot(null).finalReveal).toBeNull();
-    t.engine.start();
+    startRounds(t.engine);
     t.engine.skip();
     t.engine.skip();
+    expect(t.engine.snapshot(null).finalReveal).toBeNull();
+    t.engine.skip();
+    expect(t.engine.snapshot(null).transition?.kind).toBe("closing");
     expect(t.engine.snapshot(null).finalReveal).toBeNull();
     t.engine.skip();
     const reveal = t.engine.snapshot(null).finalReveal!;
@@ -31,7 +34,7 @@ describe("révélation finale synchronisée", () => {
     t.engine.backToLobby();
     expect(t.engine.snapshot(null).finalReveal).toBeNull();
     expect(persistence.data!.finalReveal).toBeNull();
-    t.engine.start();
+    startRounds(t.engine);
     expect(t.engine.snapshot(null).finalReveal).toBeNull();
   });
 

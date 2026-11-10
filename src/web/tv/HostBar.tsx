@@ -9,7 +9,7 @@ import { Button, ClockIcon, ConfirmDialog, HomeIcon, PauseIcon, PlayIcon, SkipIc
 export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot; actions: GameActions; overlay?: boolean }) {
   const [confirmLobby, setConfirmLobby] = useState(false);
   const { phase, paused } = snapshot;
-  const inGame = phase === "intro" || phase === "playing" || phase === "results";
+  const inGame = phase === "transition" || phase === "intro" || phase === "playing" || phase === "results";
 
   const togglePause = useCallback(() => void (paused ? actions.resume() : actions.pause()).catch(() => {}), [paused, actions]);
   const skip = useCallback(() => void actions.skip().catch(() => {}), [actions]);

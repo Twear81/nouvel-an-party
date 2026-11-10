@@ -74,6 +74,9 @@ export interface MiniGame<Cfg = any, Item = any, State = any> {
    */
   interlude?: (cfg: Cfg) => number | null;
 
+  /** Ferme un univers après les résultats : le moteur joue une transition de skin avant la manche suivante. */
+  changeSkinAfter?: boolean;
+
   /** Début de manche (pendant l'intro). */
   start: (item: Item, ctx: RoundContext<Cfg>) => State;
   /** Optionnel : appelé quand le chrono démarre (fin de l'intro). */

@@ -23,11 +23,18 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   Les écrans n'ont pas d'état de jeu à eux : un téléphone qui recharge la page retrouve tout.
 - Les actions passent par les événements de `src/shared/protocol.ts`.
 - `round.progress` (`{ done, expected }` ou `null`) : compteur « qui a répondu » calculé par le moteur via `MiniGame.progress` (phase `playing` seulement, protégé comme `publicView`) ; la TV l'affiche dans le chrono sans connaître le jeu.
-- Le snapshot porte aussi `skin` (habillage courant, identique TV + téléphones) : calculé par le moteur depuis l'ordre des 6 skins tiré au hasard (`skinOrder`, retiré à chaque retour au lobby, sauvegardé dans `save.json`) et `skinForRound` ; voir [skins.md](skins.md#rotation).
+- Le snapshot porte aussi `skin` (habillage courant, identique TV + téléphones ; `null` = thème de base).
+  Les univers sont attribués au plan sauvegardé par `assignRoundSkins`, avec changement après une frontière
+  `changeSkinAfter`. Culture gênante ferme un univers ; voir [skins.md](skins.md#rotation).
 
 ## Déroulé
-`lobby → (intro → playing → results) × N → final`
+`lobby → transition d'ouverture → (intro → playing → results) × N → transition de sortie → final`
 - **lobby** : les joueurs rejoignent et créent leur profil ; la TV règle le nombre de manches par mini-jeu.
+- **transition** : scène de la pièce, avec `snapshot.transition` ; `round` vaut `null` et aucun mini-jeu n'est lancé.
+  L'ouverture dure 9 s, le changement d'univers 4 s, la sortie 2,4 s. Les durées et l'instant de bascule du skin
+  sont partagés dans `src/shared/transitions.ts`. Le serveur utilise `TimerGroup` ; Pause/Reprendre/Passer et
+  retour au lobby s'appliquent aussi à ces scènes. Les téléphones attendent la TV. Le rendu compte depuis
+  le départ serveur, en retirant les pauses ; un rechargement reprend le bon instant de l'animation.
 - **intro** : annonce de la manche (`intro_secondes`).
 - **playing** : chrono du mini-jeu (ou fin anticipée quand tout le monde a répondu).
 - **results** : animation de révélation sur la TV (`revealSeconds` du mini-jeu), puis les points et le bouton
@@ -47,8 +54,11 @@ Les jeux « interlude » (surprises, ex. Culture gênante) s'insèrent dans le p
 normales, sans **intro** (le moteur passe directement de la manche précédente à `playing`) et avec une TV en plein
 écran gérée par le jeu ; ils ne comptent pas dans « Manche x / y ». Voir `docs/creer-un-mini-jeu.md`, « Jeux interlude ».
 
-Le futur déroulé avec pièce commune, ouverture, changements de skin après Culture gênante et souvenirs de fin
-est décrit dans [mise-en-scene.md](mise-en-scene.md). Ce document distingue la cible du comportement livré.
+La propriété facultative `MiniGame.changeSkinAfter` marque une frontière dans le plan. Après ses résultats,
+le moteur joue la scène vers l'univers suivant avant la prochaine manche. Si c'était la dernière manche,
+il joue directement la sortie ; Culture gênante ne change jamais d'univers au milieu de sa question.
+
+Le décor, la chronologie et les futurs souvenirs de fin sont décrits dans [mise-en-scene.md](mise-en-scene.md).
 
 ## Mini-jeux (`src/minigames/<id>/`)
 
@@ -74,6 +84,9 @@ joueurs connectés (`allConnectedDone`, `helpers.ts`), un téléphone planté ne
 ## Reconnexion & crash
 - Le téléphone garde un jeton dans `localStorage` → il retrouve son joueur à la reconnexion.
 - `data/save.json` est réécrit à chaque étape → au redémarrage du serveur, la TV propose de reprendre.
+- Une scène sauvegarde sa destination, ses participants, sa progression et un horodatage de contrôle. Sa reprise
+  garde le temps écoulé (y compris l'arrêt du serveur hors pause) ou reste figée si elle était en pause.
+  Une scène déjà achevée mène directement à sa destination ; aucun résultat ni point n'est recalculé.
 
 ## Temps réel
 - Les chronos sont des timestamps serveur (`deadline`) ; les écrans corrigent le décalage d'horloge

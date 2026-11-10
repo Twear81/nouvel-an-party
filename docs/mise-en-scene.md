@@ -2,13 +2,13 @@
 
 ## État du chantier
 
-Direction confirmée par l'organisateur, à réaliser par lots. Cette page décrit une cible : les scènes de pièce,
-la rotation après Culture gênante et les souvenirs ne sont pas encore implémentés.
-Le retrait de GunZ et des photos de profil ainsi que l'attente du téléphone pendant le classement final
-constituent le premier lot. La rotation livrée reste celle décrite dans [skins.md](skins.md).
+Direction confirmée par l'organisateur, réalisée par lots. Le retrait GunZ/photos, l'attente pendant le final,
+l'ouverture de la pièce, les transitions après Culture gênante et la sortie avant le podium sont intégrés.
+Les statistiques, souvenirs de partie et la cérémonie finale enrichie restent à réaliser ; le son viendra en dernier,
+exclusivement sur la TV. La rotation livrée est décrite dans [skins.md](skins.md).
 
 Le décor de la pièce a été validé par l'organisateur le **10 novembre 2026** :
-[illustration de référence](maquettes/piece-reference.png). La [maquette animée](maquettes/piece.html)
+[illustration de référence](../src/web/theme/assets/piece-reference.png). La [maquette animée](maquettes/piece.html)
 permet de régler l'installation des portraits et l'entrée dans la TV ; elle s'ouvre directement dans un navigateur.
 Cette maquette est un outil de conception autonome, avec des invités fictifs ; elle ne modifie pas le déroulé du jeu.
 
@@ -69,29 +69,29 @@ ni requête HTTP. TypeScript et les 502 tests unitaires du jeu passent ; le code
 
 ### Des frontières explicites entre les univers
 
-Aujourd'hui, `skinForRound` répartit les skins par tranches du nombre total de manches ; `buildPlan` place les
-interludes aléatoirement dans des blocs. La cible conserve ce placement, mais calcule les univers depuis les
-frontières après Culture gênante. Une annotation générique dans le plan indique ces frontières ; le moteur
-ne doit pas importer le code de Culture gênante ni tester son état interne.
+`buildPlan` conserve le placement aléatoire des interludes dans des blocs. La propriété facultative
+`MiniGame.changeSkinAfter` marque une frontière, puis `assignRoundSkins` attribue chaque univers au plan.
+Le moteur ne connaît aucun état interne ni identifiant de Culture gênante : le jeu déclare cette propriété.
 
 Le skin précédent reste actif pendant toute la surprise et ses résultats. La bascule s'effectue au point couvert
-de la scène, avant la prochaine annonce de manche. L'actuel rideau automatique de `SkinProvider` devra être
-remplacé pour ce parcours : une seule transition visible, pilotée par le serveur. `null` pourra représenter le
-thème de base dans le snapshot, sans ajouter un faux septième skin à la rotation.
+de la scène, avant la prochaine annonce de manche. L'ancien rideau automatique de `SkinProvider` est supprimé :
+une seule transition visible, pilotée par le serveur. `null` représente le thème de base dans le snapshot.
 
 ### Une seule brique moteur pour les scènes
 
-Ajouter une phase générique `transition`, avec un petit descriptif sérialisable : nature (ouverture, changement,
-sortie), skin de départ et d'arrivée, instant de départ, durée et destination. Le moteur décide quand une scène
-commence et se termine ; React affiche son avancement à partir de l'horloge synchronisée.
+La phase générique `transition` porte un petit descriptif sérialisable : nature (ouverture, changement, sortie),
+skin de départ et d'arrivée, instant de départ, durée et participants. Le moteur décide quand une scène commence
+et se termine ; React affiche son avancement à partir de l'horloge synchronisée. Les durées partagées sont dans
+`src/shared/transitions.ts` : ouverture 9 s, changement 4 s, sortie 2,4 s.
 
-Réutiliser `TimerGroup` pour Pause/Reprendre/Passer et annuler les échéances au retour au lobby. Ne pas démarrer
-le chrono d'une manche sous une scène. Sauvegarder la destination et les informations nécessaires à la reprise ;
-un rechargement de page reprend la scène, un redémarrage serveur retrouve sa destination sans rejouer les points.
+`TimerGroup` gère Pause/Reprendre/Passer et annule les échéances au retour au lobby. Aucun mini-jeu ni chrono
+ne démarre sous une scène. La sauvegarde garde progression, destination et un horodatage de contrôle :
+un rechargement de page reprend la scène ; un redémarrage serveur retrouve sa destination sans rejouer les points.
 Les téléphones montrent uniquement l'attente pendant ces scènes. La logique propre aux mini-jeux reste intacte.
 
-La révélation finale actuelle dispose déjà d'un départ serveur commun. La future sortie de la TV et la cérémonie
-étendront cette chronologie, pour garder les rangs et les distinctions cachés sur les téléphones jusqu'au bon moment.
+La révélation finale actuelle dispose déjà d'un départ serveur commun, après la sortie de la TV. La future
+cérémonie avec statistiques et souvenirs prolongera cette chronologie, en gardant les rangs et les distinctions
+cachés sur les téléphones jusqu'au bon moment.
 
 ### Des souvenirs compacts
 
@@ -104,14 +104,14 @@ phrase montrée sur la TV. Garder seulement quelques souvenirs sélectionnés et
 sans conserver tous les snapshots ni rejouer la partie. Les résumés et souvenirs sont sauvegardés avec les scores,
 pour qu'une reprise ne les compte pas deux fois. Les contenus secrets restent dans la vue TV jusqu'à leur révélation.
 
-## Cas à fixer avant de modifier la rotation
+## Cas particuliers de la rotation
 
 - Culture gênante désactivée ou sans questions restantes : conserver le skin courant jusqu'à la fin ; ne jamais
   créer une fausse question pour déclencher un changement.
 - Culture gênante en dernière manche : aller directement vers la sortie et la cérémonie, sans visiter un univers vide.
 - Partie courte : montrer uniquement les univers effectivement visités. Six skins ne supposent pas six passages obligatoires.
-- Plus de six univers : choix de l'organisateur encore attendu entre un nouveau tour mélangé sans répétition immédiate
-  et la conservation du dernier skin. Ne pas modifier le rythme de Culture gênante pour forcer six univers.
+- Plus de six univers : nouveau cycle mélangé sans répétition immédiate. Le rythme de Culture gênante n'est pas
+  modifié pour forcer six univers.
 - Démo composée seulement de Culture gênante : prévoir ouverture, surprise, sortie, sans transition intermédiaire vide.
 
 ## Ordre des lots et validation

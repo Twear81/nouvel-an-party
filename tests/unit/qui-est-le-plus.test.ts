@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import quiEstLePlus, { type Pub, type Results } from "../../src/minigames/qui-est-le-plus/game";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
 const game = quiEstLePlus;
@@ -162,7 +162,7 @@ describe("qui-est-le-plus : via le moteur", () => {
     const cfg = parse();
     const t = createTestEngine({ games: [{ game, cfg }], players: 3 });
     t.engine.setSetup({ counts: { "qui-est-le-plus": 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(4000);
     const [a, b, c] = t.ids as [string, string, string];
     t.engine.input(a, { target: c });

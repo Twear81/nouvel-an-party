@@ -3,7 +3,7 @@
 // Trois projets = les trois moteurs des téléphones d'une soirée : Chromium (Android/Chrome), Firefox (Android), WebKit (iPhone/Safari).
 // La TV (le PC de la soirée) est toujours un Chromium.
 // Chromium joue toute la suite ; Firefox et WebKit ne rejouent que les tests marqués @compat
-// (profil, partie complète, reconnexion, réglages tactiles) ; l'affichage à 8 joueurs reste testé sous Chromium pour garder une CI rapide.
+// (profil, partie complète, reconnexion, réglages tactiles et ouverture à huit invités).
 import { defineConfig, devices } from "@playwright/test";
 import type { TestOptions } from "./tests/e2e/helpers/fixtures";
 
@@ -51,6 +51,8 @@ export default defineConfig<TestOptions>({
     {
       name: "webkit",
       grep: /@compat/,
+      // Un scénario simule déjà jusqu'à huit téléphones : éviter plusieurs groupes WebKit simultanés.
+      workers: 1,
       use: {
         browserName: "webkit",
         // iPhone : Safari mobile (user-agent, tactile, isMobile).

@@ -65,3 +65,9 @@ export function addPlayers(engine: GameEngine, n: number) {
   }
   return out;
 }
+
+/** Lance les manches après avoir passé explicitement la scène d’ouverture. */
+export function startRounds(engine: GameEngine) {
+  engine.start();
+  if (engine.snapshot(null).transition?.kind === "opening") engine.skip();
+}

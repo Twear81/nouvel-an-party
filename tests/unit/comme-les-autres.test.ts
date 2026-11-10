@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { cleanText } from "../../src/minigames/helpers";
 import commeLesAutres, { MAX_LENGTH, groupAnswers, withinOneEdit, type Pub, type Results } from "../../src/minigames/comme-les-autres/game";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
 const game = commeLesAutres;
@@ -224,7 +224,7 @@ describe("comme-les-autres : via le moteur", () => {
   it("tout le monde répond → fin anticipée, points dans les deltas", () => {
     const t = createTestEngine({ games: [{ game, cfg: parse() }], players: 3 });
     t.engine.setSetup({ counts: { "comme-les-autres": 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(4000);
     const [a, b, c] = t.ids as [string, string, string];
     t.engine.input(a, { answers: ["Fromage"] });

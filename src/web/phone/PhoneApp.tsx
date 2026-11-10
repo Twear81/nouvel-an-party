@@ -86,6 +86,13 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
         </Center>
       );
     }
+    case "transition":
+      return (
+        <Center testId="phone-transition-wait">
+          <span aria-hidden className="text-8xl">👀</span>
+          <h1 className="font-display text-3xl text-gold-gradient">Regarde la TV !</h1>
+        </Center>
+      );
     case "intro":
       return (
         <Center testId="phone-intro">

@@ -18,12 +18,15 @@ Bilan du chantier et validation : [skins-suivi.md](skins-suivi.md).
 ## Rotation
 - Le **serveur** choisit le skin et l'envoie dans `GameSnapshot.skin` : la TV et les téléphones changent ensemble, un
   téléphone qui recharge retrouve le bon skin, la sauvegarde le garde.
-- Les 6 skins sont toujours tous utilisés, dans un **ordre tiré au hasard** (rien à régler). L'ordre est tiré au
-  démarrage et à chaque retour au lobby ; le lobby montre le premier skin, celui de la 1re manche.
-- `skinForRound(ordre, indexManche, totalManches)` (`src/shared/skins.ts`) répartit les skins en tranches égales du
-  plan (interludes compris) : chacun passe une fois. 12 manches → un changement toutes les 2 manches. Moins de manches
-  que de skins → on en voit autant que de manches. Classement final : skin de la dernière manche.
-- Le skin ne change **qu'à l'annonce d'une manche** (phase `intro`), jamais pendant une question ni les résultats.
+- Le lobby utilise le thème de base bleu (`skin: null`). L'ouverture de la pièce mène dans la TV et le premier
+  skin, tiré au hasard. Culture gênante et ses résultats gardent l'univers courant ; une fois ces résultats quittés,
+  une scène de la pièce couvre la bascule vers le prochain skin. Aucun changement pendant une question.
+- `assignRoundSkins` (`src/server/engine/planner.ts`) annote les manches selon les frontières `changeSkinAfter`.
+  Le plan complet et les univers sont sauvegardés. Les six skins passent dans un ordre mélangé ; après six univers,
+  un nouveau cycle mélangé commence, avec un premier skin différent du précédent.
+- Sans Culture gênante, ou si ses questions s'épuisent, le skin courant reste jusqu'à la fin. Une partie courte
+  ne force pas la visite de tous les univers. Une surprise en dernière manche mène directement à la sortie.
+- Après le dernier jeu, la sortie de la TV revient au thème de base avant le classement final.
 
 ## Architecture front
 - `html[data-skin="<id>"]` porte le skin courant (posé par `SkinProvider`, `src/web/theme/skin.tsx`, à partir du
@@ -82,7 +85,7 @@ redéfinit pas.
 | `score-row` | lignes de classement (résultats, final, téléphone) | `data-rank`, `data-highlight` |
 | `podium` | podium du classement final | |
 | `paused` | `PausedOverlay` | |
-| `skin-transition` | rideau de changement de skin | |
+| `room-scene` | scène de la pièce (ouverture, changement, sortie) | `data-kind`, `data-stage`, `data-room-skin` |
 
 ### Chrono
 `Countdown` a une variante de structure par skin (`data-variant`), qui suit la deadline serveur : il garde le même
@@ -112,8 +115,8 @@ extérieur/intérieur : ne pas ajouter de masque radial ni faire tourner la silh
 avancent le long du tracé ; `prefers-reduced-motion` les fige. Le badge reste à l'extérieur du portrait, sans être coupé.
 
 ### Animations
-- **Changement de skin** : rideau neutre (6 volets qui balaient l'écran, ~0,6 s), le skin bascule au milieu.
-  Pas d'annonce ni de texte.
+- **Changement de skin** : scène de la pièce synchronisée par le serveur, après les résultats de Culture gênante.
+  Le décor et la signature visuelle ne jouent qu'à ce moment. L'ancien rideau automatique est supprimé.
 - **Propres au skin** : réaction au toucher des boutons et des choix, mise en avant du choix sélectionné, chrono, fond
   d'ambiance (lent et léger), apparition des panneaux. Chaque skin définit les siennes, dans son fichier.
 - Tout respecte `prefers-reduced-motion` ; pas de `filter: blur` ni d'animation lourde sur les téléphones.

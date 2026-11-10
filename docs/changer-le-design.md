@@ -48,6 +48,7 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 | Routage TV (phases, pause, bande du maître) | `src/web/tv/TvApp.tsx` |
 | TV lobby (QR, joueurs avec bouton « retirer », réglage des manches) | `src/web/tv/Lobby.tsx` |
 | TV annonce de manche | `src/web/tv/IntroScreen.tsx` |
+| Pièce : ouverture, changement d'univers et sortie | `src/web/ui/RoomTransition.tsx`, `src/web/theme/room.css`, `src/shared/transitions.ts` |
 | TV manche en cours (en-tête + chrono) ; un jeu interlude s'affiche en plein écran, sans cadre | `src/web/tv/PlayingScreen.tsx` |
 | TV résultats (points gagnés, « Continuer ») | `src/web/tv/ResultsScreen.tsx` |
 | TV classement final (révélation, podium, confettis) | `src/web/tv/FinalScreen.tsx` |
@@ -60,6 +61,12 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 | Mini-jeu « Dessin raté » (page de dessin tactile, mosaïque, révélation ; couleurs = jetons `--color-paper` et `--color-pen-0…4` du thème) | `src/minigames/dessin-rate/views.tsx`, `drawing.tsx` |
 
 ## Skins
+
+Le décor canonique de la pièce est `src/web/theme/assets/piece-reference.png`. La scène reprend ses coordonnées
+et les vrais `PlayerAvatar` ; les portraits ne sont pas peints dans l'image. La référence approuvée et sa maquette
+autonome sont décrites dans [mise-en-scene.md](mise-en-scene.md). Les signatures des six univers sont des calques
+de décor dans `room.css`, joués uniquement pendant les changements, avec un fondu pour le mouvement réduit.
+
 Le jeu change d'habillage au fil de la soirée (6 skins qui imitent des interfaces de jeux vidéo) : tout est dans [skins.md](skins.md). En bref : `SkinProvider` (`src/web/theme/skin.tsx`) pose `html[data-skin]` ; **un fichier CSS par skin** (`src/web/theme/skins/<id>.css`) redéfinit les jetons puis habille les composants via leurs marqueurs `data-ui` (`panel`, `button`, `choice`, `result-bar`, `countdown`, `avatar`, `score-row`…, tableau dans skins.md). Pour qu'un écran soit habillable : n'utiliser que les composants de `src/web/ui` et les classes du thème ; une zone neuve et récurrente reçoit son `data-ui` (et ses `data-*` d'état) dans le composant, jamais de style de skin dans un mini-jeu.
 
 ## Composants réutilisables (`src/web/ui/`)

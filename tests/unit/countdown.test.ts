@@ -2,7 +2,7 @@
 import { describe, expect, it } from "bun:test";
 import { z } from "zod";
 import { defineMiniGame } from "../../src/minigames/contract";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 
 // Jeu à 2 étapes : "ecrire" (10 s) puis "voter" (5 s), puis fin de manche.
 const twoSteps = defineMiniGame<{}, number, { step: string }>({
@@ -32,7 +32,7 @@ const twoSteps = defineMiniGame<{}, number, { step: string }>({
 function setup() {
   const t = createTestEngine({ games: [{ game: twoSteps, cfg: {} }], settings: { introSeconds: 1 } });
   t.engine.setSetup({ counts: { "deux-etapes": 1 } });
-  t.engine.start();
+  startRounds(t.engine);
   t.clock.advance(1000); // fin de l'intro
   return t;
 }
@@ -89,7 +89,7 @@ describe("ctx.countdown", () => {
 
   it("un chrono simple (roundSeconds) remplit aussi timerTotalMs", () => {
     const t = createTestEngine({ settings: { introSeconds: 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(1000);
     expect(t.engine.snapshot(null).round!.timerTotalMs).not.toBeNull();
   });

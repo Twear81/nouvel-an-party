@@ -13,8 +13,9 @@ conserve le suivi détaillé des corrections.
 
 ## Résultat retenu
 - Six skins : Dofus, Overwatch, League of Legends, Rocket League, Mario Odyssey et A Plague Tale.
-  Tous sont utilisés, dans un ordre aléatoire, sans option de configuration ; le changement intervient uniquement
-  à l'annonce d'une manche, avec un rideau neutre. Le serveur synchronise TV, téléphones et sauvegarde.
+  Leur ordre est aléatoire, sans option de configuration ; une scène de pièce change d'univers après les résultats
+  de Culture gênante. Le lobby et le classement final utilisent le thème de base. Le serveur synchronise TV,
+  téléphones et sauvegarde. La rotation par tranches de manches et son rideau ont été remplacés.
 - Cadres de jeu, choix, résultats, classements, chronos et animations propres aux skins ; thème de base bleu Karmine
   Corp. Le mode sérieux de Culture gênante garde sa rupture sombre, avec des textes et accents éclaircis.
 - Avatars : portraits prédéfinis et aperçus du profil réutilisent le même composant ; six cadres SVG qui suivent la silhouette
@@ -50,8 +51,24 @@ spécifiques. La maquette active suit les six skins restants. Les anciennes capt
 - Final sans rang sur téléphone avant la fin de la révélation TV, y compris après rechargement avec une horloge
   avancée d'une heure. Un invité qui crée son profil pendant le final reste spectateur et ne modifie pas le podium.
 - Captures relues : téléphone en attente, final TV, cadres et profil Dofus 360×640, dans `test-results/`.
-- La future pièce commune, la rotation après Culture gênante, les souvenirs et le son restent le chantier décrit
-  dans [mise-en-scene.md](mise-en-scene.md) ; cette validation porte sur le premier lot.
+- Ce premier lot précède l'intégration de la pièce commune et de la rotation après Culture gênante, décrite ci-dessous.
+
+## Validation locale des scènes et de la rotation (10 novembre 2026)
+
+- TypeScript et **510 tests unitaires** verts : ouverture, frontières d'univers, pause, reprise après crash,
+  passage, retour lobby et absence de double comptage des points.
+- Suite E2E complète à deux workers : **111 réussis, 42 ignorés, trois dépassements de délai WebKit**, en 28,3 min.
+  Les trois cas passent ensuite en série après ajustement des attentes sur les états : ergonomie à 360×640,
+  ouverture à huit invités avec rechargement et Culture gênante seule. Bilan : **114 scénarios distincts validés**.
+  Les 42 ignorés restent l'outil de captures sans skin demandé.
+- Le projet WebKit est limité à un worker : chaque scénario simule déjà plusieurs téléphones. Chromium et Firefox
+  conservent leur parallélisme. Deux derniers parcours WebKit passent avec `--workers=2`, le reporter confirmant
+  l'utilisation d'un seul worker pour ce projet. Les délais des tests restent indépendants de la durée des animations.
+- Captures relues : vrais portraits et cadres à huit pseudos de 16 caractères, changement d'univers dans la pièce,
+  attente des téléphones et sortie avant le final. Exploration du mouvement réduit : caméra immobile pendant le zoom,
+  image embarquée chargée et aucune erreur de console.
+- Journaux et captures de ce lot : `captures/validation-scenes-2026-11-10/`. La cérémonie avec statistiques et
+  souvenirs, puis le son TV, restent à réaliser ; voir [mise-en-scene.md](mise-en-scene.md).
 
 ## Preuves et entretien
 - Galerie locale : `captures/revue-finition/index.html`, avec les maquettes et les captures par navigateur.
@@ -64,5 +81,5 @@ spécifiques. La maquette active suit les six skins restants. Les anciennes capt
   l'ajouter au contrat commun `data-ui`, sans introduire de connaissance des skins dans les mini-jeux.
 
 ## Avant la soirée
-Tester le thème de base, le rideau de transition, les profils et la connexion sur les vrais appareils et le wifi prévu,
+Tester le thème de base, les scènes de la pièce, les profils et la connexion sur les vrais appareils et le wifi prévu,
 sans accès à internet. Les tests locaux et la validation visuelle ne remplacent pas cet essai en conditions réelles.

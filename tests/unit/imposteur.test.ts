@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import imposteur, { GRACE_SECONDS, type Priv, type Pub, type Results } from "../../src/minigames/imposteur/game";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 import { seededRng } from "./helpers/rng";
 
@@ -475,7 +475,7 @@ describe("imposteur : à travers le moteur", () => {
     const cfg = parse();
     const t = createTestEngine({ games: [{ game, cfg }], players: 4, settings: { introSeconds: 1 } });
     t.engine.setSetup({ counts: { imposteur: 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(1_000);
     const snap = () => t.engine.snapshot(null).round!;
     const pub = () => snap().public as Pub;

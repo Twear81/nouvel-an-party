@@ -49,7 +49,7 @@ async function startInterlude(party: Party) {
 }
 
 test.describe("Culture gênante", () => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
 
   test("une manche seule : accroche, bascule, question, résultats et points @compat", async ({ party }) => {
     const { tv } = party;

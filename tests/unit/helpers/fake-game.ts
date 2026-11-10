@@ -36,6 +36,8 @@ export interface FakeGameOptions {
   noProgress?: boolean;
   /** Fait du jeu un interlude : « une fois toutes les N manches normales ». */
   interlude?: number;
+  /** Ferme un univers après les résultats de cette manche. */
+  changeSkinAfter?: boolean;
 }
 
 export function makeFakeGame(opts: FakeGameOptions = {}) {
@@ -49,6 +51,7 @@ export function makeFakeGame(opts: FakeGameOptions = {}) {
   const game = defineMiniGame<any, string, FakeState>({
     id,
     configSchema: z.any(),
+    changeSkinAfter: opts.changeSkinAfter,
     interlude: opts.interlude === undefined ? undefined : () => opts.interlude!,
     name: () => `Jeu ${id}`,
     description: () => `Description ${id}`,

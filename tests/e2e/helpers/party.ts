@@ -169,8 +169,9 @@ export class Party {
   async startGame(counts: Partial<Record<GameId, number>>) {
     await this.setOnly(counts);
     await this.tv.getByTestId("start-game").click();
-    // L'annonce ne dure qu'une seconde dans la config de test : on vérifie juste qu'on a quitté le lobby.
-    await expect(this.tv.locator("[data-phase]").last()).not.toHaveAttribute("data-phase", "lobby");
+    // L’ouverture de la pièce précède la première annonce : les tests de manches attendent sa fin.
+    // Les tests dédiés aux scènes cliquent directement sur start-game pour parcourir cette ouverture.
+    await expect(this.tv.locator("[data-phase]").last()).toHaveAttribute("data-phase", /^(intro|playing)$/, { timeout: 20_000 });
   }
 
   // ───────────── Déroulé d'une manche ─────────────

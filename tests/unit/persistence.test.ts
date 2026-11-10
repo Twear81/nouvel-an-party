@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import { GameEngine, GameError } from "../../src/server/engine/engine";
-import { MemoryPersistence, createTestEngine } from "./helpers/engine-setup";
+import { MemoryPersistence, createTestEngine, startRounds } from "./helpers/engine-setup";
 import { FakeClock } from "./helpers/fake-clock";
 import { seededRng } from "./helpers/rng";
 
@@ -30,7 +30,7 @@ describe("sauvegarde", () => {
     const t = createTestEngine({ persistence });
     const afterProfiles = persistence.saves.length;
     expect(afterProfiles).toBeGreaterThanOrEqual(3); // un setProfile par joueur
-    t.engine.start();
+    startRounds(t.engine);
     expect(persistence.data).toMatchObject({ version: 1, phase: "intro", roundIndex: 0 });
     t.clock.advance(14_000);
     expect(persistence.data!.phase).toBe("results");
@@ -41,7 +41,7 @@ describe("sauvegarde", () => {
   it("contient les jetons, profils et scores", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(4000);
     t.engine.input(t.ids[0]!, { v: 40 });
     t.clock.advance(10_000);
@@ -53,7 +53,7 @@ describe("sauvegarde", () => {
   it("un nouveau moteur restaure les joueurs (déconnectés) avec leur jeton", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });
-    t.engine.start();
+    startRounds(t.engine);
 
     const b = restart(persistence, t.fake);
     const s = b.engine.snapshot(null);
@@ -70,14 +70,14 @@ describe("sauvegarde", () => {
   it("restaure aussi le réglage des manches", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence, rounds: 4 });
-    t.engine.start(); // le réglage est sauvegardé au démarrage
+    startRounds(t.engine); // le réglage est sauvegardé au démarrage
     expect(restart(persistence, t.fake).engine.snapshot(null).setup.counts).toEqual({ fake: 4 });
   });
 
   it("remplace les anciens portraits personnalisés sans perdre profil, score ni jeton", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(4000);
     t.engine.input(t.ids[0]!, { v: 40 });
     t.clock.advance(10_000);
@@ -111,7 +111,7 @@ describe("sauvegarde", () => {
   it("une partie terminée (final) n'est pas reprenable", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence, rounds: 1 });
-    t.engine.start();
+    startRounds(t.engine);
     t.engine.skip();
     t.engine.skip();
     t.engine.skip();
@@ -128,7 +128,7 @@ describe("reprise", () => {
   it("rejoue la manche interrompue pendant l'intro", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });
-    t.engine.start();
+    startRounds(t.engine);
     const firstItem = persistence.data!.plan[0]!.item;
     t.clock.advance(1000);
 
@@ -142,7 +142,7 @@ describe("reprise", () => {
   it("rejoue la manche interrompue pendant le jeu, en gardant les scores précédents", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(4000);
     t.engine.input(t.ids[0]!, { v: 25 });
     t.clock.advance(10_000); // résultats manche 0 (score 25)
@@ -163,7 +163,7 @@ describe("reprise", () => {
   it("continue vers la manche suivante si la sauvegarde est en phase results", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(14_000);
     expect(persistence.data!.phase).toBe("results");
 
@@ -173,20 +173,22 @@ describe("reprise", () => {
     expect(b.engine.snapshot(null)).toMatchObject({ phase: "intro", round: { index: 1, total: 2 } });
   });
 
-  it("results de la dernière manche : la reprise mène directement au final", () => {
+  it("results de la dernière manche : la reprise passe par la sortie avant le final", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence, rounds: 1 });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(14_000);
     const b = restart(persistence, t.fake);
     b.engine.resumeSave();
+    expect(b.engine.snapshot(null).transition?.kind).toBe("closing");
+    b.engine.skip();
     expect(b.engine.snapshot(null).phase).toBe("final");
   });
 
   it("refuse de reprendre deux fois ou depuis une partie en cours", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });
-    t.engine.start();
+    startRounds(t.engine);
     const b = restart(persistence, t.fake);
     b.engine.resumeSave();
     expect(() => b.engine.resumeSave()).toThrow(GameError);
@@ -195,9 +197,9 @@ describe("reprise", () => {
   it("lancer une nouvelle partie abandonne la reprise", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });
-    t.engine.start();
+    startRounds(t.engine);
     const b = restart(persistence, t.fake);
-    b.engine.start();
+    startRounds(b.engine);
     expect(b.engine.snapshot(null).resumable).toBeNull();
     expect(b.engine.snapshot(null).round!.index).toBe(0);
   });
@@ -205,7 +207,7 @@ describe("reprise", () => {
   it("ignore une sauvegarde d'une version inconnue", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });
-    t.engine.start();
+    startRounds(t.engine);
     persistence.data = { ...persistence.data!, version: 2 as unknown as 1 };
     const b = restart(persistence, t.fake);
     expect(b.engine.snapshot(null).players).toHaveLength(0);

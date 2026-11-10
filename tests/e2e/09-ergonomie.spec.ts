@@ -83,6 +83,7 @@ async function lowestControlGap(page: Page) {
 }
 
 test.describe("Zone du geste « accueil »", () => {
+  test.setTimeout(120_000);
   for (const size of [{ width: 390, height: 844 }, { width: 360, height: 640 }]) {
     test(`aucun contrôle collé au bas de l'écran (${size.width}×${size.height})`, { tag: "@compat" }, async ({ party }) => {
       const check = async (label: string, page: Page) => {
@@ -101,7 +102,9 @@ test.describe("Zone du geste « accueil »", () => {
       await expect(phones[0]!.t("continue-button")).toBeVisible({ timeout: 60_000 });
       await check("résultats : Continuer", phones[0]!.page);
       await party.continueAll();
-      await expect(phones[0]!.t("phone-final")).toBeVisible({ timeout: 15_000 });
+      // Mesure d'ergonomie après la sortie et le podium : la vitesse de révélation a ses propres tests.
+      await expect(party.tv.getByTestId("tv-final")).toHaveAttribute("data-stage", "done", { timeout: 45_000 });
+      await expect(phones[0]!.t("phone-final")).toBeVisible({ timeout: 20_000 });
       await check("classement final", phones[0]!.page);
     });
   }
