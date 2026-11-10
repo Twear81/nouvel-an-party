@@ -117,58 +117,26 @@
   --sig-rl-white: #ffffff;
   --sig-rl-blue-light: #7cc4ff;
   --sig-rl-blue: #2b6ff0;
-  --sig-rl-blue-dark: #0f2c86;
   --sig-rl-navy: #060f33;
-  --sig-rl-glass-light: #4a78c4;
-  --sig-rl-glass: #0c1e48;
   --sig-rl-orange-light: #ffd884;
   --sig-rl-orange: #ff8a1f;
   --sig-rl-orange-dark: #c7470b;
   --sig-rl-flame-core: #fff4be;
-  --sig-rl-steel-light: #f1f6ff;
-  --sig-rl-steel: #a3b1c9;
-  --sig-rl-steel-dark: #4b5878;
-  --sig-rl-tire: #0b0e16;
-  --sig-rl-tire-light: #2a3042;
 }
 .sig-rl [data-room-motion] { transform-box: view-box; transform-origin: 0 0; }
-.sig-rl [data-room-motion="flame"] { transform-origin: 150px 14px; }
+.sig-rl [data-room-motion="puff"] { transform-box: fill-box; transform-origin: center; }
+.sig-rl [data-room-motion="tongue"] { transform-box: fill-box; transform-origin: left center; }
+.sig-rl [data-room-motion="flame"] { transform-box: fill-box; transform-origin: left center; }
+.sig-rl [data-room-motion="trail"] { transform-box: fill-box; transform-origin: left center; }
 .sig-rl-shadow { fill: var(--room-shadow); }
-.sig-rl-ground-glow { fill: var(--sig-rl-blue); opacity: .35; }
-.sig-rl-body { fill: url(#rl-body); stroke: var(--sig-rl-navy); stroke-width: 2; stroke-linejoin: round; }
-.sig-rl-rocker { fill: var(--sig-rl-navy); opacity: .55; }
-.sig-rl-stripe { fill: url(#rl-stripe); }
-.sig-rl-glass { fill: url(#rl-glass); stroke: var(--sig-rl-navy); stroke-width: 2; stroke-linejoin: round; }
-.sig-rl-pillar { fill: var(--sig-rl-blue-dark); }
-.sig-rl-glass-shine { fill: var(--sig-rl-white); opacity: .22; }
-.sig-rl-seam { fill: none; stroke: var(--sig-rl-navy); stroke-width: 2; opacity: .5; }
-.sig-rl-roof-light, .sig-rl-hood-light { fill: none; stroke: var(--sig-rl-blue-light); stroke-width: 3; stroke-linecap: round; opacity: .9; }
-.sig-rl-headlight { fill: var(--sig-rl-flame-core); stroke: var(--sig-rl-orange-light); stroke-width: 1.5; }
-.sig-rl-taillight { fill: var(--sig-rl-orange); }
-.sig-rl-wing { fill: var(--sig-rl-blue-dark); stroke: var(--sig-rl-navy); stroke-width: 2; stroke-linejoin: round; }
-.sig-rl-wing-post { fill: var(--sig-rl-navy); }
-.sig-rl-wing-edge { fill: none; stroke: var(--sig-rl-orange); stroke-width: 4; stroke-linecap: round; }
-.sig-rl-arch { fill: var(--sig-rl-navy); }
-.sig-rl-tire { fill: url(#rl-tire); }
-.sig-rl-tire-wall { fill: none; stroke: var(--sig-rl-tire-light); stroke-width: 2; opacity: .7; }
-.sig-rl-rim { fill: url(#rl-rim); stroke: var(--sig-rl-steel-dark); stroke-width: 1.5; }
-.sig-rl-spoke { fill: var(--sig-rl-steel-dark); stroke: var(--sig-rl-steel-light); stroke-width: 1; stroke-linejoin: round; }
-.sig-rl-rim-glow { fill: none; stroke: var(--sig-rl-orange); stroke-width: 2.5; opacity: .85; }
-.sig-rl-hub { fill: var(--sig-rl-orange); stroke: var(--sig-rl-navy); stroke-width: 1.5; }
 .sig-rl-flame-outer { fill: url(#rl-flame); }
+.sig-rl-flame-mid { fill: url(#rl-flame-mid); }
 .sig-rl-flame-core { fill: url(#rl-flame-core); }
-.sig-rl-trail-blue { fill: url(#rl-trail-blue); }
-.sig-rl-trail-orange { fill: url(#rl-trail-orange); }
+.sig-rl-trail { fill: url(#rl-trail-blue); }
+.sig-rl-puff-hot { fill: url(#rl-puff-hot); }
+.sig-rl-puff-cool { fill: url(#rl-puff-cool); }
 .sig-rl-halo { fill: url(#rl-ball-halo); }
 .sig-rl-ghost { fill: var(--sig-rl-blue-light); }
-.sig-rl-ball-base { fill: url(#rl-ball-base); }
-.sig-rl-hex { fill: var(--sig-rl-steel-dark); stroke: var(--sig-rl-blue-light); stroke-width: 3.5; stroke-linejoin: round; opacity: .55; }
-.sig-rl-hex-core { fill: var(--sig-rl-navy); stroke: var(--sig-rl-white); opacity: .62; }
-.sig-rl-hex-far { opacity: .45; }
-.sig-rl-ball-shade { fill: url(#rl-ball-shade); }
-.sig-rl-ball-spec { fill: url(#rl-ball-spec); }
-.sig-rl-ball-rim { fill: none; stroke: var(--sig-rl-blue-light); stroke-width: 4; }
-.sig-rl-ball-rim-outer { fill: none; stroke: var(--sig-rl-white); stroke-width: 2; opacity: .45; }
 .sig-rl-impact { fill: url(#rl-impact); }
 .sig-rl-impact-star { fill: var(--sig-rl-flame-core); opacity: .95; }
 .sig-rl-tv-glow { fill: url(#rl-screen); }

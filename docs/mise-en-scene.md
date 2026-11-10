@@ -82,7 +82,7 @@ par l'organisateur le **10 novembre 2026** :
 
 | Univers | Scène retenue |
 |---|---|
-| Rocket League | Une voiture en boost traverse le tapis, saute et frappe le gros ballon gris lumineux vers la TV ; explosion de but bleue et orange. |
+| Rocket League | Une vraie Octane (sprite) arrive en boost avec flamme et traînée, saute et frappe le ballon du jeu vers la TV ; la caméra tremble, explosion de but bleue et orange. |
 | Dofus | Le sol devient la grille isométrique de placement, cases rouges et bleues, les avatars des invités posés dessus ; un Bouftou et un Tofu passent. |
 | Overwatch | « Action de la partie » : bandeaux blanc et orange en biais qui balaient l'écran. |
 | League of Legends | Un nexus apparaît sur la table basse, se fissure et explose. |

@@ -16,7 +16,7 @@ const UNIVERS: { id: SkinId; nom: string; description: string }[] = [
   { id: "dofus", nom: "Dofus", description: "Une grille se dessine sur le tapis, un œuf magique vert apparaît sur la table et lance des étincelles." },
   { id: "overwatch", nom: "Overwatch", description: "La TV projette un hologramme : cible orange, hexagones et balayage du salon." },
   { id: "league-of-legends", nom: "League of Legends", description: "Un portail hextech bleu et doré s’ouvre, avec anneaux et runes autour de la table." },
-  { id: "rocket-league", nom: "Rocket League", description: "Une Octane bleue arrive en boost, saute et frappe le gros ballon de Rocket League qui file dans la TV : explosion de but bleue et orange, puis la caméra plonge dans l’écran." },
+  { id: "rocket-league", nom: "Rocket League", description: "Une vraie Octane bleue arrive en boost (flamme et traînée), saute et frappe le ballon de Rocket League qui file dans la TV : la caméra tremble, explosion de but bleue et orange, puis elle plonge dans l’écran." },
   { id: "mario-odyssey", nom: "Mario Odyssey", description: "Une casquette rouge à yeux file en arc vers la TV, accompagnée de pièces dorées." },
   { id: "plague-tale", nom: "Resonance", description: "La Macula se ramifie depuis la cheminée et la TV, avec des pulsations ambrées dans la pièce." },
 ];
