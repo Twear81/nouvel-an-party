@@ -1,11 +1,18 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./helpers/fixtures";
 
-const seconds = async (tv: Page) => Number((await tv.getByTestId("countdown").textContent() ?? "").trim());
+const seconds = async (tv: Page) => {
+  // Le tableau Rocket League ajoute deux compteurs et affiche le temps en m:ss ; les autres skins restent en secondes.
+  const text = (await tv.getByTestId("countdown").locator('[data-ui="countdown-num"]').textContent() ?? "").trim();
+  if (!/^\d+(?::\d{2})?$/.test(text)) throw new Error(`Chrono illisible : « ${text} »`);
+  return text.split(":").reduce((total, part) => total * 60 + Number(part), 0);
+};
 
 test.describe("Contrôles du maître du jeu", () => {
   test("pause : écrans figés sur TV et téléphone, le chrono s'arrête puis repart", async ({ party }) => {
     const { tv } = party;
+    // Le format le plus riche doit vérifier la pause quel que soit le skin tiré au sort par le serveur.
+    await tv.goto(`${party.server.tvUrl}?skin=rocket-league`);
     const [a] = await party.addPhones("Alice", "Bob");
     await party.startGame({ "qui-est-le-plus": 0, "ceci-ou-cela": 1 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
@@ -51,6 +58,7 @@ test.describe("Contrôles du maître du jeu", () => {
 
   test("+10 s ajoute du temps au chrono", async ({ party }) => {
     const { tv } = party;
+    await tv.goto(`${party.server.tvUrl}?skin=rocket-league`);
     await party.addPhones("Alice", "Bob");
     await party.startGame({ "qui-est-le-plus": 0, "ceci-ou-cela": 1 });
     await expect(tv.getByTestId("tv-playing")).toBeVisible();
