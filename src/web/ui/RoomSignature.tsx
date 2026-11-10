@@ -3,6 +3,7 @@ import type { SkinId } from "../../shared/skins";
 import { SKIN_TIMING } from "../../shared/transitions";
 import { RocketLeagueScene, animateRocketLeague } from "./signatures/RocketLeague";
 import { LeagueOfLegendsScene, animateLeagueOfLegends } from "./signatures/LeagueOfLegends";
+import { PlagueTaleScene, animatePlagueTale } from "./signatures/PlagueTale";
 
 export type SignatureFrame = Keyframe & { at: number };
 export type Animate = (element: Element | null, frames: SignatureFrame[]) => void;
@@ -18,9 +19,9 @@ export function legacyTime(at: number): number {
   return end + (at - 3500) * (SKIN_TIMING.durationMs - end) / 500;
 }
 
-/** Enveloppe d'apparition du calque de signature (les scènes Rocket League et League of Legends gèrent leur propre durée de vie). */
+/** Enveloppe d'apparition du calque de signature (les scènes Rocket League, League of Legends et Resonance gèrent leur propre durée de vie). */
 export function signatureEnvelope(skin: SkinId | null): SignatureFrame[] {
-  if (skin === "rocket-league" || skin === "league-of-legends") return [
+  if (skin === "rocket-league" || skin === "league-of-legends" || skin === "plague-tale") return [
     { at: 0, opacity: 0 }, { at: SKIN_TIMING.zoomOutEndMs - 200, opacity: 0 }, { at: SKIN_TIMING.zoomOutEndMs, opacity: 1 },
     { at: SKIN_TIMING.plungeEndMs - 700, opacity: 1 }, { at: SKIN_TIMING.plungeEndMs, opacity: 0 }, { at: SKIN_TIMING.durationMs, opacity: 0 },
   ];
@@ -31,23 +32,6 @@ export function signatureEnvelope(skin: SkinId | null): SignatureFrame[] {
 }
 
 const SPARKLES = [[-110, -10], [-90, -110], [-35, -135], [65, -120], [110, -45], [95, 45], [-70, 65]];
-const BRANCHES = [
-  "M748 490 C722 455 729 419 697 388 C665 358 671 320 634 288 C606 261 601 225 563 191",
-  "M701 390 C671 389 643 365 611 370 C566 377 548 349 502 354 C466 356 439 332 402 337",
-  "M638 294 C616 295 590 278 568 283 C544 290 526 268 501 270",
-  "M614 267 C631 239 612 216 622 189 C630 165 610 151 614 124",
-  "M568 283 C550 253 515 250 500 226 C485 200 456 205 440 179",
-  "M748 490 C778 454 774 420 809 389 C845 359 832 323 873 295 C906 271 902 231 942 207",
-  "M812 388 C851 400 880 375 917 382 C956 389 976 363 1019 370 C1059 377 1082 353 1125 359",
-  "M877 292 C906 305 929 280 957 287 C989 295 1006 276 1040 282",
-  "M907 266 C892 243 910 223 900 203 C887 177 906 160 896 136",
-  "M1017 370 C1017 339 1042 321 1046 294 C1052 269 1076 263 1083 237",
-  "M747 490 C737 458 756 432 746 403 C731 368 752 343 740 311 C728 274 748 253 739 218 C729 181 751 156 744 122",
-  "M742 314 C717 309 709 282 686 275 C665 268 664 246 644 239",
-  "M742 223 C765 219 774 193 795 189 C820 185 817 161 840 151",
-  "M704 470 C682 487 654 479 636 499 C613 524 582 510 561 535 C535 565 507 546 482 570",
-  "M793 470 C818 483 838 471 861 489 C887 511 913 495 939 514 C965 538 995 519 1022 542",
-];
 
 function DofusScene() {
   return <>
@@ -89,25 +73,10 @@ function MarioScene() {
   </>;
 }
 
-function MaculaScene() {
-  return <>
-    <g data-room-motion="macula-pulse" className="sig-macula-pulse">
-      <ellipse cx="748" cy="477" rx="163" ry="87" /><ellipse cx="748" cy="477" rx="107" ry="58" /><ellipse cx="748" cy="477" rx="47" ry="29" />
-    </g>
-    <g className="sig-macula-roots">
-      {BRANCHES.map((d, i) => <path key={i} data-room-motion="macula-branch" pathLength="1" className={i % 5 === 0 ? "sig-macula-trunk" : undefined} d={d} />)}
-    </g>
-    <g className="sig-macula-knots" data-room-motion="macula-knots">
-      <path d="M739 472Q719 457 730 445Q745 434 753 449Q773 444 774 460Q769 479 752 474Q741 489 739 472Z" />
-      <path d="M691 389Q679 376 686 368Q701 363 705 377Q717 377 717 389Q704 401 691 389ZM805 391Q792 384 802 372Q818 367 822 382Q832 392 817 401Z" />
-    </g>
-  </>;
-}
-
 export function RoomSignature({ skin }: { skin: SkinId | null }) {
   const content = skin === "dofus" ? <DofusScene />
     : skin === "league-of-legends" ? <LeagueOfLegendsScene /> : skin === "rocket-league" ? <RocketLeagueScene />
-      : skin === "mario-odyssey" ? <MarioScene /> : skin === "plague-tale" ? <MaculaScene /> : null;
+      : skin === "mario-odyssey" ? <MarioScene /> : skin === "plague-tale" ? <PlagueTaleScene /> : null;
   return content && <svg className="room-signature-art" viewBox="0 0 1672 941" aria-hidden="true" data-testid="transition-signature" data-signature={skin}>{content}</svg>;
 }
 
@@ -116,6 +85,7 @@ export function animateRoomSignature(root: Element | null, skin: SkinId | null, 
   if (!root) return;
   if (skin === "rocket-league") { animateRocketLeague(root, reduced, animateNative); return; }
   if (skin === "league-of-legends") { animateLeagueOfLegends(root, reduced, animateNative); return; }
+  if (skin === "plague-tale") { animatePlagueTale(root, reduced, animateNative); return; }
   const animate: Animate = (element, frames) => animateNative(element, frames.map((frame) => ({ ...frame, at: legacyTime(frame.at) })));
   const select = (name: string) => root.querySelector(`[data-room-motion="${name}"]`);
   const all = (name: string) => root.querySelectorAll(`[data-room-motion="${name}"]`);
@@ -152,19 +122,5 @@ export function animateRoomSignature(root: Element | null, skin: SkinId | null, 
       { at: 1280 + i * 140, opacity: 1, transform: reduced ? "scaleX(1)" : "scaleX(.35)" },
       { at: 1700 + i * 140, opacity: 1, transform: "scaleX(1)" }, { at: 2100 + i * 140, opacity: 0, transform: "scaleX(1)" }, { at: 4000, opacity: 0, transform: "scaleX(1)" },
     ]));
-  } else if (skin === "plague-tale") {
-    all("macula-branch").forEach((element, i) => animate(element, [
-      { at: 0, strokeDashoffset: reduced ? 0 : 1, opacity: 0 }, { at: 1000 + i * 28, strokeDashoffset: reduced ? 0 : 1, opacity: 0 },
-      { at: 1300 + i * 28, opacity: 1 }, { at: 2450 + i * 20, strokeDashoffset: 0, opacity: 1 },
-      { at: 3300, strokeDashoffset: 0, opacity: 1 }, { at: 4000, strokeDashoffset: 0, opacity: 0 },
-    ]));
-    appear(select("macula-knots"), 200);
-    animate(select("macula-pulse"), reduced ? [
-      { at: 0, opacity: 0 }, { at: 1300, opacity: .55 }, { at: 2900, opacity: .55 }, { at: 4000, opacity: 0 },
-    ] : [
-      { at: 0, opacity: 0, transform: "scale(.75)" }, { at: 1250, opacity: .2, transform: "scale(.75)" },
-      { at: 1750, opacity: .9, transform: "scale(1.08)" }, { at: 2200, opacity: .3, transform: "scale(.9)" },
-      { at: 2600, opacity: .85, transform: "scale(1.1)" }, { at: 3100, opacity: 0, transform: "scale(1.15)" }, { at: 4000, opacity: 0, transform: "scale(1.15)" },
-    ]);
   }
 }

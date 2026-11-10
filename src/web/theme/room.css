@@ -91,13 +91,6 @@
 .sig-cap-iris { fill: var(--room-shadow); }
 .sig-coin circle { fill: var(--sig-gold); stroke: var(--sig-brass); stroke-width: 4; }
 .sig-coin ellipse, .sig-coin path { fill: none; stroke: var(--sig-brass); stroke-width: 3; stroke-linecap: round; }
-.sig-macula-roots path { fill: none; stroke: var(--sig-ink); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
-.sig-macula-roots .sig-macula-trunk { stroke-width: 10; }
-.sig-macula-knots { fill: var(--sig-ink); }
-.sig-macula-pulse { fill: var(--room-accent); }
-.sig-macula-pulse ellipse { opacity: .12; }
-.sig-macula-pulse ellipse + ellipse { opacity: .2; }
-.sig-macula-pulse ellipse + ellipse + ellipse { opacity: .45; }
 
 /* Overwatch : « Action de la partie », surimpression d'écran (tailles en cqw/cqh : proportionnelles à la TV). */
 .room-overlay { pointer-events: none; overflow: hidden; }
@@ -224,3 +217,27 @@
 .sig-lol-mote { fill: var(--sig-lol-cyan); }
 .sig-lol-mote-gold { fill: var(--sig-lol-gold); }
 .sig-lol-tv-glow { fill: url(#lol-screen); }
+
+/* Resonance : veines générées dans le code (poêle -> murs), Macula (sprite) qui pulse. */
+.sig-pt {
+  --sig-pt-night: #03050a;
+  --sig-pt-vein: #05070b;
+  --sig-pt-ember: #ff8a2a;
+  --sig-pt-ember-light: #ffd08a;
+  --sig-pt-glow: #35e6dc;
+  --sig-pt-glow-light: #d4fffb;
+  --sig-pt-glow-deep: #0a7f9c;
+  --sig-pt-ribbon: #4af0e4;
+}
+.sig-pt [data-room-motion] { transform-box: fill-box; transform-origin: center; }
+.sig-pt-night { fill: url(#pt-night); opacity: 0; }
+.sig-pt-stove { fill: url(#pt-stove); opacity: 0; }
+.sig-pt-vein { fill: none; stroke: var(--sig-pt-vein); stroke-dasharray: 1 2; stroke-dashoffset: 1; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.sig-pt-vein-0 { stroke-width: 2.6; }
+.sig-pt-vein-1 { stroke-width: 1.5; }
+.sig-pt-vein-2 { stroke-width: .9; stroke-linecap: butt; }
+.sig-pt-ribbons { opacity: 0; }
+.sig-pt-ribbon { fill: none; stroke: var(--sig-pt-ribbon); stroke-width: 1; stroke-dasharray: 1 2; stroke-dashoffset: 1; stroke-linecap: round; opacity: 0; }
+.sig-pt-ribbon-main { stroke-width: 1.5; }
+.sig-pt-halo { fill: url(#pt-halo); opacity: 0; }
+.sig-pt-tv-glow { fill: url(#pt-screen); opacity: 0; }

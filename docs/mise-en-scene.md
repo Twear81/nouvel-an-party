@@ -90,10 +90,9 @@ par l'organisateur le **10 novembre 2026** :
 | Resonance : A Plague Tale Legacy | Pièce plongée dans le noir ; un fin réseau de veines noires ramifiées, traversé de filaments turquoise lumineux, gagne les murs depuis le poêle. Puis la Macula se déploie devant la cheminée : étoile à cinq tentacules osseux hérissés d'épines, cœur pâle aux alvéoles turquoise, longs filaments bleus qui ondulent ; elle pulse, et la caméra plonge dans la TV. |
 
 **Avancement (10 novembre 2026)** — les six pièces transformées sont livrées. Scènes refaites : Rocket League,
-Overwatch, League of Legends (validées par l'organisateur : LoL ; RL et Overwatch à revoir en mouvement).
+Overwatch, League of Legends, Resonance (veines générées dans `signatures/PlagueTale.tsx` + sprite de la Macula). Validées par l'organisateur : LoL ; RL, Overwatch et Resonance à revoir en mouvement.
 Restent à refaire (encore l'ancienne version en SVG) :
 - **Dofus** : sprites `dofus-bouftou.png` et `dofus-tofu.png` prêts ; grille et avatars à dessiner dans le code.
-- **Resonance** : sprite `plague-tale-macula.png` prêt ; veines à faire pousser dans le code depuis le poêle.
 - **Mario** : planche `mario-odyssey-planche-8bit.png` (1200×1200, fond blanc avec légendes) à découper en images
   séparées (marche ×3, saut) sur fond transparent, à afficher en `image-rendering: pixelated`.
 Les sprites sont dans `src/web/theme/assets/sprites/` ; modèle à imiter : `src/web/ui/signatures/RocketLeague.tsx`.

@@ -18,7 +18,7 @@ const UNIVERS: { id: SkinId; nom: string; description: string }[] = [
   { id: "league-of-legends", nom: "League of Legends", description: "Les runes du socle s’allument, un Nexus apparaît sur la table basse, se fissure sous les coups puis explose : colonne de lumière, onde de choc et éclats de cristal, avant que la lueur file vers la TV." },
   { id: "rocket-league", nom: "Rocket League", description: "Une vraie Octane bleue arrive en boost (flamme et traînée), saute et frappe le ballon de Rocket League qui file dans la TV : la caméra tremble, explosion de but bleue et orange, puis elle plonge dans l’écran." },
   { id: "mario-odyssey", nom: "Mario Odyssey", description: "Une casquette rouge à yeux file en arc vers la TV, accompagnée de pièces dorées." },
-  { id: "plague-tale", nom: "Resonance", description: "La Macula se ramifie depuis la cheminée et la TV, avec des pulsations ambrées dans la pièce." },
+  { id: "plague-tale", nom: "Resonance", description: "La pièce s’assombrit, un fin réseau de veines noires aux rubans turquoise pousse depuis le poêle jusqu’aux murs, puis la Macula se déploie devant la cheminée, pulse trois fois et inonde la TV de lumière turquoise avant le replongeon." },
 ];
 // Joueurs de démonstration (dont un pseudo de 16 caractères) : la scène Overwatch en met un en avant.
 const INVITES: GameSnapshot["players"] = [
