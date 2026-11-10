@@ -1,6 +1,5 @@
 // La pièce validée : portraits et caméra suivent uniquement la chronologie reçue du serveur.
 import { useLayoutEffect, useMemo, useRef, type CSSProperties } from "react";
-import { useReducedMotion } from "motion/react";
 import type { GameSnapshot } from "../../shared/types";
 import { OPENING_TIMING, SKIN_TIMING, transitionElapsed, type TransitionInfo } from "../../shared/transitions";
 import { serverNow } from "../net/socket";
@@ -40,7 +39,6 @@ function sceneStage(scene: TransitionInfo, elapsed: number) {
 
 export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
   const scene = snapshot.transition;
-  const reduced = !!useReducedMotion();
   const root = useRef<HTMLDivElement>(null);
   const camera = useRef<HTMLDivElement>(null);
   const light = useRef<HTMLDivElement>(null);
@@ -71,7 +69,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
     };
     const tv = ROOM.tv;
     const scale = Math.max(1 / tv.width, 1 / tv.height);
-    const zoom = reduced ? identity : `translate(${50 - scale * (tv.left + tv.width / 2) * 100}%, ${50 - scale * (tv.top + tv.height / 2) * 100}%) scale(${scale})`;
+    const zoom = `translate(${50 - scale * (tv.left + tv.width / 2) * 100}%, ${50 - scale * (tv.top + tv.height / 2) * 100}%) scale(${scale})`;
 
     if (scene.kind === "opening") {
       animate(camera.current, [
@@ -86,7 +84,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
         { at: scene.durationMs, opacity: 1 },
       ]);
       animate(cover.current, [
-        { at: 0, opacity: 0 }, { at: reduced ? OPENING_TIMING.fadeAtMs : 8250, opacity: 0 },
+        { at: 0, opacity: 0 }, { at: 8250, opacity: 0 },
         { at: OPENING_TIMING.zoomEndAtMs, opacity: 1 }, { at: scene.durationMs, opacity: 1 },
       ]);
     } else if (scene.kind === "skin") {
@@ -105,7 +103,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
         { at: legacyTime(3000), opacity: .32 }, { at: scene.durationMs, opacity: 0 },
       ]);
       animate(signature.current, signatureEnvelope(scene.toSkin));
-      animateRoomSignature(signature.current, scene.toSkin, reduced, animate);
+      animateRoomSignature(signature.current, scene.toSkin, false, animate);
       animate(cover.current, [
         { at: 0, opacity: 1 }, { at: 650, opacity: 0 },
         { at: SKIN_TIMING.plungeEndMs - 150, opacity: 0 }, { at: scene.durationMs, opacity: 1 },
@@ -127,15 +125,15 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
       const still = transform();
       if (scene.kind === "opening") {
         const start = OPENING_TIMING.arrivalAtMs + index * OPENING_TIMING.staggerMs;
-        const from = reduced ? still : transform(((x < ROOM.table.x ? -.12 : 1.12) - x) * 100, ((index % 2 === 0 ? -.12 : 1.12) - y) * 100, .65, x < ROOM.table.x ? -12 : 12);
-        const bounce = reduced ? still : transform(x < ROOM.table.x ? .5 : -.5, -.35, 1.05, 2);
+        const from = transform(((x < ROOM.table.x ? -.12 : 1.12) - x) * 100, ((index % 2 === 0 ? -.12 : 1.12) - y) * 100, .65, x < ROOM.table.x ? -12 : 12);
+        const bounce = transform(x < ROOM.table.x ? .5 : -.5, -.35, 1.05, 2);
         animate(element, [
           { at: 0, opacity: 0, transform: from },
           { at: start, opacity: 0, transform: from, easing: "cubic-bezier(.16, 1, .3, 1)" },
           { at: start + OPENING_TIMING.travelMs * .72, opacity: 1, transform: bounce, easing: "ease-out" },
           { at: start + OPENING_TIMING.travelMs, opacity: 1, transform: still },
           { at: OPENING_TIMING.leaveAtMs, opacity: 1, transform: still },
-          { at: OPENING_TIMING.fadeAtMs, opacity: 0, transform: reduced ? still : transform(0, -.7, .96) },
+          { at: OPENING_TIMING.fadeAtMs, opacity: 0, transform: transform(0, -.7, .96) },
           { at: scene.durationMs, opacity: 0, transform: still },
         ]);
       } else if (scene.kind === "closing") {
@@ -150,7 +148,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
       list.forEach((animation) => animation.cancel());
       animations.current = [];
     };
-  }, [scene?.kind, scene?.toSkin, scene?.startedAt, scene?.durationMs, participantKey, reduced]);
+  }, [scene?.kind, scene?.toSkin, scene?.startedAt, scene?.durationMs, participantKey]);
 
   useLayoutEffect(() => {
     if (!scene || !root.current) return;
@@ -166,7 +164,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
     };
     tick();
     return () => { if (frame !== null) cancelAnimationFrame(frame); };
-  }, [scene?.kind, scene?.startedAt, scene?.pausedMs, scene?.pausedSince, participantKey, reduced]);
+  }, [scene?.kind, scene?.startedAt, scene?.pausedMs, scene?.pausedSince, participantKey]);
 
   if (!scene) return null;
   const tv = ROOM.tv;
@@ -174,7 +172,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
   return (
     <div ref={root} data-testid="tv-transition" data-ui="room-scene" data-kind={scene.kind}
       data-room-skin={scene.toSkin ?? "base"} data-stage={sceneStage(scene, transitionElapsed(scene, serverNow()))}
-      data-elapsed-ms={Math.round(transitionElapsed(scene, serverNow()))} data-reduced-motion={String(reduced)}
+      data-elapsed-ms={Math.round(transitionElapsed(scene, serverNow()))}
       data-player-count={scene.playerIds.length} className="room-scene"
       style={{ "--room-tv-left": `${tv.left * 100}%`, "--room-tv-top": `${tv.top * 100}%`, "--room-tv-width": `${tv.width * 100}%`, "--room-tv-height": `${tv.height * 100}%` } as CSSProperties}>
       <div ref={camera} className="room-camera" data-testid="transition-camera">

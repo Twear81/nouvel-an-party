@@ -42,9 +42,6 @@ for (const skin of SKINS) {
     expect(submit!.x + submit!.width).toBeLessThanOrEqual(360);
     expect(submit!.height).toBeGreaterThanOrEqual(44);
     await page.screenshot({ path: testInfo.outputPath("profil-360x640.png"), animations: "disabled" });
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    const animatedFrames = page.getByTestId("profile-frames").locator('[data-ui="avatar-frame"] g');
-    expect(await animatedFrames.evaluateAll((els) => els.some((el) => getComputedStyle(el).animationName !== "none"))).toBe(false);
     await page.getByTestId("profile-submit").click();
     await expect(tile).toContainText(AVATARS[0]!.emoji);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

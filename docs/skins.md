@@ -112,14 +112,14 @@ Par défaut : cercle, rayon `50%`, aucun découpage. Dofus, Rocket League et Pla
 arrondi (`.2em`), Overwatch l'hexagone, LoL et Mario le cercle. Portrait, cadre et boutons du profil suivent ces jetons.
 Les tracés SVG normalisés suivent toutes les tailles (`xs` à `2xl`). Les effets `.frame-*` dessinent les traits
 extérieur/intérieur : ne pas ajouter de masque radial ni faire tourner la silhouette. Les pointillés et étincelles
-avancent le long du tracé ; `prefers-reduced-motion` les fige. Le badge reste à l'extérieur du portrait, sans être coupé.
+avancent le long du tracé. Le badge reste à l'extérieur du portrait, sans être coupé.
 
 ### Animations
 - **Changement de skin** : scène de la pièce synchronisée par le serveur, après les résultats de Culture gênante.
   Le décor et la signature visuelle ne jouent qu'à ce moment. L'ancien rideau automatique est supprimé.
 - **Propres au skin** : réaction au toucher des boutons et des choix, mise en avant du choix sélectionné, chrono, fond
   d'ambiance (lent et léger), apparition des panneaux. Chaque skin définit les siennes, dans son fichier.
-- Tout respecte `prefers-reduced-motion` ; pas de `filter: blur` ni d'animation lourde sur les téléphones.
+- Animations toujours jouées, même si l'appareil demande de réduire les animations (`prefers-reduced-motion` ignoré : c'est un jeu de soirée) ; pas de `filter: blur` ni d'animation lourde sur les téléphones.
 
 ## Ajouter un skin
 1. Ajouter l'id dans `SKINS` (`src/shared/skins.ts`).

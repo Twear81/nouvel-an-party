@@ -89,7 +89,7 @@ par l'organisateur le **10 novembre 2026** :
 | Mario Odyssey | Un Mario en pixel art 8-bit court sur la bande pixelisée du mur et saute dans la TV. |
 | Resonance : A Plague Tale Legacy | Pièce plongée dans le noir ; un fin réseau de veines noires ramifiées, traversé de filaments turquoise lumineux, gagne les murs depuis le poêle. Puis la Macula se déploie devant la cheminée : étoile à cinq tentacules osseux hérissés d'épines, cœur pâle aux alvéoles turquoise, longs filaments bleus qui ondulent ; elle pulse, et la caméra plonge dans la TV. |
 
-Tous les mouvements suivent la même horloge que la caméra ; la pause et le mouvement réduit s'appliquent aux détails.
+Tous les mouvements suivent la même horloge que la caméra, pause comprise. La préférence système « réduire les animations » est ignorée : les scènes jouent toujours en entier.
 
 ## Changements techniques nécessaires
 

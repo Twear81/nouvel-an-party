@@ -65,7 +65,7 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 Le décor canonique de la pièce est `src/web/theme/assets/piece-reference.png`. La scène reprend ses coordonnées
 et les vrais `PlayerAvatar` ; les portraits ne sont pas peints dans l'image. La référence approuvée et sa maquette
 autonome sont décrites dans [mise-en-scene.md](mise-en-scene.md). Les signatures des six univers sont des calques
-de décor dans `room.css`, joués uniquement pendant les changements, avec un fondu pour le mouvement réduit.
+de décor dans `room.css`, joués uniquement pendant les changements.
 `bun run apercu:transitions` construit une galerie hors ligne dans `captures/transitions/index.html` :
 elle réutilise les composants du jeu et propose lecture, pause et déplacement dans les six scènes.
 
