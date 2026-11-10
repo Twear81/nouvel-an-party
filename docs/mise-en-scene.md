@@ -92,8 +92,8 @@ par l'organisateur le **10 novembre 2026** :
 **Avancement (10 novembre 2026)** — les six pièces transformées sont livrées. Scènes refaites : Rocket League,
 Overwatch, League of Legends, Dofus (phase de placement, `signatures/Dofus.tsx`), Resonance (veines générées dans `signatures/PlagueTale.tsx` + sprite de la Macula). Validées par l'organisateur : LoL ; RL, Overwatch et Resonance à revoir en mouvement.
 Reste à refaire (encore l'ancienne version en SVG) :
-- **Mario** : planche `mario-odyssey-planche-8bit.png` (1200×1200, fond blanc avec légendes) à découper en images
-  séparées (marche ×3, saut) sur fond transparent, à afficher en `image-rendering: pixelated`.
+- **Mario** : images 16×16 découpées (`mario-odyssey-8bit-repos`, `-course1..3`, `-saut`), fond transparent,
+  à afficher en `image-rendering: pixelated`.
 Les sprites sont dans `src/web/theme/assets/sprites/` ; modèle à imiter : `src/web/ui/signatures/RocketLeague.tsx`.
 
 Tous les mouvements suivent la même horloge que la caméra, pause comprise. La préférence système « réduire les animations » est ignorée : les scènes jouent toujours en entier.
