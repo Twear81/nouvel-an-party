@@ -69,27 +69,6 @@ function DofusScene() {
   </>;
 }
 
-function OverwatchScene() {
-  return <>
-    <path className="sig-hologram-beam" d="M646 444L665 738Q805 800 970 738L851 444Z" />
-    <g className="sig-holo-floor" data-room-motion="floor">
-      <ellipse cx="805" cy="737" rx="163" ry="49" /><ellipse cx="805" cy="737" rx="132" ry="36" />
-    </g>
-    <g transform="translate(805 620)">
-      <g data-room-motion="holo-target" className="sig-holo-target">
-        <path className="sig-holo-hex" d="M-48-84H48L96 0L48 84H-48L-96 0Z" />
-        <circle className="sig-target-ring" r="65" /><circle className="sig-target-ring" r="43" />
-        <path className="sig-target-lines" d="M-82 0H-48M48 0H82M0-82V-48M0 48V82M-14 0H14M0-14V14" />
-      </g>
-    </g>
-    <g className="sig-holo-small" data-room-motion="holo-satellites">
-      <path d="M635 570h30l15 26-15 26h-30l-15-26Z" /><path d="M927 535h24l12 21-12 21h-24l-12-21Z" />
-      <path d="M934 669h24l12 21-12 21h-24l-12-21Z" />
-    </g>
-    <path data-room-motion="holo-scan" className="sig-holo-scan" d="M650 746H960" />
-  </>;
-}
-
 function LeagueScene() {
   return <>
     <g className="sig-portal-floor" data-room-motion="floor">
@@ -149,7 +128,7 @@ function MaculaScene() {
 }
 
 export function RoomSignature({ skin }: { skin: SkinId | null }) {
-  const content = skin === "dofus" ? <DofusScene /> : skin === "overwatch" ? <OverwatchScene />
+  const content = skin === "dofus" ? <DofusScene />
     : skin === "league-of-legends" ? <LeagueScene /> : skin === "rocket-league" ? <RocketLeagueScene />
       : skin === "mario-odyssey" ? <MarioScene /> : skin === "plague-tale" ? <MaculaScene /> : null;
   return content && <svg className="room-signature-art" viewBox="0 0 1672 941" aria-hidden="true" data-testid="transition-signature" data-signature={skin}>{content}</svg>;
@@ -180,15 +159,6 @@ export function animateRoomSignature(root: Element | null, skin: SkinId | null, 
       { at: 0, opacity: 0 }, { at: 1250 + i * 70, opacity: 0 }, { at: 1450 + i * 70, opacity: 1 },
       { at: 1950 + i * 70, opacity: 0 }, { at: 4000, opacity: 0 },
     ]));
-  } else if (skin === "overwatch") {
-    appear(select("holo-target")); appear(select("holo-satellites"), 100);
-    animate(select("holo-scan"), reduced ? [
-      { at: 0, opacity: 0 }, { at: 1200, opacity: .8 }, { at: 3000, opacity: .8 }, { at: 4000, opacity: 0 },
-    ] : [
-      { at: 0, opacity: 0, transform: "translateY(0px)" }, { at: 1100, opacity: 0, transform: "translateY(0px)" },
-      { at: 1400, opacity: 1, transform: "translateY(-50px)" }, { at: 2500, opacity: 1, transform: "translateY(-245px)" },
-      { at: 2850, opacity: 0, transform: "translateY(-275px)" }, { at: 4000, opacity: 0, transform: "translateY(-275px)" },
-    ]);
   } else if (skin === "league-of-legends") {
     animate(select("portal"), [
       { at: 0, opacity: 0, transform: reduced ? "none" : "scaleX(.04)" }, { at: 1000, opacity: 0, transform: reduced ? "none" : "scaleX(.04)" },

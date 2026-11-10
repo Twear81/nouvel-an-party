@@ -14,18 +14,23 @@ import "../docs/maquettes/transitions.css";
 
 const UNIVERS: { id: SkinId; nom: string; description: string }[] = [
   { id: "dofus", nom: "Dofus", description: "Une grille se dessine sur le tapis, un œuf magique vert apparaît sur la table et lance des étincelles." },
-  { id: "overwatch", nom: "Overwatch", description: "La TV projette un hologramme : cible orange, hexagones et balayage du salon." },
+  { id: "overwatch", nom: "Overwatch", description: "« Action de la partie » : des bandes blanches, orange et bleues en biais balaient l’écran, le carton géant apparaît avec l’avatar et le pseudo d’un invité, puis les bandes repassent avant de replonger dans la TV." },
   { id: "league-of-legends", nom: "League of Legends", description: "Un portail hextech bleu et doré s’ouvre, avec anneaux et runes autour de la table." },
   { id: "rocket-league", nom: "Rocket League", description: "Une vraie Octane bleue arrive en boost (flamme et traînée), saute et frappe le ballon de Rocket League qui file dans la TV : la caméra tremble, explosion de but bleue et orange, puis elle plonge dans l’écran." },
   { id: "mario-odyssey", nom: "Mario Odyssey", description: "Une casquette rouge à yeux file en arc vers la TV, accompagnée de pièces dorées." },
   { id: "plague-tale", nom: "Resonance", description: "La Macula se ramifie depuis la cheminée et la TV, avec des pulsations ambrées dans la pièce." },
 ];
-const DUREE = TRANSITION_TIMING.skin.durationMs;
+// Joueurs de démonstration (dont un pseudo de 16 caractères) : la scène Overwatch en met un en avant.
+const INVITES: GameSnapshot["players"] = [
+  { id: "p1", profile: { name: "Anne-Sophie", avatar: { kind: "preset", id: "renard" }, frame: "none", color: "#ff3366" }, score: 0, connected: true },
+  { id: "p2", profile: { name: "SeizeCaracteres!", avatar: { kind: "preset", id: "dragon" }, frame: "none", color: "#33aaff" }, score: 0, connected: true },
+];
+const DUREE =TRANSITION_TIMING.skin.durationMs;
 
 function sceneLocale(skin: SkinId, elapsed = 0, paused = true): TransitionInfo {
   const now = serverNow();
   return { kind: "skin", fromSkin: null, toSkin: skin, startedAt: now - elapsed,
-    durationMs: DUREE, pausedMs: 0, pausedSince: paused ? now : null, playerIds: [] };
+    durationMs: DUREE, pausedMs: 0, pausedSince: paused ? now : null, playerIds: INVITES.map((joueur) => joueur.id) };
 }
 
 function Galerie() {
@@ -40,7 +45,7 @@ function Galerie() {
   const skin = elapsed >= TRANSITION_TIMING.skin.swapAtMs ? scene.toSkin : scene.fromSkin;
   const snapshot = useMemo<GameSnapshot>(() => ({
     title: "Galerie des transitions", phase: "transition", paused: scene.pausedSince !== null,
-    finalReveal: null, transition: scene, players: [], round: null, continued: [], catalog: [],
+    finalReveal: null, transition: scene, players: INVITES, round: null, continued: [], catalog: [],
     setup: { counts: {} }, resumable: null, joinUrl: "", skin, me: null,
   }), [scene, skin]);
 

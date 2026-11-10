@@ -5,6 +5,7 @@ import { OPENING_TIMING, SKIN_TIMING, transitionElapsed, type TransitionInfo } f
 import { serverNow } from "../net/socket";
 import roomReference from "../theme/assets/piece-reference.png";
 import { PlayerAvatar } from "./PlayerAvatar";
+import { OverwatchScene, animateOverwatch, featuredPlayer } from "./signatures/Overwatch";
 import { RoomSignature, animateRoomSignature, legacyTime, signatureEnvelope } from "./RoomSignature";
 
 // Pièces transformées optionnelles (piece-<skin>.png) : un skin sans image n'a simplement pas de calque.
@@ -46,6 +47,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
   const roomSkin = useRef<HTMLImageElement>(null);
   const tvLight = useRef<HTMLDivElement>(null);
   const cover = useRef<HTMLDivElement>(null);
+  const potg = useRef<HTMLDivElement>(null);
   const animations = useRef<Animation[]>([]);
   const currentScene = useRef(scene);
   currentScene.current = scene;
@@ -54,6 +56,8 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
     return profile ? [{ id, index, profile }] : [];
   }) ?? [], [scene?.playerIds, snapshot.players]);
   const participantKey = players.map((p) => p.id).join("|");
+  // Overwatch : l'invité du carton « Action de la partie » est choisi sans hasard (même choix après un rechargement).
+  const featured = scene ? featuredPlayer(players, scene.startedAt) : null;
 
   useLayoutEffect(() => {
     if (!scene || !root.current || !camera.current) return;
@@ -102,8 +106,11 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
         { at: 0, opacity: 0 }, { at: legacyTime(1000), opacity: 0 }, { at: legacyTime(1700), opacity: .32 },
         { at: legacyTime(3000), opacity: .32 }, { at: scene.durationMs, opacity: 0 },
       ]);
-      animate(signature.current, signatureEnvelope(scene.toSkin));
-      animateRoomSignature(signature.current, scene.toSkin, false, animate);
+      if (scene.toSkin === "overwatch") { if (potg.current) animateOverwatch(potg.current, animate); }
+      else {
+        animate(signature.current, signatureEnvelope(scene.toSkin));
+        animateRoomSignature(signature.current, scene.toSkin, false, animate);
+      }
       animate(cover.current, [
         { at: 0, opacity: 1 }, { at: 650, opacity: 0 },
         { at: SKIN_TIMING.plungeEndMs - 150, opacity: 0 }, { at: scene.durationMs, opacity: 1 },
@@ -197,6 +204,9 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
           );
         })}
       </div>
+      {scene.kind === "skin" && scene.toSkin === "overwatch" && (
+        <div ref={potg} className="room-overlay"><OverwatchScene profile={featured?.profile ?? null} /></div>
+      )}
       <div ref={cover} className="room-cover" aria-hidden />
     </div>
   );

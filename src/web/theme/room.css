@@ -17,7 +17,7 @@
   container-type: size;
   background: var(--color-bg);
 }
-.room-camera, .room-light, .room-signature, .room-cover { position: absolute; inset: 0; }
+.room-camera, .room-light, .room-signature, .room-cover, .room-overlay { position: absolute; inset: 0; }
 .room-camera { transform-origin: 0 0; will-change: transform; }
 .room-image { width: 100%; height: 100%; object-fit: cover; user-select: none; }
 /* Pièce transformée : superposée à la référence, fondu piloté par la chronologie. */
@@ -85,11 +85,6 @@
 .sig-egg-mark { fill: none; stroke: var(--sig-green-dark); stroke-width: 8; stroke-linejoin: round; stroke-linecap: round; }
 .sig-egg-shine { fill: none; stroke: var(--sig-green-light); stroke-width: 8; stroke-linecap: round; }
 .sig-sparkle { fill: var(--sig-green-light); stroke: var(--sig-gold); stroke-width: 1.5; }
-.sig-hologram-beam { fill: color-mix(in srgb, var(--sig-energy) 15%, transparent); stroke: color-mix(in srgb, var(--sig-energy) 45%, transparent); stroke-width: 2; }
-.sig-holo-floor { fill: color-mix(in srgb, var(--sig-energy) 12%, transparent); stroke: var(--sig-energy); stroke-width: 3; }
-.sig-holo-hex, .sig-holo-small { fill: color-mix(in srgb, var(--sig-energy) 12%, transparent); stroke: var(--sig-energy); stroke-width: 3; }
-.sig-target-ring, .sig-target-lines { fill: none; stroke: var(--sig-orange); stroke-width: 5; }
-.sig-holo-scan { fill: none; stroke: var(--room-ink); stroke-width: 5; filter: drop-shadow(0 0 .4rem var(--sig-energy)); }
 .sig-portal-floor { fill: color-mix(in srgb, var(--sig-energy) 16%, transparent); stroke: var(--sig-gold); stroke-width: 3; }
 .sig-rune { fill: none; stroke: var(--sig-gold); stroke-width: 3; stroke-linecap: round; }
 .sig-portal-energy { fill: color-mix(in srgb, var(--sig-energy) 78%, var(--room-shadow)); }
@@ -111,6 +106,60 @@
 .sig-macula-pulse ellipse { opacity: .12; }
 .sig-macula-pulse ellipse + ellipse { opacity: .2; }
 .sig-macula-pulse ellipse + ellipse + ellipse { opacity: .45; }
+
+/* Overwatch : « Action de la partie », surimpression d'écran (tailles en cqw/cqh : proportionnelles à la TV). */
+.room-overlay { pointer-events: none; overflow: hidden; }
+.sig-ow {
+  --sig-ow-white: #ffffff;
+  --sig-ow-orange: #ff9c1a;
+  --sig-ow-orange-deep: #d9560b;
+  --sig-ow-blue: #2fb4f0;
+  --sig-ow-navy: #151c33;
+  --sig-ow-font: "Big Noodle Titling", "Bebas Neue", "Arial Narrow", sans-serif;
+  position: absolute; inset: 0; overflow: hidden;
+}
+.sig-ow-dim {
+  position: absolute; inset: 0; opacity: 0;
+  background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--sig-ow-navy) 45%, transparent), color-mix(in srgb, var(--sig-ow-navy) 82%, transparent));
+}
+.sig-ow-card {
+  position: absolute; left: 0; right: 0; top: 50%;
+  display: flex; flex-direction: column; align-items: center; gap: 2.2cqw;
+  transform: translateY(-50%) rotate(-3deg);
+}
+.sig-ow-title {
+  font-family: var(--sig-ow-font); font-style: italic; font-weight: 400; text-transform: uppercase;
+  font-size: 13.5cqw; line-height: .9; letter-spacing: .01em; white-space: nowrap;
+  color: var(--sig-ow-white);
+  text-shadow: .45cqw .6cqw 0 var(--sig-ow-orange), .9cqw 1.2cqw 0 var(--sig-ow-navy), 0 0 3cqw color-mix(in srgb, var(--sig-ow-orange) 60%, transparent);
+  opacity: 0;
+}
+.sig-ow-player { opacity: 0; max-width: 62cqw; }
+.sig-ow-player-in {
+  display: flex; align-items: center; gap: 2.4cqw;
+  padding: .6cqw 5cqw .6cqw 2.4cqw;
+  background: linear-gradient(100deg, var(--sig-ow-orange), var(--sig-ow-orange-deep));
+  border: .35cqw solid var(--sig-ow-white);
+  clip-path: polygon(3% 0, 100% 0, 97% 100%, 0 100%);
+}
+.sig-ow-name {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--sig-ow-font); font-style: italic; text-transform: uppercase;
+  font-size: 6.6cqw; line-height: 1.1; color: var(--sig-ow-white);
+  text-shadow: .25cqw .35cqw 0 var(--sig-ow-navy);
+}
+.sig-ow-flash { position: absolute; inset: 0; background: var(--sig-ow-white); opacity: 0; }
+.sig-ow-stripes {
+  position: absolute; left: -40cqw; top: -45cqh; width: 180cqw; height: 190cqh;
+  display: flex; flex-direction: column; transform: rotate(-14deg);
+}
+.sig-ow-stripe {
+  flex: 1; background: var(--sig-ow-white);
+  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+  transform: translateX(-125%);
+}
+.sig-ow-stripe[data-tone="orange"] { background: var(--sig-ow-orange); }
+.sig-ow-stripe[data-tone="blue"] { background: var(--sig-ow-blue); }
 
 /* Rocket League : tout est dessiné autour de (0,0) et placé par transform (coordonnées absolues du viewBox). */
 .sig-rl {

@@ -77,14 +77,14 @@ par l'organisateur le **10 novembre 2026** :
 
 - **Pièce transformée** : une variante peinte de l'illustration par univers (`src/web/theme/assets/piece-<id>.png`),
   en fondu pendant la scène ; les animations restent dessinées par-dessus. Prompts : [prompts-pieces.md](maquettes/prompts-pieces.md).
-- **Pas de carton titre** : le jeu n'est jamais nommé, c'est la scène puis l'interface qui le font deviner.
+- **Pas de carton titre** (sauf « Action de la partie », texte français du jeu) : le jeu n’est jamais nommé, c'est la scène puis l'interface qui le font deviner.
 - Éléments ressemblant aux jeux autorisés (usage privé, local, non commercial), sans reprendre de logo.
 
 | Univers | Scène retenue |
 |---|---|
 | Rocket League | Une vraie Octane (sprite) arrive en boost avec flamme et traînée, saute et frappe le ballon du jeu vers la TV ; la caméra tremble, explosion de but bleue et orange. |
 | Dofus | Le sol devient la grille isométrique de placement, cases rouges et bleues, les avatars des invités posés dessus ; un Bouftou et un Tofu passent. |
-| Overwatch | « Action de la partie » : bandeaux blanc et orange en biais qui balaient l'écran. |
+| Overwatch | « Action de la partie » : bandes blanches, orange et bleues en biais balaient l’écran, flash, carton géant avec l’avatar et le pseudo d’un invité (choisi sans hasard dans `playerIds`), puis les bandes repassent avant le replongeon. Surimpression d’écran hors caméra : `signatures/Overwatch.tsx`. |
 | League of Legends | Un nexus apparaît sur la table basse, se fissure et explose. |
 | Mario Odyssey | Un Mario en pixel art 8-bit court sur la bande pixelisée du mur et saute dans la TV. |
 | Resonance : A Plague Tale Legacy | Pièce plongée dans le noir ; un fin réseau de veines noires ramifiées, traversé de filaments turquoise lumineux, gagne les murs depuis le poêle. Puis la Macula se déploie devant la cheminée : étoile à cinq tentacules osseux hérissés d'épines, cœur pâle aux alvéoles turquoise, longs filaments bleus qui ondulent ; elle pulse, et la caméra plonge dans la TV. |
