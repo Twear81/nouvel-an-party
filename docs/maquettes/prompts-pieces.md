@@ -68,10 +68,11 @@ Une variante de la pièce par univers, affichée en fondu pendant le changement 
 
 ## A Plague Tale — `piece-plague-tale.png`
 
-> Thème : le salon devient une pièce médiévale française du XIVe siècle, de nuit, dans l'esprit d'A Plague Tale,
-> sombre et inquiétante. Murs en pierre et torchis, poutres anciennes, parquet en vieilles planches usées.
-> La seule lumière chaude vient du poêle, qui projette un cercle de lumière orangée sur le sol ; tout le reste est
-> dans une pénombre bleu-gris froide. Le jukebox devient un vieux coffre en bois cerclé de fer, avec une bougie
-> dessus. Par les fenêtres : une ruelle médiévale de nuit, brume, clair de lune, toits pointus. Dans les coins du
-> plafond et au bas des murs, de discrètes traînées organiques rouge sombre, veinées, comme une maladie qui
-> commence à ronger la pièce. Ambiance dark, tension, peu saturée.
+> Thème : le salon devient une pièce médiévale française du XIVe siècle, de nuit, dans l'esprit d'A Plague Tale :
+> Resonance, sombre et inquiétante. Murs en pierre et torchis, poutres anciennes, parquet en vieilles planches usées.
+> La lumière chaude vient seulement du poêle, qui projette un cercle orangé sur le sol ; tout le reste baigne dans
+> une pénombre froide, gris-vert et bleu nuit, avec une légère brume. Le jukebox devient un vieux coffre en bois
+> cerclé de fer, avec une bougie dessus. Par les fenêtres : une ruelle médiévale de nuit, brume, clair de lune,
+> toits pointus. Dans les coins du plafond et au bas des murs, un fin réseau de veines noires très ramifiées, comme
+> de la dentelle ou des capillaires, parcouru de quelques filaments bleu turquoise lumineux : une corruption
+> surnaturelle qui commence à gagner la pièce. Pas de rouge. Ambiance dark, tension, couleurs désaturées.

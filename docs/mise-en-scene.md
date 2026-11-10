@@ -87,7 +87,7 @@ par l'organisateur le **10 novembre 2026** :
 | Overwatch | « Action de la partie » : bandeaux blanc et orange en biais qui balaient l'écran. |
 | League of Legends | Un nexus apparaît sur la table basse, se fissure et explose. |
 | Mario Odyssey | Un Mario en pixel art 8-bit court sur la bande pixelisée du mur et saute dans la TV. |
-| Resonance : A Plague Tale Legacy | Ambiance sombre ; la Macula rouge sombre, organique et veinée, gagne les murs depuis le poêle en pulsant. |
+| Resonance : A Plague Tale Legacy | Pièce plongée dans le noir ; un fin réseau de veines noires ramifiées, traversé de filaments turquoise lumineux, gagne les murs depuis le poêle. Puis la Macula se déploie devant la cheminée : étoile à cinq tentacules osseux hérissés d'épines, cœur pâle aux alvéoles turquoise, longs filaments bleus qui ondulent ; elle pulse, et la caméra plonge dans la TV. |
 
 Tous les mouvements suivent la même horloge que la caméra ; la pause et le mouvement réduit s'appliquent aux détails.
 
