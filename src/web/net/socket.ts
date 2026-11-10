@@ -24,9 +24,10 @@ export function call<T = object>(event: keyof ClientToServer, ...args: unknown[]
 let offset = 0;
 export const serverNow = () => Date.now() + offset;
 
-export async function syncClock(samples = 8): Promise<void> {
+export async function syncClock(samples = 8): Promise<boolean> {
   let best: { rtt: number; offset: number } | null = null;
   for (let i = 0; i < samples; i++) {
+    if (!socket.connected) return false;
     const t0 = performance.now();
     const c0 = Date.now();
     const serverTime = await new Promise<number>((resolve) => {
@@ -43,4 +44,5 @@ export async function syncClock(samples = 8): Promise<void> {
     await new Promise((r) => setTimeout(r, 80));
   }
   if (best) offset = best.offset;
+  return best !== null;
 }

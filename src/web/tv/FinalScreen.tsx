@@ -1,32 +1,22 @@
 // Classement final : révélation suspense de la dernière à la première place, puis podium et confettis.
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { FINAL_ENTRY_MS } from "../../shared/final-reveal";
+import { useFinalReveal } from "../net/useFinalReveal";
 import { rankOf } from "../../shared/ranking";
 import { playersWithProfile } from "../net/helpers";
 import type { GameSnapshot } from "../../shared/types";
 import { fireConfetti, PlayerAvatar } from "../ui";
 
-const STEP_MS = 1700; // suspense pour le podium
-const FAST_STEP_MS = 1000; // du dernier au 4e : plus vite
-
 export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   const sorted = useMemo(
-    () => playersWithProfile(snapshot).sort((a, b) => b.score - a.score || a.profile!.name.localeCompare(b.profile!.name)),
-    [snapshot.players],
+    () => playersWithProfile(snapshot).filter((p) => snapshot.finalReveal?.playerIds.includes(p.id))
+      .sort((a, b) => b.score - a.score || a.profile!.name.localeCompare(b.profile!.name)),
+    [snapshot.players, snapshot.finalReveal],
   );
   const total = sorted.length;
-  const [step, setStep] = useState(0); // nombre de joueurs révélés (depuis le dernier)
-
-  useEffect(() => {
-    if (step >= total) return;
-    // Le prochain joueur révélé a l'index total - step - 1 : le podium (index 0..2) prend son temps.
-    const nextIndex = total - step - 1;
-    const id = setTimeout(() => setStep((s) => s + 1), step === 0 ? 1800 : nextIndex >= 3 ? FAST_STEP_MS : STEP_MS);
-    return () => clearTimeout(id);
-  }, [step, total]);
-
+  const { step, done } = useFinalReveal(snapshot.finalReveal);
   const revealed = (index: number) => index >= total - step; // index dans `sorted`
-  const done = step >= total;
   useEffect(() => {
     if (done && total > 0) fireConfetti("big");
   }, [done, total]);
@@ -38,7 +28,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   const heights = ["h-[17rem]", "h-[12rem]", "h-[9rem]"];
 
   return (
-    <div data-testid="tv-final" className="flex min-h-0 flex-1 flex-col items-center gap-2 px-12 pt-6">
+    <div data-testid="tv-final" data-stage={done ? "done" : "reveal"} className="flex min-h-0 flex-1 flex-col items-center gap-2 px-12 pt-6">
       <motion.h1 initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} className="font-display text-6xl text-gold-gradient">
         {done ? "Bonne année !" : "Le classement…"}
       </motion.h1>
@@ -59,7 +49,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                       <motion.div
                         initial={{ opacity: 0, y: -200, scale: 0.4 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ type: "spring", stiffness: 120, damping: 22 }}
+                        transition={{ type: "spring", duration: FINAL_ENTRY_MS / 1000, bounce: 0.2 }}
                         className="flex flex-col items-center gap-2"
                       >
                         {i === 0 && <motion.span animate={{ rotate: [-8, 8, -8] }} transition={{ repeat: Infinity, duration: 2 }} className="text-7xl">👑</motion.span>}
@@ -101,6 +91,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                     data-highlight="false"
                     initial={{ opacity: 0, x: 120 }}
                     animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: FINAL_ENTRY_MS / 1000 }}
                     className="glass flex items-center gap-4 rounded-btn px-5 py-2"
                     style={{ order: i }}
                   >

@@ -30,6 +30,7 @@ export function useGame(role: "tv" | "phone") {
 
   useEffect(() => {
     let cancelled = false;
+    let connectionId = 0;
 
     const join = async (token: string | null) => {
       for (;;) {
@@ -45,8 +46,14 @@ export function useGame(role: "tv" | "phone") {
     };
 
     // À chaque (re)connexion : resynchroniser l'horloge puis se (re)présenter au serveur.
-    const onConnect = () => {
+    const onConnect = async () => {
+      const connection = ++connectionId;
       setConnected(true);
+      // Premier échantillon avant le snapshot : une horloge locale en avance ne doit pas dévoiler les résultats.
+      while (!cancelled && socket.connected && connection === connectionId) {
+        if (await syncClock(1)) break;
+      }
+      if (cancelled || !socket.connected || connection !== connectionId) return;
       void syncClock();
       if (role === "tv") {
         call<{ host: boolean }>("tv:hello").then((r) => setHost(r.host), () => {});
@@ -54,7 +61,10 @@ export function useGame(role: "tv" | "phone") {
         void join(readToken());
       }
     };
-    const onDisconnect = () => setConnected(false);
+    const onDisconnect = () => {
+      connectionId++;
+      setConnected(false);
+    };
     const onState = (s: GameSnapshot) => {
       setSnapshot(s);
     };
@@ -94,7 +104,6 @@ export function useGame(role: "tv" | "phone") {
       kick: (id: PlayerId) => send("host:kick", id),
       lobby: () => send("host:lobby"),
       setProfile: (p: Profile) => send("player:profile", p),
-      uploadPhoto: (data: ArrayBuffer) => call<{ url: string }>("player:photo", data).then((r) => r.url),
       input: (payload: unknown) => send("player:input", payload),
       continue: () => send("player:continue"),
     }),

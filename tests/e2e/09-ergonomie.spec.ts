@@ -45,25 +45,6 @@ test.describe("Ergonomie téléphone", () => {
     expect(await submit.evaluate((el) => { const cs = getComputedStyle(el) as CSSStyleDeclaration & { webkitUserSelect?: string }; return cs.userSelect || cs.webkitUserSelect; })).toBe("none");
   });
 
-  test("la caméra est un <video playsinline muted autoplay> et se coupe en quittant", { tag: "@compat" }, async ({ party, browserName }) => {
-    test.skip(browserName === "webkit", "WebKit (Playwright) n'a pas de caméra factice.");
-    const { page } = await party.openPhonePage();
-    await page.getByTestId("take-photo").click();
-    await expect(page.getByTestId("capture-photo")).toBeVisible();
-    const video = page.locator("video");
-    await expect(video).toHaveAttribute("playsinline", "");
-    expect(await video.evaluate((v: HTMLVideoElement) => v.muted && v.autoplay)).toBe(true);
-    const tracks = () => page.evaluate(() => (document.querySelector("video")?.srcObject as MediaStream | null)?.getTracks().map((t) => t.readyState) ?? []);
-    expect(await tracks()).toEqual(["live"]);
-    // On garde la référence au flux pour vérifier qu'il est bien arrêté après « Annuler ».
-    await page.evaluate(() => {
-      (window as unknown as { __stream: MediaStream }).__stream = document.querySelector("video")!.srcObject as MediaStream;
-    });
-    await page.getByRole("button", { name: "Annuler" }).click();
-    await expect(page.locator("video")).toHaveCount(0);
-    expect(await page.evaluate(() => (window as unknown as { __stream: MediaStream }).__stream.getTracks().map((t) => t.readyState))).toEqual(["ended"]);
-  });
-
   test("la phase de vote indique clairement quel choix est enregistré", async ({ party }) => {
     const [a, b] = await party.addPhones("Alice", "Bob");
     await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 0 });

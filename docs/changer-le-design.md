@@ -38,7 +38,7 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 - `FRAMES` : ajouter `{ id, label, className }` puis écrire la classe `.frame-<nom>` dans `theme.css`
   (`--p` = couleur du joueur ; traits SVG `avatar-frame-outer` / `avatar-frame-inner`, coordonnées sur 100).
   Le skin choisit la silhouette via les jetons `--avatar-*` : voir [le contrat des avatars](skins.md#avatars-et-cadres--contrat-commun).
-  Ne pas redessiner le portrait dans le profil : les choix et aperçus réutilisent `PlayerAvatar`, y compris pour les photos.
+  Ne pas redessiner le portrait dans le profil : les choix et aperçus réutilisent `PlayerAvatar`.
 - `COLORS` : liste de couleurs hex.
 
 ## Où est chaque écran
@@ -53,14 +53,14 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 | TV classement final (révélation, podium, confettis) | `src/web/tv/FinalScreen.tsx` |
 | Contrôles du maître du jeu (Pause, Passer, +10 s, Lobby : bande fine toujours visible en bas à droite) | `src/web/tv/HostBar.tsx` |
 | Routage téléphone + lobby/intro/résultats/final | `src/web/phone/PhoneApp.tsx` |
-| Création / édition du profil | `src/web/phone/ProfileEditor.tsx`, `CameraCapture.tsx`, `photo.ts` |
+| Création / édition du profil | `src/web/phone/ProfileEditor.tsx` |
 | Mini-jeu « Qui est le plus… ? » | `src/minigames/qui-est-le-plus/views.tsx` |
 | Mini-jeu « Ceci ou Cela » (deux réponses face à face, camps en résultats) | `src/minigames/ceci-ou-cela/views.tsx` |
 | Mini-jeu « Culture gênante » (interlude : une scène par fichier, `Accroche`, `Bascule`, `Question`, `Reveal`, `Phone`) | `src/minigames/culture-genante/` |
 | Mini-jeu « Dessin raté » (page de dessin tactile, mosaïque, révélation ; couleurs = jetons `--color-paper` et `--color-pen-0…4` du thème) | `src/minigames/dessin-rate/views.tsx`, `drawing.tsx` |
 
 ## Skins
-Le jeu change d'habillage au fil de la soirée (7 skins qui imitent des interfaces de jeux vidéo) : tout est dans [skins.md](skins.md). En bref : `SkinProvider` (`src/web/theme/skin.tsx`) pose `html[data-skin]` ; **un fichier CSS par skin** (`src/web/theme/skins/<id>.css`) redéfinit les jetons puis habille les composants via leurs marqueurs `data-ui` (`panel`, `button`, `choice`, `result-bar`, `countdown`, `avatar`, `score-row`…, tableau dans skins.md). Pour qu'un écran soit habillable : n'utiliser que les composants de `src/web/ui` et les classes du thème ; une zone neuve et récurrente reçoit son `data-ui` (et ses `data-*` d'état) dans le composant, jamais de style de skin dans un mini-jeu.
+Le jeu change d'habillage au fil de la soirée (6 skins qui imitent des interfaces de jeux vidéo) : tout est dans [skins.md](skins.md). En bref : `SkinProvider` (`src/web/theme/skin.tsx`) pose `html[data-skin]` ; **un fichier CSS par skin** (`src/web/theme/skins/<id>.css`) redéfinit les jetons puis habille les composants via leurs marqueurs `data-ui` (`panel`, `button`, `choice`, `result-bar`, `countdown`, `avatar`, `score-row`…, tableau dans skins.md). Pour qu'un écran soit habillable : n'utiliser que les composants de `src/web/ui` et les classes du thème ; une zone neuve et récurrente reçoit son `data-ui` (et ses `data-*` d'état) dans le composant, jamais de style de skin dans un mini-jeu.
 
 ## Composants réutilisables (`src/web/ui/`)
 - `Button`, `ConfirmDialog` (confirmation dans le style du jeu, jamais `window.confirm`), `Icons` (icônes SVG : pause, passer, accueil…), `Panel` (carte en verre, prop `title` facultative), `PlayerAvatar` (avatar + cadre + couleur, tailles `xs`→`2xl`, `AVATAR_REM` = taille en rem).
@@ -69,7 +69,7 @@ Le jeu change d'habillage au fil de la soirée (7 skins qui imitent des interfac
 - `DuelGauge` : jauge bilatérale (deux camps qui poussent l'un vers l'autre, OUI / NON) : `left` et `right` de 0 à 1, gauche `good`, droite `bad`. Marqueurs `duel-gauge`, `duel-gauge-left`, `duel-gauge-right`, `duel-gauge-mid`.
 - `Button` : variantes `primary`, `secondary`, `danger`, `ghost`, `good`, `bad` ; tailles `sm` à `xl`, et `hero` (géant, remplit la place : STOP du compte à rebours). Tout bouton d'action d'un mini-jeu (Valider, Voir mon mot, STOP) passe par lui.
 - Éléments propres à un jeu mais habillables : `tool` (outil de dessin, `data-kind` `pen` / `width` / `action`, `data-selected`) dans une `toolbar` ; `tier-row` / `tier-label` (`data-tier`) ; `pad` (pastille de Simon) et `hub` (disque central). Les couleurs de contenu (feutres, étages, pastilles de Simon) ne se redéfinissent pas dans un skin.
-- `Countdown` (secondes depuis la deadline serveur ; structure selon le skin : cœur, hexagone, anneau, tableau, LED, pièce ; barre compacte sur téléphone ; `--p` = part restante), `Backdrop` (fond étoilé par défaut, redessiné par chaque skin ; calques `backdrop-layer`), `Stage` (cadres TV 16:9 / téléphone, bandeau « Reconnexion… », overlay Pause), `fireConfetti`.
+- `Countdown` (secondes depuis la deadline serveur ; structure selon le skin : cœur, hexagone, anneau, tableau, pièce ; barre compacte sur téléphone ; `--p` = part restante), `Backdrop` (fond étoilé par défaut, redessiné par chaque skin ; calques `backdrop-layer`), `Stage` (cadres TV 16:9 / téléphone, bandeau « Reconnexion… », overlay Pause), `fireConfetti`.
 - `AnsweredRoster` + `AnsweredCount` : barre TV « qui a répondu » (avatars grisés puis ✓, pseudo tronqué, taille selon le nombre de joueurs ; `data-testid` `tv-answered` / `tv-answered-count`, variantes par props : badge, halo, barre de progression, ton « serious »).
 - `SelectedBadge` : pastille ✓ animée sur le choix enregistré (tons `ink` / `accent` / `good` / `serious`, tailles `sm` / `md` / `lg`, position par `className`).
 - `NumPad` : pavé numérique du téléphone (virgule optionnelle, touches sans effet grisées, ton `serious`) ; la logique de saisie (`pressKey`) reste dans le mini-jeu.

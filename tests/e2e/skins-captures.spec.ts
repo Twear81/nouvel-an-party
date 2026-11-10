@@ -1,7 +1,7 @@
 // Outil (pas un test de non-régression) : photographie TOUS les écrans du jeu dans un skin donné, pour que les
 // designers de skins vérifient leur travail. Ne s'exécute que si CAPTURES_SKIN est défini :
-//   CAPTURES_SKIN=gunz bun run captures:skin          (captures dans test-results/skins/gunz/)
-//   CAPTURES_DIR=/chemin CAPTURES_SKIN=gunz bun run captures:skin
+//   CAPTURES_SKIN=dofus bun run captures:skin          (captures dans test-results/skins/dofus/)
+//   CAPTURES_DIR=/chemin CAPTURES_SKIN=dofus bun run captures:skin
 // Voir docs/skins.md. Le skin est forcé sur la TV ET sur tous les téléphones (localStorage "skin-force").
 import { mkdirSync } from "node:fs";
 import path from "node:path";

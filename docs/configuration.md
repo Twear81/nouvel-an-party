@@ -41,8 +41,11 @@ Créé automatiquement à côté de l'exe. Ne pas y toucher pendant la partie.
 | Contenu | Rôle |
 |---|---|
 | `save.json` | sauvegarde de la partie, réécrite à chaque étape. Après un crash ou un redémarrage, la TV propose de **reprendre** |
-| `photos/` | photos de profil des joueurs |
-| `certs/` | certificat HTTPS auto-signé (nécessaire pour la caméra du téléphone). Les téléphones affichent un avertissement la première fois : il faut accepter |
+| `certs/` | certificat HTTPS auto-signé (nécessaire pour garder l'écran du téléphone allumé). Les téléphones affichent un avertissement la première fois : il faut accepter |
 
 ### Repartir de zéro
-Fermez `NouvelAn.exe`, supprimez le dossier `data/`, relancez. Les joueurs et scores sont effacés. Le certificat est régénéré (les téléphones devront accepter à nouveau l'avertissement). Pour ne réinitialiser que la partie en gardant photos et certificat, supprimez seulement `save.json`.
+Fermez `NouvelAn.exe`, supprimez le dossier `data/`, relancez. Les joueurs et scores sont effacés. Le certificat est régénéré (les téléphones devront accepter à nouveau l'avertissement). Pour ne réinitialiser que la partie en gardant le certificat, supprimez seulement `save.json`.
+
+Une ancienne sauvegarde avec un portrait photo reste utilisable : le portrait devient l'avatar Renard ; le pseudo,
+le cadre, la couleur, le score et le jeton sont conservés. Un ancien dossier `photos/` n'est plus utilisé ni servi par
+l'application ; ses fichiers ne sont pas supprimés automatiquement.

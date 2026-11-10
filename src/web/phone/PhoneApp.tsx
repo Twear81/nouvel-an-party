@@ -8,6 +8,7 @@ import type { MiniGameViewProps } from "../../minigames/views-contract";
 import { gameViewProps, playersWithProfile, waitingPlayers } from "../net/helpers";
 import { useGame, type GameActions } from "../net/useGame";
 import { useRevealed } from "../net/useReveal";
+import { useFinalReveal } from "../net/useFinalReveal";
 import { SkinProvider } from "../theme/skin";
 import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, Panel, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
 import { ProfileEditor } from "./ProfileEditor";
@@ -59,7 +60,7 @@ interface ScreenProps {
 
 function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
   const round = snapshot.round;
-  const rank = playersWithProfile(snapshot).sort((a, b) => b.score - a.score);
+  const finalReveal = useFinalReveal(snapshot.finalReveal);
 
   switch (snapshot.phase) {
     case "lobby": {
@@ -104,8 +105,26 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
       if (!round) return null;
       return <ResultsPhone snapshot={snapshot} round={round} me={me} actions={actions} />;
     case "final": {
+      if (!finalReveal.done) {
+        return (
+          <Center testId="phone-final-wait">
+            <span aria-hidden className="text-8xl">👀</span>
+            <h1 className="font-display text-3xl text-gold-gradient">Regarde la TV !</h1>
+          </Center>
+        );
+      }
+      const rank = playersWithProfile(snapshot).filter((p) => snapshot.finalReveal?.playerIds.includes(p.id))
+        .sort((a, b) => b.score - a.score);
       const pos = rank.findIndex((p) => p.id === me.id);
-      return <FinalPhone rank={pos < 0 ? rank.length + 1 : rankOf(rank, pos)} total={rank.length} score={me.score} profile={me.profile} />;
+      if (pos < 0) {
+        return (
+          <Center testId="phone-final-spectator">
+            <PlayerAvatar profile={me.profile} size="xl" />
+            <h1 className="font-display text-3xl text-gold-gradient">Bonne année ! 🥂</h1>
+          </Center>
+        );
+      }
+      return <FinalPhone rank={rankOf(rank, pos)} total={rank.length} score={me.score} profile={me.profile} />;
     }
   }
 }

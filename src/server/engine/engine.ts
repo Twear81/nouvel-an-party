@@ -9,6 +9,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import type { RoundContext } from "../../minigames/contract";
 import { activeNow } from "../../shared/clock";
+import type { FinalRevealInfo } from "../../shared/final-reveal";
 import { profileSchema } from "../../shared/schemas";
 import { shuffle } from "../../shared/shuffle";
 import { SKINS, isSkinId, skinForRound, type SkinId } from "../../shared/skins";
@@ -33,6 +34,7 @@ export interface SaveData {
   plan: PlannedRound[];
   roundIndex: number;
   phase: Phase;
+  finalReveal?: FinalRevealInfo | null;
   /** Ordre des skins de la partie (absent des anciennes sauvegardes : un nouvel ordre est tiré). */
   skinOrder?: SkinId[];
 }
@@ -82,9 +84,10 @@ export class GameEngine {
   private players = new Map<PlayerId, PlayerRecord>();
   private phase: Phase = "lobby";
   private paused = false;
+  private finalReveal: FinalRevealInfo | null = null;
   private plan: PlannedRound[] = [];
   private roundIndex = -1;
-  /** Ordre (tiré au hasard) des 7 skins : le lobby montre le premier, la partie les enchaîne. Retiré à chaque retour au lobby. */
+  /** Ordre (tiré au hasard) des skins : le lobby montre le premier, la partie les enchaîne. Retiré à chaque retour au lobby. */
   private skinOrder: SkinId[] = [];
   private current: CurrentRound | null = null;
   private continued = new Set<PlayerId>();
@@ -225,6 +228,7 @@ export class GameEngine {
     this.current = null;
     this.phase = "lobby";
     this.paused = false;
+    this.finalReveal = null;
     this.plan = [];
     this.skinOrder = shuffle([...SKINS], this.rng);
     this.roundIndex = -1;
@@ -262,6 +266,7 @@ export class GameEngine {
 
     if (this.roundIndex >= this.plan.length) {
       this.phase = "final";
+      this.finalReveal = { startedAt: this.clock.now(), playerIds: this.publicPlayers().filter((p) => p.profile).map((p) => p.id) };
       this.save();
       this.changed();
       return;
@@ -460,6 +465,7 @@ export class GameEngine {
       title: this.opts.settings.title,
       phase: this.phase,
       paused: this.paused,
+      finalReveal: this.finalReveal,
       players: this.publicPlayers(),
       round,
       continued: [...this.continued],
@@ -497,13 +503,21 @@ export class GameEngine {
       roundIndex: this.roundIndex,
       phase: this.phase,
       skinOrder: this.skinOrder,
+      finalReveal: this.finalReveal,
     });
   }
 
   private restoreFromSave() {
     const save = this.opts.persistence?.load();
     if (!save || save.version !== 1) return;
-    for (const p of save.players) this.players.set(p.id, { ...p, sockets: 0 });
+    for (const p of save.players) {
+      // Les anciens portraits personnalisés deviennent un avatar prédéfini, sans perdre identité ni score.
+      const parsed = p.profile ? profileSchema.safeParse({
+        ...p.profile,
+        avatar: p.profile.avatar?.kind === "preset" ? p.profile.avatar : { kind: "preset", id: "renard" },
+      }) : null;
+      this.players.set(p.id, { ...p, profile: parsed?.success ? parsed.data : null, sockets: 0 });
+    }
     if (save.setup) this.setup = sanitizeSetup(save.setup, this.catalog);
     const inProgress = save.phase === "intro" || save.phase === "playing" || save.phase === "results";
     if (inProgress && save.plan.length > 0) this.resumable = save;
@@ -534,7 +548,9 @@ function safe<T>(fn: () => T): T | null {
   }
 }
 
-/** Ordre de skins sauvegardé, s'il est complet et valide. */
+/** Ordre sauvegardé complet, après retrait des habillages qui n'existent plus. */
 function validSkinOrder(o: unknown): SkinId[] | null {
-  return Array.isArray(o) && o.length === SKINS.length && o.every(isSkinId) && new Set(o).size === SKINS.length ? [...o] : null;
+  if (!Array.isArray(o)) return null;
+  const order = o.filter(isSkinId);
+  return order.length === SKINS.length && new Set(order).size === SKINS.length ? order : null;
 }

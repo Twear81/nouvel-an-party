@@ -35,8 +35,6 @@ export interface Phone {
 }
 
 export interface JoinOptions {
-  /** Prend la photo avec la caméra factice au lieu d'un avatar prédéfini. */
-  photo?: boolean;
   /** Taille d'écran de ce téléphone (ex : 360x640, le plus petit à supporter). */
   viewport?: { width: number; height: number };
   /** Autre moteur pour ce téléphone (ex : un iPhone dans une partie Android), avec ses options de contexte. */
@@ -101,7 +99,6 @@ export class Party {
     }
 
     await page.getByTestId("profile-name").fill(name);
-    if (opts.photo) await takePhoto(page);
     await page.getByTestId("profile-submit").click();
     if (inLobby) await expect(page.getByTestId("phone-lobby-ready")).toBeVisible();
     this.phones.push(phone);
@@ -269,13 +266,4 @@ export class Party {
   async close() {
     await Promise.all(this.contexts.map((c) => c.close().catch(() => {})));
   }
-}
-
-/** Photo de profil avec la caméra factice (Chromium : args du lanceur ; Firefox : prefs `media.navigator.*`). */
-export async function takePhoto(page: Page) {
-  await page.getByTestId("take-photo").click();
-  await page.getByTestId("capture-photo").click();
-  // La caméra se ferme une fois la photo envoyée au serveur : on revient sur l'éditeur.
-  await expect(page.getByTestId("capture-photo")).toBeHidden();
-  await expect(page.getByTestId("profile-submit")).toBeVisible();
 }

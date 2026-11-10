@@ -455,7 +455,7 @@ describe("joueurs", () => {
       { ...validProfile(), name: "   " },
       { ...validProfile(), name: "x".repeat(17) },
       { ...validProfile(), color: "rouge" },
-      { ...validProfile(), avatar: { kind: "photo", url: "http://evil/x.png" } },
+      { ...validProfile(), avatar: { kind: "photo", url: "/photos/ancien.webp" } },
       { ...validProfile(), frame: "" },
     ];
     for (const p of bad) expect(() => t.engine.setProfile(id, p)).toThrow(GameError);
@@ -463,12 +463,12 @@ describe("joueurs", () => {
     expect(() => t.engine.setProfile("inconnu", validProfile())).toThrow("Joueur inconnu");
   });
 
-  it("accepte un profil photo valide et retire les espaces du pseudo", () => {
+  it("accepte un avatar prédéfini et retire les espaces du pseudo", () => {
     const t = createTestEngine({ players: 1 });
-    t.engine.setProfile(t.ids[0]!, { ...validProfile("  Zoé  "), avatar: { kind: "photo", url: "/photos/abc.webp?v=3" } });
+    t.engine.setProfile(t.ids[0]!, { ...validProfile("  Zoé  "), avatar: { kind: "preset", id: "renard" } });
     const p = t.engine.snapshot(null).players[0]!.profile!;
     expect(p.name).toBe("Zoé");
-    expect(p.avatar).toEqual({ kind: "photo", url: "/photos/abc.webp?v=3" });
+    expect(p.avatar).toEqual({ kind: "preset", id: "renard" });
   });
 
   it("kick retire le joueur et débloque les résultats", () => {
@@ -786,12 +786,12 @@ describe("skins", () => {
       persistence,
     });
 
-  it("7 manches : les 7 skins passent chacun une fois, le lobby annonce le premier, rien ne change pendant une manche", () => {
-    const t = createTestEngine({ rounds: 7, game: { items: 20 } });
+  it("6 manches : les 6 skins passent chacun une fois, le lobby annonce le premier, rien ne change pendant une manche", () => {
+    const t = createTestEngine({ rounds: SKINS.length, game: { items: 20 } });
     const lobby = skinOf(t);
     t.engine.start();
     const seen: SkinId[] = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < SKINS.length; i++) {
       expect(t.engine.snapshot(null).phase).toBe("intro");
       seen.push(skinOf(t));
       t.clock.advance(4000);
@@ -804,27 +804,27 @@ describe("skins", () => {
     expect(seen[0]).toBe(lobby);
     expect([...seen].sort()).toEqual([...SKINS].sort());
     expect(t.engine.snapshot(null).phase).toBe("final");
-    expect(skinOf(t)).toBe(seen[6]!); // dernière manche jouée
+    expect(skinOf(t)).toBe(seen[SKINS.length - 1]!); // dernière manche jouée
   });
 
-  it("14 manches : un changement toutes les 2 manches", () => {
-    const t = createTestEngine({ rounds: 14, game: { items: 20 } });
+  it("12 manches : un changement toutes les 2 manches", () => {
+    const t = createTestEngine({ rounds: SKINS.length * 2, game: { items: 20 } });
     t.engine.start();
     const seen: SkinId[] = [];
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < SKINS.length * 2; i++) {
       seen.push(skinOf(t));
       nextRound(t);
     }
-    for (let i = 0; i < 14; i += 2) expect(seen[i + 1]).toBe(seen[i]!);
-    expect(new Set(seen).size).toBe(7);
+    for (let i = 0; i < SKINS.length * 2; i += 2) expect(seen[i + 1]).toBe(seen[i]!);
+    expect(new Set(seen).size).toBe(SKINS.length);
   });
 
   it("ordre tiré au hasard (rng du moteur), retiré à chaque retour au lobby", () => {
     const orderOf = (seed: number) => {
-      const t = createTestEngine({ rounds: 7, seed, game: { items: 20 } });
+      const t = createTestEngine({ rounds: SKINS.length, seed, game: { items: 20 } });
       t.engine.start();
       const seen: SkinId[] = [];
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < SKINS.length; i++) {
         seen.push(skinOf(t));
         nextRound(t);
       }
@@ -834,7 +834,7 @@ describe("skins", () => {
     const many = new Set([1, 2, 3, 4, 5, 6].map((s) => orderOf(s).join()));
     expect(many.size).toBeGreaterThan(1); // l'ordre varie d'une partie à l'autre
 
-    const t = createTestEngine({ rounds: 7, game: { items: 20 } });
+    const t = createTestEngine({ rounds: SKINS.length, game: { items: 20 } });
     const before = Array.from({ length: 6 }, () => {
       t.engine.backToLobby();
       return skinOf(t);
@@ -844,7 +844,7 @@ describe("skins", () => {
 
   it("l'ordre est sauvegardé et conservé à la reprise", () => {
     const persistence = new MemoryPersistence();
-    const t = createTestEngine({ rounds: 7, persistence, game: { items: 20 } });
+    const t = createTestEngine({ rounds: SKINS.length, persistence, game: { items: 20 } });
     t.engine.start();
     nextRound(t);
     nextRound(t);
@@ -863,7 +863,7 @@ describe("skins", () => {
   it("vieille sauvegarde sans ordre (ou ordre invalide) : reprenable, avec l'ordre tiré au démarrage", () => {
     for (const bad of [undefined, ["dofus", "zelda"]]) {
       const persistence = new MemoryPersistence();
-      const t = createTestEngine({ rounds: 7, persistence, game: { items: 20 } });
+      const t = createTestEngine({ rounds: SKINS.length, persistence, game: { items: 20 } });
       t.engine.start();
       nextRound(t);
       (persistence.data as { skinOrder?: unknown }).skinOrder = bad;
@@ -873,5 +873,18 @@ describe("skins", () => {
       expect(s.phase).toBe("intro");
       expect(SKINS).toContain(s.skin);
     }
+  });
+
+  it("retire un ancien skin de la sauvegarde en gardant l'ordre des skins restants", () => {
+    const persistence = new MemoryPersistence();
+    const t = createTestEngine({ rounds: SKINS.length, persistence, game: { items: 20 } });
+    t.engine.start();
+    const expected = [...persistence.data!.skinOrder!];
+    (persistence.data as { skinOrder?: unknown }).skinOrder = [expected[0], "gunz", ...expected.slice(1)];
+
+    const engine = restart(t, persistence, 999);
+    engine.resumeSave();
+    expect(persistence.data!.skinOrder).toEqual(expected);
+    expect(engine.snapshot(null).skin).toBe(expected[0]!);
   });
 });

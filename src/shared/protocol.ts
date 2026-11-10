@@ -31,8 +31,6 @@ export interface ClientToServer {
   /** Rejoint la partie. Avec un jeton existant, on récupère son joueur (reconnexion). */
   "player:join": (token: string | null, ack: Ack<{ playerId: PlayerId; token: string }>) => void;
   "player:profile": (profile: Profile, ack?: Ack) => void;
-  /** Photo de profil (image webp/jpeg déjà redimensionnée côté téléphone). */
-  "player:photo": (data: ArrayBuffer, ack: Ack<{ url: string }>) => void;
   /** Réponse au mini-jeu en cours. La forme dépend du mini-jeu. */
   "player:input": (payload: unknown, ack?: Ack) => void;
   "player:continue": (ack?: Ack) => void;

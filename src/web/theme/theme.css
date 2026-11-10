@@ -9,7 +9,6 @@
 @import "./skins/overwatch.css";
 @import "./skins/league-of-legends.css";
 @import "./skins/rocket-league.css";
-@import "./skins/gunz.css";
 @import "./skins/mario-odyssey.css";
 @import "./skins/plague-tale.css";
 /* Tailwind ne regarde pas hors de src/web par défaut : on lui indique les écrans des mini-jeux. */

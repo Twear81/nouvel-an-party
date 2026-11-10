@@ -2,12 +2,11 @@
 // Toute donnée qui transite par le réseau est décrite ici.
 
 import type { SkinId } from "./skins";
+import type { FinalRevealInfo } from "./final-reveal";
 
 export type PlayerId = string;
 
-export type Avatar =
-  | { kind: "preset"; id: string } // id d'un avatar de src/web/theme/profile-options.ts
-  | { kind: "photo"; url: string }; // photo prise avec le téléphone, servie par /photos/...
+export type Avatar = { kind: "preset"; id: string }; // id d'un avatar de src/web/theme/profile-options.ts
 
 export interface Profile {
   name: string;
@@ -90,6 +89,8 @@ export interface GameSnapshot {
   title: string;
   phase: Phase;
   paused: boolean;
+  /** Départ serveur de la révélation finale ; null pendant les manches et au lobby. */
+  finalReveal: FinalRevealInfo | null;
   players: PublicPlayer[];
   round: RoundInfo | null;
   /** Joueurs ayant cliqué sur "Continuer" pendant les résultats. */

@@ -13,7 +13,7 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
  Téléphones ◄──►│   static/       sert le front (embarqué dans l'exe)        │
  https://IP:    │                                                           │
  3443/play      │  config/  (à côté de l'exe, modifiable)  data/ (sauvegarde,│
-                │                                          photos, certificat)│
+                │                                          certificat)        │
                 └───────────────────────────────────────────────────────────┘
 ```
 
@@ -23,7 +23,7 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   Les écrans n'ont pas d'état de jeu à eux : un téléphone qui recharge la page retrouve tout.
 - Les actions passent par les événements de `src/shared/protocol.ts`.
 - `round.progress` (`{ done, expected }` ou `null`) : compteur « qui a répondu » calculé par le moteur via `MiniGame.progress` (phase `playing` seulement, protégé comme `publicView`) ; la TV l'affiche dans le chrono sans connaître le jeu.
-- Le snapshot porte aussi `skin` (habillage courant, identique TV + téléphones) : calculé par le moteur depuis l'ordre des 7 skins tiré au hasard (`skinOrder`, retiré à chaque retour au lobby, sauvegardé dans `save.json`) et `skinForRound` ; voir [skins.md](skins.md#rotation).
+- Le snapshot porte aussi `skin` (habillage courant, identique TV + téléphones) : calculé par le moteur depuis l'ordre des 6 skins tiré au hasard (`skinOrder`, retiré à chaque retour au lobby, sauvegardé dans `save.json`) et `skinForRound` ; voir [skins.md](skins.md#rotation).
 
 ## Déroulé
 `lobby → (intro → playing → results) × N → final`
@@ -34,13 +34,24 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   "Continuer" apparaissent ; on avance quand tous les joueurs connectés ont cliqué (la TV peut forcer avec "Passer").
   Avant la fin de l'animation les téléphones affichent « Regarde la TV » pour ne rien spoiler. Tous les écrans
   comptent depuis `round.resultsAt` (heure serveur) : un téléphone qui recharge en pleine révélation est resynchronisé.
-- **final** : classement.
+- **final** : classement. `snapshot.finalReveal` fixe le départ serveur et les participants de la cérémonie.
+  TV et téléphones partagent la cadence de `src/shared/final-reveal.ts` via `useFinalReveal` : les téléphones
+  gardent « Regarde la TV ! » jusqu'à la fin de l'entrée du dernier portrait révélé. Un rechargement de la TV
+  ou d'un téléphone reprend au bon moment au lieu de relancer le classement. Il s'agit d'une synchronisation
+  d'affichage : les scores cumulés restent publics, comme pendant les manches. Le final terminé conserve le
+  comportement de sauvegarde existant : après un redémarrage serveur, retour au lobby avec les profils et scores.
+  Un nouvel invité arrivé pendant le podium reste spectateur. La première synchronisation d'horloge précède
+  l'inscription réseau des écrans, pour éviter qu'une horloge locale en avance dévoile les rangs au rechargement.
 
 Les jeux « interlude » (surprises, ex. Culture gênante) s'insèrent dans le plan environ toutes les N manches
 normales, sans **intro** (le moteur passe directement de la manche précédente à `playing`) et avec une TV en plein
 écran gérée par le jeu ; ils ne comptent pas dans « Manche x / y ». Voir `docs/creer-un-mini-jeu.md`, « Jeux interlude ».
 
+Le futur déroulé avec pièce commune, ouverture, changements de skin après Culture gênante et souvenirs de fin
+est décrit dans [mise-en-scene.md](mise-en-scene.md). Ce document distingue la cible du comportement livré.
+
 ## Mini-jeux (`src/minigames/<id>/`)
+
 | Fichier | Rôle |
 |---|---|
 | `game.ts` | logique serveur : schéma du yaml, tirage des questions, réponses, points (`contract.ts`) |

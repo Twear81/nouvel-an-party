@@ -74,6 +74,31 @@ describe("sauvegarde", () => {
     expect(restart(persistence, t.fake).engine.snapshot(null).setup.counts).toEqual({ fake: 4 });
   });
 
+  it("remplace les anciens portraits personnalisés sans perdre profil, score ni jeton", () => {
+    const persistence = new MemoryPersistence();
+    const t = createTestEngine({ persistence });
+    t.engine.start();
+    t.clock.advance(4000);
+    t.engine.input(t.ids[0]!, { v: 40 });
+    t.clock.advance(10_000);
+    const saved = persistence.data!.players[0]!;
+    const oldProfile = { ...saved.profile!, avatar: { kind: "photo", url: "/photos/ancien.webp" } };
+    // Reproduit le JSON d'une ancienne version, qui ne respecte plus le contrat courant.
+    (saved as { profile: unknown }).profile = oldProfile;
+
+    const b = restart(persistence, t.fake);
+    expect(b.engine.join(saved.token).playerId).toBe(saved.id);
+    const restored = b.engine.snapshot(null).players.find((p) => p.id === saved.id)!;
+    expect(restored).toMatchObject({ score: 40, profile: {
+      name: oldProfile.name,
+      frame: oldProfile.frame,
+      color: oldProfile.color,
+      avatar: { kind: "preset", id: "renard" },
+    } });
+    b.engine.resumeSave();
+    expect(persistence.data!.players[0]!.profile!.avatar).toEqual({ kind: "preset", id: "renard" });
+  });
+
   it("une partie restée au lobby n'est pas reprenable", () => {
     const persistence = new MemoryPersistence();
     const t = createTestEngine({ persistence });

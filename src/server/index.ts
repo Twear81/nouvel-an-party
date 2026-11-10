@@ -27,7 +27,7 @@ async function main() {
 
   const httpServer = http.createServer(handleHttp);
   const httpsServer = https.createServer(cert, handleHttp);
-  const io = new Server<ClientToServer, ServerToClient>(httpServer, { maxHttpBufferSize: 4e6 });
+  const io = new Server<ClientToServer, ServerToClient>(httpServer);
   // Le même serveur Socket.IO écoute aussi en HTTPS.
   io.engine.attach(httpsServer, { path: "/socket.io/" } as any);
 
@@ -45,7 +45,7 @@ async function main() {
     onChange: broadcast,
     persistence: filePersistence(paths.data),
   });
-  attachSockets(io, engine, { dataDir: paths.data, hostIps: ips });
+  attachSockets(io, engine, { hostIps: ips });
 
   await Promise.all([listen(httpServer, httpPort), listen(httpsServer, httpsPort)]);
 
