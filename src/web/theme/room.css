@@ -69,21 +69,12 @@
   --sig-gold: #f6ce63;
   --sig-brass: #ae6b13;
   --sig-orange: #ff9b37;
-  --sig-green: #73b93d;
-  --sig-green-dark: #284b22;
-  --sig-green-light: #c9ef91;
   --sig-red-dark: #761f2d;
   --sig-ink: #140e14;
   position: absolute; inset: 0;
   width: 100%; height: 100%; overflow: visible;
 }
 .room-signature-art [data-room-motion] { transform-box: fill-box; transform-origin: center; }
-.sig-grid { fill: color-mix(in srgb, var(--sig-green) 12%, transparent); stroke: var(--sig-green-light); stroke-width: 2.5; }
-.sig-green-aura { fill: color-mix(in srgb, var(--sig-green-light) 35%, transparent); stroke: var(--sig-green-light); stroke-width: 3; }
-.sig-egg-body { fill: var(--sig-green); stroke: var(--sig-green-dark); stroke-width: 5; }
-.sig-egg-mark { fill: none; stroke: var(--sig-green-dark); stroke-width: 8; stroke-linejoin: round; stroke-linecap: round; }
-.sig-egg-shine { fill: none; stroke: var(--sig-green-light); stroke-width: 8; stroke-linecap: round; }
-.sig-sparkle { fill: var(--sig-green-light); stroke: var(--sig-gold); stroke-width: 1.5; }
 .sig-cap-body, .sig-cap-brim { fill: var(--room-accent); stroke: var(--sig-red-dark); stroke-width: 5; stroke-linejoin: round; }
 .sig-cap-brim { fill: color-mix(in srgb, var(--room-accent) 83%, var(--sig-red-dark)); }
 .sig-cap-shine { fill: none; stroke: color-mix(in srgb, var(--room-ink) 65%, var(--room-accent)); stroke-width: 6; stroke-linecap: round; }
@@ -241,3 +232,42 @@
 .sig-pt-ribbon-main { stroke-width: 1.5; }
 .sig-pt-halo { fill: url(#pt-halo); opacity: 0; }
 .sig-pt-tv-glow { fill: url(#pt-screen); opacity: 0; }
+
+/* Dofus : phase de placement d'un combat (cases bleues/rouges, avatars, Bouftou, Tofu, timeline). */
+.sig-df {
+  --sig-df-blue: #3a7bd5;
+  --sig-df-blue-light: #9cc4ff;
+  --sig-df-red: #d23c3c;
+  --sig-df-red-light: #ffa097;
+  --sig-df-line: #f7f4dc;
+  --sig-df-gold: #ecdb4f;
+  --sig-df-gold-light: #fff6a8;
+  --sig-df-slate: #45465f;
+  --sig-df-slate-deep: #1d1e2b;
+  --sig-df-shadow: #090d19;
+}
+.sig-df [data-room-motion] { transform-box: view-box; transform-origin: 0 0; }
+.sig-df [data-room-motion="cell"], .sig-df [data-room-motion="team"], .sig-df [data-room-motion="flash"], .sig-df [data-room-motion="ring"],
+.sig-df [data-room-motion$="shadow"] { transform-box: fill-box; transform-origin: center; }
+.sig-df-dim { fill: var(--sig-df-shadow); opacity: 0; }
+.sig-df-cell { fill: color-mix(in srgb, var(--sig-df-line) 7%, transparent); stroke: color-mix(in srgb, var(--sig-df-line) 75%, transparent); stroke-width: 1.6; stroke-linejoin: round; opacity: 0; }
+.sig-df-team { stroke-width: 3; stroke-linejoin: round; opacity: 0; }
+.sig-df-blue { fill: color-mix(in srgb, var(--sig-df-blue) 55%, transparent); stroke: var(--sig-df-blue-light); }
+.sig-df-red { fill: color-mix(in srgb, var(--sig-df-red) 55%, transparent); stroke: var(--sig-df-red-light); }
+.sig-df-shadow { fill: var(--sig-df-shadow); opacity: 0; }
+.sig-df-shadow { fill-opacity: .5; }
+.sig-df-flash { fill: url(#df-flash); opacity: 0; }
+.sig-df-ring { fill: none; stroke: var(--sig-df-gold-light); stroke-width: 7; opacity: 0; }
+.sig-df-actors { position: absolute; inset: 0; pointer-events: none; }
+.sig-df-actor { position: absolute; width: 0; height: 0; }
+.sig-df-actor-in { position: absolute; left: 0; bottom: 0; width: 0; height: 0; opacity: 0; }
+.sig-df-actor-size { position: absolute; left: -4rem; bottom: .2rem; width: 8rem; height: 8rem; transform: scale(.72); transform-origin: 50% 100%; }
+.sig-df-actor-size > [data-ui="avatar"] { filter: drop-shadow(0 .3rem .25rem color-mix(in srgb, var(--sig-df-shadow) 55%, transparent)); }
+.sig-df-timeline-host { position: absolute; right: 2.2rem; bottom: 2.2rem; opacity: 0; }
+.sig-df-timeline { display: flex; gap: .35rem; padding: .4rem; border-radius: .5rem; background: color-mix(in srgb, var(--sig-df-slate-deep) 80%, transparent); }
+.sig-df-tile {
+  display: flex; align-items: center; justify-content: center; width: 3.7rem; height: 3.7rem; border-radius: .3rem;
+  background: var(--sig-df-slate); border: .18rem solid color-mix(in srgb, var(--sig-df-gold) 55%, var(--sig-df-slate-deep));
+}
+.sig-df-tile[data-active="true"] { border-color: var(--sig-df-gold-light); box-shadow: 0 0 .8rem var(--sig-df-gold); }
+.sig-df-tile-monster { width: 3rem; height: 3rem; object-fit: contain; transform: scaleX(-1); }

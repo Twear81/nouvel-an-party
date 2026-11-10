@@ -83,16 +83,15 @@ par l'organisateur le **10 novembre 2026** :
 | Univers | Scène retenue |
 |---|---|
 | Rocket League | Une vraie Octane (sprite) arrive en boost avec flamme et traînée, saute et frappe le ballon du jeu vers la TV ; la caméra tremble, explosion de but bleue et orange. |
-| Dofus | Le sol devient la grille isométrique de placement, cases rouges et bleues, les avatars des invités posés dessus ; un Bouftou et un Tofu passent. |
+| Dofus | Phase de placement d'un combat : une grille de cases en losange (projetée dans le plan du sol) se dessine en vague depuis le centre, des cases bleues (alliés, côté canapé) et rouges (ennemis, côté cheminée) s'allument, les avatars des invités tombent chacun sur une case bleue (rebond, ombre), un Bouftou (en sautillant) et un Tofu (en volant) se posent sur des cases rouges ; la frise d'ordre de jeu (avatars + monstres) glisse en bas à droite, puis éclat doré avant le replongeon. Scène et avatars suivent la caméra, la frise est une surimpression d'écran : `signatures/Dofus.tsx`. |
 | Overwatch | « Action de la partie » : bandes blanches, orange et bleues en biais balaient l’écran, flash, personnage (avatar de la vedette) en grand à droite, texte empilé à gauche « ACTION DE LA PARTIE » / pseudo orangé / « EN TANT QUE <avatar> » qui glisse lentement (vedette = `spotlightPlayerId`, choisie par le serveur : un des gagnants de la manche précédente, sinon au hasard), puis les bandes repassent avant le replongeon. Surimpression d’écran hors caméra : `signatures/Overwatch.tsx`. |
 | League of Legends | Les runes du socle s’allument, un vrai Nexus (sprite) se matérialise sur la table basse, encaisse des coups (fissures, secousses), puis explose : colonne de lumière, onde de choc au sol, éclats de cristal et tremblement de caméra ; la lueur file vers la TV. |
 | Mario Odyssey | Un Mario en pixel art 8-bit court sur la bande pixelisée du mur et saute dans la TV. |
 | Resonance : A Plague Tale Legacy | Pièce plongée dans le noir ; un fin réseau de veines noires ramifiées, traversé de filaments turquoise lumineux, gagne les murs depuis le poêle. Puis la Macula se déploie devant la cheminée : étoile à cinq tentacules osseux hérissés d'épines, cœur pâle aux alvéoles turquoise, longs filaments bleus qui ondulent ; elle pulse, et la caméra plonge dans la TV. |
 
 **Avancement (10 novembre 2026)** — les six pièces transformées sont livrées. Scènes refaites : Rocket League,
-Overwatch, League of Legends, Resonance (veines générées dans `signatures/PlagueTale.tsx` + sprite de la Macula). Validées par l'organisateur : LoL ; RL, Overwatch et Resonance à revoir en mouvement.
-Restent à refaire (encore l'ancienne version en SVG) :
-- **Dofus** : sprites `dofus-bouftou.png` et `dofus-tofu.png` prêts ; grille et avatars à dessiner dans le code.
+Overwatch, League of Legends, Dofus (phase de placement, `signatures/Dofus.tsx`), Resonance (veines générées dans `signatures/PlagueTale.tsx` + sprite de la Macula). Validées par l'organisateur : LoL ; RL, Overwatch et Resonance à revoir en mouvement.
+Reste à refaire (encore l'ancienne version en SVG) :
 - **Mario** : planche `mario-odyssey-planche-8bit.png` (1200×1200, fond blanc avec légendes) à découper en images
   séparées (marche ×3, saut) sur fond transparent, à afficher en `image-rendering: pixelated`.
 Les sprites sont dans `src/web/theme/assets/sprites/` ; modèle à imiter : `src/web/ui/signatures/RocketLeague.tsx`.

@@ -13,7 +13,7 @@ import "../src/web/theme/theme.css";
 import "../docs/maquettes/transitions.css";
 
 const UNIVERS: { id: SkinId; nom: string; description: string }[] = [
-  { id: "dofus", nom: "Dofus", description: "Une grille se dessine sur le tapis, un œuf magique vert apparaît sur la table et lance des étincelles." },
+  { id: "dofus", nom: "Dofus", description: "Phase de placement d’un combat : une grille de cases en losange se dessine sur le sol, des cases bleues et rouges s’allument, les avatars des invités tombent sur les bleues, un Bouftou (en sautillant) et un Tofu (en volant) se posent sur les rouges, la frise d’ordre de jeu glisse en bas à droite, puis un éclat doré lance le combat avant le replongeon." },
   { id: "overwatch", nom: "Overwatch", description: "« Action de la partie » : des bandes blanches, orange et bleues en biais balaient l’écran, puis le meilleur de la manche précédente en vedette : texte à gauche qui glisse, son avatar en grand à droite ; enfin les bandes repassent avant de replonger dans la TV." },
   { id: "league-of-legends", nom: "League of Legends", description: "Les runes du socle s’allument, un Nexus apparaît sur la table basse, se fissure sous les coups puis explose : colonne de lumière, onde de choc et éclats de cristal, avant que la lueur file vers la TV." },
   { id: "rocket-league", nom: "Rocket League", description: "Une vraie Octane bleue arrive en boost (flamme et traînée), saute et frappe le ballon de Rocket League qui file dans la TV : la caméra tremble, explosion de but bleue et orange, puis elle plonge dans l’écran." },
@@ -24,6 +24,12 @@ const UNIVERS: { id: SkinId; nom: string; description: string }[] = [
 const INVITES: GameSnapshot["players"] = [
   { id: "p1", profile: { name: "Anne-Sophie", avatar: { kind: "preset", id: "renard" }, frame: "none", color: "#ff3366" }, score: 0, connected: true },
   { id: "p2", profile: { name: "SeizeCaracteres!", avatar: { kind: "preset", id: "dragon" }, frame: "none", color: "#33aaff" }, score: 0, connected: true },
+  { id: "p3", profile: { name: "Julien", avatar: { kind: "preset", id: "licorne" }, frame: "none", color: "#ffcc33" }, score: 0, connected: true },
+  { id: "p4", profile: { name: "Marion", avatar: { kind: "preset", id: "chat" }, frame: "none", color: "#44cc88" }, score: 0, connected: true },
+  { id: "p5", profile: { name: "Thomas", avatar: { kind: "preset", id: "robot" }, frame: "none", color: "#aa66ff" }, score: 0, connected: true },
+  { id: "p6", profile: { name: "Camille", avatar: { kind: "preset", id: "panda" }, frame: "none", color: "#ff8844" }, score: 0, connected: true },
+  { id: "p7", profile: { name: "Nico", avatar: { kind: "preset", id: "hibou" }, frame: "none", color: "#33cccc" }, score: 0, connected: true },
+  { id: "p8", profile: { name: "Léa", avatar: { kind: "preset", id: "grenouille" }, frame: "none", color: "#ee5588" }, score: 0, connected: true },
 ];
 const DUREE =TRANSITION_TIMING.skin.durationMs;
 

@@ -6,6 +6,7 @@ import { serverNow } from "../net/socket";
 import roomReference from "../theme/assets/piece-reference.png";
 import { PlayerAvatar } from "./PlayerAvatar";
 import { OverwatchScene, animateOverwatch } from "./signatures/Overwatch";
+import { DofusTimeline, animateDofusTimeline } from "./signatures/Dofus";
 import { RoomSignature, animateRoomSignature, legacyTime, signatureEnvelope } from "./RoomSignature";
 
 // Pièces transformées optionnelles (piece-<skin>.png) : un skin sans image n'a simplement pas de calque.
@@ -48,6 +49,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
   const tvLight = useRef<HTMLDivElement>(null);
   const cover = useRef<HTMLDivElement>(null);
   const potg = useRef<HTMLDivElement>(null);
+  const timeline = useRef<HTMLDivElement>(null);
   const animations = useRef<Animation[]>([]);
   const currentScene = useRef(scene);
   currentScene.current = scene;
@@ -110,6 +112,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
       else {
         animate(signature.current, signatureEnvelope(scene.toSkin));
         animateRoomSignature(signature.current, scene.toSkin, false, animate);
+        if (scene.toSkin === "dofus" && timeline.current) animateDofusTimeline(timeline.current, animate);
       }
       animate(cover.current, [
         { at: 0, opacity: 1 }, { at: 650, opacity: 0 },
@@ -188,7 +191,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
         {scene.kind === "skin" && skinImage && <img ref={roomSkin} src={skinImage} alt="" draggable={false} aria-hidden
           data-testid="transition-room-skin" className="room-image room-image-skin" />}
         <div ref={light} className="room-light" aria-hidden />
-        {scene.kind === "skin" && <div ref={signature} className="room-signature" aria-hidden><RoomSignature skin={scene.toSkin} /></div>}
+        {scene.kind === "skin" && <div ref={signature} className="room-signature" aria-hidden><RoomSignature skin={scene.toSkin} players={players} /></div>}
         <div ref={tvLight} className="room-tv-light" aria-hidden />
         {scene.kind !== "skin" && players.map(({ id, index, profile }) => {
           const angle = -Math.PI / 2 + index * 2 * Math.PI / scene.playerIds.length;
@@ -206,6 +209,9 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
       </div>
       {scene.kind === "skin" && scene.toSkin === "overwatch" && (
         <div ref={potg} className="room-overlay"><OverwatchScene profile={featured?.profile ?? null} playerId={featured?.id ?? null} /></div>
+      )}
+      {scene.kind === "skin" && scene.toSkin === "dofus" && (
+        <div className="room-overlay" aria-hidden><div ref={timeline} className="sig-df-timeline-host"><DofusTimeline players={players} /></div></div>
       )}
       <div ref={cover} className="room-cover" aria-hidden />
     </div>

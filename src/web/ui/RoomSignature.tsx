@@ -4,6 +4,7 @@ import { SKIN_TIMING } from "../../shared/transitions";
 import { RocketLeagueScene, animateRocketLeague } from "./signatures/RocketLeague";
 import { LeagueOfLegendsScene, animateLeagueOfLegends } from "./signatures/LeagueOfLegends";
 import { PlagueTaleScene, animatePlagueTale } from "./signatures/PlagueTale";
+import { DofusActors, DofusScene, animateDofus, type DofusPlayer } from "./signatures/Dofus";
 
 export type SignatureFrame = Keyframe & { at: number };
 export type Animate = (element: Element | null, frames: SignatureFrame[]) => void;
@@ -19,9 +20,9 @@ export function legacyTime(at: number): number {
   return end + (at - 3500) * (SKIN_TIMING.durationMs - end) / 500;
 }
 
-/** Enveloppe d'apparition du calque de signature (les scènes Rocket League, League of Legends et Resonance gèrent leur propre durée de vie). */
+/** Enveloppe d'apparition du calque de signature (les scènes Rocket League, League of Legends, Dofus et Resonance gèrent leur propre durée de vie). */
 export function signatureEnvelope(skin: SkinId | null): SignatureFrame[] {
-  if (skin === "rocket-league" || skin === "league-of-legends" || skin === "plague-tale") return [
+  if (skin === "rocket-league" || skin === "league-of-legends" || skin === "plague-tale" || skin === "dofus") return [
     { at: 0, opacity: 0 }, { at: SKIN_TIMING.zoomOutEndMs - 200, opacity: 0 }, { at: SKIN_TIMING.zoomOutEndMs, opacity: 1 },
     { at: SKIN_TIMING.plungeEndMs - 700, opacity: 1 }, { at: SKIN_TIMING.plungeEndMs, opacity: 0 }, { at: SKIN_TIMING.durationMs, opacity: 0 },
   ];
@@ -29,29 +30,6 @@ export function signatureEnvelope(skin: SkinId | null): SignatureFrame[] {
     { at: 0, opacity: 0 }, { at: legacyTime(850), opacity: 0 }, { at: legacyTime(1200), opacity: 1 },
     { at: legacyTime(2900), opacity: 1 }, { at: legacyTime(3500), opacity: 0 }, { at: SKIN_TIMING.durationMs, opacity: 0 },
   ];
-}
-
-const SPARKLES = [[-110, -10], [-90, -110], [-35, -135], [65, -120], [110, -45], [95, 45], [-70, 65]];
-
-function DofusScene() {
-  return <>
-    <g className="sig-grid" data-room-motion="floor">
-      {Array.from({ length: 25 }, (_, i) => {
-        const x = i % 5, y = Math.floor(i / 5);
-        const left = 805 + (x - y) * 66, top = 660 + (x + y) * 19;
-        return <path key={i} d={`M${left} ${top}l66 19-66 19-66-19Z`} />;
-      })}
-    </g>
-    <ellipse className="sig-green-aura" cx="805" cy="751" rx="115" ry="32" data-room-motion="aura" />
-    <g transform="translate(805 675)">
-      <g data-room-motion="egg" className="sig-egg">
-        <path className="sig-egg-body" d="M0-94C44-94 64-42 61 7C58 56 37 82 0 85C-37 82-58 56-61 7C-64-42-44-94 0-94Z" />
-        <path className="sig-egg-mark" d="M-33-25Q0-57 33-25Q4-5 26 23Q-7 50-31 20Q-8 4-33-25ZM-18 60Q4 47 22 56" />
-        <path className="sig-egg-shine" d="M-35-54Q-23-75-12-74" />
-      </g>
-      {SPARKLES.map(([x, y], i) => <path key={i} data-room-motion="sparkle" className="sig-sparkle" d={`M${x} ${y - 9}q0 9 9 9q-9 0-9 9q0-9-9-9q9 0 9-9Z`} />)}
-    </g>
-  </>;
 }
 
 const COINS = [[687, 633], [773, 571], [857, 495], [852, 424]];
@@ -73,11 +51,15 @@ function MarioScene() {
   </>;
 }
 
-export function RoomSignature({ skin }: { skin: SkinId | null }) {
-  const content = skin === "dofus" ? <DofusScene />
+export function RoomSignature({ skin, players = [] }: { skin: SkinId | null; players?: DofusPlayer[] }) {
+  const content = skin === "dofus" ? <DofusScene players={players} />
     : skin === "league-of-legends" ? <LeagueOfLegendsScene /> : skin === "rocket-league" ? <RocketLeagueScene />
       : skin === "mario-odyssey" ? <MarioScene /> : skin === "plague-tale" ? <PlagueTaleScene /> : null;
-  return content && <svg className="room-signature-art" viewBox="0 0 1672 941" aria-hidden="true" data-testid="transition-signature" data-signature={skin}>{content}</svg>;
+  if (!content) return null;
+  return <>
+    <svg className="room-signature-art" viewBox="0 0 1672 941" aria-hidden="true" data-testid="transition-signature" data-signature={skin}>{content}</svg>
+    {skin === "dofus" && <DofusActors players={players} />}
+  </>;
 }
 
 /** Les effets natifs sont ajoutés à la même liste que la caméra : aucun temps autonome. */
@@ -86,28 +68,11 @@ export function animateRoomSignature(root: Element | null, skin: SkinId | null, 
   if (skin === "rocket-league") { animateRocketLeague(root, reduced, animateNative); return; }
   if (skin === "league-of-legends") { animateLeagueOfLegends(root, reduced, animateNative); return; }
   if (skin === "plague-tale") { animatePlagueTale(root, reduced, animateNative); return; }
+  if (skin === "dofus") { animateDofus(root, animateNative); return; }
   const animate: Animate = (element, frames) => animateNative(element, frames.map((frame) => ({ ...frame, at: legacyTime(frame.at) })));
   const select = (name: string) => root.querySelector(`[data-room-motion="${name}"]`);
   const all = (name: string) => root.querySelectorAll(`[data-room-motion="${name}"]`);
-  const appear = (element: Element | null, delay = 0) => animate(element, [
-    { at: 0, opacity: 0 }, { at: 1000 + delay, opacity: 0 }, { at: 1250 + delay, opacity: 1 },
-    { at: 3000, opacity: 1 }, { at: 3500, opacity: 0 }, { at: 4000, opacity: 0 },
-  ]);
-  appear(select("floor"));
-  if (skin === "dofus") {
-    animate(select("egg"), reduced ? [
-      { at: 0, opacity: 0 }, { at: 1050, opacity: 0 }, { at: 1350, opacity: 1 }, { at: 3000, opacity: 1 }, { at: 4000, opacity: 0 },
-    ] : [
-      { at: 0, opacity: 0, transform: "translateY(35px) scale(.7)" }, { at: 1050, opacity: 0, transform: "translateY(35px) scale(.7)" },
-      { at: 1450, opacity: 1, transform: "translateY(-5px) scale(1.05)" }, { at: 2200, opacity: 1, transform: "translateY(-18px) scale(1)" },
-      { at: 3100, opacity: 0, transform: "translateY(-65px) scale(.85)" }, { at: 4000, opacity: 0, transform: "translateY(-65px) scale(.85)" },
-    ]);
-    appear(select("aura"));
-    all("sparkle").forEach((element, i) => animate(element, [
-      { at: 0, opacity: 0 }, { at: 1250 + i * 70, opacity: 0 }, { at: 1450 + i * 70, opacity: 1 },
-      { at: 1950 + i * 70, opacity: 0 }, { at: 4000, opacity: 0 },
-    ]));
-  } else if (skin === "mario-odyssey") {
+  if (skin === "mario-odyssey") {
     animate(select("cap-flight"), reduced ? [
       { at: 0, opacity: 0, transform: "translate(175px, -20px)" }, { at: 1200, opacity: 1, transform: "translate(175px, -20px)" },
       { at: 2900, opacity: 1, transform: "translate(175px, -20px)" }, { at: 4000, opacity: 0, transform: "translate(175px, -20px)" },
