@@ -4,7 +4,7 @@ L'habillage du jeu change au fil de la soirée : chaque **skin** reprend l'inter
 couleurs, effets) **sans logo ni élément officiel**. La disposition, les tailles et les zones tactiles ne changent pas :
 seule la peau change. Référence visuelle validée : **https://claude.ai/code/artifact/63f8e7a3-35e1-4279-886f-feffba7ec5bc** (fait foi) ; copie locale [maquettes/skins.html](maquettes/skins.html) (ouvrir dans un
 navigateur, flèches ← → pour changer de skin). Captures du vrai jeu : [maquettes/references/](maquettes/references/).
-Avancement du chantier : [skins-suivi.md](skins-suivi.md).
+Bilan du chantier et validation : [skins-suivi.md](skins-suivi.md).
 
 | id | Jeu | Signature |
 |---|---|---|
