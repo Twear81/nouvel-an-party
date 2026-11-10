@@ -7,6 +7,11 @@ la rotation après Culture gênante et les souvenirs ne sont pas encore impléme
 Le retrait de GunZ et des photos de profil ainsi que l'attente du téléphone pendant le classement final
 constituent le premier lot. La rotation livrée reste celle décrite dans [skins.md](skins.md).
 
+Le décor de la pièce a été validé par l'organisateur le **10 novembre 2026** :
+[illustration de référence](maquettes/piece-reference.png). La [maquette animée](maquettes/piece.html)
+permet de régler l'installation des portraits et l'entrée dans la TV ; elle s'ouvre directement dans un navigateur.
+Cette maquette est un outil de conception autonome, avec des invités fictifs ; elle ne modifie pas le déroulé du jeu.
+
 ## Déroulé retenu
 
 1. Lobby dans le thème de base bleu.
@@ -22,20 +27,43 @@ Les signatures propres aux univers se jouent uniquement pendant ces changements,
 réponse ou changement de leader. Une scène courte et soignée par transition. Le son sera traité après les
 animations ; il sortira toujours de la TV.
 
-## Modèle de la pièce à fournir
+## Pièce de référence validée
 
-Un dessin à la main, photographié ou scanné en PNG/JPG, un PDF ou un croquis numérique conviennent.
-Prévoir une vue du dessus avec la table, la télévision, les sièges et les ouvertures, puis une flèche indiquant
-le point de vue souhaité pour l'illustration. Une esquisse de face est facultative. Les proportions approximatives
-suffisent ; les dimensions exactes et la qualité du dessin ne sont pas nécessaires.
+Le croquis vu du dessus et les précisions de l'organisateur ont servi à produire l'illustration de référence.
+Le fichier PNG versionné est une copie non modifiée de la dernière maquette validée ; les variantes antérieures
+ne font pas référence.
 
-À annoter : couleurs des murs/sol/meubles, emplacement des invités, deux ou trois objets reconnaissables et
-objets liés aux anecdotes du groupe. Les références appartiennent au décor ou au contenu, sans imposer de lien
-entre une personne réelle et un avatar.
+- Vue légèrement plongeante depuis l'arrière du canapé, décalée vers la gauche, vers la cheminée et le mur droit.
+- Murs blancs, parquet bois, canapé beige au premier plan ; table basse rectangulaire en verre sur un tapis blanc ovale.
+- Cheminée au fond au centre, poêle à bois noir arrondi devant, TV posée en hauteur sur la tablette et bac à bûches à droite.
+  Le conduit forme une saillie blanche dans le mur derrière la TV, jusqu'au plafond. Le plafond est haut comme dans
+  un appartement ancien, avec la hauteur intermédiaire de l'illustration finale.
+- Portes du placard technique au fond à gauche ; porte ancienne moulurée à poignée ronde et petit meuble bas sur le mur gauche.
+- Grand pouf gris foncé à gauche avec Uto, chat adulte Sacré de Birmanie blanc à poils longs, endormi et petit par rapport au pouf.
+- Jukebox rétro vintage à néons au milieu du mur droit. Les affiches **Whiplash** et **Dune** sont superposées au-dessus.
+- Deux fenêtres anciennes hautes de part et d'autre du jukebox, avec de profondes embrasures et de larges rebords où s'asseoir.
+- Vue du **premier étage** sur une rue piétonne, le bâtiment d'en face et des décorations de Noël dans la rue.
 
-Rendu proposé : illustration 2D en calques, avec objets et portraits séparés. Une même composition pour
-l'ouverture, les transitions et la fin, avec quelques éléments variant selon l'univers. La conception précise
-du décor et des animations attend ce croquis.
+Les références appartiennent au décor et au contenu, indépendamment de l'avatar choisi par chaque invité.
+La composition retenue sera partagée entre ouverture, transitions et fin ; les portraits resteront séparés du décor.
+Pour l'intégration, seuls les éléments qui doivent bouger ou changer d'univers nécessiteront un calque distinct.
+La maquette de chorégraphie utilise pour l'instant l'illustration complète et des portraits superposés.
+
+### Essayer l'introduction
+
+Ouvrir [piece.html](maquettes/piece.html) dans un navigateur, puis choisir **Lire**. Les commandes restent hors
+de la scène : **Pause/Reprendre**, **Rejouer** et **7/8 invités**. Les pseudos de démonstration font 16 caractères.
+La chronologie dure neuf secondes : découverte de la pièce, installation des portraits, courte tenue autour de la
+table, effacement des portraits et entrée dans l'écran TV. Avec la préférence système de mouvement réduit,
+les portraits apparaissent en fondu et le grand zoom est remplacé par un fondu.
+
+Les coordonnées de la table, le rectangle de l'écran TV et les durées sont regroupés dans `REGLAGES` dans le HTML.
+La maquette fonctionne hors ligne ; elle ne lance pas de serveur, de mini-jeu ou de son.
+
+Validation locale Chromium en 1920×1080 : ouverture directe hors ligne, lecture complète, pause/reprise,
+rejeu, changement d'effectif et mouvement réduit vérifiés. À sept et huit invités, les pseudos de 16 caractères
+ne recouvrent ni les portraits ni les autres noms, sans débordement. Captures relues ; aucune erreur de console
+ni requête HTTP. TypeScript et les 502 tests unitaires du jeu passent ; le code du jeu n'a pas changé dans ce lot.
 
 ## Changements techniques nécessaires
 

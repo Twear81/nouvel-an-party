@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La pièce — maquette de l’introduction</title>
+<style>
+:root {
+  color-scheme: dark;
+  --fond: #0c1121;
+  --panneau: #171f31;
+  --ligne: #39455d;
+  --texte: #f4f5fa;
+  --discret: #b4bdd0;
+  --accent: #f5d878;
+  --encre-accent: #201b0b;
+  --ecran: #061e68;
+  --portrait-fond: #17233b;
+  --ombre: #090d19;
+  --police: "Trebuchet MS", Arial, sans-serif;
+  --ecart: clamp(.5rem, 1vw, 1rem);
+  --rayon: .7rem;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  height: 100svh;
+  padding: var(--ecart);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ecart);
+  overflow: hidden;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: var(--police);
+}
+.entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .7rem 1.5rem;
+}
+h1 { margin: 0; font-size: clamp(1rem, 1.7vw, 1.4rem); }
+.commandes, .nombre { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem; }
+.nombre { padding-left: .5rem; border-left: 1px solid var(--ligne); }
+button {
+  min-height: 2.75rem;
+  padding: .55rem .9rem;
+  border: 1px solid var(--ligne);
+  border-radius: var(--rayon);
+  background: var(--panneau);
+  color: var(--texte);
+  font: 700 .95rem/1 var(--police);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+button:disabled { opacity: .45; cursor: default; }
+button.principal, button[aria-pressed="true"] { background: var(--accent); color: var(--encre-accent); border-color: var(--accent); }
+button:not(:disabled):hover { filter: brightness(1.12); }
+.cadre {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  container-type: size;
+}
+.scene {
+  width: min(100cqw, calc(100cqh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  container-type: size;
+  border-radius: var(--rayon);
+  background: var(--ecran);
+  box-shadow: 0 .6rem 2rem color-mix(in srgb, var(--ombre) 75%, transparent);
+}
+.camera, .decor, .invites, .destination { position: absolute; inset: 0; }
+.camera { transform-origin: 0 0; will-change: transform; }
+.decor { width: 100%; height: 100%; object-fit: cover; user-select: none; }
+.invite {
+  position: absolute;
+  width: 14cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .45cqw;
+  transform: translate(-50%, -50%);
+}
+.portrait {
+  width: 5.8cqw;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: .26cqw solid var(--couleur);
+  border-radius: 50%;
+  background: var(--portrait-fond);
+  color: var(--texte);
+  font-size: 3.5cqw;
+  line-height: 1;
+  box-shadow: 0 .3cqw .9cqw color-mix(in srgb, var(--ombre) 65%, transparent);
+}
+.nom {
+  position: absolute;
+  top: calc(100% + .5cqw);
+  width: 100%;
+  padding: .25cqw .45cqw;
+  border-radius: .4cqw;
+  background: color-mix(in srgb, var(--ombre) 85%, transparent);
+  color: var(--texte);
+  text-align: center;
+  font-size: 1.18cqw;
+  line-height: 1.35;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.visiteur { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; opacity: 0; }
+/* Les noms suivent l'extérieur de la tablée pour ne jamais masquer le portrait voisin. */
+.invite[data-etiquette="haut"] .nom { top: auto; bottom: calc(100% + .5cqw); }
+.invite[data-etiquette="gauche"] .nom {
+  top: 50%; right: calc(50% + 3.4cqw); transform: translateY(-50%);
+}
+.invite[data-etiquette="droite"] .nom {
+  top: 50%; left: calc(50% + 3.4cqw); transform: translateY(-50%);
+}
+.lueur-tv {
+  position: absolute;
+  left: var(--tv-gauche);
+  top: var(--tv-haut);
+  width: var(--tv-largeur);
+  height: var(--tv-hauteur);
+  background: var(--ecran);
+  box-shadow: 0 0 3cqw 1cqw color-mix(in srgb, var(--ecran) 75%, transparent);
+  opacity: 0;
+}
+.destination {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1.6cqw;
+  padding: 6cqw;
+  background: var(--ecran);
+  color: var(--texte);
+  opacity: 0;
+  pointer-events: none;
+}
+.destination p { margin: 0; font-size: 1.8cqw; letter-spacing: .18em; text-transform: uppercase; }
+.destination h2 { margin: 0; max-width: 100%; text-align: center; font-size: 5.2cqw; line-height: 1.15; text-wrap: balance; }
+.pied {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 1.1rem;
+  color: var(--discret);
+  font-size: .8rem;
+}
+progress { flex: 1; min-width: 2rem; height: .35rem; border: 0; border-radius: 1rem; overflow: hidden; background: var(--ligne); accent-color: var(--accent); }
+progress::-webkit-progress-bar { background: var(--ligne); }
+progress::-webkit-progress-value { background: var(--accent); }
+progress::-moz-progress-bar { background: var(--accent); }
+#etat { min-width: 10.5rem; }
+#alerte { margin: 0; color: var(--accent); }
+@media (max-width: 600px) {
+  .entete { justify-content: center; }
+  .commandes { justify-content: center; }
+  .pied { flex-wrap: wrap; gap: .35rem; }
+}
+</style>
+</head>
+<body>
+<header class="entete">
+  <h1>Entrée dans la soirée</h1>
+  <div class="commandes" aria-label="Lecture de la maquette">
+    <button id="lecture" class="principal" type="button" data-testid="intro-play" disabled>Lire</button>
+    <button id="pause" type="button" data-testid="intro-pause" disabled>Pause</button>
+    <div class="nombre" role="group" aria-label="Nombre d’invités">
+      <button type="button" data-testid="intro-count-7" data-nombre="7" aria-pressed="true">7 invités</button>
+      <button type="button" data-testid="intro-count-8" data-nombre="8" aria-pressed="false">8 invités</button>
+    </div>
+  </div>
+</header>
+<main class="cadre">
+  <div id="scene" class="scene" data-testid="intro-scene" data-stage="decouverte" data-status="pret" data-player-count="7" data-time="0" aria-label="La pièce et l’installation des invités">
+    <div id="camera" class="camera">
+      <img id="decor" class="decor" src="piece-reference.png" alt="Le salon : canapé beige, table en verre sur tapis blanc, Uto sur son pouf, cheminée et TV, jukebox et fenêtres donnant sur la rue illuminée pour Noël." draggable="false" data-testid="intro-room">
+      <div id="lueur" class="lueur-tv" aria-hidden="true"></div>
+      <div id="invites" class="invites" data-testid="intro-guests"></div>
+    </div>
+    <div id="destination" class="destination" data-testid="intro-destination">
+      <p>Nouvel An 2027</p>
+      <h2>La partie commence !</h2>
+    </div>
+  </div>
+</main>
+<footer class="pied">
+  <span id="etat" aria-live="polite">La pièce</span>
+  <progress id="avancement" max="9000" value="0" aria-label="Avancement de l’introduction" data-testid="intro-progress"></progress>
+  <p id="alerte" role="alert" hidden>Le décor n’a pas pu être chargé.</p>
+</footer>
+<script>
+"use strict";
+
+// Toute la chorégraphie est regroupée ici ; les coordonnées sont des proportions de l’image validée.
+const REGLAGES = {
+  duree: 9000,
+  arrivee: 900,
+  decalageInvites: 120,
+  trajet: 850,
+  installation: 2800,
+  departTv: 5900,
+  finPortraits: 6300,
+  finZoom: 8400,
+  apparitionTitre: 8500,
+  tv: { gauche: 627 / 1672, haut: 322 / 941, largeur: 244 / 1672, hauteur: 129 / 941 },
+  table: { x: .48, y: .79, rayonX: .24, rayonY: .104 },
+  // Portraits de démonstration uniquement : aucune association avec des personnes réelles.
+  portraits: [
+    { visage: "🦊", couleur: "#ff4f9a" }, { visage: "🐼", couleur: "#ffb300" },
+    { visage: "🐸", couleur: "#2ed3a4" }, { visage: "🦁", couleur: "#19c3ff" },
+    { visage: "🐙", couleur: "#8a5cff" }, { visage: "🦉", couleur: "#ff6b3d" },
+    { visage: "🐧", couleur: "#e4def5" }, { visage: "🐲", couleur: "#d35cff" },
+  ],
+};
+const scene = document.getElementById("scene");
+const camera = document.getElementById("camera");
+const decor = document.getElementById("decor");
+const invites = document.getElementById("invites");
+const lueur = document.getElementById("lueur");
+const destination = document.getElementById("destination");
+const lecture = document.getElementById("lecture");
+const pause = document.getElementById("pause");
+const avancement = document.getElementById("avancement");
+const etat = document.getElementById("etat");
+const alerte = document.getElementById("alerte");
+const mouvementReduit = matchMedia("(prefers-reduced-motion: reduce)");
+
+let nombre = 7;
+let temps = 0;
+let depart = 0;
+let enLecture = false;
+let commence = false;
+let imagePrete = false;
+let trame = null;
+let animations = [];
+
+// Les animations restent en pause : une seule horloge règle leur currentTime, y compris lors d’un rejeu.
+function animer(element, images) {
+  const animation = element.animate(images.map(function(image) {
+    const { a, ...proprietes } = image;
+    return { ...proprietes, offset: a / REGLAGES.duree };
+  }), { duration: REGLAGES.duree, fill: "both" });
+  animation.pause();
+  animation.currentTime = temps;
+  animations.push(animation);
+}
+function transformation(x, y, echelle, angle) {
+  return "translate(" + x + "cqw, " + y + "cqh) scale(" + echelle + ") rotate(" + angle + "deg)";
+}
+function preparer() {
+  animations.forEach(function(animation) { animation.cancel(); });
+  animations = [];
+  invites.replaceChildren();
+  const reduit = mouvementReduit.matches;
+  const tv = REGLAGES.tv;
+  scene.style.setProperty("--tv-gauche", tv.gauche * 100 + "%");
+  scene.style.setProperty("--tv-haut", tv.haut * 100 + "%");
+  scene.style.setProperty("--tv-largeur", tv.largeur * 100 + "%");
+  scene.style.setProperty("--tv-hauteur", tv.hauteur * 100 + "%");
+  scene.dataset.playerCount = String(nombre);
+  scene.dataset.reducedMotion = String(reduit);
+
+  for (let i = 0; i < nombre; i++) {
+    const angle = -Math.PI / 2 + i * 2 * Math.PI / nombre;
+    const x = REGLAGES.table.x + Math.cos(angle) * REGLAGES.table.rayonX;
+    const y = REGLAGES.table.y + Math.sin(angle) * REGLAGES.table.rayonY;
+    const invite = document.createElement("div");
+    invite.className = "invite";
+    invite.style.left = x * 100 + "%";
+    invite.style.top = y * 100 + "%";
+    invite.style.setProperty("--couleur", REGLAGES.portraits[i].couleur);
+    invite.dataset.testid = "intro-guest-" + (i + 1);
+    invite.dataset.etiquette = Math.sin(angle) < -.35 ? "haut" : Math.sin(angle) > .35 ? "bas" : Math.cos(angle) < 0 ? "gauche" : "droite";
+    const visiteur = document.createElement("div");
+    visiteur.className = "visiteur";
+    const portrait = document.createElement("span");
+    portrait.className = "portrait";
+    portrait.setAttribute("aria-hidden", "true");
+    portrait.textContent = REGLAGES.portraits[i].visage;
+    const nom = document.createElement("span");
+    nom.className = "nom";
+    nom.textContent = "Invité numéro " + String(i + 1).padStart(2, "0"); // 16 caractères.
+    visiteur.append(portrait, nom);
+    invite.append(visiteur);
+    invites.append(invite);
+
+    const debut = REGLAGES.arrivee + i * REGLAGES.decalageInvites;
+    const depuisX = (x < .48 ? -.12 : 1.12) - x;
+    const depuisY = (i % 2 === 0 ? -.12 : 1.12) - y;
+    const identite = transformation(0, 0, 1, 0);
+    const loin = reduit ? identite : transformation(depuisX * 100, depuisY * 100, .65, x < .48 ? -12 : 12);
+    const rebond = reduit ? identite : transformation(x < .48 ? .5 : -.5, -.35, 1.05, 2);
+    animer(visiteur, [
+      { a: 0, opacity: 0, transform: loin },
+      { a: debut, opacity: 0, transform: loin, easing: "cubic-bezier(.16, 1, .3, 1)" },
+      { a: debut + REGLAGES.trajet * .72, opacity: 1, transform: rebond, easing: "ease-out" },
+      { a: debut + REGLAGES.trajet, opacity: 1, transform: identite },
+      { a: REGLAGES.departTv, opacity: 1, transform: identite, easing: "ease-in" },
+      { a: REGLAGES.finPortraits, opacity: 0, transform: reduit ? identite : transformation(0, -.7, .96, 0) },
+      { a: REGLAGES.duree, opacity: 0, transform: identite },
+    ]);
+  }
+
+  const echelle = Math.max(1 / tv.largeur, 1 / tv.hauteur);
+  const cibleX = 50 - echelle * (tv.gauche + tv.largeur / 2) * 100;
+  const cibleY = 50 - echelle * (tv.haut + tv.hauteur / 2) * 100;
+  const cible = reduit ? "none" : "translate(" + cibleX + "%, " + cibleY + "%) scale(" + echelle + ")";
+  animer(camera, [
+    { a: 0, transform: "translate(0%, 0%) scale(1)" },
+    { a: REGLAGES.finPortraits, transform: "translate(0%, 0%) scale(1)", easing: "cubic-bezier(.6, 0, .15, 1)" },
+    { a: REGLAGES.finZoom, transform: cible },
+    { a: REGLAGES.duree, transform: cible },
+  ]);
+  animer(lueur, [
+    { a: 0, opacity: 0 },
+    { a: REGLAGES.departTv - 600, opacity: 0 },
+    { a: REGLAGES.finPortraits, opacity: .7 },
+    { a: REGLAGES.finZoom, opacity: 1 },
+    { a: REGLAGES.duree, opacity: 1 },
+  ]);
+  animer(destination, [
+    { a: 0, opacity: 0 },
+    { a: reduit ? REGLAGES.finPortraits : REGLAGES.finZoom - 150, opacity: 0 },
+    { a: REGLAGES.apparitionTitre, opacity: 1 },
+    { a: REGLAGES.duree, opacity: 1 },
+  ]);
+  afficher();
+}
+function afficher() {
+  animations.forEach(function(animation) { animation.currentTime = temps; });
+  let etape = "decouverte";
+  let libelle = "La pièce";
+  if (temps >= REGLAGES.duree) { etape = "terminee"; libelle = "La partie commence"; }
+  else if (temps >= REGLAGES.departTv) { etape = "television"; libelle = "Entrée dans la TV"; }
+  else if (temps >= REGLAGES.installation) { etape = "table"; libelle = "La tablée"; }
+  else if (temps >= REGLAGES.arrivee) { etape = "arrivee"; libelle = "Arrivée des invités"; }
+  scene.dataset.stage = etape;
+  scene.dataset.status = enLecture ? "lecture" : temps >= REGLAGES.duree ? "termine" : commence ? "pause" : "pret";
+  scene.dataset.time = String(Math.round(temps));
+  if (etat.textContent !== libelle) etat.textContent = libelle;
+  avancement.value = temps;
+  lecture.textContent = commence ? "Rejouer" : "Lire";
+  lecture.disabled = !imagePrete;
+  pause.textContent = commence && !enLecture && temps < REGLAGES.duree ? "Reprendre" : "Pause";
+  pause.disabled = !commence || temps >= REGLAGES.duree;
+}
+function avancer(maintenant) {
+  if (!enLecture) return;
+  temps = Math.min(REGLAGES.duree, maintenant - depart);
+  if (temps >= REGLAGES.duree) enLecture = false;
+  afficher();
+  if (enLecture) trame = requestAnimationFrame(avancer);
+}
+function arreter() {
+  if (enLecture) temps = Math.min(REGLAGES.duree, performance.now() - depart);
+  enLecture = false;
+  cancelAnimationFrame(trame);
+}
+function reprendre() {
+  enLecture = true;
+  commence = true;
+  depart = performance.now() - temps;
+  afficher();
+  trame = requestAnimationFrame(avancer);
+}
+lecture.addEventListener("click", function() {
+  arreter();
+  temps = 0;
+  reprendre();
+});
+pause.addEventListener("click", function() {
+  if (enLecture) { arreter(); afficher(); }
+  else reprendre();
+});
+document.querySelectorAll("[data-nombre]").forEach(function(bouton) {
+  bouton.addEventListener("click", function() {
+    const nouveauNombre = Number(bouton.dataset.nombre);
+    if (nouveauNombre === nombre) return;
+    const relancer = commence;
+    arreter();
+    nombre = nouveauNombre;
+    temps = 0;
+    commence = false;
+    document.querySelectorAll("[data-nombre]").forEach(function(choix) {
+      choix.setAttribute("aria-pressed", String(Number(choix.dataset.nombre) === nombre));
+    });
+    preparer();
+    if (relancer) reprendre();
+  });
+});
+mouvementReduit.addEventListener("change", function() {
+  preparer();
+});
+decor.addEventListener("load", function() {
+  imagePrete = true;
+  scene.dataset.image = "prete";
+  afficher();
+});
+decor.addEventListener("error", function() {
+  imagePrete = false;
+  scene.dataset.image = "erreur";
+  alerte.hidden = false;
+  afficher();
+});
+if (decor.complete && decor.naturalWidth > 0) {
+  imagePrete = true;
+  scene.dataset.image = "prete";
+}
+preparer();
+</script>
+</body>
+</html>
