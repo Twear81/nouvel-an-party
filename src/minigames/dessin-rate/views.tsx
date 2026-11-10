@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { fireConfetti, Panel, PlayerAvatar, SelectedBadge, TrashIcon, typo, UndoIcon, VoteDots } from "../../web/ui";
+import { Choice, fireConfetti, Panel, PlayerAvatar, TrashIcon, typo, UndoIcon, VoteDots } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { Drawing, DrawingPad, PEN_BG } from "./drawing";
 import type { Priv, Pub, Results, ResultCard, TvPub } from "./game";
@@ -203,7 +203,7 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
       <div className="order-2 min-h-0 flex-1">
         <DrawingPad strokes={strokes} color={color} width={width} disabled={snapshot.paused} onChange={change} />
       </div>
-      <div data-testid="draw-tools" className="order-1 -mx-3 flex shrink-0 items-center justify-center gap-1">
+      <div data-ui="toolbar" data-testid="draw-tools" className="order-1 -mx-3 flex shrink-0 items-center justify-center gap-1">
         {Array.from({ length: PALETTE }, (_, i) => (
           <button
             key={i}
@@ -211,6 +211,8 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
             data-testid={`draw-color-${i}`}
             aria-label={`Couleur ${i + 1}`}
             aria-pressed={color === i}
+            data-ui="tool" data-kind="pen"
+            data-selected={color === i}
             onClick={() => setColor(i)}
             className={`${TOOL} ${PEN_BG[i]} ${color === i ? "scale-110 border-accent shadow-glow" : "border-ink/40"}`}
           />
@@ -222,16 +224,18 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
             data-testid={`draw-width-${i}`}
             aria-label={i === 0 ? "Trait fin" : "Trait épais"}
             aria-pressed={width === i}
+            data-ui="tool" data-kind="width"
+            data-selected={width === i}
             onClick={() => setWidth(i)}
             className={`${TOOL} bg-surface-strong ${width === i ? "border-accent" : "border-transparent"}`}
           >
             <span className={`rounded-full bg-ink ${i === 0 ? "h-1.5 w-1.5" : "h-3.5 w-3.5"}`} />
           </button>
         ))}
-        <button type="button" data-testid="draw-undo" aria-label="Annuler le dernier trait" disabled={strokes.length === 0} onClick={() => change(strokes.slice(0, -1), true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
+        <button type="button" data-ui="tool" data-kind="action" data-selected="false" data-testid="draw-undo" aria-label="Annuler le dernier trait" disabled={strokes.length === 0} onClick={() => change(strokes.slice(0, -1), true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
           <UndoIcon />
         </button>
-        <button type="button" data-testid="draw-clear" aria-label="Tout effacer" disabled={strokes.length === 0} onClick={() => change([], true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
+        <button type="button" data-ui="tool" data-kind="action" data-selected="false" data-testid="draw-clear" aria-label="Tout effacer" disabled={strokes.length === 0} onClick={() => change([], true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
           <TrashIcon />
         </button>
       </div>
@@ -264,26 +268,24 @@ function PhoneVote({ pub, priv, sendInput, snapshot }: Props) {
           const blank = c.strokes.length === 0;
           const selected = vote === c.playerId;
           return (
-            <motion.button
+            <Choice
               key={c.playerId}
-              type="button"
               data-testid={`vote-card-${c.playerId}`}
               data-blank={blank}
               disabled={blank}
-              aria-pressed={selected}
-              whileTap={blank ? undefined : { scale: 0.94 }}
-              animate={{ scale: selected ? 1.03 : 1, opacity: blank ? 0.55 : vote !== null && !selected ? 0.55 : 1 }}
+              selected={selected}
+              state={blank || (vote !== null && !selected) ? "faded" : "idle"}
               onClick={() => void sendInput({ target: c.playerId }).catch(() => {})}
-              className={`relative flex min-w-0 flex-col items-center gap-1 rounded-card border-2 p-1.5 ${selected ? "border-accent bg-accent/25 shadow-glow" : "glass border-transparent"}`}
+              checkTone="accent"
+              checkSize="sm"
+              checkClassName="absolute right-1 top-1"
+              className="min-w-0 flex-col gap-1 p-1.5"
             >
               <div className="aspect-square w-full">
                 <Drawing strokes={c.strokes} blankLabel="Page blanche" />
               </div>
               <span className="line-clamp-2 w-full text-balance text-center text-xs font-bold leading-tight">{c.word}</span>
-              {selected && (
-                <SelectedBadge tone="accent" size="sm" className="absolute right-1 top-1" />
-              )}
-            </motion.button>
+            </Choice>
           );
         })}
       </div>

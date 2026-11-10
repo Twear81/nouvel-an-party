@@ -32,6 +32,7 @@ tests/unit/<id>.test.ts        tests de la logique
 | `privateView?(state, playerId, ctx)` | ce que voit un seul téléphone (« tu as voté pour X ») |
 | `tvView?(state, ctx)` | optionnel : remplace `publicView` pour la TV seulement. Pour ce que les téléphones ne doivent pas recevoir, même caché (ex : la suite de Simon) |
 | `onPresenceChange?(state, ctx)` | optionnel : un participant se connecte ou se déconnecte pendant le jeu (voir ci-dessous) |
+| `progress?(state, ctx)` | optionnel : compteur commun « qui a répondu » du chrono de la TV : `{ done, expected }` (nombres seulement, rien de secret), ou `null` hors étape de réponse (révélation, tour par tour, animation). `expected` = participants concernés par l'étape en cours, déconnectés compris (c'est un affichage, pas une condition de fin). Helper `progressOf(ctx, (id) => state.votes.has(id))`. Le moteur le recopie dans `round.progress` (null hors phase `playing`, si le jeu ne l'implémente pas, ou s'il lève une exception) |
 | `interlude?(cfg)` | optionnel : renvoie N = « une fois toutes les N manches » pour faire de ce jeu une surprise sans annonce (voir « Jeux interlude » plus bas) ; absent ou `null` = jeu normal |
 | `finish(state, ctx)` | fin de manche : renvoie `{ results, scores }`. `results` est libre (affiché par `TvResults`), `scores` = points gagnés **dans cette manche** par `playerId` (absents = 0) |
 
@@ -79,7 +80,7 @@ Si `TvResults` joue une animation (prix qui arrivent un par un, podium…), déc
 
 Props (`MiniGameViewProps`) : `snapshot`, `round` (infos de la manche), `pub` (= `publicView`), `priv` (= `privateView`, `null` sur la TV), `results` (= `finish().results`, phase résultats seulement), `players`, `playerById(id)`, `sendInput(payload)` (téléphone : appelle `input` côté serveur).
 
-**Règle design** : n'utilisez que les composants de `src/web/ui` (`Button`, `Panel`, `PlayerAvatar`, `Countdown`…, exportés par `src/web/ui/index.ts`) et les tokens de `src/web/theme` (couleurs, tailles, espacements). Pas de couleur, police ou taille en dur : ainsi tout changement de design (voir `docs/changer-le-design.md`) s'applique à tous les jeux. Pas d'état de jeu dans React : tout vient du serveur (un téléphone qui recharge retrouve la manche). Pour lister les joueurs de la manche, filtrez avec `round.participants` (les retardataires n'y sont pas).
+**Règle design** : n'utilisez que les composants de `src/web/ui` (`Button`, `Panel`, `PlayerAvatar`, `Countdown`…, exportés par `src/web/ui/index.ts`) et les tokens de `src/web/theme` (couleurs, tailles, espacements). Pas de couleur, police ou taille en dur : ainsi tout changement de design (voir `docs/changer-le-design.md`) s'applique à tous les jeux. Les boutons ou cartes de choix s'écrivent avec `Choice`, les barres de résultat animées avec `ResultBar` (ne pas refaire de `motion.button` ni de barre à la main : ce sont eux que les skins habillent). **Un mini-jeu ne connaît aucun skin** : jamais de classe ni de style pour un skin donné (voir `docs/skins.md`). Les chiffres de score et de chrono utilisent `font-num`. Pas d'état de jeu dans React : tout vient du serveur (un téléphone qui recharge retrouve la manche). Pour lister les joueurs de la manche, filtrez avec `round.participants` (les retardataires n'y sont pas).
 
 ## 4. Enregistrer le jeu
 Deux listes à compléter, sinon le jeu n'apparaît pas (ou plante) :

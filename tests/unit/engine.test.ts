@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
+import { SKINS, type SkinId } from "../../src/shared/skins";
 import { activeNow } from "../../src/shared/clock";
 import { GameEngine, GameError } from "../../src/server/engine/engine";
 import { createTestEngine, MemoryPersistence, validProfile } from "./helpers/engine-setup";
@@ -147,6 +148,44 @@ describe("entrées des joueurs", () => {
     expect(() => t.engine.input(t.ids[0]!, { gameError: true })).toThrow("refusé");
     expect(() => t.engine.input(t.ids[0]!, { boom: true })).not.toThrow();
     expect(t.engine.snapshot(null).phase).toBe("playing");
+  });
+});
+
+describe("compteur commun des réponses (progress)", () => {
+  it("null hors de la phase de jeu, puis suit les réponses", () => {
+    const t = createTestEngine();
+    const prog = () => t.engine.snapshot(null).round?.progress;
+    expect(t.engine.snapshot(null).round).toBeNull();
+    t.engine.start();
+    expect(prog()).toBeNull(); // intro
+    t.clock.advance(T.intro);
+    expect(prog()).toEqual({ done: 0, expected: 3 });
+    t.engine.input(t.ids[0]!, { v: 1 });
+    expect(prog()).toEqual({ done: 1, expected: 3 });
+    t.engine.input(t.ids[1]!, { v: 2 });
+    expect(t.engine.snapshot(t.ids[0]!).round?.progress).toEqual({ done: 2, expected: 3 });
+    t.clock.advance(T.round);
+    expect(prog()).toBeNull(); // résultats
+  });
+
+  it("un joueur déconnecté reste compté parmi les attendus", () => {
+    const t = startPlaying();
+    t.engine.disconnect(t.ids[2]!);
+    expect(t.engine.snapshot(null).round?.progress).toEqual({ done: 0, expected: 3 });
+  });
+
+  it("null si le jeu n'implémente pas progress", () => {
+    const t = startPlaying({ game: { noProgress: true } });
+    expect(t.engine.snapshot(null).round?.progress).toBeNull();
+  });
+
+  it("une exception de progress ne casse pas le snapshot", () => {
+    const t = startPlaying();
+    t.engine.input(t.ids[0]!, { badProgress: true });
+    const snap = t.engine.snapshot(null);
+    expect(snap.round?.progress).toBeNull();
+    expect(snap.phase).toBe("playing");
+    expect(snap.round?.public).toBeTruthy();
   });
 });
 
@@ -725,5 +764,114 @@ describe("manches interlude (jeu surprise)", () => {
     const after = engine.snapshot(null);
     expect(after).toMatchObject({ phase: "playing", round: { index: savedIndex, interlude: true } });
     expect(s.calls).toEqual(["start", "onPlay"]);
+  });
+});
+
+describe("skins", () => {
+  type T = ReturnType<typeof createTestEngine>;
+  const skinOf = (t: T) => t.engine.snapshot(null).skin;
+  /** Termine la manche en cours (intro → jeu → résultats) et passe à la suivante (ou au final). */
+  function nextRound(t: T) {
+    t.clock.advance(4000);
+    t.clock.advance(10_000);
+    t.engine.skip();
+  }
+  const restart = (t: T, persistence: MemoryPersistence, seed: number) =>
+    new GameEngine({
+      games: [t.fake.loaded],
+      settings: { title: "Test", targetMinutes: 1, order: "melange", introSeconds: 4 },
+      joinUrl: "http://test",
+      clock: new FakeClock(),
+      rng: seededRng(seed),
+      persistence,
+    });
+
+  it("7 manches : les 7 skins passent chacun une fois, le lobby annonce le premier, rien ne change pendant une manche", () => {
+    const t = createTestEngine({ rounds: 7, game: { items: 20 } });
+    const lobby = skinOf(t);
+    t.engine.start();
+    const seen: SkinId[] = [];
+    for (let i = 0; i < 7; i++) {
+      expect(t.engine.snapshot(null).phase).toBe("intro");
+      seen.push(skinOf(t));
+      t.clock.advance(4000);
+      expect(skinOf(t)).toBe(seen[i]!); // pas de changement pendant le jeu
+      t.clock.advance(10_000);
+      expect(t.engine.snapshot(null).phase).toBe("results");
+      expect(skinOf(t)).toBe(seen[i]!); // ni pendant les résultats
+      t.engine.skip();
+    }
+    expect(seen[0]).toBe(lobby);
+    expect([...seen].sort()).toEqual([...SKINS].sort());
+    expect(t.engine.snapshot(null).phase).toBe("final");
+    expect(skinOf(t)).toBe(seen[6]!); // dernière manche jouée
+  });
+
+  it("14 manches : un changement toutes les 2 manches", () => {
+    const t = createTestEngine({ rounds: 14, game: { items: 20 } });
+    t.engine.start();
+    const seen: SkinId[] = [];
+    for (let i = 0; i < 14; i++) {
+      seen.push(skinOf(t));
+      nextRound(t);
+    }
+    for (let i = 0; i < 14; i += 2) expect(seen[i + 1]).toBe(seen[i]!);
+    expect(new Set(seen).size).toBe(7);
+  });
+
+  it("ordre tiré au hasard (rng du moteur), retiré à chaque retour au lobby", () => {
+    const orderOf = (seed: number) => {
+      const t = createTestEngine({ rounds: 7, seed, game: { items: 20 } });
+      t.engine.start();
+      const seen: SkinId[] = [];
+      for (let i = 0; i < 7; i++) {
+        seen.push(skinOf(t));
+        nextRound(t);
+      }
+      return seen;
+    };
+    expect(orderOf(1)).toEqual(orderOf(1)); // même graine, même ordre
+    const many = new Set([1, 2, 3, 4, 5, 6].map((s) => orderOf(s).join()));
+    expect(many.size).toBeGreaterThan(1); // l'ordre varie d'une partie à l'autre
+
+    const t = createTestEngine({ rounds: 7, game: { items: 20 } });
+    const before = Array.from({ length: 6 }, () => {
+      t.engine.backToLobby();
+      return skinOf(t);
+    });
+    expect(new Set(before).size).toBeGreaterThan(1);
+  });
+
+  it("l'ordre est sauvegardé et conservé à la reprise", () => {
+    const persistence = new MemoryPersistence();
+    const t = createTestEngine({ rounds: 7, persistence, game: { items: 20 } });
+    t.engine.start();
+    nextRound(t);
+    nextRound(t);
+    t.clock.advance(4000);
+    const saved = persistence.data!.skinOrder!;
+    expect([...saved].sort()).toEqual([...SKINS].sort());
+    const expected = skinOf(t);
+
+    // Redémarrage avec un autre rng : l'ordre ne doit pas être retiré à nouveau.
+    const engine = restart(t, persistence, 999);
+    engine.resumeSave();
+    expect(engine.snapshot(null).skin).toBe(expected);
+    expect(JSON.parse(JSON.stringify(persistence.data)).skinOrder).toEqual(saved);
+  });
+
+  it("vieille sauvegarde sans ordre (ou ordre invalide) : reprenable, avec l'ordre tiré au démarrage", () => {
+    for (const bad of [undefined, ["dofus", "zelda"]]) {
+      const persistence = new MemoryPersistence();
+      const t = createTestEngine({ rounds: 7, persistence, game: { items: 20 } });
+      t.engine.start();
+      nextRound(t);
+      (persistence.data as { skinOrder?: unknown }).skinOrder = bad;
+      const engine = restart(t, persistence, 5);
+      engine.resumeSave();
+      const s = engine.snapshot(null);
+      expect(s.phase).toBe("intro");
+      expect(SKINS).toContain(s.skin);
+    }
   });
 });

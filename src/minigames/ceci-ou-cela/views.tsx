@@ -1,14 +1,14 @@
 // Écrans de "Ceci ou Cela" : deux réponses face à face (couleurs neutres bleu / rose : ce n'est pas "bien / mal").
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
-import { AnsweredCount, AnsweredRoster, CheckIcon, fit, PlayerAvatar, SelectedBadge, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, CheckIcon, Choice, fit, PlayerAvatar, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
 // Classes écrites en toutes lettres pour que Tailwind les repère.
 const TONES = [
-  { solid: "bg-cool text-bg", soft: "border-cool bg-cool/15", text: "text-cool", glow: "shadow-[0_0_3.5rem_rgb(90_209_255/0.5)]" },
-  { solid: "bg-hot text-bg", soft: "border-hot bg-hot/15", text: "text-hot", glow: "shadow-[0_0_3.5rem_rgb(255_79_154/0.5)]" },
+  { solid: "bg-cool text-bg", soft: "border-cool bg-cool/15", text: "text-cool", glow: "shadow-[0_0_3.5rem_color-mix(in_srgb,var(--color-cool)_50%,transparent)]" },
+  { solid: "bg-hot text-bg", soft: "border-hot bg-hot/15", text: "text-hot", glow: "shadow-[0_0_3.5rem_color-mix(in_srgb,var(--color-hot)_50%,transparent)]" },
 ] as const;
 
 const GuessIcon = () => <span aria-hidden>🎯</span>;
@@ -64,7 +64,7 @@ const Tv = ({ pub, round, playerById, players }: MiniGameViewProps<Pub>) => {
       </div>
 
       <div className="flex flex-col items-center gap-1">
-        <AnsweredCount done={answered} total={voters.length} className="font-display text-4xl text-ink-muted" />
+        <AnsweredCount done={answered} total={voters.length} className="font-num text-4xl text-ink-muted" />
         <AnsweredRoster
           players={voters}
           size="compact"
@@ -100,23 +100,19 @@ const Phone = ({ pub, priv, sendInput, playerById }: MiniGameViewProps<Pub, Priv
         {pub.choices.map((label, i) => {
           const selected = choice === i;
           return (
-            <motion.button
+            <Choice
               key={i}
-              type="button"
               data-testid={`choice-${i}`}
-              whileTap={{ scale: 0.96 }}
-              animate={{ scale: selected ? 1.02 : 1, opacity: choice !== null && !selected ? 0.4 : 1 }}
+              tone={i === 0 ? "cool" : "hot"}
+              selected={selected}
+              state={choice !== null && !selected ? "faded" : "idle"}
               onClick={() => void sendInput({ choice: i }).catch(() => {})}
-              aria-pressed={selected}
-              className={`relative flex min-h-[6rem] flex-1 items-center justify-center rounded-card px-4 shadow-card ${TONES[i]!.solid} ${selected ? "ring-[0.4rem] ring-ink" : ""}`}
+              className="min-h-[6rem] flex-1 px-4"
             >
               <span className="text-balance break-words font-display leading-tight" style={{ fontSize: `${fit(label, 17, 1.5, 3.75)}rem` }}>
                 {label}
               </span>
-              {selected && (
-                <SelectedBadge className="absolute right-3 top-3" />
-              )}
-            </motion.button>
+            </Choice>
           );
         })}
       </div>
@@ -154,7 +150,7 @@ function Camp({ index, label, ids, winner, tie, total, results, playerById }: { 
         </span>
       </div>
       <div className="flex items-center gap-4">
-        <span className={`font-display text-6xl ${tone.text}`}>{ids.length}</span>
+        <span className={`font-num text-6xl ${tone.text}`}>{ids.length}</span>
         {winner && (
           <span className="rounded-chip bg-gold px-5 py-1 text-2xl font-extrabold text-accent-ink">
             {results.mode === "cible" ? "✓ Bonne réponse" : "👑 Majorité"}

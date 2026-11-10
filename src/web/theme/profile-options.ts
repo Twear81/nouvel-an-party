@@ -1,10 +1,10 @@
 // Options du profil joueur : avatars, cadres et couleurs. Ajouter une ligne suffit pour qu'elle apparaisse sur les téléphones.
-// Les cadres sont dessinés en CSS (classes .frame-* dans theme.css).
+// Les cadres partagent les tracés SVG d'AvatarFrame, habillés par les classes .frame-* de theme.css.
 
 export interface AvatarPreset {
   id: string;
   label: string;
-  emoji: string; // v1 : emoji dans un cercle coloré. Pour des images : ajouter un champ `src` et adapter PlayerAvatar.
+  emoji: string; // Pour des images : ajouter un champ `src` et adapter PlayerAvatar (choix et aperçus compris).
 }
 
 export const AVATARS: AvatarPreset[] = [

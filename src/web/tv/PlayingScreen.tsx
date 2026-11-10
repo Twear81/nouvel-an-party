@@ -4,18 +4,33 @@ import { TvGameView } from "./GameView";
 
 export function RoundHeader({ round, children }: { round: RoundInfo; children?: React.ReactNode }) {
   return (
-    <header className="flex items-center justify-between gap-8 px-14 pt-8">
+    <header data-ui="round-header" className="flex items-center justify-between gap-8 px-14 pt-8">
       <div className="flex items-center gap-5">
         {/* Un interlude n'a pas de numéro : le compter dévoilerait sa venue. */}
         {!round.interlude && (
-          <span className="rounded-chip bg-surface-strong px-6 py-2 font-display text-3xl text-accent">
+          <span data-ui="round-tag" className="rounded-chip bg-surface-strong px-6 py-2 font-num text-3xl text-accent">
             {round.number} / {round.normalTotal}
           </span>
         )}
-        <span className="font-display text-3xl text-ink-muted">{round.gameName}</span>
+        <span data-ui="round-game-name" className="font-display text-3xl text-ink-muted">{round.gameName}</span>
       </div>
       {children}
     </header>
+  );
+}
+
+/**
+ * Cadre commun de l'écran d'un mini-jeu sur la TV (jeu et résultats) : invisible dans le thème de base, chaque skin le
+ * dessine en fenêtre de son jeu (`game-frame`, titre `game-frame-title` masqué par défaut, contenu `game-frame-body`).
+ */
+export function GameFrame({ title, className = "mb-4 mt-4", children }: { title: string; className?: string; children: React.ReactNode }) {
+  return (
+    <section data-ui="game-frame" className={`relative mx-14 flex min-h-0 flex-1 flex-col ${className}`}>
+      <h2 data-ui="game-frame-title">{title}</h2>
+      <div data-ui="game-frame-body" className="flex min-h-0 flex-1 flex-col">
+        {children}
+      </div>
+    </section>
   );
 }
 
@@ -31,11 +46,11 @@ export function PlayingScreen({ snapshot, round }: { snapshot: GameSnapshot; rou
   return (
     <div data-testid="tv-playing" data-interlude="false" className="flex min-h-0 flex-1 flex-col">
       <RoundHeader round={round}>
-        <Countdown round={round} size="tv" />
+        <Countdown round={round} size="tv" answeredCount={round.progress?.done} waitingCount={round.progress ? Math.max(0, round.progress.expected - round.progress.done) : undefined} />
       </RoundHeader>
-      <div className="flex min-h-0 flex-1 flex-col px-14 pb-4 pt-4">
+      <GameFrame title={round.gameName}>
         <TvGameView snapshot={snapshot} round={round} kind="Tv" />
-      </div>
+      </GameFrame>
     </div>
   );
 }

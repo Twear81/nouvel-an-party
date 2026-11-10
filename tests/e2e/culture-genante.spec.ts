@@ -18,7 +18,7 @@ async function questionOf(p: Phone): Promise<string> {
   await expect(p.t("cg-phone")).toHaveAttribute("data-stage", "question", { timeout: 20_000 });
   const q = p.t("cg-phone-question");
   await expect(q).toBeVisible();
-  return (await q.innerText()).trim();
+  return (await q.textContent() ?? "").trim();
 }
 
 const choice = (p: Phone, label: string) => p.page.locator('[data-testid^="cg-choice-"]', { hasText: label });
@@ -208,7 +208,7 @@ test.describe("Culture gênante", () => {
         for (const r of records)
           for (const n of r.addedNodes) {
             const el = n as HTMLElement;
-            if (el.querySelector?.('[data-testid="tv-intro"]') || el.dataset?.testid === "tv-intro") w.__intros.push(document.body.innerText.match(/Manche \d+ \/ \d+/)?.[0] ?? "?");
+            if (el.querySelector?.('[data-testid="tv-intro"]') || el.dataset?.testid === "tv-intro") w.__intros.push(document.body.textContent?.match(/Manche \d+ \/ \d+/)?.[0] ?? "?");
           }
       }).observe(document.body, { childList: true, subtree: true });
     });

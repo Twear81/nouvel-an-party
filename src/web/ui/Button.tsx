@@ -2,7 +2,7 @@
 import { motion, type HTMLMotionProps } from "motion/react";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost" | "good" | "bad";
-type Size = "sm" | "md" | "lg" | "xl";
+type Size = "sm" | "md" | "lg" | "xl" | "hero";
 
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-gold text-accent-ink shadow-btn",
@@ -17,6 +17,8 @@ const SIZES: Record<Size, string> = {
   md: "px-6 py-3 text-lg",
   lg: "px-8 py-4 text-2xl",
   xl: "px-10 py-6 text-4xl",
+  // Bouton géant qui remplit la place (STOP du compte à rebours) : la hauteur vient de `className` (flex-1…).
+  hero: "flex items-center justify-center px-10 py-6 text-[5.5rem] leading-none",
 };
 
 export interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
@@ -31,6 +33,9 @@ export function Button({ variant = "primary", size = "md", block, className = ""
       whileTap={{ scale: 0.95, y: 3 }}
       whileHover={rest.disabled ? undefined : { scale: 1.03 }}
       type="button"
+      data-ui="button"
+      data-variant={variant}
+      data-size={size}
       className={`rounded-btn font-display tracking-wide transition-opacity disabled:opacity-40 ${VARIANTS[variant]} ${SIZES[size]} ${block ? "w-full" : ""} ${className}`}
       {...rest}
     >

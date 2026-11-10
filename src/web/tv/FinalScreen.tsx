@@ -47,7 +47,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
 
       <div className="flex min-h-0 w-full flex-1 items-end justify-center gap-12">
         {/* Podium */}
-        <div className="flex items-end gap-5">
+        <div data-ui="podium" className="flex items-end gap-5">
           {podiumOrder.map((i) => {
             const p = podium[i]!;
             const shown = revealed(i);
@@ -65,7 +65,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                         {i === 0 && <motion.span animate={{ rotate: [-8, 8, -8] }} transition={{ repeat: Infinity, duration: 2 }} className="text-7xl">👑</motion.span>}
                         <PlayerAvatar profile={p.profile} size={i === 0 ? "xl" : "lg"} />
                         <span className="max-w-full truncate text-3xl font-bold">{p.profile!.name}</span>
-                        <span className="font-display text-4xl text-accent">{p.score}</span>
+                        <span className="font-num text-4xl text-accent">{p.score}</span>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -96,15 +96,18 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                     layout
                     key={p.id}
                     data-testid={`rank-${i + 1}`}
+                    data-ui="score-row"
+                    data-rank={rankOf(sorted, i)}
+                    data-highlight="false"
                     initial={{ opacity: 0, x: 120 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="glass flex items-center gap-4 rounded-btn px-5 py-2"
                     style={{ order: i }}
                   >
-                    <span className="w-12 text-center font-display text-3xl text-ink-muted">{rankOf(sorted, i)}</span>
+                    <span className="w-12 text-center font-num text-3xl text-ink-muted">{rankOf(sorted, i)}</span>
                     <PlayerAvatar profile={p.profile} size="sm" />
                     <span className="min-w-0 flex-1 truncate text-2xl font-bold">{p.profile!.name}</span>
-                    <span className="font-display text-3xl text-accent">{p.score}</span>
+                    <span className="font-num text-3xl text-accent">{p.score}</span>
                   </motion.div>
                 );
               })}

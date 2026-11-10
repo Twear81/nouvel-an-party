@@ -10,6 +10,8 @@ import { randomBytes, randomUUID } from "node:crypto";
 import type { RoundContext } from "../../minigames/contract";
 import { activeNow } from "../../shared/clock";
 import { profileSchema } from "../../shared/schemas";
+import { shuffle } from "../../shared/shuffle";
+import { SKINS, isSkinId, skinForRound, type SkinId } from "../../shared/skins";
 import type { GameSnapshot, Phase, PlayerId, Profile, PublicPlayer, RoundInfo, Setup } from "../../shared/types";
 import { realClock, TimerGroup, type Clock } from "./clock";
 import { buildCatalog, buildPlan, defaultSetup, sanitizeSetup, type LoadedGame, type PlannedRound } from "./planner";
@@ -31,6 +33,8 @@ export interface SaveData {
   plan: PlannedRound[];
   roundIndex: number;
   phase: Phase;
+  /** Ordre des skins de la partie (absent des anciennes sauvegardes : un nouvel ordre est tiré). */
+  skinOrder?: SkinId[];
 }
 
 export interface Persistence {
@@ -80,6 +84,8 @@ export class GameEngine {
   private paused = false;
   private plan: PlannedRound[] = [];
   private roundIndex = -1;
+  /** Ordre (tiré au hasard) des 7 skins : le lobby montre le premier, la partie les enchaîne. Retiré à chaque retour au lobby. */
+  private skinOrder: SkinId[] = [];
   private current: CurrentRound | null = null;
   private continued = new Set<PlayerId>();
   private setup: Setup;
@@ -94,6 +100,7 @@ export class GameEngine {
     this.games = new Map(opts.games.map((g) => [g.game.id, g]));
     this.clock = opts.clock ?? realClock;
     this.rng = opts.rng ?? Math.random;
+    this.skinOrder = shuffle([...SKINS], this.rng);
     this.catalog = buildCatalog(opts.games, opts.settings.introSeconds);
     this.setup = defaultSetup(this.catalog, opts.settings.targetMinutes);
     this.restoreFromSave();
@@ -171,6 +178,7 @@ export class GameEngine {
     if (!save || this.phase !== "lobby") throw new GameError("Rien à reprendre");
     this.plan = save.plan.filter((r) => this.games.has(r.gameId));
     // Une manche interrompue avant ses résultats est rejouée, sinon on passe à la suivante.
+    this.skinOrder = validSkinOrder(save.skinOrder) ?? this.skinOrder;
     this.roundIndex = save.phase === "results" ? save.roundIndex : save.roundIndex - 1;
     this.resumable = null;
     this.nextRound();
@@ -218,6 +226,7 @@ export class GameEngine {
     this.phase = "lobby";
     this.paused = false;
     this.plan = [];
+    this.skinOrder = shuffle([...SKINS], this.rng);
     this.roundIndex = -1;
     this.continued.clear();
     for (const p of this.players.values()) p.score = 0;
@@ -437,6 +446,7 @@ export class GameEngine {
         deadline: this.paused ? null : fireAt,
         pausedRemainingMs: this.paused && c.mainTimer !== null ? c.timers.remaining(c.mainTimer) : null,
         timerTotalMs: this.phase === "playing" ? c.timerTotalMs : null,
+        progress: this.phase === "playing" && g.progress ? safe(() => g.progress!(c.state, c.ctx)) : null,
         public: safe(() => (viewer === null && g.tvView ? g.tvView(c.state, c.ctx) : g.publicView(c.state, c.ctx))),
         results: this.phase === "results" ? c.results : null,
         deltas: this.phase === "results" ? c.deltas : null,
@@ -463,8 +473,17 @@ export class GameEngine {
           }
         : null,
       joinUrl: this.opts.joinUrl,
+      skin: this.currentSkin(),
       me: viewer ? { id: viewer, private: priv, inRound: !!c?.ctx.players.some((p) => p.id === viewer) } : null,
     };
+  }
+
+  // ───────────────────────────── Skins ─────────────────────────────
+
+  /** Lobby : skin de la 1re manche à venir ; en partie : skin de la manche (final : celui de la dernière manche jouée). */
+  private currentSkin(): SkinId {
+    if (this.phase === "lobby" || this.plan.length === 0) return this.skinOrder[0]!;
+    return skinForRound(this.skinOrder, Math.min(this.roundIndex, this.plan.length - 1), this.plan.length);
   }
 
   // ───────────────────────────── Sauvegarde ─────────────────────────────
@@ -477,6 +496,7 @@ export class GameEngine {
       plan: this.plan,
       roundIndex: this.roundIndex,
       phase: this.phase,
+      skinOrder: this.skinOrder,
     });
   }
 
@@ -512,4 +532,9 @@ function safe<T>(fn: () => T): T | null {
     console.error("erreur de vue de mini-jeu :", err);
     return null;
   }
+}
+
+/** Ordre de skins sauvegardé, s'il est complet et valide. */
+function validSkinOrder(o: unknown): SkinId[] | null {
+  return Array.isArray(o) && o.length === SKINS.length && o.every(isSkinId) && new Set(o).size === SKINS.length ? [...o] : null;
 }

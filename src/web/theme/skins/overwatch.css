@@ -1,0 +1,417 @@
+/*
+ * Skin « Overwatch » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="overwatch"].
+ * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
+ * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ */
+
+/* ── Jetons : le fond est CLAIR (bleu-gris), donc --color-ink est marine ; les « fenêtres » ardoise redéfinissent
+   ink / ink-muted / accent en blanc / cyan (voir « Portée sombre » plus bas). */
+html[data-skin="overwatch"] {
+  /* Forme partagée par les portraits et tous les cadres du profil. */
+  --avatar-radius: 0;
+  --avatar-circle: none;
+  --avatar-hexagon: inline;
+  --avatar-clip: var(--ow-hex);
+  --color-bg: #b4c1da;
+  --color-bg-2: #d3dcec;
+  --color-bg-3: #8e9ec0;
+  --color-surface: #e2e8f2;
+  --color-surface-strong: #c3cde0;
+  --color-line: rgb(42 51 82 / 0.35);
+  --color-ink: #2a3352;
+  --color-ink-muted: #3f4d6e;
+  --color-accent: #1668a8;
+  --color-accent-strong: #1ba3d6;
+  --color-accent-deep: #c24a14;
+  --color-accent-ink: #2a3352;
+  --color-hot: #f06a2e;
+  --color-cool: #1ba3d6;
+  --color-good: #57e03c;
+  --color-good-deep: #2b9a1a;
+  --color-bad: #ff4a5a;
+  --color-bad-deep: #b8203f;
+  --color-warn: #f99e1a;
+  --font-display: "Twemoji", "Bebas Neue", "Big Noodle Titling", "Arial Narrow", sans-serif;
+  --font-sans: "Twemoji", "Jost", Futura, sans-serif;
+  --font-num: "Twemoji", "Bebas Neue", "Big Noodle Titling", "Arial Narrow", sans-serif;
+  --radius-card: 0;
+  --radius-btn: 0;
+  --radius-chip: 0;
+  --shadow-card: 0 0.3rem 0.8rem rgb(30 40 80 / 0.28);
+  --shadow-glow: 0 0 1.2rem rgb(46 230 242 / 0.55);
+  --shadow-btn: 0 0.25rem 0.6rem rgb(30 40 80 / 0.4);
+  --gradient-bg: radial-gradient(70% 60% at 50% 35%, #d3dcec 0%, #aebbd6 55%, #8e9ec0 100%);
+  --gradient-gold: linear-gradient(180deg, #f06a2e, #f06a2e);
+  --gradient-hot: linear-gradient(135deg, #1ba3d6, #2ee6f2);
+  --gradient-glass: linear-gradient(180deg, #3d4763, #3d4763);
+  --scrim-blur: 0px;
+  --ow-navy: #3a4870;
+  --ow-navy-2: #2a3352;
+  --ow-slate: #3d4763;
+  --ow-cyan: #2ee6f2;
+  --ow-blue: #1ba3d6;
+  --ow-orange: #f06a2e;
+  --ow-row: #eef1f7;
+  --ow-band: #56657f;
+  --ow-hex: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  --ow-bevel-r: polygon(0.6rem 0, 100% 0, 100% 100%, 0 100%);
+  --ow-bevel-l: polygon(0 0, 100% 0, calc(100% - 0.6rem) 100%, 0 100%);
+}
+
+/* ── Portée sombre : cartes / fenêtres / bandeaux ardoise ou marine = texte blanc, chiffres cyan */
+html[data-skin="overwatch"] [data-ui="panel"],
+html[data-skin="overwatch"] .glass,
+html[data-skin="overwatch"] [data-ui="dialog"],
+html[data-skin="overwatch"] [data-ui="round-header"],
+html[data-skin="overwatch"] [data-ui="roster"],
+html[data-skin="overwatch"] [data-ui="score-row"],
+html[data-skin="overwatch"] [data-ui="paused"],
+html[data-skin="overwatch"] [data-ui="host-bar"] {
+  --color-ink: #ffffff;
+  --color-ink-muted: #c9d3e6;
+  --color-accent: #2ee6f2;
+  --color-accent-strong: #9ff6fb;
+  --color-line: rgb(255 255 255 / 0.25);
+  color: #ffffff;
+  --color-surface: #4b5877;
+  --color-surface-strong: #56657f;
+  --color-bg: #2a3352;
+  --color-accent-ink: #2a3352;
+}
+
+/* ── Typographie : grandes condensées obliques façon Big Noodle, textes Futura */
+html[data-skin="overwatch"] h1,
+html[data-skin="overwatch"] h2 { font-family: var(--font-display); font-style: italic; font-weight: 400; letter-spacing: 0.01em; }
+html[data-skin="overwatch"] .font-display,
+html[data-skin="overwatch"] .font-num { font-style: italic; font-weight: 400; letter-spacing: 0.02em; }
+html[data-skin="overwatch"] .font-num { font-variant-numeric: tabular-nums; }
+
+/* ── Composants */
+
+/* Classes du thème */
+html[data-skin="overwatch"] .glass {
+  background: var(--ow-slate);
+  border: 0;
+  border-top: 0.2rem solid rgb(255 255 255 / 0.18);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-skin="overwatch"] .bg-gold { background: var(--ow-orange); }
+html[data-skin="overwatch"] .bg-hot-gradient { background: linear-gradient(135deg, #1ba3d6, #2ee6f2); }
+html[data-skin="overwatch"] .text-gold-gradient { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: var(--color-ink); -webkit-text-fill-color: currentColor; }
+html[data-skin="overwatch"] .shadow-glow { box-shadow: 0 0 1.2rem rgb(46 230 242 / 0.55); }
+
+/* Panneau : fenêtre ardoise + languette blanche biseautée */
+html[data-skin="overwatch"] [data-ui="panel"] { position: relative; }
+html[data-skin="overwatch"] [data-ui="panel-title"] {
+  position: absolute;
+  top: -0.9rem;
+  left: 1rem;
+  z-index: 2;
+  margin: 0;
+  padding: 0.05rem 1.3rem 0.05rem 0.8rem;
+  background: #f2f4f8;
+  color: var(--ow-blue);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.35rem;
+  line-height: 1.3;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.6rem) 100%, 0 100%);
+}
+
+/* Boutons : rectangle orange à liseré blanc, Futura gras en capitales */
+html[data-skin="overwatch"] [data-ui="button"] {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 0.12em solid #fff;
+  color: #fff;
+  box-shadow: 0 0 0 1px rgb(42 51 82 / 0.45), var(--shadow-btn);
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+html[data-skin="overwatch"] [data-ui="button"][data-variant="primary"] { background: var(--ow-orange); }
+html[data-skin="overwatch"] [data-ui="button"][data-variant="secondary"] { background: var(--ow-navy); border-color: rgb(255 255 255 / 0.7); }
+html[data-skin="overwatch"] [data-ui="button"][data-variant="danger"],
+html[data-skin="overwatch"] [data-ui="button"][data-variant="bad"] { background: #d83a4a; }
+html[data-skin="overwatch"] [data-ui="button"][data-variant="good"] { background: #2b9a1a; }
+html[data-skin="overwatch"] [data-ui="button"][data-variant="ghost"] { background: transparent; border-color: transparent; box-shadow: none; color: var(--color-ink-muted); }
+html[data-skin="overwatch"] [data-ui="button"]:disabled { filter: grayscale(0.6); }
+
+/* Choix : ligne claire, texte marine gras en capitales ; sélectionné = cyan */
+html[data-skin="overwatch"] [data-ui="choice"] {
+  color: var(--ow-navy-2);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: 0;
+  box-shadow: 0 0.2rem 0 rgb(42 51 82 / 0.35);
+}
+html[data-skin="overwatch"] [data-ui="choice"][data-tone="glass"] { background: var(--ow-row); border-left: 0.35rem solid var(--ow-blue); }
+html[data-skin="overwatch"] [data-ui="choice"][data-selected="true"] {
+  outline: 0.18rem solid #fff;
+  outline-offset: -0.18rem;
+  box-shadow: 0 0 0 0.12rem var(--ow-navy-2), 0 0 1.1rem rgb(46 230 242 / 0.7);
+}
+html[data-skin="overwatch"] [data-ui="choice"][data-tone="glass"][data-selected="true"] { background: var(--ow-cyan); border-left-color: var(--ow-navy-2); }
+html[data-skin="overwatch"] [data-ui="choice"][data-state="correct"] { background: #7fe86a !important; border-color: #2b9a1a !important; }
+html[data-skin="overwatch"] [data-ui="choice"][data-state="wrong"] { background: #ffb3ba !important; border-color: #d83a4a !important; }
+html[data-skin="overwatch"] [data-ui="choice-key"] {
+  background: var(--ow-navy-2);
+  color: #fff;
+  border: 0;
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+html[data-skin="overwatch"] [data-ui="choice-label"] { font-family: var(--font-sans); }
+html[data-skin="overwatch"] [data-ui="choice-check"],
+html[data-skin="overwatch"] [data-ui="selected-badge"] { background: var(--ow-navy-2); color: #fff; border-radius: 0; clip-path: var(--ow-hex); }
+
+/* Camps (cool / hot / good / bad + text-bg) : panneau ardoise, grosse barre de la couleur du camp à gauche, libellé blanc
+   en capitales à taille normale. Jamais d'aplat saturé : le texte resterait illisible dessus. */
+html[data-skin="overwatch"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg:where(:not(button), [data-ui="choice"]) {
+  --camp: #1ba3d6;
+  color: #ffffff;
+  font-style: normal;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background-color: var(--ow-navy-2);
+  background-image: linear-gradient(90deg, var(--camp) 0 0.7rem, transparent 0.7rem), linear-gradient(115deg, transparent 0 62%, rgb(255 255 255 / 0.07) 62% 80%, transparent 80%);
+  box-shadow: 0 0.2rem 0 rgb(42 51 82 / 0.45);
+  border: 0;
+}
+html[data-skin="overwatch"] .bg-hot.text-bg { --camp: #f06a2e; }
+html[data-skin="overwatch"] .bg-good.text-bg { --camp: #57e03c; }
+html[data-skin="overwatch"] .bg-bad.text-bg { --camp: #ff4a5a; }
+/* La croix de retrait est une action : rouge plein, sans le bandeau latéral des camps. */
+html[data-skin="overwatch"] [data-ui="remove-player"] { background: #ff4a5a; color: #ffffff; }
+html[data-skin="overwatch"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg { font-family: var(--font-sans); }
+html[data-skin="overwatch"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-selected="true"] {
+  background-color: #1d4f6e;
+  background-image: linear-gradient(90deg, var(--camp) 0 0.7rem, transparent 0.7rem), linear-gradient(90deg, rgb(46 230 242 / 0.3), transparent);
+  outline: 0.2rem solid var(--ow-cyan);
+  outline-offset: -0.2rem;
+  box-shadow: 0 0 1.1rem rgb(46 230 242 / 0.7);
+}
+/* Choix grisés (le mien est fait) ou inactifs : en retrait mais lisibles */
+html[data-skin="overwatch"] [data-ui="choice"][data-state="faded"],
+html[data-skin="overwatch"] [data-ui="choice"]:disabled { opacity: 0.75 !important; filter: grayscale(0.5); }
+
+/* Encadré d'annonce accent (ex. « C'est ta phrase ! ») : carte ardoise opaque, texte blanc, titre cyan */
+html[data-skin="overwatch"] :is(.border-accent.bg-accent\/15, .border-good.bg-good\/15, .border-bad.bg-bad\/15) {
+  --color-accent: #2ee6f2;
+  --color-ink-muted: #e3e9f5;
+  background: var(--ow-slate);
+  color: #ffffff;
+  border: 0;
+  border-top: 0.3rem solid var(--ow-cyan);
+  box-shadow: var(--shadow-card);
+}
+html[data-skin="overwatch"] .border-good.bg-good\/15 { border-top-color: var(--color-good); }
+html[data-skin="overwatch"] .border-bad.bg-bad\/15 { border-top-color: var(--color-bad); }
+
+/* Cadre de jeu TV : bandeau marine à grand titre blanc oblique, contenu sur carte ardoise */
+html[data-skin="overwatch"] [data-ui="game-frame"] {
+  --color-ink: #ffffff;
+  --color-ink-muted: #c9d3e6;
+  --color-accent: #2ee6f2;
+  --color-accent-strong: #9ff6fb;
+  --color-line: rgb(255 255 255 / 0.25);
+  --color-surface: #4b5877;
+  --color-surface-strong: #56657f;
+  --color-bg: #2a3352;
+  color: #ffffff;
+  padding: 0;
+  background: var(--ow-slate);
+  border-top: 0.25rem solid var(--ow-cyan);
+  box-shadow: var(--shadow-card);
+}
+html[data-skin="overwatch"] [data-ui="game-frame-title"] {
+  display: block;
+  margin: 0;
+  padding: 0.5rem 2rem 0.4rem;
+  background: var(--ow-navy);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 3.4rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+html[data-skin="overwatch"] [data-ui="game-frame-body"] { padding: 1.2rem 2rem 1.4rem; }
+
+/* Barre de résultat : rail clair, remplissage bleu biseauté ; gagnante = ambre */
+html[data-skin="overwatch"] [data-ui="result-bar"] { color: var(--ow-navy-2); --color-ink: #2a3352; --color-ink-muted: #3f4d6e; background: var(--ow-row); clip-path: var(--ow-bevel-r); box-shadow: none; }
+html[data-skin="overwatch"] [data-ui="result-bar-fill"] {
+  background: linear-gradient(115deg, transparent 0 62%, rgb(255 255 255 / 0.3) 62% 80%, transparent 80%), #4cc3ee;
+  color: var(--ow-navy-2);
+  clip-path: var(--ow-bevel-r);
+}
+html[data-skin="overwatch"] [data-ui="result-bar"][data-highlight="true"] [data-ui="result-bar-fill"] {
+  background: linear-gradient(115deg, transparent 0 62%, rgb(255 255 255 / 0.3) 62% 80%, transparent 80%), #f99e1a;
+  box-shadow: none;
+}
+
+/* Chrono TV : chiffre marine dans un hexagone blanc ; la barre dessous se vide avec --p */
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="hex"] { position: relative; }
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="hex"] [data-ui="countdown-shape"] polygon { fill: #fff; stroke: var(--ow-blue); stroke-width: 3; }
+/* Bebas Neue italique décale l'encre d'environ +0,08em / -0,05em par rapport au centre de sa boîte. */
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="hex"] [data-ui="countdown-num"] { color: var(--ow-navy-2); font-style: italic; translate: -0.08em 0.05em; }
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="hex"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.45rem;
+  height: 0.3rem;
+  width: calc(11rem * var(--p, 1));
+  transform: translateX(-50%);
+  background: var(--ow-cyan);
+  transition: width 0.1s linear;
+}
+html[data-skin="overwatch"] [data-ui="countdown"][data-low="true"][data-variant="hex"] [data-ui="countdown-shape"] polygon { fill: #ff4a5a; stroke: #fff; }
+html[data-skin="overwatch"] [data-ui="countdown"][data-low="true"][data-variant="hex"] [data-ui="countdown-num"] { color: #fff; }
+html[data-skin="overwatch"] [data-ui="countdown"][data-low="true"][data-variant="hex"]::after { background: #ff4a5a; }
+/* Barre compacte du téléphone */
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="bar"] [data-ui="countdown-track"] { background: var(--ow-slate); border-radius: 0; clip-path: var(--ow-bevel-r); }
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="bar"] [data-ui="countdown-fill"] { background: var(--ow-cyan); border-radius: 0; }
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="bar"][data-low="true"] [data-ui="countdown-fill"] { background: #ff4a5a; }
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="bar"] [data-ui="countdown-num"] { color: var(--ow-navy-2); font-style: italic; }
+html[data-skin="overwatch"] [data-ui="countdown"][data-variant="bar"][data-low="true"] [data-ui="countdown-num"] { color: #d83a4a; }
+
+/* Avatars : portrait hexagonal (pointe en haut) à liseré bleu clair ; grisé si indisponible */
+html[data-skin="overwatch"] [data-ui="avatar"] { isolation: isolate; border-radius: 0; }
+html[data-skin="overwatch"] [data-ui="avatar"]::before {
+  content: "";
+  position: absolute;
+  inset: -4%;
+  z-index: -1;
+  background: #9be4ff;
+  clip-path: var(--ow-hex);
+}
+html[data-skin="overwatch"] [data-ui="avatar"][data-dimmed="true"]::before { background: #7d89a6; }
+html[data-skin="overwatch"] [data-ui="avatar-badge"] {
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: var(--ow-navy-2);
+  clip-path: var(--ow-hex);
+}
+
+/* Qui a répondu : bande marine sous les portraits, pseudos bleus en italique */
+html[data-skin="overwatch"] [data-ui="roster"] {
+  background: linear-gradient(180deg, rgb(42 51 82 / 0.25), rgb(42 51 82 / 0.88));
+  box-shadow: 0 0 0 0.5rem rgb(42 51 82 / 0.6);
+  border-top: 0.1rem solid rgb(255 255 255 / 0.5);
+}
+html[data-skin="overwatch"] [data-ui="roster-item"] > span { font-family: var(--font-display); font-style: italic; font-weight: 400; color: #4ac8ff; letter-spacing: 0.02em; }
+html[data-skin="overwatch"] [data-ui="roster-item"][data-done="false"] > span { color: #8e9ab4; }
+html[data-skin="overwatch"] [data-ui="answered-count"] { font-style: italic; }
+
+/* Pastilles de vote : petits hexagones */
+html[data-skin="overwatch"] [data-testid="tv-vote-dots"] > span { border-radius: 0; clip-path: var(--ow-hex); }
+html[data-skin="overwatch"] [data-testid="tv-vote-dots"] > span:not(.bg-gold) { background: #7d89a6; }
+html[data-skin="overwatch"] [data-testid="tv-vote-count"] { font-style: italic; }
+
+/* Pavé numérique : touches claires, chiffres marine */
+html[data-skin="overwatch"] [data-ui="numpad-key"] {
+  background: var(--ow-row);
+  color: var(--ow-navy-2);
+  border: 0;
+  border-bottom: 0.25rem solid var(--ow-blue);
+  border-radius: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  box-shadow: 0 0.2rem 0 rgb(42 51 82 / 0.3);
+}
+html[data-skin="overwatch"] [data-ui="numpad-key"]:active { background: var(--ow-cyan); }
+
+/* Boîte de confirmation */
+html[data-skin="overwatch"] [data-ui="dialog"] { background: var(--ow-slate); border-top: 0.4rem solid var(--ow-cyan); box-shadow: 0 1rem 3rem rgb(20 30 60 / 0.5); }
+html[data-skin="overwatch"] [data-testid="confirm-dialog"] { background: rgb(42 51 82 / 0.7); }
+
+/* En-tête de manche : bandeau marine, étiquette cyan */
+html[data-skin="overwatch"] [data-ui="round-header"] { background: var(--ow-navy); padding-block: 1.4rem; box-shadow: 0 0.3rem 0.8rem rgb(30 40 80 / 0.3); }
+html[data-skin="overwatch"] [data-ui="round-header"] > div > span:not([data-ui]) { font-style: italic; font-size: 2.6rem; line-height: 1; color: #fff; }
+html[data-skin="overwatch"] [data-ui="round-tag"] {
+  background: var(--ow-cyan);
+  color: var(--ow-navy-2);
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  clip-path: var(--ow-bevel-l);
+  padding-right: 1.8rem;
+}
+
+/* Barre de l'hôte : boutons discrets à liseré */
+html[data-skin="overwatch"] [data-ui="host-button"] {
+  background: var(--ow-navy);
+  border: 0.12rem solid rgb(255 255 255 / 0.55);
+  font-size: 0.95rem;
+  box-shadow: none;
+}
+html[data-skin="overwatch"] [data-ui="host-button"][data-variant="primary"] { background: var(--ow-orange); border-color: #fff; }
+
+/* Classement : bandeaux gris-bleu biseautés à rayure diagonale, liseré bleu ; le 1er en vert */
+html[data-skin="overwatch"] [data-ui="score-row"].glass {
+  background: linear-gradient(115deg, transparent 0 60%, rgb(255 255 255 / 0.08) 60% 78%, transparent 78%), var(--ow-band);
+  border: 0;
+  border-right: 0.35rem solid var(--ow-blue);
+  clip-path: var(--ow-bevel-r);
+  font-family: var(--font-display);
+  font-style: italic;
+}
+html[data-skin="overwatch"] [data-ui="score-row"][data-rank="1"].glass { border-right-color: #f99e1a; }
+html[data-skin="overwatch"] [data-ui="score-row"][data-rank="1"].glass > span:nth-of-type(2) { color: #57e03c; }
+
+/* Podium : socles ardoise à liseré cyan, le 1er orange */
+html[data-skin="overwatch"] [data-ui="podium"] > div > div:last-child { border-top: 0.3rem solid var(--ow-cyan); }
+html[data-skin="overwatch"] [data-ui="podium"] .bg-gold { border-top-color: #fff; }
+
+/* Pause */
+html[data-skin="overwatch"] [data-ui="paused"] { background: rgb(42 51 82 / 0.9); }
+html[data-skin="overwatch"] [data-ui="paused"] .text-gold-gradient { color: #fff; }
+
+/* ── Fond : bleu-gris clair en dégradé, hexagones très pâles qui dérivent lentement */
+html[data-skin="overwatch"] [data-ui="backdrop"] { background: radial-gradient(70% 60% at 50% 35%, #d3dcec 0%, #aebbd6 55%, #8e9ec0 100%); }
+html[data-skin="overwatch"] [data-ui="backdrop"] [data-backdrop-default] { display: none; }
+html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="1"] {
+  inset: -12%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='104' height='120' viewBox='0 0 104 120'%3E%3Cpath d='M52 4 98 30v60L52 116 6 90V30Z' fill='none' stroke='%23ffffff' stroke-opacity='.28' stroke-width='2'/%3E%3C/svg%3E");
+  background-size: 7rem auto;
+}
+html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="2"] {
+  background: linear-gradient(115deg, transparent 0 40%, rgb(255 255 255 / 0.14) 40% 52%, transparent 52% 100%);
+}
+html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="3"] {
+  top: auto;
+  height: 28%;
+  background: linear-gradient(180deg, transparent, rgb(58 72 112 / 0.28));
+}
+
+/* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */
+@keyframes ow-drift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-3.5rem, -6rem, 0); } }
+@keyframes ow-sweep { from { transform: translate3d(-25%, 0, 0); } to { transform: translate3d(25%, 0, 0); } }
+@keyframes ow-in { from { opacity: 0; transform: translate3d(-1.2rem, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes ow-select { 0%, 100% { box-shadow: 0 0 0 0.12rem var(--ow-navy-2), 0 0 0.6rem rgb(46 230 242 / 0.5); } 50% { box-shadow: 0 0 0 0.12rem var(--ow-navy-2), 0 0 1.4rem rgb(46 230 242 / 0.95); } }
+@keyframes ow-low { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="1"] { animation: ow-drift 40s linear infinite alternate; }
+  html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="2"] { animation: ow-sweep 22s ease-in-out infinite alternate; }
+  html[data-skin="overwatch"] [data-ui="panel"] { animation: ow-in 0.35s ease-out both; }
+  html[data-skin="overwatch"] [data-ui="button"]:not(:disabled):hover { filter: brightness(1.12); }
+  html[data-skin="overwatch"] [data-ui="button"][data-variant="primary"]:not(:disabled):hover { box-shadow: 0 0 0 1px rgb(42 51 82 / 0.45), 0 0 1rem rgb(240 106 46 / 0.7); }
+  html[data-skin="overwatch"] [data-ui="choice"]:not(:disabled):hover { filter: brightness(1.06); }
+  html[data-skin="overwatch"] [data-ui="choice"][data-selected="true"] { animation: ow-select 1.8s ease-in-out infinite; }
+  html[data-skin="overwatch"] [data-ui="countdown"][data-low="true"][data-variant="hex"] [data-ui="countdown-shape"] { animation: ow-low 0.8s ease-in-out infinite; }
+}

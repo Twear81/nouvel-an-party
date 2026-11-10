@@ -107,9 +107,10 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
         {fields.map((i) => {
           const done = state === "sent" && !!values[i]?.trim();
           return (
-            <div key={i} className="relative">
+            <div key={i} data-ui="text-field-shell" className="relative">
               {n > 1 && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-display text-xl text-accent">{i + 1}</span>}
               <input
+                data-ui="text-field"
                 ref={(el) => {
                   refs.current[i] = el;
                 }}
@@ -158,7 +159,7 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
 
       {/* Qui a déjà répondu : les avatars s'allument comme sur la TV */}
       <div data-testid="phone-answered" className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden pb-2">
-        <span data-testid="phone-answered-count" className="font-display text-2xl text-ink-muted">
+        <span data-testid="phone-answered-count" className="font-num text-2xl text-ink-muted">
           <span className="text-accent">{answered}</span> / {writers.length}
         </span>
         <div className="flex flex-wrap justify-center gap-2">

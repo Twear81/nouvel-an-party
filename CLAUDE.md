@@ -23,6 +23,8 @@ Tout le projet (code, commentaires, docs, commits, textes affichés) est **en fr
 | Créer un mini-jeu (contrat `MiniGame`, `ctx`, vues, enregistrement, exemple complet) | [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md) |
 | Design : thème, composants, écrans, règles d'ergonomie mobile | [docs/changer-le-design.md](docs/changer-le-design.md) |
 | `config/partie.yaml`, dossier `data/` | [docs/configuration.md](docs/configuration.md) |
+| Skins (habillages imitant des jeux vidéo) : contrat, marqueurs, rotation | [docs/skins.md](docs/skins.md) |
+| Skins : bilan du chantier, validation, maquette et captures de référence | [docs/skins-suivi.md](docs/skins-suivi.md) |
 | Règles et contenu d'un mini-jeu | `src/minigames/<id>/README.md` |
 | Commandes, dev depuis WSL avec de vrais téléphones | [README.md](README.md) |
 
@@ -113,6 +115,7 @@ On ne teste pas tout, on **automatise ce qui est jouable et critique** :
   WebKit (iPhone) — avec parcimonie, c'est lourd en CI.
 - Tests robustes : attendre des états (`toHaveAttribute("data-stage", …)`), jamais des `waitForTimeout` calés sur
   les animations ; pas de dépendance au timing fin (la CI est chargée).
+- Lire un texte avec `textContent()`, jamais `innerText()` : le skin (tiré au hasard) peut le passer en capitales.
 
 **Développement d'un mini-jeu : test manuel complet obligatoire en local avec Playwright**, avant de dire que c'est fini.
 On joue le jeu en entier (pas seulement le chemin automatisé) :
@@ -159,4 +162,8 @@ Règles :
 - L'orchestrateur **vérifie** le résultat (diff, tests) avant de commiter : un compte rendu de sous-agent n'est pas
   une preuve.
 - Une petite tâche (quelques lignes, un fichier) se fait directement, sans sous-agent.
+- Lancer tests, E2E et captures : sous-agent `verificateur` (Haiku, `.claude/agents/verificateur.md`), jamais Sonnet.
+- Au plus 2 sous-agents en parallèle (au-delà, la machine sature et les runs Playwright expirent).
+- Un sous-agent ne regarde qu'un échantillon de captures (≤ 15, les écrans à risque) ; l'orchestrateur relit.
+- Avant de relancer un sous-agent, se demander si l'orchestrateur ne peut pas faire la retouche directement.
 - En cas de flou sur les règles d'un jeu, le fun ou le design : **demander à l'utilisateur** plutôt que deviner.

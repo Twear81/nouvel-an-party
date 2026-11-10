@@ -374,3 +374,16 @@ describe("culture-genante : dans le moteur", () => {
     expect(s.round!.deltas).toEqual({ [t.ids[0]!]: 150 });
   });
 });
+
+describe("culture-genante : progress", () => {
+  it("null pendant l'accroche, puis compte les réponses de l'étape question", () => {
+    const r = round(qcm, 4);
+    expect(game.progress!(r.state, r.ctx)).toBeNull();
+    r.toQuestion();
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 0, expected: 4 });
+    r.answer("p1", 0);
+    r.answer("p2", 1);
+    r.ctx.setConnected("p4", false);
+    expect(game.progress!(r.state, r.ctx)).toEqual({ done: 2, expected: 4 });
+  });
+});

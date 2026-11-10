@@ -68,7 +68,8 @@ Si le QR code pointe sur la mauvaise IP, la forcer dans `config/partie.yaml` (`i
 | `bun run dev` | Dev avec rechargement à chaud |
 | `bun run start` | Compile le front puis lance le serveur comme en prod |
 | `bun run test` | Tests unitaires (moteur, mini-jeux, config) |
-| `bun run test:e2e` | Tests de bout en bout (TV + plusieurs téléphones simulés). 1re fois : `bunx playwright install --with-deps chromium` |
+| `bun run test:e2e` | Tests de bout en bout (TV Chromium + téléphones Chromium, Firefox et WebKit). 1re fois : `bunx playwright install --with-deps chromium firefox webkit` |
+| `CAPTURES_SKIN=<id> bun run captures:skin` | Photographie tous les écrans (TV + téléphone) dans un skin, dans `test-results/skins/<id>/` (voir docs/skins.md) |
 | `bun run typecheck` | Vérification TypeScript |
 | `bun run release` | Construit `release/nouvel-an-party-windows-x64.zip` (fonctionne depuis WSL) |
 | `bun run release -- linux` | Même chose en exécutable Linux, pour tester sous WSL |

@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
 import { tieRanks } from "../../shared/ranking";
-import { endWhenAllDone } from "../helpers";
+import { endWhenAllDone, progressOf } from "../helpers";
 import { MAX_CENTS } from "./amount";
 
 const objetSchema = z.object({
@@ -108,6 +108,8 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 
   onPresenceChange: checkAllGuessed,
+
+  progress: (state, ctx) => progressOf(ctx, (id) => state.guesses.has(id)),
 
   publicView: (state): Pub => ({
     nom: state.item.nom,

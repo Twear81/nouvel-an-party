@@ -23,7 +23,7 @@ test.describe("Dessin raté", () => {
     await expect(alice.t("draw-canvas")).toBeVisible({ timeout: 20_000 });
     await expect(tv.getByTestId("tv-dessin")).toHaveAttribute("data-stage", "draw");
     await expect(tv.getByTestId("difficulty-badge")).toHaveAttribute("data-difficulty", "facile");
-    const words = await Promise.all([alice, bob, chloe].map((p) => p.t("draw-word").innerText()));
+    const words = await Promise.all([alice, bob, chloe].map(async (p) => (await p.t("draw-word").textContent()) ?? ""));
     expect(new Set(words).size).toBe(3);
     for (const w of words) await expect(tv.getByTestId("tv-dessin")).not.toContainText(w);
 

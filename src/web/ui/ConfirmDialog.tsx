@@ -22,8 +22,8 @@ export function ConfirmDialog({ title, detail, confirmLabel, onConfirm, onCancel
   }, [onCancel]);
 
   return (
-    <div data-testid="confirm-dialog" role="alertdialog" aria-modal="true" aria-label={title} className="absolute inset-0 z-[55] flex items-center justify-center bg-bg/80 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.85, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 20 }} className="glass flex max-w-[52rem] flex-col items-center gap-8 rounded-card px-14 py-10 text-center">
+    <div data-testid="confirm-dialog" role="alertdialog" aria-modal="true" aria-label={title} className="absolute inset-0 z-[55] flex items-center justify-center bg-bg/80 backdrop-blur-(--scrim-blur)">
+      <motion.div initial={{ opacity: 0, scale: 0.85, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 20 }} data-ui="dialog" className="glass flex max-w-[52rem] flex-col items-center gap-8 rounded-card px-14 py-10 text-center">
         <h2 className="text-balance font-display text-5xl leading-tight text-gold-gradient">{title}</h2>
         {detail && <p className="text-3xl text-ink-muted">{detail}</p>}
         <div className="flex items-center gap-6">

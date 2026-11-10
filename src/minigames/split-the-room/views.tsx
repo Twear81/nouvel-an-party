@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { cleanText } from "../../shared/clean-text";
-import { AnsweredCount, AnsweredRoster, Button, CheckIcon, fireConfetti, PlayerAvatar, SelectedBadge, typo, VoteDots } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, Button, CheckIcon, Choice, DuelGauge, fireConfetti, PlayerAvatar, SelectedBadge, typo, VoteDots } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results, Verdict } from "./game";
 
@@ -130,11 +130,7 @@ function Gauge({ sequence, shown }: { sequence: boolean[]; shown: number }) {
           <span className="text-5xl">NON</span> {no}
         </span>
       </div>
-      <div data-testid="tv-gauge" className="relative h-20 w-full overflow-hidden rounded-chip bg-surface-strong">
-        <div className="absolute inset-y-0 left-0 bg-good transition-[width] duration-300" style={{ width: n ? `${(yes / n) * 100}%` : 0 }} />
-        <div className="absolute inset-y-0 right-0 bg-bad transition-[width] duration-300" style={{ width: n ? `${(no / n) * 100}%` : 0 }} />
-        <div className="absolute inset-y-0 left-1/2 w-1.5 -translate-x-1/2 bg-ink" />
-      </div>
+      <DuelGauge data-testid="tv-gauge" className="h-20 w-full" left={n ? yes / n : 0} right={n ? no / n : 0} />
     </div>
   );
 }
@@ -212,8 +208,9 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center gap-3 pb-3">
       <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight min-[400px]:text-3xl">{typo(pub.start)}</h1>
-      <div className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
+      <div data-ui="text-field-shell" className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
         <textarea
+          data-ui="text-field"
           data-testid="split-input"
           value={draft}
           maxLength={pub.maxLength}
@@ -267,24 +264,18 @@ function PhoneVote({ pub, priv, sendInput }: Props) {
             {([true, false] as const).map((yes) => {
               const selected = vote === yes;
               return (
-                <motion.div key={String(yes)} animate={{ opacity: vote !== null && !selected ? 0.45 : 1, scale: selected ? 1.02 : 1 }} className="flex min-h-[5rem] flex-1">
-                  <Button
-                    data-testid={yes ? "vote-yes" : "vote-no"}
-                    aria-pressed={selected}
-                    variant={yes ? "good" : "bad"}
-                    size="xl"
-                    block
-                    onClick={() => void sendInput({ vote: yes }).catch(() => {})}
-                    className="relative h-full !text-5xl"
-                  >
-                    {yes ? "OUI" : "NON"}
-                    {selected && (
-                      <span className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-bg text-ink">
-                        <CheckIcon />
-                      </span>
-                    )}
-                  </Button>
-                </motion.div>
+                <Choice
+                  key={String(yes)}
+                  data-testid={yes ? "vote-yes" : "vote-no"}
+                  tone={yes ? "good" : "bad"}
+                  selected={selected}
+                  state={vote !== null && !selected ? "faded" : "idle"}
+                  onClick={() => void sendInput({ vote: yes }).catch(() => {})}
+                  checkClassName="absolute right-4 top-4"
+                  className="min-h-[5rem] flex-1 px-10 py-6 font-display text-5xl tracking-wide"
+                >
+                  {yes ? "OUI" : "NON"}
+                </Choice>
               );
             })}
           </div>
@@ -321,7 +312,7 @@ function PhoneReveal({ pub, priv, snapshot, playerById }: Props) {
               <PlayerAvatar profile={authorProfile} size="xl" badge={<span aria-hidden>🎭</span>} className="drop-shadow-[0_0_1.5rem_var(--color-accent)]" />
               <span className="max-w-full truncate font-display text-3xl text-accent">{authorProfile?.name}</span>
               {pub.authorGain > 0 && (
-                <span data-testid="reveal-gain" className="font-display text-3xl text-accent">
+                <span data-testid="reveal-gain" className="font-num text-3xl text-accent">
                   {mine ? "Tu marques" : "Marque"} +{pub.authorGain}
                 </span>
               )}

@@ -1,0 +1,429 @@
+/*
+ * Skin « A Plague Tale » (docs/skins.md) : tout ce fichier est préfixé html[data-skin="plague-tale"].
+ * Un skin ne connaît que les marqueurs data-ui, les titres (h1, h2) et les jetons : jamais un mini-jeu précis.
+ * Référence visuelle : docs/maquettes/skins.html. Ordre du fichier : Jetons, Composants, Fond, Animations.
+ */
+
+/* ── Jetons (couleurs, polices, rayons, ombres, dégradés) */
+html[data-skin="plague-tale"] {
+  /* Forme partagée par les portraits et tous les cadres du profil. */
+  --avatar-radius: .2em;
+  --avatar-circle: none;
+  --avatar-square: inline;
+  --color-bg: #181818;
+  --color-bg-2: #34332f;
+  --color-bg-3: #5d5c57;
+  --color-surface: rgb(18 18 18 / 0.6);
+  --color-surface-strong: rgb(18 18 18 / 0.85);
+  --color-line: rgb(227 219 191 / 0.18);
+  --color-ink: #e3dbbf;
+  --color-ink-muted: #cfc8ad;
+  --color-accent: #e0cb7d;
+  --color-accent-strong: #f3e4a6;
+  --color-accent-deep: #8a7640;
+  --color-accent-ink: #181818;
+  --color-hot: #c0604f;
+  --color-cool: #e0cb7d;
+  --color-good: #9ab87a;
+  --color-good-deep: #5c7a3e;
+  --color-bad: #c0604f;
+  --color-bad-deep: #7a2f24;
+  --color-warn: #d89c4a;
+  --font-display: "Twemoji", "Cinzel", "Trajan Pro", serif;
+  --font-sans: "Twemoji", "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-num: "Twemoji", "Cinzel", "Trajan Pro", serif;
+  --radius-card: 0.1rem;
+  --radius-btn: 0.1rem;
+  --radius-chip: 0.1rem;
+  --shadow-card: 0 0.6rem 1.4rem rgb(0 0 0 / 0.55);
+  --shadow-glow: 0 0 1.2rem rgb(224 203 125 / 0.35);
+  --shadow-btn: 0 0.2rem 0.6rem rgb(0 0 0 / 0.5);
+  --gradient-bg: repeating-radial-gradient(circle at 37% 61%, rgb(255 255 255 / 0.022) 0 1px, transparent 1px 3px), radial-gradient(45% 55% at 66% 42%, rgb(227 219 191 / 0.16), transparent 70%), radial-gradient(70% 80% at 55% 45%, #5d5c57 0%, #34332f 45%, #181818 90%);
+  --gradient-gold: linear-gradient(180deg, #f3e4a6, #e0cb7d 55%, #8a7640 130%);
+  --gradient-hot: linear-gradient(135deg, #a8553d, #34332f);
+  --gradient-glass: linear-gradient(90deg, rgb(18 18 18 / 0.78), rgb(18 18 18 / 0.35) 70%, rgb(18 18 18 / 0.15));
+  /* Pièces du décor : filet doré qui s'estompe aux bouts, case brune (dégradé radial Van Dyke), losange creux + plein. */
+  --plague-rule: linear-gradient(90deg, transparent, rgb(224 203 125 / 0.55) 12%, rgb(224 203 125 / 0.55) 88%, transparent);
+  --plague-tile: radial-gradient(circle at 50% 45%, #6e5639 0%, #4a3a28 60%, #382e25 100%);
+  --plague-diamond: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 1 19 10 10 19 1 10Z' fill='none' stroke='%23e0cb7d' stroke-width='1.6'/%3E%3Cpath d='M10 5 15 10 10 15 5 10Z' fill='%23f3e4a6'/%3E%3C/svg%3E");
+  --plague-gold-line: rgb(224 203 125 / 0.75);
+  --scrim-blur: 0px;
+}
+
+/* ── Composants (formes propres au jeu : cibler les marqueurs data-ui et leurs états data-*) */
+html[data-skin="plague-tale"] body { font-weight: 300; letter-spacing: 0.01em; }
+html[data-skin="plague-tale"] h1,
+html[data-skin="plague-tale"] h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0.1em 0.35em rgb(0 0 0 / 0.7);
+}
+html[data-skin="plague-tale"] .text-gold-gradient { color: var(--color-accent); background: none; -webkit-background-clip: border-box; background-clip: border-box; }
+html[data-skin="plague-tale"] .bg-hot-gradient { background-image: linear-gradient(90deg, #4a3a28, #382e25 70%, rgb(56 46 37 / 0.6)); }
+html[data-skin="plague-tale"] .shadow-glow { box-shadow: 0 0 0.9rem rgb(224 203 125 / 0.25), inset 0 0 0 1px rgb(224 203 125 / 0.45); }
+html[data-skin="plague-tale"] .rounded-card,
+html[data-skin="plague-tale"] .rounded-btn { border-radius: 0.1rem; }
+
+/* « Verre » : ligne sombre translucide qui s'estompe vers la droite, filet fin, pas de flou (iPhone). */
+html[data-skin="plague-tale"] .glass {
+  background-image: var(--gradient-glass);
+  background-color: transparent;
+  border: 1px solid rgb(227 219 191 / 0.1);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 0.4rem 1rem rgb(0 0 0 / 0.4);
+}
+
+/* Panneau : carte sombre à filets dorés en haut et en bas ; titre « — SECTION — » */
+html[data-skin="plague-tale"] [data-ui="panel"] {
+  background-image: linear-gradient(90deg, rgb(18 18 18 / 0.7), rgb(18 18 18 / 0.3));
+  border-color: rgb(224 203 125 / 0.22);
+  box-shadow: 0 0.5rem 1.2rem rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(224 203 125 / 0.5), inset 0 -1px 0 rgb(224 203 125 / 0.3);
+}
+html[data-skin="plague-tale"] [data-ui="panel-title"] {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  color: var(--color-accent);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+html[data-skin="plague-tale"] [data-ui="panel-title"]::before,
+html[data-skin="plague-tale"] [data-ui="panel-title"]::after { content: ""; flex: 1; height: 1px; background: var(--plague-rule); }
+
+/* Cadre de jeu TV : zone sombre dans la brume ; le titre de la manche est centré entre deux filets dorés (comme « Question 3 »). */
+html[data-skin="plague-tale"] [data-ui="game-frame"] {
+  padding: 0.8rem 1.4rem 1rem;
+  background-image: linear-gradient(90deg, rgb(18 18 18 / 0.62), rgb(18 18 18 / 0.34) 60%, rgb(18 18 18 / 0.5));
+  border: 1px solid rgb(227 219 191 / 0.08);
+  border-radius: 0.2rem;
+  box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.35);
+}
+html[data-skin="plague-tale"] [data-ui="game-frame-title"] {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin: 0 0 0.3rem;
+  font-size: 2.1rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  color: #e0cb7d;
+}
+html[data-skin="plague-tale"] [data-ui="game-frame-title"]::before,
+html[data-skin="plague-tale"] [data-ui="game-frame-title"]::after { content: ""; flex: 1; height: 1px; background: var(--plague-rule); }
+html[data-skin="plague-tale"] [data-ui="game-frame-body"] { padding: 0.4rem 0.6rem; }
+
+/* Camps (cool / hot / good / bad + text-bg) : lignes sombres comme les choix de la maquette, texte lin gros, numéro en liseré.
+   cool / good = liseré or ; hot / bad = liseré rouge sang. Les boutons gardent leur style. */
+html[data-skin="plague-tale"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg:is(:not(button), [data-ui="choice"]) {
+  --camp: #e0cb7d;
+  color: #f1ead0;
+  font-weight: 500;
+  background-color: rgb(24 22 18 / 0.94);
+  background-image: linear-gradient(90deg, rgb(56 46 37 / 0.55), rgb(18 18 18 / 0.2) 80%);
+  border: 1px solid rgb(227 219 191 / 0.14);
+  border-left: 0.45rem solid var(--camp);
+  box-shadow: 0 0.3rem 0.8rem rgb(0 0 0 / 0.5);
+  text-shadow: 0 0.08em 0.25em rgb(0 0 0 / 0.8);
+}
+html[data-skin="plague-tale"] :is(.bg-hot, .bg-bad).text-bg:is(:not(button), [data-ui="choice"]) {
+  --camp: #c0604f;
+  background-image: linear-gradient(90deg, rgb(74 28 22 / 0.7), rgb(18 18 18 / 0.2) 80%);
+}
+html[data-skin="plague-tale"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-selected="true"] {
+  border-color: var(--plague-gold-line);
+  border-left-color: var(--camp);
+  box-shadow: inset 0 0 1.2rem rgb(224 203 125 / 0.14), 0 0 0 1px var(--plague-gold-line), 0 0 0.9rem rgb(224 203 125 / 0.25);
+}
+html[data-skin="plague-tale"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad)[data-state="faded"],
+html[data-skin="plague-tale"] [data-ui="choice"]:is(.bg-cool, .bg-hot, .bg-good, .bg-bad):disabled { opacity: 0.72 !important; }
+html[data-skin="plague-tale"] [data-ui="button"]:disabled { opacity: 0.6; filter: saturate(0.5); }
+
+/* Encadrés d'annonce (border-accent bg-accent/15) : carte sombre opaque à filet or, texte lin */
+html[data-skin="plague-tale"] :is(.border-accent.bg-accent\/15, .border-good.bg-good\/15, .border-bad.bg-bad\/15) {
+  --color-ink-muted: #d8d1b6;
+  background-color: #1f1d19;
+  color: #f1ead0;
+  box-shadow: 0 0.3rem 0.8rem rgb(0 0 0 / 0.5);
+}
+
+/* Boutons : plaque sombre, filet or, Cinzel ; losanges de part et d'autre du principal */
+html[data-skin="plague-tale"] [data-ui="button"] {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  border: 1px solid rgb(227 219 191 / 0.3);
+  border-radius: 0.1rem;
+  box-shadow: 0 0.2rem 0.6rem rgb(0 0 0 / 0.5);
+  background-image: linear-gradient(90deg, rgb(18 18 18 / 0.7), rgb(40 36 26 / 0.55), rgb(18 18 18 / 0.7));
+  background-color: transparent;
+  color: var(--color-ink);
+  transition: border-color 0.25s, color 0.25s, opacity 0.2s;
+}
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="primary"] {
+  background-image: linear-gradient(90deg, rgb(18 18 18 / 0.5), rgb(56 46 37 / 0.95), rgb(18 18 18 / 0.5));
+  border-color: var(--plague-gold-line);
+  color: var(--color-accent);
+}
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="primary"]::before,
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="primary"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-top: -0.45rem;
+  background: var(--plague-diamond) center / contain no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="primary"]::before { left: 0.5rem; }
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="primary"]::after { right: 0.5rem; }
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="secondary"] { color: var(--color-ink); }
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="ghost"] { background-image: none; border-color: transparent; box-shadow: none; color: var(--color-ink-muted); }
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="danger"],
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="bad"] {
+  background-image: linear-gradient(90deg, rgb(58 24 20 / 0.95), rgb(122 47 36 / 0.85), rgb(58 24 20 / 0.95));
+  border-color: rgb(192 96 79 / 0.8);
+  color: #f0d9d2;
+}
+html[data-skin="plague-tale"] [data-ui="button"][data-variant="good"] {
+  background-image: linear-gradient(90deg, rgb(30 38 22 / 0.95), rgb(70 90 46 / 0.8), rgb(30 38 22 / 0.95));
+  border-color: rgb(154 184 122 / 0.8);
+  color: #e6efd6;
+}
+
+/* Barre hôte : raccourcis façon manette (rond gris + mot) */
+html[data-skin="plague-tale"] [data-ui="host-button"] { font-family: var(--font-sans); font-weight: 400; letter-spacing: 0.04em; border-color: transparent; background-image: none; box-shadow: none; color: var(--color-ink); }
+html[data-skin="plague-tale"] [data-ui="host-button"]::before {
+  content: "";
+  flex: none;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border: 0.1em solid #cfc8b0;
+  background: radial-gradient(circle at 40% 35%, #8a877c, #2a2a28);
+  box-shadow: inset 0 0 0 0.12em #2a2a28;
+}
+html[data-skin="plague-tale"] [data-ui="host-bar"] { background-image: linear-gradient(0deg, rgb(18 18 18 / 0.7), transparent); }
+
+/* Choix : ligne de liste sombre qui s'estompe ; sélectionné = cadre or fin + losange lumineux à gauche */
+html[data-skin="plague-tale"] [data-ui="choice"] {
+  border-width: 1px;
+  border-color: rgb(227 219 191 / 0.1);
+  border-radius: 0.1rem;
+  font-weight: 400;
+  /* Voile sombre : assourdit les choix en couleur franche (camps, oui / non) pour les faire entrer dans la palette. */
+  box-shadow: inset 0 0 0 100vmax rgb(24 24 24 / 0.32);
+  transition: border-color 0.25s, color 0.25s, box-shadow 0.25s;
+}
+html[data-skin="plague-tale"] [data-ui="choice"][data-selected="true"] {
+  border-color: var(--plague-gold-line);
+  box-shadow: inset 0 0 1.2rem rgb(224 203 125 / 0.12), 0 0 0.8rem rgb(224 203 125 / 0.18);
+}
+html[data-skin="plague-tale"] [data-ui="choice"][data-selected="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: -0.55rem;
+  background: var(--plague-diamond) center / contain no-repeat;
+  filter: drop-shadow(0 0 0.25rem rgb(243 228 166 / 0.8));
+  pointer-events: none;
+}
+html[data-skin="plague-tale"] [data-ui="choice"][data-state="correct"] { border-color: var(--color-good); }
+html[data-skin="plague-tale"] [data-ui="choice"][data-state="wrong"] { border-color: var(--color-bad); }
+html[data-skin="plague-tale"] [data-ui="choice"][data-state="faded"] { border-color: rgb(227 219 191 / 0.05); }
+html[data-skin="plague-tale"] [data-ui="choice-key"] {
+  border: 1px solid rgb(224 203 125 / 0.5);
+  border-radius: 0.1rem;
+  background: var(--plague-tile);
+  color: var(--color-accent);
+  font-weight: 500;
+}
+html[data-skin="plague-tale"] [data-ui="choice-label"] { font-weight: 400; }
+html[data-skin="plague-tale"] [data-ui="choice-check"],
+html[data-skin="plague-tale"] [data-ui="selected-badge"] {
+  background: #181818;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 0 0.5rem rgb(224 203 125 / 0.4);
+}
+
+/* Barre de résultat : rail sombre, remplissage brun Van Dyke, vainqueur doré */
+html[data-skin="plague-tale"] [data-ui="result-bar"] {
+  border-radius: 0.1rem;
+  background-color: rgb(18 18 18 / 0.6);
+  border: 1px solid rgb(227 219 191 / 0.12);
+}
+html[data-skin="plague-tale"] [data-ui="result-bar-fill"] { border-radius: 0; box-shadow: none; border-right: 1px solid rgb(224 203 125 / 0.4); }
+html[data-skin="plague-tale"] [data-ui="result-bar"][data-highlight="true"] { border-color: var(--plague-gold-line); }
+html[data-skin="plague-tale"] [data-ui="result-bar"][data-highlight="true"] [data-ui="result-bar-fill"] {
+  background-image: linear-gradient(90deg, #8a7640, #e0cb7d);
+  border-right-color: #f3e4a6;
+  box-shadow: 0 0 0.9rem rgb(224 203 125 / 0.35);
+}
+
+/* Chrono : anneau fin or (TV) ; barre fine or (téléphone) */
+html[data-skin="plague-tale"] [data-ui="countdown"] { font-family: var(--font-num); }
+html[data-skin="plague-tale"] [data-ui="countdown-num"] { font-weight: 500; color: var(--color-ink); }
+html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-num"] { color: var(--color-bad); }
+html[data-skin="plague-tale"] [data-ui="countdown-ring-bg"] { stroke: rgb(224 203 125 / 0.25); stroke-width: 1; }
+html[data-skin="plague-tale"] [data-ui="countdown-ring"] { stroke-width: 1.8; stroke-linecap: butt; }
+html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-ring"] { stroke-width: 2.4; }
+html[data-skin="plague-tale"] [data-ui="countdown-cartouche"] {
+  background: var(--color-accent);
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  transform: scale(0.45); /* le centrage vient de -translate-x-1/2 (propriété translate) */
+}
+html[data-skin="plague-tale"] [data-ui="countdown-track"] { border-radius: 0; background: rgb(224 203 125 / 0.2); }
+html[data-skin="plague-tale"] [data-ui="countdown-fill"] { border-radius: 0; background-image: linear-gradient(90deg, #8a7640, #e0cb7d); }
+html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-fill"] { background-image: linear-gradient(90deg, #7a2f24, #c0604f); }
+
+/* Avatar : case brune carrée (dégradé Van Dyke), fin liseré sombre ; les pastilles restent carrées aussi */
+html[data-skin="plague-tale"] [data-ui="avatar"] { box-shadow: 0 0.15em 0.5em rgb(0 0 0 / 0.55); }
+html[data-skin="plague-tale"] [data-ui="avatar-face"] {
+  background: var(--plague-tile) !important;
+  border: 1px solid rgb(0 0 0 / 0.55);
+  box-shadow: inset 0 0 0 0.18em rgb(255 255 255 / 0.04);
+}
+html[data-skin="plague-tale"] [data-ui="avatar"][data-dimmed="true"] { box-shadow: none; }
+html[data-skin="plague-tale"] [data-ui="avatar-badge"] {
+  background-image: none;
+  background-color: #181818;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  font-family: var(--font-num);
+}
+
+/* Qui a répondu : petit losange doré posé au-dessus de la case (nouveauté) */
+html[data-skin="plague-tale"] [data-ui="roster-item"] { position: relative; }
+html[data-skin="plague-tale"] [data-ui="roster-item"][data-done="true"]::before {
+  content: "";
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  width: 1rem;
+  height: 1rem;
+  margin-left: -0.5rem;
+  background: var(--plague-diamond) center / contain no-repeat;
+  pointer-events: none;
+}
+html[data-skin="plague-tale"] [data-ui="answered-count"] { font-family: var(--font-num); font-weight: 500; }
+
+/* Pavé numérique : cases brunes */
+html[data-skin="plague-tale"] [data-ui="numpad-key"] {
+  background-image: var(--plague-tile);
+  background-color: #382e25;
+  border: 1px solid rgb(0 0 0 / 0.55);
+  border-radius: 0.1rem;
+  box-shadow: inset 0 0 0 0.15rem rgb(255 255 255 / 0.04), 0 0.15rem 0.4rem rgb(0 0 0 / 0.5);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-weight: 500;
+  transition: border-color 0.2s;
+}
+html[data-skin="plague-tale"] [data-ui="numpad-key"]:active { border-color: var(--color-ink); }
+
+/* Votes : petits losanges */
+html[data-skin="plague-tale"] [data-ui="vote-dots"] span { border-radius: 0; }
+html[data-skin="plague-tale"] [data-ui="vote-dots"] span.bg-gold { background-image: none; background-color: var(--color-accent); box-shadow: 0 0 0.6rem rgb(224 203 125 / 0.5); }
+
+/* Boîte de dialogue : carte sombre à filets dorés */
+html[data-skin="plague-tale"] [data-ui="dialog"] {
+  background-image: linear-gradient(180deg, rgb(24 24 24 / 0.96), rgb(18 18 18 / 0.96));
+  border-color: rgb(224 203 125 / 0.35);
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.7), inset 0 1px 0 var(--plague-gold-line), inset 0 -1px 0 var(--plague-gold-line);
+}
+
+/* En-tête de manche : titre doré, filet pleine largeur et encoche au centre ; pastille = texte souligné d'or */
+html[data-skin="plague-tale"] [data-ui="round-header"] { position: relative; }
+html[data-skin="plague-tale"] [data-ui="round-header"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--plague-rule);
+  pointer-events: none;
+}
+html[data-skin="plague-tale"] [data-ui="round-header"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.25rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 1px solid var(--color-accent);
+  border-bottom: 1px solid var(--color-accent);
+  background: #181818;
+  transform: translateX(-50%) rotate(45deg);
+  pointer-events: none;
+}
+html[data-skin="plague-tale"] [data-ui="round-header"] .font-display { color: var(--color-accent); font-weight: 500; letter-spacing: 0.04em; }
+html[data-skin="plague-tale"] [data-ui="round-tag"] {
+  background-color: transparent;
+  border-radius: 0;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  box-shadow: inset 0 -1px 0 rgb(224 203 125 / 0.45);
+}
+
+/* Classement : lignes sombres, filet or pour le 1er */
+html[data-skin="plague-tale"] [data-ui="score-row"] { font-family: var(--font-sans); }
+html[data-skin="plague-tale"] [data-ui="score-row"][data-highlight="true"] { border-color: var(--plague-gold-line); text-shadow: 0 0 0.8rem rgb(224 203 125 / 0.5); }
+html[data-skin="plague-tale"] [data-ui="score-row"][data-rank="1"] { border-color: var(--plague-gold-line); }
+
+/* Pause : voile sombre, titre doré espacé */
+html[data-skin="plague-tale"] [data-ui="paused"] {
+  background-color: rgb(18 18 18 / 0.93);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html[data-skin="plague-tale"] [data-ui="paused"] > span:first-child { font-family: var(--font-display); font-weight: 500; letter-spacing: 0.3em; color: var(--color-accent); background: none; }
+
+html[data-skin="plague-tale"] [data-ui="stage-tv"],
+html[data-skin="plague-tale"] [data-ui="stage-phone"] { background-color: #181818; }
+
+/* ── Fond (html[data-skin="plague-tale"] [data-ui="backdrop"] et ses [data-ui="backdrop-layer"]) */
+html[data-skin="plague-tale"] [data-ui="backdrop"] [data-backdrop-default] { display: none; }
+html[data-skin="plague-tale"] [data-ui="backdrop-layer"] { will-change: transform; }
+/* Nappes de brume : de grands dégradés radiaux clairs, jamais de flou. */
+html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="1"] {
+  inset: -20% -30%;
+  background: radial-gradient(40% 35% at 30% 55%, rgb(227 219 191 / 0.1), transparent 70%), radial-gradient(35% 30% at 75% 35%, rgb(227 219 191 / 0.08), transparent 70%);
+}
+html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="2"] {
+  inset: -20% -30%;
+  background: radial-gradient(45% 30% at 60% 70%, rgb(227 219 191 / 0.09), transparent 70%), radial-gradient(30% 35% at 15% 25%, rgb(227 219 191 / 0.07), transparent 70%);
+}
+/* Vignette : bords noirs */
+html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="3"] { background: radial-gradient(90% 85% at 50% 48%, transparent 55%, rgb(0 0 0 / 0.55) 100%); }
+
+/* ── Animations (toucher des boutons et des choix, choix sélectionné, chrono, fond, apparition des panneaux) */
+@keyframes plague-mist-a { from { transform: translate3d(-4%, 0, 0); } to { transform: translate3d(4%, -3%, 0); } }
+@keyframes plague-mist-b { from { transform: translate3d(5%, 2%, 0); } to { transform: translate3d(-5%, -2%, 0); } }
+@keyframes plague-diamond-glow { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+@keyframes plague-panel-in { from { opacity: 0; transform: translate3d(0, 0.6rem, 0); } to { opacity: 1; transform: none; } }
+@keyframes plague-low { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="1"] { animation: plague-mist-a 70s ease-in-out infinite alternate; }
+  html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="2"] { animation: plague-mist-b 95s ease-in-out infinite alternate; }
+  html[data-skin="plague-tale"] [data-ui="choice"][data-selected="true"]::before { animation: plague-diamond-glow 2.8s ease-in-out infinite; }
+  html[data-skin="plague-tale"] [data-ui="panel"] { animation: plague-panel-in 0.5s ease-out both; }
+  html[data-skin="plague-tale"] [data-ui="button"]:not(:disabled):hover,
+  html[data-skin="plague-tale"] [data-ui="choice"]:not(:disabled):hover { border-color: var(--plague-gold-line); }
+  html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-ring"],
+  html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-fill"] { animation: plague-low 1s ease-in-out infinite; }
+}

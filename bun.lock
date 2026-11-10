@@ -6,7 +6,18 @@
       "name": "nouvel-an-party",
       "dependencies": {
         "@fontsource-variable/outfit": "^5.3.0",
+        "@fontsource/arimo": "^5.3.0",
+        "@fontsource/barlow-condensed": "^5.3.0",
+        "@fontsource/bebas-neue": "^5.3.0",
         "@fontsource/bungee": "^5.3.0",
+        "@fontsource/cinzel": "^5.3.0",
+        "@fontsource/exo-2": "^5.3.0",
+        "@fontsource/fira-sans": "^5.3.0",
+        "@fontsource/jost": "^5.3.0",
+        "@fontsource/jura": "^5.3.0",
+        "@fontsource/lato": "^5.3.0",
+        "@fontsource/m-plus-1p": "^5.3.0",
+        "@fontsource/share-tech-mono": "^5.3.0",
         "canvas-confetti": "^1.9.4",
         "motion": "^14.9.1",
         "nosleep.js": "^0.12.0",
@@ -16,6 +27,7 @@
         "selfsigned": "^5.5.0",
         "socket.io": "^4.8.4",
         "socket.io-client": "^4.8.4",
+        "twemoji-colr-font": "15.0.3",
         "yaml": "^2.9.1",
         "zod": "^4.6.7",
       },
@@ -37,7 +49,29 @@
   "packages": {
     "@fontsource-variable/outfit": ["@fontsource-variable/outfit@5.3.0", "", {}, "sha512-fPb5XnYK0k7SbR++HEmm4+ZqDszmLKQ+sPRUr8oQ/KNC0vy6r6hazJFe8iYozv4cqlHbvJ/JECkJWrfDodUMVQ=="],
 
+    "@fontsource/arimo": ["@fontsource/arimo@5.3.0", "", {}, "sha512-nhxZ2sTVZYX8DJBgLuyX360B5vE4mxqpmjlKTRfucIqfcWRVx9vOYzWBc1IgEX0ist48VMC10PRKbFyH+4QFvQ=="],
+
+    "@fontsource/barlow-condensed": ["@fontsource/barlow-condensed@5.3.0", "", {}, "sha512-RA7MmIx0v3eQ6Gcf74qLVLOwLB0GpPOzx+eU9iG/AmCnSJGcIWYeU8y6CEMGZ210MGwGg5CZhzLkkvyZdTTk1g=="],
+
+    "@fontsource/bebas-neue": ["@fontsource/bebas-neue@5.3.0", "", {}, "sha512-nCxMEb9Bg9sjNWm9TIOsvHKDMLRUfEZPWpLgYu6m9KavZZVSA/WoHzI5wROwqA+eNwEi/PNBAcB5Co7HA3S0Cw=="],
+
     "@fontsource/bungee": ["@fontsource/bungee@5.3.0", "", {}, "sha512-vKwbDE7yMrqfGxgFan+diPLwgWp9j4FGYaLm+OhUoqYO6Pr02QIi/p0KiTW0E/7uiXqfTd6cMj+/E4h2sc3Ocg=="],
+
+    "@fontsource/cinzel": ["@fontsource/cinzel@5.3.0", "", {}, "sha512-KEOYTsrRppW0uRIPWBDPrQgunCS6f8u4nzZxYRBfo9SCknKojLYjK7B0ZoVmJhyVLefz271ZQRF9EOpHZlfhRw=="],
+
+    "@fontsource/exo-2": ["@fontsource/exo-2@5.3.0", "", {}, "sha512-jVI6qXPPuV1Fne7m2Hpyc9rTt4O7ZIo+wsUZZzAW+u/iHem4CyWXXCGUoSw3utZUW82/bsGVQO9yO+hDsjZH8A=="],
+
+    "@fontsource/fira-sans": ["@fontsource/fira-sans@5.3.0", "", {}, "sha512-z1SKSG7eRhm3srlb7rQ3j77QP4TP7OFxCZ4wUWhCdt+3hOF9K0AyvybpAsz6+JWNcCVV7AqC7dbOT3e67P2r5A=="],
+
+    "@fontsource/jost": ["@fontsource/jost@5.3.0", "", {}, "sha512-lORv5y49hSoLVxjGb0qNuBzXvnaNYI3B94200uGPGJFei8fao6d6LLz2ziWbOZubGfZnibzuT6GVNX8fBw8WQQ=="],
+
+    "@fontsource/jura": ["@fontsource/jura@5.3.0", "", {}, "sha512-0TNTRVaIiUp4Bw8RYrNgYUrq9flQIAUWnwZkrWe5aoY+FBTbMjxshKkAiVSsrW+SDLO0+wqjkqp944nKPIrRPw=="],
+
+    "@fontsource/lato": ["@fontsource/lato@5.3.0", "", {}, "sha512-0WhF/4rhrw+ErIyneKvhHn2YAl+xf8GDtllgOgOzDmeaSlLQtjpChXaQOpWhG2BchQW0WJy2zLV12Hdg0ndOMw=="],
+
+    "@fontsource/m-plus-1p": ["@fontsource/m-plus-1p@5.3.0", "", {}, "sha512-CunM07SjKhNp0nhIlp8x4QqeBqQx9bsR7Xrmm7A9riVt5TxFuKmFwDPT6Co9nnirguvsD9Ng+4pHM2uE7WbXmQ=="],
+
+    "@fontsource/share-tech-mono": ["@fontsource/share-tech-mono@5.3.0", "", {}, "sha512-hVEzVCzEid/fBfhggMyvkfDzn9ODrMihxC0EiOeQK3BuQNvdjmith2ERnoDNUkbW8zhufbKNuCgaSoT8LUNpuQ=="],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
@@ -380,6 +414,8 @@
     "tslib": ["tslib@2.9.1", "", {}, "sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA=="],
 
     "tsyringe": ["tsyringe@4.10.0", "", { "dependencies": { "tslib": "^1.9.3" } }, "sha512-axr3IdNuVIxnaK5XGEUFTu3YmAQ6lllgrvqfEoR16g/HGnYY/6We4oWENtAnzK6/LpJ2ur9PAb80RBt7/U4ugw=="],
+
+    "twemoji-colr-font": ["twemoji-colr-font@15.0.3", "", {}, "sha512-UsK4JUpaczeVoMGeYMnKaMTxKt7fujg1nQOk4NaC0teZmdOo+uAai0DIuaSzsMkShtG4J75F0OEsVdGJ+Q1pHQ=="],
 
     "typescript": ["typescript@7.0.2", "", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
 

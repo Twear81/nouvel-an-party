@@ -260,3 +260,13 @@ describe("ceci-ou-cela : via le moteur", () => {
     expect(s.round!.deltas).toEqual({ [t.ids[0]!]: 100, [t.ids[1]!]: 100 });
   });
 });
+
+describe("ceci-ou-cela : progress", () => {
+  it("compte les réponses ; un déconnecté reste attendu", () => {
+    const { ctx, state, answer } = round(PLAIN, 3);
+    expect(game.progress!(state, ctx)).toEqual({ done: 0, expected: 3 });
+    answer("p1", 0);
+    ctx.setConnected("p3", false);
+    expect(game.progress!(state, ctx)).toEqual({ done: 1, expected: 3 });
+  });
+});

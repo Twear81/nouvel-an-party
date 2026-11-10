@@ -33,7 +33,7 @@ test.describe("L'imposteur", () => {
     const words: string[] = [];
     for (const p of phones) {
       await expect(p.t("word-big")).toBeVisible();
-      words.push(await p.t("word-big").innerText());
+      words.push(await p.t("word-big").textContent() ?? "");
     }
     const lower = words.map((w) => w.toLowerCase());
     const impIdx = lower.findIndex((w) => lower.filter((x) => x === w).length === 1);
@@ -78,8 +78,8 @@ test.describe("L'imposteur", () => {
     await expect(tv.getByTestId("tv-verdict")).toBeVisible({ timeout: 20_000 });
     await expect(tv.getByTestId("tv-verdict")).toHaveAttribute("data-unmasked", "true");
     await expect(tv.getByTestId("tv-imposter")).toContainText(imp.name);
-    expect((await tv.getByTestId("tv-word-imposter").innerText()).toLowerCase()).toBe(lower[impIdx]!);
-    expect((await tv.getByTestId("tv-word-majority").innerText()).toLowerCase()).toBe(lower.find((w) => w !== lower[impIdx]!)!);
+    expect((await tv.getByTestId("tv-word-imposter").textContent() ?? "").toLowerCase()).toBe(lower[impIdx]!);
+    expect((await tv.getByTestId("tv-word-majority").textContent() ?? "").toLowerCase()).toBe(lower.find((w) => w !== lower[impIdx]!)!);
     await party.phoneRevealed(imp);
     await expect(imp.t("imposteur-result")).toHaveAttribute("data-role", "imposter");
     await expect(others[0]!.t("imposteur-result")).toHaveAttribute("data-role", "right");
@@ -93,7 +93,7 @@ test.describe("L'imposteur", () => {
     const words: string[] = [];
     for (const p of phones) {
       await expect(p.t("word-big")).toBeVisible({ timeout: 15_000 });
-      words.push((await p.t("word-big").innerText()).toLowerCase());
+      words.push((await p.t("word-big").textContent() ?? "").toLowerCase());
     }
     const impIdx = words.findIndex((w) => words.filter((x) => x === w).length === 1);
     const imp = phones[impIdx]!;

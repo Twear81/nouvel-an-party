@@ -136,6 +136,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
                   </span>
                   {host && (
                     <button
+                      data-ui="remove-player"
                       data-testid={`kick-${p.id}`}
                       onClick={() => setKicking({ id: p.id, name: p.profile?.name ?? "ce joueur" })}
                       aria-label={`Retirer ${p.profile?.name ?? "ce joueur"}`}

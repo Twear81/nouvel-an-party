@@ -49,6 +49,7 @@ export function Digital({ chaos: c, shown }: DesignProps) {
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-[24rem] w-[24rem] -translate-x-1/2 -translate-y-1/2 animate-pulse-soft rounded-full bg-hot/10 shadow-[0_0_8rem_var(--color-hot)]" />
       )}
       <div
+        data-ui="animated-number"
         className={`relative font-display text-[17rem] leading-none ${tone}`}
         style={{
           opacity,

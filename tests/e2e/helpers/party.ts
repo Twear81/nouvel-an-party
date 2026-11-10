@@ -153,7 +153,7 @@ export class Party {
       }
       const count = this.tv.getByTestId(`setup-count-${id}`);
       for (let guard = 0; guard < 30; guard++) {
-        const current = Number(await count.innerText());
+        const current = Number(await count.textContent() ?? "");
         if (current === target) break;
         await this.tv.getByTestId(`setup-${current < target! ? "inc" : "dec"}-${id}`).click();
         await expect(count).not.toHaveText(String(current));
@@ -213,7 +213,7 @@ export class Party {
     for (const p of phones) {
       const value = this.tv.getByTestId(`delta-value-${p.id}`);
       await expect(value).toBeVisible({ timeout: REVEAL_TIMEOUT });
-      out[p.id!] = Number((await value.innerText()).replace("+", ""));
+      out[p.id!] = Number((await value.textContent() ?? "").replace("+", ""));
     }
     return out;
   }
@@ -226,7 +226,7 @@ export class Party {
   /** Score total affiché sur l'écran de résultats d'un téléphone ("Total : N pts"). */
   async phoneScore(phone: Phone): Promise<number> {
     await this.phoneRevealed(phone);
-    const text = await phone.t("phone-results").innerText();
+    const text = await phone.t("phone-results").textContent() ?? "";
     return Number(/Total\s*:\s*(\d+)/.exec(text)![1]);
   }
 

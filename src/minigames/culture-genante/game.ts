@@ -5,7 +5,7 @@
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
 import { tieRanks } from "../../shared/ranking";
-import { endWhenAllDone, shuffle } from "../helpers";
+import { endWhenAllDone, progressOf, shuffle } from "../helpers";
 
 /** Plus grand nombre accepté pour une estimation (9 chiffres sur le pavé). */
 export const MAX_ESTIMATION = 999_999_999;
@@ -225,6 +225,8 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 
   onPresenceChange: checkAllAnswered,
+
+  progress: (state, ctx) => (state.stage === "question" ? progressOf(ctx, (id) => state.answers.has(id)) : null),
 
   publicView: publicOf,
 

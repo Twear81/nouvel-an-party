@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useState } from "react";
-import { AnsweredCount, AnsweredRoster, CheckIcon, fit, NumPad, ordinal, SelectedBadge, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, Button, CheckIcon, fit, NumPad, ordinal, SelectedBadge, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { centsToDraft, draftToCents, formatCents, formatDraft, pressKey } from "./amount";
 import type { Priv, Pub, Results } from "./game";
@@ -34,7 +34,7 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
       <Showcase image={pub.image} emoji={pub.emoji} />
 
       <div className="flex flex-col items-center gap-1 pt-2">
-        <AnsweredCount done={answered} total={voters.length} className="font-display text-3xl text-ink-muted" />
+        <AnsweredCount done={answered} total={voters.length} className="font-num text-3xl text-ink-muted" />
         <AnsweredRoster players={voters} size="compact" isDone={(id) => pub.answeredIds.includes(id)} />
       </div>
     </div>
@@ -86,14 +86,13 @@ const Phone = ({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>) => {
 
       <NumPad allowComma isUseless={(k) => pressKey(draft, k) === draft} onKey={(k) => setDraft((d) => pressKey(d, k))} />
 
-      <motion.button
-        type="button"
+      <Button
+        variant={validated ? "good" : "primary"}
+        size="lg"
         data-testid="submit-guess"
-        whileTap={{ scale: 0.95, y: 3 }}
-        animate={{ opacity: cents === null ? 0.4 : 1 }}
         disabled={cents === null || validated}
         onClick={submit}
-        className={`mb-2 flex h-[3.75rem] shrink-0 items-center justify-center gap-2 rounded-btn font-display text-2xl ${validated ? "bg-good text-bg shadow-[0_0.35rem_0_var(--color-good-deep)]" : "bg-gold text-accent-ink shadow-btn"}`}
+        className={`mb-2 flex h-[3.75rem] shrink-0 items-center justify-center gap-2 !py-0 ${validated ? "disabled:!opacity-100" : ""}`}
       >
         {validated ? (
           <>
@@ -102,7 +101,7 @@ const Phone = ({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>) => {
         ) : (
           "Valider"
         )}
-      </motion.button>
+      </Button>
     </div>
   );
 };

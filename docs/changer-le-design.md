@@ -8,7 +8,7 @@ ils emploient les classes Tailwind issues du thème (`bg-surface`, `text-accent`
 | Je veux changer… | Fichier |
 |---|---|
 | Couleurs, polices, rayons, ombres, dégradés, animations | `src/web/theme/theme.css` (bloc `@theme static`) |
-| Cadres d'avatar (dessin CSS) | `src/web/theme/theme.css` (section « Cadres d'avatar », classes `.frame-*`) |
+| Cadres d'avatar (tracés SVG et décor CSS) | `src/web/ui/AvatarFrame.tsx` + `src/web/theme/theme.css` (section « Avatars », classes `.frame-*`) |
 | Liste des avatars, cadres proposés, couleurs de profil | `src/web/theme/profile-options.ts` |
 | Fonts embarquées | `src/web/main.tsx` (imports `@fontsource…`) + `--font-*` dans `theme.css` |
 
@@ -19,7 +19,7 @@ Dans `theme.css`, modifier les variables `--color-*` :
 Les dégradés (`--gradient-bg`, `--gradient-gold`…) sont construits à partir de ces couleurs.
 Classes disponibles : `bg-bg`, `text-ink`, `text-ink-muted`, `bg-accent`, `text-accent`, `bg-gold`, `bg-night`, `glass`, `text-gold-gradient`…
 
-Le mode « sérieux » de Culture gênante (décor sombre, typo solennelle) a ses propres jetons : `--color-serious-*`, `--font-serious`, `--gradient-serious` (classes `bg-serious`, `text-serious-ink`, `font-serious`…), dans la section `culture-genante` de `theme.css`.
+Le mode « sérieux » de Culture gênante (décor sombre, typo solennelle) a ses propres jetons : `--color-serious-*`, `--font-serious`, `--gradient-serious` (classes `bg-serious`, `text-serious-ink`, `font-serious`…), dans la section `culture-genante` de `theme.css`. Sous un skin, ces jetons sont **dérivés** de ceux du skin (fond plus sombre et désaturé, texte et accent éclaircis pour rester lisibles même si le skin est clair, police `--font-sans`) par la règle `html[data-skin]` de la même section : le mode sérieux reste dans l'univers du skin. `--color-shade` (ombre portée d'un objet posé sur le décor) suit la même logique.
 
 ### Polices
 Les polices sont installées en local (pas d'internet pendant la soirée).
@@ -27,11 +27,18 @@ Les polices sont installées en local (pas d'internet pendant la soirée).
 2. L'importer dans `src/web/main.tsx`
 3. Mettre son nom dans `--font-display` (titres, gros chiffres) ou `--font-sans` (texte) de `theme.css`.
 
+**Emojis** : embarqués aussi (police Twemoji en couleur, paquet `twemoji-colr-font`, `@font-face` en tête de
+`theme.css`), pour qu'ils soient identiques sur la TV, les iPhone et les Android, sans police système. Toute pile
+`--font-*` (thème de base comme skins) **commence par `"Twemoji"`** : l'`unicode-range` de la police la réserve aux
+emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce premier élément.
+
 ### Avatars, cadres, couleurs
 - `AVATARS` : ajouter `{ id, label, emoji }`. L'`id` est enregistré dans le profil : ne pas renommer un id existant en cours de soirée.
   Pour utiliser des images à la place des emoji, adapter `PlayerAvatar.tsx` (une seule branche à changer).
 - `FRAMES` : ajouter `{ id, label, className }` puis écrire la classe `.frame-<nom>` dans `theme.css`
-  (`--p` = couleur du joueur, `1em` = 1/10 de la taille de l'avatar, donc le cadre suit toutes les tailles).
+  (`--p` = couleur du joueur ; traits SVG `avatar-frame-outer` / `avatar-frame-inner`, coordonnées sur 100).
+  Le skin choisit la silhouette via les jetons `--avatar-*` : voir [le contrat des avatars](skins.md#avatars-et-cadres--contrat-commun).
+  Ne pas redessiner le portrait dans le profil : les choix et aperçus réutilisent `PlayerAvatar`, y compris pour les photos.
 - `COLORS` : liste de couleurs hex.
 
 ## Où est chaque écran
@@ -52,9 +59,17 @@ Les polices sont installées en local (pas d'internet pendant la soirée).
 | Mini-jeu « Culture gênante » (interlude : une scène par fichier, `Accroche`, `Bascule`, `Question`, `Reveal`, `Phone`) | `src/minigames/culture-genante/` |
 | Mini-jeu « Dessin raté » (page de dessin tactile, mosaïque, révélation ; couleurs = jetons `--color-paper` et `--color-pen-0…4` du thème) | `src/minigames/dessin-rate/views.tsx`, `drawing.tsx` |
 
+## Skins
+Le jeu change d'habillage au fil de la soirée (7 skins qui imitent des interfaces de jeux vidéo) : tout est dans [skins.md](skins.md). En bref : `SkinProvider` (`src/web/theme/skin.tsx`) pose `html[data-skin]` ; **un fichier CSS par skin** (`src/web/theme/skins/<id>.css`) redéfinit les jetons puis habille les composants via leurs marqueurs `data-ui` (`panel`, `button`, `choice`, `result-bar`, `countdown`, `avatar`, `score-row`…, tableau dans skins.md). Pour qu'un écran soit habillable : n'utiliser que les composants de `src/web/ui` et les classes du thème ; une zone neuve et récurrente reçoit son `data-ui` (et ses `data-*` d'état) dans le composant, jamais de style de skin dans un mini-jeu.
+
 ## Composants réutilisables (`src/web/ui/`)
-- `Button`, `ConfirmDialog` (confirmation dans le style du jeu, jamais `window.confirm`), `Icons` (icônes SVG : pause, passer, accueil…), `Panel` (carte en verre), `PlayerAvatar` (avatar + cadre + couleur, tailles `xs`→`2xl`, `AVATAR_REM` = taille en rem).
-- `Countdown` (barre + secondes depuis la deadline serveur), `Backdrop` (fond étoilé), `Stage` (cadres TV 16:9 / téléphone, bandeau « Reconnexion… », overlay Pause), `fireConfetti`.
+- `Button`, `ConfirmDialog` (confirmation dans le style du jeu, jamais `window.confirm`), `Icons` (icônes SVG : pause, passer, accueil…), `Panel` (carte en verre, prop `title` facultative), `PlayerAvatar` (avatar + cadre + couleur, tailles `xs`→`2xl`, `AVATAR_REM` = taille en rem).
+- `Choice` : carte de choix cliquable du téléphone (réponse, vote, camp, oui / non). Props `selected`, `state` (`idle` / `correct` / `wrong` / `faded`), `keyLabel` (A, B…), `tone` (`glass` par défaut, `cool` / `hot` / `good` / `bad` pleins, `plain`, `flat` sans relief ni anneau), `radius` (`card` / `btn`), `showCheck` (faux pour les petits boutons serrés), ✓ intégré quand `selected` (taille / position via `checkSize`, `checkTone`, `checkClassName`) ; la mise en page vient de `className`. Marqueurs `choice`, `choice-key`, `choice-label`, `choice-check`. Ne plus écrire de `motion.button` de choix à la main.
+- `ResultBar` : barre animée (rail + remplissage) pour votes et progressions : `value` 0→1, `highlight` (gagnant), `tone`, `pill`, `delay` / `duration` / `ease` ou `transition` (les valeurs passées sont exactement celles de l'animation : `revealSeconds` s'y fie), contenu libre dans la barre. Marqueurs `result-bar`, `result-bar-fill`.
+- `DuelGauge` : jauge bilatérale (deux camps qui poussent l'un vers l'autre, OUI / NON) : `left` et `right` de 0 à 1, gauche `good`, droite `bad`. Marqueurs `duel-gauge`, `duel-gauge-left`, `duel-gauge-right`, `duel-gauge-mid`.
+- `Button` : variantes `primary`, `secondary`, `danger`, `ghost`, `good`, `bad` ; tailles `sm` à `xl`, et `hero` (géant, remplit la place : STOP du compte à rebours). Tout bouton d'action d'un mini-jeu (Valider, Voir mon mot, STOP) passe par lui.
+- Éléments propres à un jeu mais habillables : `tool` (outil de dessin, `data-kind` `pen` / `width` / `action`, `data-selected`) dans une `toolbar` ; `tier-row` / `tier-label` (`data-tier`) ; `pad` (pastille de Simon) et `hub` (disque central). Les couleurs de contenu (feutres, étages, pastilles de Simon) ne se redéfinissent pas dans un skin.
+- `Countdown` (secondes depuis la deadline serveur ; structure selon le skin : cœur, hexagone, anneau, tableau, LED, pièce ; barre compacte sur téléphone ; `--p` = part restante), `Backdrop` (fond étoilé par défaut, redessiné par chaque skin ; calques `backdrop-layer`), `Stage` (cadres TV 16:9 / téléphone, bandeau « Reconnexion… », overlay Pause), `fireConfetti`.
 - `AnsweredRoster` + `AnsweredCount` : barre TV « qui a répondu » (avatars grisés puis ✓, pseudo tronqué, taille selon le nombre de joueurs ; `data-testid` `tv-answered` / `tv-answered-count`, variantes par props : badge, halo, barre de progression, ton « serious »).
 - `SelectedBadge` : pastille ✓ animée sur le choix enregistré (tons `ink` / `accent` / `good` / `serious`, tailles `sm` / `md` / `lg`, position par `className`).
 - `NumPad` : pavé numérique du téléphone (virgule optionnelle, touches sans effet grisées, ton `serious`) ; la logique de saisie (`pressKey`) reste dans le mini-jeu.

@@ -2,7 +2,7 @@
 // On marque quand sa réponse est la même que celle d'autres joueurs ; la plus répandue rapporte un bonus.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { normalizeAnswer, normalizeQuestion, questionSchema, cleanText, endWhenAllDone, playerIds } from "../helpers";
+import { normalizeAnswer, normalizeQuestion, questionSchema, cleanText, endWhenAllDone, playerIds, progressOf } from "../helpers";
 
 export const MAX_LENGTH = 40;
 
@@ -171,6 +171,8 @@ export default defineMiniGame<Cfg, Item, State>({
   },
 
   onPresenceChange: checkAllAnswered,
+
+  progress: (state, ctx) => progressOf(ctx, (id) => state.answers.has(id)),
 
   publicView: (state, ctx): Pub => ({ question: state.question, perPlayer: ctx.cfg.reponses, answeredIds: [...state.answers.keys()] }),
   privateView: (state, playerId): Priv => ({ answers: state.answers.get(playerId) ?? [] }),

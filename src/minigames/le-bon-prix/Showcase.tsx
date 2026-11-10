@@ -18,13 +18,13 @@ export function ItemVisual({ image, emoji, rem }: Visual & { rem: number }) {
         alt=""
         draggable={false}
         onError={() => setBroken(true)}
-        className="object-contain drop-shadow-[0_1rem_1.5rem_rgb(0_0_0/0.55)]"
+        className="object-contain drop-shadow-[0_1rem_1.5rem_var(--color-shade)]"
         style={{ height: `${rem}rem`, maxWidth: `${rem * 1.5}rem` }}
       />
     );
   }
   return (
-    <span data-testid="bp-emoji" className="block select-none leading-none drop-shadow-[0_1rem_1.5rem_rgb(0_0_0/0.55)]" style={{ fontSize: `${rem * 0.82}rem`, height: `${rem}rem`, lineHeight: `${rem}rem` }}>
+    <span data-testid="bp-emoji" className="block select-none leading-none drop-shadow-[0_1rem_1.5rem_var(--color-shade)]" style={{ fontSize: `${rem * 0.82}rem`, height: `${rem}rem`, lineHeight: `${rem}rem` }}>
       {emoji ?? "🎁"}
     </span>
   );

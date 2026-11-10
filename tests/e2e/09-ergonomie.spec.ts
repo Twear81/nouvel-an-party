@@ -72,10 +72,11 @@ test.describe("Ergonomie téléphone", () => {
     await expect(option).toHaveAttribute("aria-pressed", "false");
     await option.click();
     await expect(option).toHaveAttribute("aria-pressed", "true");
-    await expect(option.locator("svg")).toHaveCount(1); // pastille ✓
+    await expect(option.locator('[data-ui="choice-check"]')).toBeVisible();
     // La TV montre que ce joueur a voté, sans dire pour qui.
     await expect(party.tv.getByTestId("tv-answered-count")).toContainText("1 / 2");
-    await expect(party.tv.getByTestId("tv-answered").locator("svg")).toHaveCount(1); // un seul ✓ sur son avatar
+    await expect(party.tv.getByTestId("tv-answered").locator('[data-ui="roster-item"][data-done="true"]')).toHaveCount(1);
+    await expect(party.tv.getByTestId("tv-answered").locator('[data-ui="avatar-badge"]')).toBeVisible();
   });
 });
 
@@ -135,8 +136,8 @@ test.describe("Ceci ou Cela : lisibilité", () => {
       await expect(party.tv.getByTestId("tv-playing")).toContainText(`${round} / 6`);
       await expect(a!.t("choice-0")).toBeVisible();
       await expect(a!.t("choice-1")).toBeVisible();
-      const left = await party.tv.getByTestId("tv-choice-0").innerText();
-      const right = await party.tv.getByTestId("tv-choice-1").innerText();
+      const left = await party.tv.getByTestId("tv-choice-0").textContent() ?? "";
+      const right = await party.tv.getByTestId("tv-choice-1").textContent() ?? "";
       expect(left).not.toBe(right);
       await expect(a!.t("choice-0")).toContainText(left);
       await expect(a!.t("choice-1")).toContainText(right);

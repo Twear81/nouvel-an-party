@@ -236,3 +236,13 @@ describe("comme-les-autres : via le moteur", () => {
     expect(s.round!.deltas).toEqual({ [a]: 100, [b]: 100 });
   });
 });
+
+describe("comme-les-autres : progress", () => {
+  it("compte les joueurs ayant répondu, déconnectés compris", () => {
+    const { ctx, state, answer } = round(3);
+    expect(game.progress!(state, ctx)).toEqual({ done: 0, expected: 3 });
+    answer("p1", "pomme");
+    ctx.setConnected("p2", false);
+    expect(game.progress!(state, ctx)).toEqual({ done: 1, expected: 3 });
+  });
+});

@@ -2,7 +2,7 @@
 // (avec leur mot), puis on vote pour le mieux dessiné. Une manche, trois étapes : dessiner, galerie, vote.
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { argmaxAll, endWhenAllDone, playerIds, shuffle } from "../helpers";
+import { argmaxAll, endWhenAllDone, playerIds, progressOf, shuffle } from "../helpers";
 import { cleanStrokes, DIFFICULTIES, isBlank, type Difficulty, type Stroke } from "./shared";
 
 /** Un mot est tiré dans une liste de 8 mots minimum : en dessous, la difficulté n'est pas jouée. */
@@ -187,6 +187,9 @@ export default defineMiniGame<Cfg, Item, State>({
   onPresenceChange(state, ctx) {
     checkVoted(state, ctx);
   },
+
+  // Dessin et galerie : pas d'étape de réponse (on dessine jusqu'au bout) ; seul le vote est compté.
+  progress: (state, ctx) => (state.step === "vote" ? progressOf(ctx, (id) => state.votes.has(id)) : null),
 
   publicView,
 

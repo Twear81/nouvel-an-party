@@ -174,3 +174,14 @@ describe("qui-est-le-plus : via le moteur", () => {
     expect(s.round!.deltas).toEqual({ [a]: 100, [b]: 100, [c]: 50 });
   });
 });
+
+describe("qui-est-le-plus : progress", () => {
+  it("compte les votants (un vote changé compte une fois), déconnectés compris", () => {
+    const { ctx, state, vote } = round(3);
+    expect(game.progress!(state, ctx)).toEqual({ done: 0, expected: 3 });
+    vote("p1", "p2");
+    vote("p1", "p3");
+    ctx.setConnected("p3", false);
+    expect(game.progress!(state, ctx)).toEqual({ done: 1, expected: 3 });
+  });
+});

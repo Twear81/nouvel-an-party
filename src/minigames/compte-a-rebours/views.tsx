@@ -7,7 +7,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { activeNow } from "../../shared/clock";
 import type { RoundInfo } from "../../shared/types";
 import { serverNow } from "../../web/net/socket";
-import { ordinal, PlayerAvatar } from "../../web/ui";
+import { Button, ordinal, PlayerAvatar } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { Counter, useFrame } from "./Counter";
 import { GO_LEAD_MS, type Priv, type Pub, type Results } from "./game";
@@ -42,7 +42,7 @@ const Tv = ({ pub, playerById, round }: Props) => {
             <span data-testid="cabr-target-big" className="font-display text-7xl">
               Arrêtez-vous à
             </span>
-            <span className="font-display text-[19rem] leading-none text-accent" style={{ textShadow: "0 0 4rem var(--color-accent-deep)" }}>
+            <span data-ui="animated-number" className="font-display text-[19rem] leading-none text-accent" style={{ textShadow: "0 0 4rem var(--color-accent-deep)" }}>
               {fmtCible(pub.cible)} s
             </span>
             <span className="text-4xl text-ink-muted">Le compteur va devenir fou : finissez de compter dans votre tête !</span>
@@ -116,20 +116,22 @@ function StopPad({ pub, round, sendInput }: { pub: Pub; round: RoundInfo; sendIn
 
   if (sent) return <Stopped />;
   return (
-    <motion.button
-      type="button"
+    <Button
+      variant="bad"
+      size="hero"
       data-testid="cabr-stop"
       onPointerDown={stop}
       onClick={stop}
       initial={{ scale: 0.6, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       whileTap={{ scale: 0.97, y: 6 }}
+      whileHover={{}}
       transition={{ type: "spring", stiffness: 400, damping: 22 }}
-      className="relative mb-14 flex min-h-0 w-full flex-1 touch-manipulation items-center justify-center rounded-card bg-hot font-display text-[5.5rem] leading-none tracking-wide text-bg shadow-[0_0.6rem_0_var(--color-bad-deep)]"
+      className="relative mb-14 min-h-0 w-full flex-1 touch-manipulation"
     >
-      <motion.span aria-hidden className="pointer-events-none absolute inset-0 rounded-card ring-[0.5rem] ring-ink/50" animate={{ opacity: [0.15, 0.9, 0.15] }} transition={{ repeat: Infinity, duration: 0.7, ease: "easeInOut" }} />
+      <motion.span aria-hidden className="pointer-events-none absolute inset-0 rounded-btn ring-[0.5rem] ring-ink/50" animate={{ opacity: [0.15, 0.9, 0.15] }} transition={{ repeat: Infinity, duration: 0.7, ease: "easeInOut" }} />
       STOP
-    </motion.button>
+    </Button>
   );
 }
 
@@ -186,7 +188,7 @@ const PhoneResults = ({ results, snapshot }: Props) => {
   return (
     <div data-testid="cabr-phone-result" data-rank={mine.rank} className="flex flex-col items-center gap-2 text-center">
       <span className="font-display text-3xl text-accent">{ordinal(mine.rank)}</span>
-      <span className={`font-display text-4xl ${QUALITY_TEXT[quality(mine.signedMs)]}`}>{fmtSigned(mine.signedMs)} s</span>
+      <span className={`font-num text-4xl ${QUALITY_TEXT[quality(mine.signedMs)]}`}>{fmtSigned(mine.signedMs)} s</span>
     </div>
   );
 };

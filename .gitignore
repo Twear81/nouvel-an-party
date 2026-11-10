@@ -7,3 +7,6 @@ playwright-report/
 *.exe
 .DS_Store
 .claude/worktrees/
+
+# Captures d'écran de revue des skins (locales)
+captures/

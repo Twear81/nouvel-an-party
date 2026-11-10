@@ -28,26 +28,26 @@ export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot
 
   return (
     <>
-      <div data-testid="host-bar" className={`z-50 flex items-center justify-end gap-3 px-10 pb-3 pt-1 ${overlay ? "absolute inset-x-0 bottom-0" : "relative shrink-0"}`}>
+      <div data-testid="host-bar" data-ui="host-bar" className={`z-50 flex items-center justify-end gap-3 px-10 pb-3 pt-1 ${overlay ? "absolute inset-x-0 bottom-0" : "relative shrink-0"}`}>
         {inGame && (
           <>
-            <Button data-testid="host-pause" variant={paused ? "primary" : "secondary"} size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={togglePause}>
+            <Button data-ui="host-button" data-testid="host-pause" variant={paused ? "primary" : "secondary"} size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={togglePause}>
               {paused ? <PlayIcon /> : <PauseIcon />}
               {paused ? "Reprendre" : "Pause"}
             </Button>
-            <Button data-testid="host-skip" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={skip}>
+            <Button data-ui="host-button" data-testid="host-skip" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={skip}>
               <SkipIcon />
               Passer
             </Button>
             {phase === "playing" && (
-              <Button data-testid="host-addtime" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={() => void actions.addTime(10).catch(() => {})}>
+              <Button data-ui="host-button" data-testid="host-addtime" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={() => void actions.addTime(10).catch(() => {})}>
                 <ClockIcon />
                 +10 s
               </Button>
             )}
           </>
         )}
-        <Button data-testid="host-lobby" variant="secondary" size="sm" className="ml-3 flex items-center gap-2 !px-4 !py-1.5" onClick={() => setConfirmLobby(true)}>
+        <Button data-ui="host-button" data-testid="host-lobby" variant="secondary" size="sm" className="ml-3 flex items-center gap-2 !px-4 !py-1.5" onClick={() => setConfirmLobby(true)}>
           <HomeIcon />
           Lobby
         </Button>

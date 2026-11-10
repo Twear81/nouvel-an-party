@@ -3,7 +3,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Button, CheckIcon, fireConfetti, Panel, PlayerAvatar, SelectedBadge } from "../../web/ui";
+import { Button, CheckIcon, Choice, fireConfetti, Panel, PlayerAvatar, ResultBar } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -82,10 +82,8 @@ function TvDecision({ pub }: Props) {
           <div key={c.id} data-testid={`tv-count-${c.id}`} data-count={c.n} className="glass flex w-[40rem] flex-col items-center gap-5 rounded-card px-8 py-10">
             <span className="text-[7rem] leading-none" aria-hidden>{c.emoji}</span>
             <span className="font-display text-6xl">{c.label}</span>
-            <span className="font-display text-[9rem] leading-none text-accent">{c.n}</span>
-            <div className="h-6 w-full overflow-hidden rounded-full bg-surface-strong">
-              <motion.div animate={{ width: `${(c.n / total) * 100}%` }} transition={{ type: "spring", stiffness: 120, damping: 16 }} className="h-full rounded-full bg-accent" />
-            </div>
+            <span className="font-num text-[9rem] leading-none text-accent">{c.n}</span>
+            <ResultBar pill tone="gold" value={c.n / total} fromZero={false} transition={{ type: "spring", stiffness: 120, damping: 16 }} className="h-6 w-full" />
           </div>
         ))}
       </div>
@@ -133,12 +131,12 @@ function WordPeek({ word }: { word: string }) {
     return () => clearTimeout(id);
   }, [shown]);
   return (
-    <button
-      type="button"
+    <Button
+      variant="secondary"
       data-testid="word-peek"
       data-shown={shown}
       onClick={() => setShown((s) => !s)}
-      className="glass flex h-[3.25rem] w-full shrink-0 items-center justify-center gap-2 rounded-btn px-4 text-xl font-bold [-webkit-touch-callout:none]"
+      className="flex h-[3.25rem] w-full shrink-0 items-center justify-center gap-2 !px-4 !py-0 !text-xl !font-bold [-webkit-touch-callout:none]"
     >
       {shown ? (
         <span data-testid="word-peek-word" className="truncate font-display text-2xl text-accent">{word}</span>
@@ -147,7 +145,7 @@ function WordPeek({ word }: { word: string }) {
           <span aria-hidden>🔒</span> <span className="text-ink-muted">Voir mon mot</span>
         </>
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -206,7 +204,7 @@ function PhoneSpeech({ pub, sendInput, playerById, snapshot }: Props) {
 }
 
 // Mêmes codes que « Ceci ou Cela » : deux gros boutons pleins, le choisi a un anneau et une pastille ✓, l'autre s'estompe.
-const DECISION_TONES = { vote: "bg-cool text-bg", tour: "bg-hot text-bg" } as const;
+const DECISION_TONES = { vote: "cool", tour: "hot" } as const;
 
 function PhoneDecision({ priv, sendInput }: Props) {
   const choice = priv?.choice ?? null;
@@ -221,22 +219,17 @@ function PhoneDecision({ priv, sendInput }: Props) {
         {options.map((o) => {
           const selected = choice === o.id;
           return (
-            <motion.button
+            <Choice
               key={o.id}
-              type="button"
               data-testid={`decision-${o.id}`}
-              data-selected={selected}
-              aria-pressed={selected}
-              whileTap={{ scale: 0.96 }}
-              animate={{ scale: selected ? 1.02 : 1, opacity: choice !== null && !selected ? 0.4 : 1 }}
+              tone={DECISION_TONES[o.id]}
+              selected={selected}
+              state={choice !== null && !selected ? "faded" : "idle"}
               onClick={() => void sendInput({ choice: o.id }).catch(() => {})}
-              className={`relative flex min-h-[5rem] flex-1 items-center justify-center rounded-card px-4 shadow-card ${DECISION_TONES[o.id]} ${selected ? "ring-[0.4rem] ring-ink" : ""}`}
+              className="min-h-[5rem] flex-1 px-4"
             >
               <span className="text-balance font-display text-3xl leading-tight">{o.label}</span>
-              {selected && (
-                <SelectedBadge className="absolute right-3 top-3" />
-              )}
-            </motion.button>
+            </Choice>
           );
         })}
       </div>
@@ -257,22 +250,20 @@ function PhoneVote({ round, priv, sendInput, playerById, snapshot }: Props) {
           const selected = vote === id;
           const profile = playerById(id)?.profile ?? null;
           return (
-            <motion.button
+            <Choice
               key={id}
-              type="button"
               data-testid={`vote-option-${id}`}
-              whileTap={{ scale: 0.93 }}
-              animate={{ scale: selected ? 1.03 : 1, opacity: vote !== null && !selected ? 0.5 : 1 }}
+              selected={selected}
+              state={vote !== null && !selected ? "faded" : "idle"}
               onClick={() => void sendInput({ target: id }).catch(() => {})}
-              aria-pressed={selected}
-              className={`relative flex flex-col items-center justify-center gap-1 rounded-card border-2 p-1.5 ${dense ? "min-h-[6.5rem]" : "min-h-[9rem]"} ${selected ? "border-accent bg-accent/25 shadow-glow" : "glass border-transparent"}`}
+              checkTone="accent"
+              checkSize="sm"
+              checkClassName="absolute right-1.5 top-1.5"
+              className={`flex-col gap-1 p-1.5 ${dense ? "min-h-[6.5rem]" : "min-h-[9rem]"}`}
             >
               <PlayerAvatar profile={profile} size={dense ? "md" : "lg"} />
               <span className="w-full truncate text-lg font-bold leading-tight">{profile?.name}</span>
-              {selected && (
-                <SelectedBadge tone="accent" size="sm" className="absolute right-1.5 top-1.5" />
-              )}
-            </motion.button>
+            </Choice>
           );
         })}
       </div>
