@@ -66,22 +66,32 @@
 
 /* Les dessins utilisent les coordonnées de la pièce ; couleurs et traits sont regroupés ici. */
 .room-signature-art {
-  --sig-gold: #f6ce63;
-  --sig-brass: #ae6b13;
-  --sig-orange: #ff9b37;
-  --sig-red-dark: #761f2d;
-  --sig-ink: #140e14;
   position: absolute; inset: 0;
   width: 100%; height: 100%; overflow: visible;
 }
 .room-signature-art [data-room-motion] { transform-box: fill-box; transform-origin: center; }
-.sig-cap-body, .sig-cap-brim { fill: var(--room-accent); stroke: var(--sig-red-dark); stroke-width: 5; stroke-linejoin: round; }
-.sig-cap-brim { fill: color-mix(in srgb, var(--room-accent) 83%, var(--sig-red-dark)); }
-.sig-cap-shine { fill: none; stroke: color-mix(in srgb, var(--room-ink) 65%, var(--room-accent)); stroke-width: 6; stroke-linecap: round; }
-.sig-cap-eye { fill: var(--room-ink); }
-.sig-cap-iris { fill: var(--room-shadow); }
-.sig-coin circle { fill: var(--sig-gold); stroke: var(--sig-brass); stroke-width: 4; }
-.sig-coin ellipse, .sig-coin path { fill: none; stroke: var(--sig-brass); stroke-width: 3; stroke-linecap: round; }
+/* Mario Odyssey : pixel art net (sprites en pixels carrés, pas de dégradé), mouvements en coordonnées du viewBox. */
+.sig-mario {
+  --sig-mario-coin-dark: #b84800;
+  --sig-mario-coin: #f8b800;
+  --sig-mario-coin-light: #fff4a8;
+  --sig-mario-pouf: #ffffff;
+  --sig-mario-pouf-b: #fcd89c;
+  --sig-mario-iris: #ffffff;
+  --sig-mario-iris-edge: #f8b800;
+}
+.sig-mario [data-room-motion] { transform-box: view-box; transform-origin: 0 0; opacity: 0; }
+.sig-mario [data-room-motion="iris"], .sig-mario [data-room-motion="iris-edge"] { transform-box: fill-box; transform-origin: center; }
+.sig-mario [data-room-motion="coin-frame"] { opacity: 1; }
+.sig-mario image, .sig-mario rect { image-rendering: crisp-edges; image-rendering: pixelated; shape-rendering: crispEdges; }
+.sig-mario [data-room-motion="block"] image { image-rendering: auto; shape-rendering: auto; }
+.sig-mario-coin-dark { fill: var(--sig-mario-coin-dark); }
+.sig-mario-coin { fill: var(--sig-mario-coin); }
+.sig-mario-coin-light { fill: var(--sig-mario-coin-light); }
+.sig-mario-pouf { fill: var(--sig-mario-pouf); }
+.sig-mario-pouf-b { fill: var(--sig-mario-pouf-b); }
+.sig-mario-iris { fill: var(--sig-mario-iris); }
+.sig-mario-iris-edge { fill: var(--sig-mario-iris-edge); }
 
 /* Overwatch : « Action de la partie », surimpression d'écran (tailles en cqw/cqh : proportionnelles à la TV). */
 .room-overlay { pointer-events: none; overflow: hidden; }
