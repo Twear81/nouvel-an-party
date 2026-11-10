@@ -4,6 +4,9 @@ Chantier validé par l'utilisateur le **10 novembre 2026**, après les retouches
 Overwatch. Le contrat technique et les commandes de captures sont dans [skins.md](skins.md) ; l'historique Git
 conserve le suivi détaillé des corrections.
 
+Les nouvelles scènes de changement d'univers présentées ci-dessous sont encore **en attente de validation visuelle
+par l'organisateur**. La galerie permet de les examiner séparément.
+
 ## Références conservées
 - **Maquette validée** : copie locale [maquettes/skins.html](maquettes/skins.html), référence pour les couleurs,
   polices, formes et détails ; flèches ← → pour changer de skin dans le navigateur.
@@ -69,6 +72,19 @@ spécifiques. La maquette active suit les six skins restants. Les anciennes capt
   image embarquée chargée et aucune erreur de console.
 - Journaux et captures de ce lot : `captures/validation-scenes-2026-11-10/`. La cérémonie avec statistiques et
   souvenirs, puis le son TV, restent à réaliser ; voir [mise-en-scene.md](mise-en-scene.md).
+
+## Revue technique des six nouvelles scènes (10 novembre 2026)
+
+- Six dessins animés ancrés dans la pièce remplacent les motifs abstraits : œuf, hologramme, portail, ballon/boost,
+  casquette/pièces et ramifications de la Macula pour Resonance. Le fondu noir médian qui masquait les effets est retiré.
+- La galerie `bun run apercu:transitions` construit `captures/transitions/index.html`, un HTML autonome qui réutilise
+  les composants et les polices du jeu. Son contrôleur de démonstration ne se connecte pas au serveur.
+- TypeScript, **510 tests unitaires** et les **trois E2E de transitions Chromium** verts. Les six lectures complètes,
+  pause/reprise, curseur et rejeu sont vérifiés dans la galerie. La pause fige aussi les animations des objets et les ramifications.
+- Avec la préférence de mouvement réduit définie avant ouverture, caméra et objets restent fixes ; les formes restent
+  visibles en fondu. Aucune erreur de console ni requête HTTP/Socket.IO pendant la revue hors ligne.
+- Captures des six effets relues, galerie et vidéo d'ensemble dans `captures/transitions/`. Les fichiers générés sont
+  ignorés par Git ; la commande régénère la galerie à partir des sources. La validation de chaque proposition revient à l'organisateur.
 
 ## Preuves et entretien
 - Galerie locale : `captures/revue-finition/index.html`, avec les maquettes et les captures par navigateur.

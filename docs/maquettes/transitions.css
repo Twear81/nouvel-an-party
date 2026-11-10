@@ -1,0 +1,60 @@
+/* L'outil de revue reste neutre ; la scène et le panneau final utilisent le véritable thème du jeu. */
+:root {
+  --galerie-fond: #0b1020;
+  --galerie-surface: #172137;
+  --galerie-ligne: #3c4961;
+  --galerie-texte: #f4f5fa;
+  --galerie-discret: #bac5d7;
+  --galerie-accent: #f2d57b;
+  --galerie-encre: #211b09;
+  --galerie-police: "Outfit Variable", Arial, sans-serif;
+}
+/* Les commandes de revue gardent une taille lisible ; seul le décor s'adapte au cadre 16:9. */
+html[data-app="tv"] { font-size: 16px; }
+html, body, #galerie { height: 100%; margin: 0; overflow: hidden; }
+body { background: var(--galerie-fond); }
+.galerie {
+  height: 100%; display: flex; flex-direction: column; gap: .65rem; padding: .8rem 1rem;
+  color: var(--galerie-texte); background: var(--galerie-fond); font-family: var(--galerie-police);
+}
+.galerie-entete { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.galerie .galerie-titre {
+  margin: 0; font: 700 1.4rem/1.15 var(--galerie-police); color: var(--galerie-texte);
+  text-transform: none; letter-spacing: normal; transform: none; text-shadow: none;
+}
+.galerie-statut { margin: .2rem 0 0; font-size: .9rem; color: var(--galerie-discret); }
+.galerie-lecture, .galerie-univers { display: flex; flex-wrap: wrap; gap: .45rem; }
+.galerie-univers { justify-content: center; }
+.galerie-lecture button, .galerie-univers button {
+  min-height: 2.6rem; padding: .55rem 1rem; border: 1px solid var(--galerie-ligne); border-radius: .5rem;
+  font: 650 1rem/1.1 var(--galerie-police); color: var(--galerie-texte); background: var(--galerie-surface);
+  cursor: pointer; touch-action: manipulation;
+}
+.galerie button:focus-visible, .galerie input:focus-visible { outline: 3px solid var(--galerie-accent); outline-offset: 3px; }
+.galerie-univers button[aria-pressed="true"], .galerie-lecture button:first-child {
+  background: var(--galerie-accent); color: var(--galerie-encre); border-color: var(--galerie-accent);
+}
+.galerie button:disabled { cursor: default; opacity: .45; }
+.galerie-cadre { flex: 1; min-height: 0; display: grid; place-items: center; container-type: size; }
+.galerie-scene {
+  position: relative; width: min(100cqw, calc(100cqh * 16 / 9)); aspect-ratio: 16 / 9;
+  overflow: hidden; isolation: isolate; background: var(--color-bg); border-radius: .6rem;
+}
+.galerie-destination { position: absolute; inset: 0; display: grid; place-items: center; background: var(--gradient-bg); }
+.galerie-panneau { min-width: 45%; max-width: 85%; padding: 3rem; text-align: center; }
+.galerie-nom-destination { margin: 1.1rem 0 1.8rem; font-size: 4rem; line-height: 1.1; }
+.galerie-pied { display: flex; flex-direction: column; gap: .55rem; }
+.galerie-legende { display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; gap: .3rem .7rem; font-size: .95rem; }
+.galerie-legende span { color: var(--galerie-discret); }
+.galerie-progression { display: flex; align-items: center; gap: .8rem; font-size: .9rem; }
+.galerie-progression input { flex: 1; min-width: 3rem; accent-color: var(--galerie-accent); }
+.galerie-progression output { min-width: 5.8rem; text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 650px) {
+  .galerie { padding: .5rem; }
+  .galerie-entete { flex-wrap: wrap; justify-content: center; text-align: center; }
+  .galerie-univers button { padding-inline: .65rem; }
+  .galerie-legende span { text-align: center; }
+  .galerie-progression > span { display: none; }
+  .galerie-panneau { padding: .5rem; }
+  .galerie-nom-destination { margin: .35rem 0 .65rem; font-size: 1.8rem; }
+}

@@ -10,6 +10,7 @@
     "release": "bun scripts/build-release.ts",
     "typecheck": "tsc --noEmit",
     "captures:skin": "playwright test skins-captures --project=chromium",
+    "apercu:transitions": "bun scripts/construire-apercu-transitions.ts",
     "test": "bun test tests/unit",
     "test:e2e": "playwright test"
   },

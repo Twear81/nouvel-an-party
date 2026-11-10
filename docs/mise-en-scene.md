@@ -65,6 +65,29 @@ rejeu, changement d'effectif et mouvement réduit vérifiés. À sept et huit in
 ne recouvrent ni les portraits ni les autres noms, sans débordement. Captures relues ; aucune erreur de console
 ni requête HTTP. TypeScript et les 502 tests unitaires du jeu passent ; le code du jeu n'a pas changé dans ce lot.
 
+### Examiner les six changements d'univers
+
+Générer la galerie avec `bun run apercu:transitions`, puis ouvrir `captures/transitions/index.html` directement
+dans le navigateur. Chaque univers dispose de sa proposition animée, avec lecture, pause et curseur de progression.
+La galerie utilise `RoomTransition` et les signatures du jeu : elle n'entretient pas une seconde version des effets.
+Son contrôleur emploie des snapshots de démonstration, sans lancer de partie ni se connecter au serveur.
+
+Ces propositions visuelles sont **en attente de validation par l'organisateur** :
+
+| Univers | Petite scène proposée |
+|---|---|
+| Dofus | Un œuf vert apparaît au-dessus de la table ; des cases et des étincelles l'accompagnent. |
+| Overwatch | La TV projette un hologramme : balayage, hexagones et viseur orange. |
+| League of Legends | Un portail hextech bleu et doré s'ouvre dans le salon. |
+| Rocket League | Un ballon rebondit avec une traînée de boost bleue et orange, puis rejoint la TV. |
+| Mario Odyssey | Une casquette rouge à yeux traverse la pièce, accompagnée de pièces dorées. |
+| Resonance : A Plague Tale Legacy | La Macula gagne les murs par des ramifications noires depuis la cheminée ; une pulsation ambrée traverse le réseau. |
+
+Pour Resonance, cette interprétation visuelle part de la Macula et de la lumière décrites dans le
+[devblog officiel](https://community.focus-entmt.com/focus-entertainment/a-plague-tale-series/blogs/433-devblog-5-seadogs).
+Elle remplace les anciennes bandes de brume. Les scènes restent muettes et durent quatre secondes.
+Tous les mouvements suivent la même horloge que la caméra ; la pause et le mouvement réduit s'appliquent aux détails.
+
 ## Changements techniques nécessaires
 
 ### Des frontières explicites entre les univers

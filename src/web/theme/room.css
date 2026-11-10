@@ -55,28 +55,64 @@
 }
 .room-light { background: linear-gradient(130deg, var(--room-tint), transparent 40%, var(--room-accent)); mix-blend-mode: soft-light; opacity: 0; }
 .room-signature { overflow: hidden; opacity: 0; color: var(--room-accent); pointer-events: none; }
-.room-scene[data-room-skin="dofus"] { --room-accent: #ecdb4f; --room-tint: #3e5540; }
-.room-scene[data-room-skin="overwatch"] { --room-accent: #1ba3d6; --room-tint: #d3dcec; }
-.room-scene[data-room-skin="league-of-legends"] { --room-accent: #c8aa6e; --room-tint: #0a323c; }
+.room-scene[data-room-skin="dofus"] { --room-accent: #b4e979; --room-tint: #3e5540; }
+.room-scene[data-room-skin="overwatch"] { --room-accent: #72dcff; --room-tint: #d3dcec; }
+.room-scene[data-room-skin="league-of-legends"] { --room-accent: #e5bf69; --room-tint: #0a323c; }
 .room-scene[data-room-skin="rocket-league"] { --room-accent: #59b6ff; --room-tint: #123376; --room-rival: #ee8b39; }
 .room-scene[data-room-skin="mario-odyssey"] { --room-accent: #e83d42; --room-tint: #f1e4d0; }
-.room-scene[data-room-skin="plague-tale"] { --room-accent: #e0cb7d; --room-tint: #34332f; }
-.room-grid {
-  position: absolute; inset: 48% 12% -25%;
-  background-image: linear-gradient(var(--room-accent) 1px, transparent 1px), linear-gradient(90deg, var(--room-accent) 1px, transparent 1px);
-  background-size: 5rem 5rem;
-  transform: perspective(28rem) rotateX(48deg) rotateZ(-8deg);
+.room-scene[data-room-skin="plague-tale"] { --room-accent: #e3a558; --room-tint: #33271f; }
+
+/* Les dessins utilisent les coordonnées de la pièce ; couleurs et traits sont regroupés ici. */
+.room-signature-art {
+  --sig-gold: #f6ce63;
+  --sig-brass: #ae6b13;
+  --sig-energy: #45ccf1;
+  --sig-orange: #ff9b37;
+  --sig-green: #73b93d;
+  --sig-green-dark: #284b22;
+  --sig-green-light: #c9ef91;
+  --sig-red-dark: #761f2d;
+  --sig-ink: #140e14;
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; overflow: visible;
 }
-.room-hexagons { position: absolute; inset: 12% 20%; display: grid; grid-template-columns: repeat(6, 1fr); align-content: center; gap: 2rem; }
-.room-hexagons i { display: block; aspect-ratio: 1; background: var(--room-accent); clip-path: polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); }
-.room-hexagons i::after { content: ""; display: block; height: calc(100% - .35rem); margin: .175rem; background: var(--room-tint); clip-path: inherit; }
-.room-diamond { position: absolute; width: 22rem; height: 22rem; left: calc(50% - 11rem); top: calc(50% - 11rem); border: .25rem solid currentColor; transform: rotate(45deg); box-shadow: 0 0 4rem currentColor; }
-.room-diamond i { position: absolute; inset: 3rem; border: .1rem solid currentColor; }
-.room-stadium { position: absolute; inset: 20% -10%; border-block: .3rem solid currentColor; transform: rotate(-12deg); }
-.room-stadium i { position: absolute; top: 0; bottom: 0; width: 20%; left: 15%; background: linear-gradient(90deg, transparent, var(--room-accent), transparent); }
-.room-stadium i + i { left: auto; right: 15%; background: linear-gradient(90deg, transparent, var(--room-rival), transparent); }
-.room-postcard { position: absolute; inset: 12% 16%; border: 1.4rem solid var(--room-ink); outline: .35rem solid var(--room-accent); transform: rotate(-5deg); }
-.room-postcard i { position: absolute; width: 9rem; height: 9rem; top: -3rem; right: -3rem; border: .6rem double var(--room-accent); border-radius: 50%; }
-.room-mist { position: absolute; inset: 0 -20%; background: repeating-linear-gradient(173deg, transparent 0 9rem, color-mix(in srgb, var(--room-tint) 70%, transparent) 12rem 15rem, transparent 18rem); }
-.room-mist i { position: absolute; width: 50%; height: 16rem; bottom: -6rem; border-radius: 50%; background: color-mix(in srgb, var(--room-shadow) 75%, transparent); }
-.room-mist i + i { right: -5%; bottom: -8rem; }
+.room-signature-art [data-room-motion] { transform-box: fill-box; transform-origin: center; }
+.sig-grid { fill: color-mix(in srgb, var(--sig-green) 12%, transparent); stroke: var(--sig-green-light); stroke-width: 2.5; }
+.sig-green-aura { fill: color-mix(in srgb, var(--sig-green-light) 35%, transparent); stroke: var(--sig-green-light); stroke-width: 3; }
+.sig-egg-body { fill: var(--sig-green); stroke: var(--sig-green-dark); stroke-width: 5; }
+.sig-egg-mark { fill: none; stroke: var(--sig-green-dark); stroke-width: 8; stroke-linejoin: round; stroke-linecap: round; }
+.sig-egg-shine { fill: none; stroke: var(--sig-green-light); stroke-width: 8; stroke-linecap: round; }
+.sig-sparkle { fill: var(--sig-green-light); stroke: var(--sig-gold); stroke-width: 1.5; }
+.sig-hologram-beam { fill: color-mix(in srgb, var(--sig-energy) 15%, transparent); stroke: color-mix(in srgb, var(--sig-energy) 45%, transparent); stroke-width: 2; }
+.sig-holo-floor { fill: color-mix(in srgb, var(--sig-energy) 12%, transparent); stroke: var(--sig-energy); stroke-width: 3; }
+.sig-holo-hex, .sig-holo-small { fill: color-mix(in srgb, var(--sig-energy) 12%, transparent); stroke: var(--sig-energy); stroke-width: 3; }
+.sig-target-ring, .sig-target-lines { fill: none; stroke: var(--sig-orange); stroke-width: 5; }
+.sig-holo-scan { fill: none; stroke: var(--room-ink); stroke-width: 5; filter: drop-shadow(0 0 .4rem var(--sig-energy)); }
+.sig-portal-floor { fill: color-mix(in srgb, var(--sig-energy) 16%, transparent); stroke: var(--sig-gold); stroke-width: 3; }
+.sig-rune { fill: none; stroke: var(--sig-gold); stroke-width: 3; stroke-linecap: round; }
+.sig-portal-energy { fill: color-mix(in srgb, var(--sig-energy) 78%, var(--room-shadow)); }
+.sig-portal-inner { fill: color-mix(in srgb, var(--room-screen) 88%, var(--sig-energy)); stroke: var(--sig-energy); stroke-width: 5; }
+.sig-portal-rim { fill: none; stroke: var(--sig-gold); stroke-width: 8; stroke-linejoin: round; }
+.sig-portal-fine { stroke-width: 2; }
+.sig-portal-cracks { fill: none; stroke: var(--sig-energy); stroke-width: 5; stroke-linejoin: round; opacity: .8; }
+.sig-object-shadow { fill: var(--room-shadow); }
+.sig-boost path { fill: none; stroke: var(--room-accent); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 .3rem var(--room-accent)); }
+.sig-boost path + path { stroke: var(--room-rival); }
+.sig-ball-leather { fill: var(--room-ink); stroke: var(--room-shadow); stroke-width: 5; }
+.sig-ball-panel { fill: var(--room-shadow); }
+.sig-ball-seams { fill: none; stroke: var(--room-shadow); stroke-width: 2; }
+.sig-ball-shine { fill: none; stroke: var(--sig-energy); stroke-width: 4; stroke-linecap: round; }
+.sig-cap-body, .sig-cap-brim { fill: var(--room-accent); stroke: var(--sig-red-dark); stroke-width: 5; stroke-linejoin: round; }
+.sig-cap-brim { fill: color-mix(in srgb, var(--room-accent) 83%, var(--sig-red-dark)); }
+.sig-cap-shine { fill: none; stroke: color-mix(in srgb, var(--room-ink) 65%, var(--room-accent)); stroke-width: 6; stroke-linecap: round; }
+.sig-cap-eye { fill: var(--room-ink); }
+.sig-cap-iris { fill: var(--room-shadow); }
+.sig-coin circle { fill: var(--sig-gold); stroke: var(--sig-brass); stroke-width: 4; }
+.sig-coin ellipse, .sig-coin path { fill: none; stroke: var(--sig-brass); stroke-width: 3; stroke-linecap: round; }
+.sig-macula-roots path { fill: none; stroke: var(--sig-ink); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.sig-macula-roots .sig-macula-trunk { stroke-width: 10; }
+.sig-macula-knots { fill: var(--sig-ink); }
+.sig-macula-pulse { fill: var(--room-accent); }
+.sig-macula-pulse ellipse { opacity: .12; }
+.sig-macula-pulse ellipse + ellipse { opacity: .2; }
+.sig-macula-pulse ellipse + ellipse + ellipse { opacity: .45; }

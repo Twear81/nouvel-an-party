@@ -5,8 +5,8 @@ import type { GameSnapshot } from "../../shared/types";
 import { OPENING_TIMING, transitionElapsed, type TransitionInfo } from "../../shared/transitions";
 import { serverNow } from "../net/socket";
 import roomReference from "../theme/assets/piece-reference.png";
-import type { SkinId } from "../../shared/skins";
 import { PlayerAvatar } from "./PlayerAvatar";
+import { RoomSignature, animateRoomSignature } from "./RoomSignature";
 
 export { roomReference };
 
@@ -28,19 +28,6 @@ function sceneStage(scene: TransitionInfo, elapsed: number) {
   }
   if (scene.kind === "closing") return elapsed < 1500 ? "zoom" : "table";
   return elapsed < 1000 ? "room" : elapsed < 2600 ? "change" : "zoom";
-}
-
-/** Une signature de décor par univers, uniquement pendant le changement de skin. */
-function RoomSignature({ skin }: { skin: SkinId | null }) {
-  switch (skin) {
-    case "dofus": return <div className="room-grid" />;
-    case "overwatch": return <div className="room-hexagons">{Array.from({ length: 12 }, (_, i) => <i key={i} />)}</div>;
-    case "league-of-legends": return <div className="room-diamond"><i /></div>;
-    case "rocket-league": return <div className="room-stadium"><i /><i /></div>;
-    case "mario-odyssey": return <div className="room-postcard"><i /></div>;
-    case "plague-tale": return <div className="room-mist"><i /><i /></div>;
-    default: return null;
-  }
 }
 
 export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
@@ -101,17 +88,16 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
         { at: 3900, transform: zoom }, { at: scene.durationMs, transform: zoom },
       ]);
       animate(light.current, [
-        { at: 0, opacity: 0 }, { at: 1000, opacity: 0 }, { at: 1700, opacity: .58 },
-        { at: 3000, opacity: .58 }, { at: scene.durationMs, opacity: 0 },
+        { at: 0, opacity: 0 }, { at: 1000, opacity: 0 }, { at: 1700, opacity: .32 },
+        { at: 3000, opacity: .32 }, { at: scene.durationMs, opacity: 0 },
       ]);
       animate(signature.current, [
-        { at: 0, opacity: 0, transform: "scale(.94)" }, { at: 1100, opacity: 0, transform: "scale(.94)" },
-        { at: 1800, opacity: .8, transform: "scale(1)" }, { at: 2700, opacity: .8, transform: "scale(1.02)" },
-        { at: 3400, opacity: 0, transform: "scale(1.05)" }, { at: scene.durationMs, opacity: 0 },
+        { at: 0, opacity: 0 }, { at: 850, opacity: 0 }, { at: 1200, opacity: 1 },
+        { at: 2900, opacity: 1 }, { at: 3500, opacity: 0 }, { at: scene.durationMs, opacity: 0 },
       ]);
+      animateRoomSignature(signature.current, scene.toSkin, reduced, animate);
       animate(cover.current, [
-        { at: 0, opacity: 1 }, { at: 650, opacity: 0 }, { at: 1700, opacity: 0 },
-        { at: 1900, opacity: 1 }, { at: 2300, opacity: 1 }, { at: 2500, opacity: 0 },
+        { at: 0, opacity: 1 }, { at: 650, opacity: 0 },
         { at: 3750, opacity: 0 }, { at: scene.durationMs, opacity: 1 },
       ]);
     } else {
