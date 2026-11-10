@@ -14,7 +14,7 @@ import "../docs/maquettes/transitions.css";
 
 const UNIVERS: { id: SkinId; nom: string; description: string }[] = [
   { id: "dofus", nom: "Dofus", description: "Une grille se dessine sur le tapis, un œuf magique vert apparaît sur la table et lance des étincelles." },
-  { id: "overwatch", nom: "Overwatch", description: "« Action de la partie » : des bandes blanches, orange et bleues en biais balaient l’écran, le carton géant apparaît avec l’avatar et le pseudo d’un invité, puis les bandes repassent avant de replonger dans la TV." },
+  { id: "overwatch", nom: "Overwatch", description: "« Action de la partie » : des bandes blanches, orange et bleues en biais balaient l’écran, puis le meilleur de la manche précédente en vedette : texte à gauche qui glisse, son avatar en grand à droite ; enfin les bandes repassent avant de replonger dans la TV." },
   { id: "league-of-legends", nom: "League of Legends", description: "Un portail hextech bleu et doré s’ouvre, avec anneaux et runes autour de la table." },
   { id: "rocket-league", nom: "Rocket League", description: "Une vraie Octane bleue arrive en boost (flamme et traînée), saute et frappe le ballon de Rocket League qui file dans la TV : la caméra tremble, explosion de but bleue et orange, puis elle plonge dans l’écran." },
   { id: "mario-odyssey", nom: "Mario Odyssey", description: "Une casquette rouge à yeux file en arc vers la TV, accompagnée de pièces dorées." },
@@ -30,7 +30,7 @@ const DUREE =TRANSITION_TIMING.skin.durationMs;
 function sceneLocale(skin: SkinId, elapsed = 0, paused = true): TransitionInfo {
   const now = serverNow();
   return { kind: "skin", fromSkin: null, toSkin: skin, startedAt: now - elapsed,
-    durationMs: DUREE, pausedMs: 0, pausedSince: paused ? now : null, playerIds: INVITES.map((joueur) => joueur.id) };
+    durationMs: DUREE, pausedMs: 0, pausedSince: paused ? now : null, playerIds: INVITES.map((joueur) => joueur.id), spotlightPlayerId: "p2" };
 }
 
 function Galerie() {

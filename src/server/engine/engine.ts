@@ -298,7 +298,22 @@ export class GameEngine {
 
   // ───────────────────────────── Déroulé ─────────────────────────────
 
+  /** Vedette d'une scène d'univers : un des meilleurs gains de la dernière manche, sinon un participant au hasard. */
+  private pickSpotlight(kind: TransitionKind, playerIds: string[]): string | null {
+    if (kind !== "skin" || playerIds.length === 0) return null;
+    const deltas = this.current?.deltas ?? {};
+    const best = Math.max(0, ...playerIds.map((id) => deltas[id] ?? 0));
+    const pool = best > 0 ? playerIds.filter((id) => (deltas[id] ?? 0) === best) : playerIds;
+    return pool[Math.min(pool.length - 1, Math.floor(this.rng() * pool.length))]!;
+  }
+
   private beginTransition(kind: TransitionKind, fromSkin: SkinId | null, toSkin: SkinId | null, restored?: SavedTransition) {
+    // Les gains de la dernière manche sont lus avant d'effacer `current` (une reprise réutilise la vedette sauvegardée).
+    const playerIds = restored ? [...new Set(restored.playerIds)].filter((id) => this.players.get(id)?.profile)
+      : this.publicPlayers().filter((p) => p.profile).map((p) => p.id);
+    const spotlightPlayerId = restored
+      ? (restored.spotlightPlayerId && playerIds.includes(restored.spotlightPlayerId) ? restored.spotlightPlayerId : null)
+      : this.pickSpotlight(kind, playerIds);
     this.current?.timers.clear();
     this.current = null;
     this.transitionTimers?.clear();
@@ -315,8 +330,7 @@ export class GameEngine {
       durationMs: timing.durationMs,
       pausedMs: 0,
       pausedSince: this.paused ? now : null,
-      playerIds: restored ? [...new Set(restored.playerIds)].filter((id) => this.players.get(id)?.profile)
-        : this.publicPlayers().filter((p) => p.profile).map((p) => p.id),
+      playerIds, spotlightPlayerId,
     };
     this.transition = scene;
     const timers = new TimerGroup(this.clock);
@@ -666,6 +680,9 @@ function validSkinOrder(o: unknown): SkinId[] | null {
 
 function validSavedTransition(scene: SavedTransition | null | undefined): scene is SavedTransition {
   if (!scene || !["opening", "skin", "closing"].includes(scene.kind)) return false;
+  // Les anciennes sauvegardes n'ont pas de vedette : elles restent valides.
+  if (scene.spotlightPlayerId === undefined) scene.spotlightPlayerId = null;
+  if (scene.spotlightPlayerId !== null && typeof scene.spotlightPlayerId !== "string") return false;
   if (scene.fromSkin !== null && !isSkinId(scene.fromSkin)) return false;
   if (scene.toSkin !== null && !isSkinId(scene.toSkin)) return false;
   return Number.isFinite(scene.elapsedMs) && Number.isFinite(scene.checkpointAt) && typeof scene.paused === "boolean"

@@ -256,3 +256,76 @@ describe("frontières d'univers", () => {
     expect(assignRoundSkins(plan, [...SKINS], seededRng(123))).toEqual(result);
   });
 });
+
+/** Joue des manches où chaque joueur marque `values[i]` points, jusqu'à la scène de changement d'univers. */
+function playUntilSkinScene(t: ReturnType<typeof partyWithSurprise>, values: number[]) {
+  startRounds(t.engine);
+  for (let guard = 0; guard < 20; guard++) {
+    if (t.engine.snapshot(null).phase === "intro") t.engine.skip();
+    t.ids.forEach((id, i) => t.engine.input(id, { v: values[i]! }));
+    t.engine.skip();
+    expect(t.engine.snapshot(null).phase).toBe("results");
+    const result = t.engine.snapshot(null);
+    if (result.round!.interlude && result.round!.index < result.round!.total - 1) {
+      for (const id of t.ids) t.engine.continue(id);
+      expect(t.engine.snapshot(null).transition?.kind).toBe("skin");
+      return t.engine.snapshot(null).transition!;
+    }
+    t.engine.skip();
+  }
+  throw new Error("aucune scène d'univers atteinte");
+}
+
+describe("vedette d'une scène d'univers", () => {
+  it("c'est le joueur qui a le plus marqué à la dernière manche", () => {
+    const t = partyWithSurprise(4);
+    const scene = playUntilSkinScene(t, [1, 5, 2]);
+    expect(scene.spotlightPlayerId).toBe(t.ids[1]!);
+  });
+
+  it("une égalité en tête est départagée par le rng du moteur, parmi les ex aequo seulement", () => {
+    const seen = new Set<number>();
+    for (let seed = 1; seed <= 30; seed++) {
+      const normal = makeFakeGame({ id: "normal", items: 4 });
+      const surprise = makeFakeGame({ id: "surprise", items: 3, interlude: 2, changeSkinAfter: true });
+      const t = createTestEngine({ games: [normal.loaded, surprise.loaded], seed });
+      t.engine.setSetup({ counts: { normal: 4, surprise: 1 } });
+      const scene = playUntilSkinScene({ ...t, normal, surprise, persistence: new MemoryPersistence() }, [4, 1, 4]);
+      seen.add(t.ids.indexOf(scene.spotlightPlayerId!));
+    }
+    expect([...seen].sort()).toEqual([0, 2]);
+  });
+
+  it("personne n'a marqué : un participant au hasard", () => {
+    const t = partyWithSurprise(4);
+    const scene = playUntilSkinScene(t, [0, 0, 0]);
+    expect(t.ids).toContain(scene.spotlightPlayerId!);
+    expect(scene.playerIds).toContain(scene.spotlightPlayerId!);
+  });
+
+  it("l'ouverture et la sortie n'ont pas de vedette", () => {
+    const t = createTestEngine({ rounds: 1 });
+    t.engine.start();
+    expect(t.engine.snapshot(null).transition!.spotlightPlayerId).toBeNull();
+  });
+
+  it("la reprise après sauvegarde conserve la vedette", () => {
+    const t = partyWithSurprise(4);
+    const scene = playUntilSkinScene(t, [1, 5, 2]);
+    t.clock.advance(1000);
+    const b = restart(t.persistence, [t.normal.loaded, t.surprise.loaded], t.clock.now() + 500);
+    b.engine.resumeSave();
+    expect(b.engine.snapshot(null).transition).toMatchObject({ kind: "skin", spotlightPlayerId: scene.spotlightPlayerId });
+  });
+
+  it("une ancienne sauvegarde sans le champ reste valide (vedette nulle)", () => {
+    const t = partyWithSurprise(4);
+    playUntilSkinScene(t, [1, 5, 2]);
+    const saved = t.persistence.load()!;
+    delete (saved.transition as any).spotlightPlayerId;
+    t.persistence.save(saved);
+    const b = restart(t.persistence, [t.normal.loaded, t.surprise.loaded], t.clock.now() + 500);
+    b.engine.resumeSave();
+    expect(b.engine.snapshot(null).transition).toMatchObject({ kind: "skin", spotlightPlayerId: null });
+  });
+});

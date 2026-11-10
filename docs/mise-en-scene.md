@@ -84,7 +84,7 @@ par l'organisateur le **10 novembre 2026** :
 |---|---|
 | Rocket League | Une vraie Octane (sprite) arrive en boost avec flamme et traînée, saute et frappe le ballon du jeu vers la TV ; la caméra tremble, explosion de but bleue et orange. |
 | Dofus | Le sol devient la grille isométrique de placement, cases rouges et bleues, les avatars des invités posés dessus ; un Bouftou et un Tofu passent. |
-| Overwatch | « Action de la partie » : bandes blanches, orange et bleues en biais balaient l’écran, flash, carton géant avec l’avatar et le pseudo d’un invité (choisi sans hasard dans `playerIds`), puis les bandes repassent avant le replongeon. Surimpression d’écran hors caméra : `signatures/Overwatch.tsx`. |
+| Overwatch | « Action de la partie » : bandes blanches, orange et bleues en biais balaient l’écran, flash, personnage (avatar de la vedette) en grand à droite, texte empilé à gauche « ACTION DE LA PARTIE » / pseudo orangé / « EN TANT QUE <avatar> » qui glisse lentement (vedette = `spotlightPlayerId`, choisie par le serveur : un des gagnants de la manche précédente, sinon au hasard), puis les bandes repassent avant le replongeon. Surimpression d’écran hors caméra : `signatures/Overwatch.tsx`. |
 | League of Legends | Un nexus apparaît sur la table basse, se fissure et explose. |
 | Mario Odyssey | Un Mario en pixel art 8-bit court sur la bande pixelisée du mur et saute dans la TV. |
 | Resonance : A Plague Tale Legacy | Pièce plongée dans le noir ; un fin réseau de veines noires ramifiées, traversé de filaments turquoise lumineux, gagne les murs depuis le poêle. Puis la Macula se déploie devant la cheminée : étoile à cinq tentacules osseux hérissés d'épines, cœur pâle aux alvéoles turquoise, longs filaments bleus qui ondulent ; elle pulse, et la caméra plonge dans la TV. |
@@ -106,7 +106,10 @@ une seule transition visible, pilotée par le serveur. `null` représente le th�
 ### Une seule brique moteur pour les scènes
 
 La phase générique `transition` porte un petit descriptif sérialisable : nature (ouverture, changement, sortie),
-skin de départ et d'arrivée, instant de départ, durée et participants. Le moteur décide quand une scène commence
+skin de départ et d'arrivée, instant de départ, durée, participants et **vedette** (`spotlightPlayerId`, choisie par le
+serveur à la création de la scène : un des plus gros gagnants de la manche qui vient de finir, tirage `rng` en cas
+d'égalité, participant au hasard si personne n'a marqué, `null` pour l'ouverture et la sortie ; sauvegardée, vieille
+sauvegarde = `null`). Le moteur décide quand une scène commence
 et se termine ; React affiche son avancement à partir de l'horloge synchronisée. Les durées partagées sont dans
 `src/shared/transitions.ts` : ouverture 9 s, changement 6 s (`SKIN_TIMING` : dézoom 1 s, scène jusqu’à 4,6 s, replongeon jusqu’à 5,9 s), sortie 2,4 s.
 

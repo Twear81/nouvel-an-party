@@ -5,7 +5,7 @@ import { OPENING_TIMING, SKIN_TIMING, transitionElapsed, type TransitionInfo } f
 import { serverNow } from "../net/socket";
 import roomReference from "../theme/assets/piece-reference.png";
 import { PlayerAvatar } from "./PlayerAvatar";
-import { OverwatchScene, animateOverwatch, featuredPlayer } from "./signatures/Overwatch";
+import { OverwatchScene, animateOverwatch } from "./signatures/Overwatch";
 import { RoomSignature, animateRoomSignature, legacyTime, signatureEnvelope } from "./RoomSignature";
 
 // Pièces transformées optionnelles (piece-<skin>.png) : un skin sans image n'a simplement pas de calque.
@@ -56,8 +56,8 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
     return profile ? [{ id, index, profile }] : [];
   }) ?? [], [scene?.playerIds, snapshot.players]);
   const participantKey = players.map((p) => p.id).join("|");
-  // Overwatch : l'invité du carton « Action de la partie » est choisi sans hasard (même choix après un rechargement).
-  const featured = scene ? featuredPlayer(players, scene.startedAt) : null;
+  // Overwatch : la vedette du carton « Action de la partie » est choisie par le serveur (`spotlightPlayerId`).
+  const featured = scene?.spotlightPlayerId ? players.find((p) => p.id === scene.spotlightPlayerId) ?? null : null;
 
   useLayoutEffect(() => {
     if (!scene || !root.current || !camera.current) return;
@@ -205,7 +205,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
         })}
       </div>
       {scene.kind === "skin" && scene.toSkin === "overwatch" && (
-        <div ref={potg} className="room-overlay"><OverwatchScene profile={featured?.profile ?? null} /></div>
+        <div ref={potg} className="room-overlay"><OverwatchScene profile={featured?.profile ?? null} playerId={featured?.id ?? null} /></div>
       )}
       <div ref={cover} className="room-cover" aria-hidden />
     </div>

@@ -35,6 +35,11 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   sont partagés dans `src/shared/transitions.ts`. Le serveur utilise `TimerGroup` ; Pause/Reprendre/Passer et
   retour au lobby s'appliquent aussi à ces scènes. Les téléphones attendent la TV. Le rendu compte depuis
   le départ serveur, en retirant les pauses ; un rechargement reprend le bon instant de l'animation.
+  `transition.spotlightPlayerId` est la **vedette** de la scène, choisie par le serveur à sa création (brique
+  générique, utilisable par n'importe quelle scène) : pour un changement d'univers, un des participants ayant gagné
+  le plus de points à la manche qui vient de finir (`deltas`, gain > 0), départagés par le `rng` du moteur ; si
+  personne n'a marqué, un participant au hasard (`rng`) ; `null` pour l'ouverture et la sortie. Elle est sauvegardée
+  avec la scène (une ancienne sauvegarde sans le champ donne `null`) et rien n'y est secret.
 - **intro** : annonce de la manche (`intro_secondes`).
 - **playing** : chrono du mini-jeu (ou fin anticipée quand tout le monde a répondu).
 - **results** : animation de révélation sur la TV (`revealSeconds` du mini-jeu), puis les points et le bouton

@@ -31,6 +31,8 @@ export interface TransitionInfo {
   pausedMs: number;
   pausedSince: number | null;
   playerIds: string[];
+  /** La vedette de la scène (choisie par le serveur parmi `playerIds`) ; `null` si aucune. */
+  spotlightPlayerId: string | null;
 }
 
 export function transitionElapsed(scene: TransitionInfo, now: number): number {

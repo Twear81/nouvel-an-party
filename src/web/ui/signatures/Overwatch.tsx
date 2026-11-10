@@ -2,16 +2,17 @@
 // gros carton, bandeau du joueur mis en avant, puis les bandes repassent. C'est une surimpression d'écran : elle vit
 // hors de `.room-camera` (elle ne zoome pas avec la caméra) et a disparu avant le replongeon dans la TV.
 // Couleurs et police : `.sig-ow` dans room.css. Tous les mouvements passent par `animate` (horloge de la scène).
+import type { CSSProperties } from "react";
 import type { Profile } from "../../../shared/types";
 import { SKIN_TIMING } from "../../../shared/transitions";
-import { PlayerAvatar } from "../PlayerAvatar";
+import { AVATARS } from "../../theme/profile-options";
 import type { Animate, SignatureFrame } from "../RoomSignature";
 
 const D = SKIN_TIMING.durationMs;
 /** Instants de la scène (ms depuis le début de la transition). */
 export const OW_TIMING = {
-  sweepIn: 1200,   // premier balayage : la pièce a été visible un court instant
-  sweepOut: 3950,  // second balayage : efface le carton
+  sweepIn: 1100,   // premier balayage : la pièce a été visible un court instant
+  sweepOut: 3500,  // second balayage : efface le carton ; les bandes sont parties avant le replongeon (4600)
   stripeTravel: 260, stripeStagger: 30, stripeHold: 20,
 } as const;
 const STRIPE_COUNT = 9;
@@ -19,27 +20,38 @@ const COVER = OW_TIMING.stripeTravel + (STRIPE_COUNT - 1) * OW_TIMING.stripeStag
 const IN_COVER = OW_TIMING.sweepIn + COVER;
 const OUT_COVER = OW_TIMING.sweepOut + COVER;
 
-/** Le joueur mis en avant : déterministe (la TV qui recharge affiche le même). */
-export function featuredPlayer<T>(players: T[], startedAt: number): T | null {
-  return players.length ? players[Math.abs(Math.floor(startedAt)) % players.length]! : null;
+/** Le libellé de l'avatar (« Renard »), ou `null` si l'avatar du profil est introuvable. */
+function avatarLabel(profile: Profile): { label: string; emoji: string } | null {
+  const preset = AVATARS.find((a) => a.id === profile.avatar.id);
+  return preset ? { label: preset.label, emoji: preset.emoji } : null;
 }
 
-export function OverwatchScene({ profile }: { profile: Profile | null }) {
+/** Taille du pseudo (cqw) : grande, réduite pour qu'un pseudo de 16 caractères tienne dans la moitié gauche. */
+const nameSize = (name: string) => Math.min(11, 44 / (Math.max(name.length, 1) * .46));
+
+/** `profile` : la vedette choisie par le serveur (`scene.spotlightPlayerId`) ; `null` = titre seul. */
+export function OverwatchScene({ profile, playerId }: { profile: Profile | null; playerId: string | null }) {
+  const avatar = profile ? avatarLabel(profile) : null;
   return (
     <div className="sig-ow" data-testid="transition-potg" aria-hidden="true">
       <div className="sig-ow-dim" data-room-motion="dim" />
-      <div className="sig-ow-card">
-        <div className="sig-ow-title" data-room-motion="title" data-testid="transition-potg-title">
-          Action de la partie
-        </div>
-        {profile && (
-          <div className="sig-ow-player" data-room-motion="player" data-testid="transition-potg-player">
-            <div className="sig-ow-player-in">
-              <PlayerAvatar profile={profile} size="xl" />
-              <span className="sig-ow-name" data-testid="transition-potg-name">{profile.name}</span>
-            </div>
+      {profile && (
+        <div className="sig-ow-hero" data-room-motion="hero" style={{ "--sig-ow-glow": profile.color } as CSSProperties}>
+          <div className="sig-ow-hero-in" data-room-motion="hero-cam">
+            <span className="sig-ow-hero-face">{avatar?.emoji ?? "?"}</span>
           </div>
-        )}
+        </div>
+      )}
+      <div className="sig-ow-card" data-room-motion="card">
+        <div className="sig-ow-text" data-room-motion="text">
+          <div className="sig-ow-title" data-testid="transition-potg-title">Action de la partie</div>
+          {profile && (
+            <div data-testid="transition-potg-player" data-player-id={playerId ?? undefined}>
+              <div className="sig-ow-name" data-testid="transition-potg-name" style={{ fontSize: `${nameSize(profile.name)}cqw` }}>{profile.name}</div>
+              {avatar && <div className="sig-ow-role" data-testid="transition-potg-role">En tant que {avatar.label}</div>}
+            </div>
+          )}
+        </div>
       </div>
       <div className="sig-ow-flash" data-room-motion="flash" />
       <div className="sig-ow-stripes">
@@ -82,27 +94,34 @@ export function animateOverwatch(root: Element, animate: Animate) {
   // Fond assombri : posé derrière les bandes, retiré derrière elles.
   animate(one("dim"), fade([cut(IN_COVER), 0], [IN_COVER, 1], [cut(OUT_COVER), 1], [OUT_COVER, 0]));
 
-  // Carton : glisse et zoome en arrivant, dérive très légèrement, puis disparaît derrière le second balayage.
-  const titleIn = IN_COVER + 40;
-  animate(one("title"), [
-    { at: 0, opacity: 0, transform: "translateX(-14cqw) scale(1.35)" },
-    { at: titleIn, opacity: 0, transform: "translateX(-14cqw) scale(1.35)", easing: "cubic-bezier(.12, .9, .25, 1)" },
-    { at: titleIn + 120, opacity: 1, transform: "translateX(-14cqw) scale(1.35)" },
-    { at: titleIn + 520, opacity: 1, transform: "translateX(0cqw) scale(1)", easing: "linear" },
-    { at: cut(OUT_COVER), opacity: 1, transform: "translateX(1.5cqw) scale(1.04)" },
-    { at: OUT_COVER, opacity: 0, transform: "translateX(1.5cqw) scale(1.04)" },
-    { at: D, opacity: 0, transform: "translateX(1.5cqw) scale(1.04)" },
+  // Texte : entrée rapide par la gauche, puis glissement lent vers la droite jusqu'au second balayage.
+  const textIn = IN_COVER + 40;
+  const drift = "translateX(4cqw)";
+  animate(one("text"), [
+    { at: 0, opacity: 0, transform: "translateX(-9cqw)" },
+    { at: textIn, opacity: 0, transform: "translateX(-9cqw)", easing: "cubic-bezier(.12, .9, .25, 1)" },
+    { at: textIn + 90, opacity: 1, transform: "translateX(-9cqw)" },
+    { at: textIn + 380, opacity: 1, transform: "translateX(0cqw)", easing: "linear" },
+    { at: cut(OUT_COVER), opacity: 1, transform: drift },
+    { at: OUT_COVER, opacity: 0, transform: drift },
+    { at: D, opacity: 0, transform: drift },
   ]);
 
-  // Bandeau du joueur : arrive de la droite après le carton.
-  const playerIn = titleIn + 520;
-  animate(one("player"), [
-    { at: 0, opacity: 0, transform: "translateX(40cqw)" },
-    { at: playerIn, opacity: 0, transform: "translateX(40cqw)", easing: "cubic-bezier(.12, .9, .25, 1)" },
-    { at: playerIn + 50, opacity: 1, transform: "translateX(40cqw)" },
-    { at: playerIn + 480, opacity: 1, transform: "translateX(0cqw)", easing: "linear" },
-    { at: cut(OUT_COVER), opacity: 1, transform: "translateX(-1cqw)" },
-    { at: OUT_COVER, opacity: 0, transform: "translateX(-1cqw)" },
-    { at: D, opacity: 0, transform: "translateX(-1cqw)" },
+  // Personnage : arrive de la droite, puis mouvement de caméra lent (zoom et dérive).
+  const heroEnter = "translateX(14cqw)";
+  animate(one("hero"), [
+    { at: 0, opacity: 0, transform: heroEnter },
+    { at: textIn - 60, opacity: 0, transform: heroEnter, easing: "cubic-bezier(.12, .9, .25, 1)" },
+    { at: textIn + 140, opacity: 1, transform: heroEnter },
+    { at: textIn + 520, opacity: 1, transform: "translateX(0cqw)" },
+    { at: cut(OUT_COVER), opacity: 1, transform: "translateX(0cqw)" },
+    { at: OUT_COVER, opacity: 0, transform: "translateX(0cqw)" },
+    { at: D, opacity: 0, transform: "translateX(0cqw)" },
+  ]);
+  animate(one("hero-cam"), [
+    { at: 0, transform: "scale(1) translate(0cqw, 0cqw)", easing: "linear" },
+    { at: textIn, transform: "scale(1) translate(0cqw, 0cqw)", easing: "linear" },
+    { at: OUT_COVER, transform: "scale(1.1) translate(-1.5cqw, -1cqw)" },
+    { at: D, transform: "scale(1.1) translate(-1.5cqw, -1cqw)" },
   ]);
 }

@@ -113,6 +113,7 @@
   --sig-ow-white: #ffffff;
   --sig-ow-orange: #ff9c1a;
   --sig-ow-orange-deep: #d9560b;
+  --sig-ow-gold: #fba91f;
   --sig-ow-blue: #2fb4f0;
   --sig-ow-navy: #151c33;
   --sig-ow-font: "Big Noodle Titling", "Bebas Neue", "Arial Narrow", sans-serif;
@@ -120,33 +121,30 @@
 }
 .sig-ow-dim {
   position: absolute; inset: 0; opacity: 0;
-  background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--sig-ow-navy) 45%, transparent), color-mix(in srgb, var(--sig-ow-navy) 82%, transparent));
+  background: radial-gradient(ellipse at 60% 50%, color-mix(in srgb, var(--sig-ow-navy) 40%, transparent), color-mix(in srgb, var(--sig-ow-navy) 88%, transparent) 85%);
 }
-.sig-ow-card {
-  position: absolute; left: 0; right: 0; top: 50%;
-  display: flex; flex-direction: column; align-items: center; gap: 2.2cqw;
-  transform: translateY(-50%) rotate(-3deg);
-}
-.sig-ow-title {
+.sig-ow-card { position: absolute; inset: 0; }
+.sig-ow-text {
+  position: absolute; left: 7cqw; top: 50%; margin-top: -9cqw; max-width: 46cqw;
+  display: flex; flex-direction: column; align-items: flex-start; opacity: 0;
   font-family: var(--sig-ow-font); font-style: italic; font-weight: 400; text-transform: uppercase;
-  font-size: 13.5cqw; line-height: .9; letter-spacing: .01em; white-space: nowrap;
-  color: var(--sig-ow-white);
-  text-shadow: .45cqw .6cqw 0 var(--sig-ow-orange), .9cqw 1.2cqw 0 var(--sig-ow-navy), 0 0 3cqw color-mix(in srgb, var(--sig-ow-orange) 60%, transparent);
-  opacity: 0;
+  text-shadow: .15cqw .2cqw 0 color-mix(in srgb, var(--sig-ow-navy) 80%, transparent);
 }
-.sig-ow-player { opacity: 0; max-width: 62cqw; }
-.sig-ow-player-in {
-  display: flex; align-items: center; gap: 2.4cqw;
-  padding: .6cqw 5cqw .6cqw 2.4cqw;
-  background: linear-gradient(100deg, var(--sig-ow-orange), var(--sig-ow-orange-deep));
-  border: .35cqw solid var(--sig-ow-white);
-  clip-path: polygon(3% 0, 100% 0, 97% 100%, 0 100%);
+.sig-ow-title { font-size: 4.4cqw; line-height: 1; letter-spacing: .02em; white-space: nowrap; color: var(--sig-ow-white); }
+.sig-ow-name { line-height: 1; margin-top: .4cqw; white-space: nowrap; color: var(--sig-ow-gold); letter-spacing: .01em; }
+.sig-ow-role { font-size: 2.6cqw; line-height: 1.1; margin-top: .6cqw; white-space: nowrap; color: var(--sig-ow-white); letter-spacing: .03em; }
+/* Le personnage : toute la moitié droite, coupé par le bas de l'écran. */
+.sig-ow-hero { position: absolute; right: 0; bottom: 0; width: 52cqw; height: 100cqh; overflow: hidden; opacity: 0; }
+.sig-ow-hero-in {
+  position: absolute; inset: 0; transform-origin: 50% 80%;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: radial-gradient(ellipse at 55% 75%, color-mix(in srgb, var(--sig-ow-glow) 55%, transparent), transparent 68%);
 }
-.sig-ow-name {
-  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  font-family: var(--sig-ow-font); font-style: italic; text-transform: uppercase;
-  font-size: 6.6cqw; line-height: 1.1; color: var(--sig-ow-white);
-  text-shadow: .25cqw .35cqw 0 var(--sig-ow-navy);
+.sig-ow-hero-face {
+  /* Twemoji (vectorielle, embarquée) : net à cette taille, contrairement aux emojis en image du système. */
+  font-family: "Twemoji", var(--font-sans);
+  font-size: 38cqw; line-height: 1; margin-bottom: -7cqw;
+  filter: drop-shadow(-1.2cqw 1.2cqw 2cqw color-mix(in srgb, var(--sig-ow-navy) 70%, transparent));
 }
 .sig-ow-flash { position: absolute; inset: 0; background: var(--sig-ow-white); opacity: 0; }
 .sig-ow-stripes {
