@@ -68,7 +68,6 @@
 .room-signature-art {
   --sig-gold: #f6ce63;
   --sig-brass: #ae6b13;
-  --sig-energy: #45ccf1;
   --sig-orange: #ff9b37;
   --sig-green: #73b93d;
   --sig-green-dark: #284b22;
@@ -85,13 +84,6 @@
 .sig-egg-mark { fill: none; stroke: var(--sig-green-dark); stroke-width: 8; stroke-linejoin: round; stroke-linecap: round; }
 .sig-egg-shine { fill: none; stroke: var(--sig-green-light); stroke-width: 8; stroke-linecap: round; }
 .sig-sparkle { fill: var(--sig-green-light); stroke: var(--sig-gold); stroke-width: 1.5; }
-.sig-portal-floor { fill: color-mix(in srgb, var(--sig-energy) 16%, transparent); stroke: var(--sig-gold); stroke-width: 3; }
-.sig-rune { fill: none; stroke: var(--sig-gold); stroke-width: 3; stroke-linecap: round; }
-.sig-portal-energy { fill: color-mix(in srgb, var(--sig-energy) 78%, var(--room-shadow)); }
-.sig-portal-inner { fill: color-mix(in srgb, var(--room-screen) 88%, var(--sig-energy)); stroke: var(--sig-energy); stroke-width: 5; }
-.sig-portal-rim { fill: none; stroke: var(--sig-gold); stroke-width: 8; stroke-linejoin: round; }
-.sig-portal-fine { stroke-width: 2; }
-.sig-portal-cracks { fill: none; stroke: var(--sig-energy); stroke-width: 5; stroke-linejoin: round; opacity: .8; }
 .sig-cap-body, .sig-cap-brim { fill: var(--room-accent); stroke: var(--sig-red-dark); stroke-width: 5; stroke-linejoin: round; }
 .sig-cap-brim { fill: color-mix(in srgb, var(--room-accent) 83%, var(--sig-red-dark)); }
 .sig-cap-shine { fill: none; stroke: color-mix(in srgb, var(--room-ink) 65%, var(--room-accent)); stroke-width: 6; stroke-linecap: round; }
@@ -198,3 +190,37 @@
 .sig-rl-spark-blue { fill: var(--sig-rl-blue-light); }
 .sig-rl-spark-orange { fill: var(--sig-rl-orange); }
 .sig-rl-spark-white { fill: var(--sig-rl-white); }
+
+/* League of Legends : Nexus qui explose. Tout est dessiné autour de (0,0) dans un <g transform> statique. */
+.sig-lol {
+  --sig-lol-white: #eafcff;
+  --sig-lol-cyan: #4fe3ff;
+  --sig-lol-blue: #0b7fe0;
+  --sig-lol-navy: #04122b;
+  --sig-lol-gold: #f6ce63;
+  --sig-lol-gold-light: #fff0b0;
+}
+.sig-lol [data-room-motion] { transform-box: view-box; transform-origin: 0 0; }
+.sig-lol [data-room-motion="rune"], .sig-lol [data-room-motion="rune-ring"], .sig-lol [data-room-motion="table-glow"],
+.sig-lol [data-room-motion="mote"], .sig-lol [data-room-motion="tv-glow"], .sig-lol [data-room-motion="nexus-white"],
+.sig-lol [data-room-motion="crack"] { transform-box: fill-box; transform-origin: center; }
+.sig-lol [data-room-motion="pillar"], .sig-lol [data-room-motion="pillar-wide"] { transform-box: fill-box; transform-origin: center bottom; }
+.sig-lol-dim { fill: var(--sig-lol-navy); opacity: 0; }
+.sig-lol-ring { fill: none; stroke: var(--sig-lol-cyan); stroke-width: 5; }
+.sig-lol-ring-fine { stroke: var(--sig-lol-gold); stroke-width: 3; opacity: .8; }
+.sig-lol-ring-glow { fill: color-mix(in srgb, var(--sig-lol-blue) 22%, transparent); stroke: var(--sig-lol-cyan); stroke-width: 22; opacity: .35; }
+.sig-lol-rune { fill: color-mix(in srgb, var(--sig-lol-cyan) 35%, transparent); stroke: var(--sig-lol-white); stroke-width: 2.5; stroke-linejoin: round; }
+.sig-lol-table-glow { fill: url(#lol-halo); }
+.sig-lol-halo { fill: url(#lol-halo); }
+.sig-lol-crack-glow { fill: none; stroke: var(--sig-lol-cyan); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; opacity: .75; }
+.sig-lol-crack-core { fill: none; stroke: var(--sig-lol-white); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; }
+.sig-lol-pillar { fill: url(#lol-pillar); }
+.sig-lol-pillar-wide { fill: url(#lol-pillar-side); }
+.sig-lol-shockwave { fill: none; stroke: var(--sig-lol-cyan); stroke-width: 7; }
+.sig-lol-flash { fill: url(#lol-flash); }
+.sig-lol-burst { fill: url(#lol-halo); }
+.sig-lol-shard { fill: url(#lol-shard); stroke: var(--sig-lol-white); stroke-width: 2; stroke-linejoin: round; }
+.sig-lol-shard-pale { fill: var(--sig-lol-gold-light); stroke: var(--sig-lol-gold); }
+.sig-lol-mote { fill: var(--sig-lol-cyan); }
+.sig-lol-mote-gold { fill: var(--sig-lol-gold); }
+.sig-lol-tv-glow { fill: url(#lol-screen); }

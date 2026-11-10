@@ -2,6 +2,7 @@
 import type { SkinId } from "../../shared/skins";
 import { SKIN_TIMING } from "../../shared/transitions";
 import { RocketLeagueScene, animateRocketLeague } from "./signatures/RocketLeague";
+import { LeagueOfLegendsScene, animateLeagueOfLegends } from "./signatures/LeagueOfLegends";
 
 export type SignatureFrame = Keyframe & { at: number };
 export type Animate = (element: Element | null, frames: SignatureFrame[]) => void;
@@ -17,9 +18,9 @@ export function legacyTime(at: number): number {
   return end + (at - 3500) * (SKIN_TIMING.durationMs - end) / 500;
 }
 
-/** Enveloppe d'apparition du calque de signature (la scène Rocket League gère sa propre durée de vie). */
+/** Enveloppe d'apparition du calque de signature (les scènes Rocket League et League of Legends gèrent leur propre durée de vie). */
 export function signatureEnvelope(skin: SkinId | null): SignatureFrame[] {
-  if (skin === "rocket-league") return [
+  if (skin === "rocket-league" || skin === "league-of-legends") return [
     { at: 0, opacity: 0 }, { at: SKIN_TIMING.zoomOutEndMs - 200, opacity: 0 }, { at: SKIN_TIMING.zoomOutEndMs, opacity: 1 },
     { at: SKIN_TIMING.plungeEndMs - 700, opacity: 1 }, { at: SKIN_TIMING.plungeEndMs, opacity: 0 }, { at: SKIN_TIMING.durationMs, opacity: 0 },
   ];
@@ -69,30 +70,6 @@ function DofusScene() {
   </>;
 }
 
-function LeagueScene() {
-  return <>
-    <g className="sig-portal-floor" data-room-motion="floor">
-      <ellipse cx="805" cy="746" rx="213" ry="65" /><ellipse cx="805" cy="746" rx="175" ry="49" />
-    </g>
-    {Array.from({ length: 10 }, (_, i) => {
-      const angle = i * Math.PI / 5;
-      return <g key={i} transform={`translate(${805 + Math.cos(angle) * 197} ${746 + Math.sin(angle) * 57})`}>
-        <path data-room-motion="rune" className="sig-rune" d="M-9 5V-10L0-17L9-10V5M-14-2H14M0-17V15" />
-      </g>;
-    })}
-    <g transform="translate(805 628)">
-      <g data-room-motion="portal" className="sig-portal">
-        <path className="sig-portal-energy" d="M0-143L115-72V72L0 151L-115 72V-72Z" />
-        <ellipse className="sig-portal-inner" rx="79" ry="113" />
-        <path className="sig-portal-rim" d="M0-143L115-72V72L0 151L-115 72V-72Z" />
-        <path className="sig-portal-rim sig-portal-fine" d="M0-123L98-62V62L0 129L-98 62V-62Z" />
-        <path className="sig-portal-cracks" d="M-58-79L-19-44-35-9L7 16-14 49L31 84M39-100L17-67 55-29 24 11 53 47" />
-        <path className="sig-portal-rim" d="M-16-143L0-163 16-143 0-125ZM-16 151L0 170 16 151 0 133Z" />
-      </g>
-    </g>
-  </>;
-}
-
 const COINS = [[687, 633], [773, 571], [857, 495], [852, 424]];
 function MarioScene() {
   return <>
@@ -129,7 +106,7 @@ function MaculaScene() {
 
 export function RoomSignature({ skin }: { skin: SkinId | null }) {
   const content = skin === "dofus" ? <DofusScene />
-    : skin === "league-of-legends" ? <LeagueScene /> : skin === "rocket-league" ? <RocketLeagueScene />
+    : skin === "league-of-legends" ? <LeagueOfLegendsScene /> : skin === "rocket-league" ? <RocketLeagueScene />
       : skin === "mario-odyssey" ? <MarioScene /> : skin === "plague-tale" ? <MaculaScene /> : null;
   return content && <svg className="room-signature-art" viewBox="0 0 1672 941" aria-hidden="true" data-testid="transition-signature" data-signature={skin}>{content}</svg>;
 }
@@ -138,6 +115,7 @@ export function RoomSignature({ skin }: { skin: SkinId | null }) {
 export function animateRoomSignature(root: Element | null, skin: SkinId | null, reduced: boolean, animateNative: Animate) {
   if (!root) return;
   if (skin === "rocket-league") { animateRocketLeague(root, reduced, animateNative); return; }
+  if (skin === "league-of-legends") { animateLeagueOfLegends(root, reduced, animateNative); return; }
   const animate: Animate = (element, frames) => animateNative(element, frames.map((frame) => ({ ...frame, at: legacyTime(frame.at) })));
   const select = (name: string) => root.querySelector(`[data-room-motion="${name}"]`);
   const all = (name: string) => root.querySelectorAll(`[data-room-motion="${name}"]`);
@@ -159,13 +137,6 @@ export function animateRoomSignature(root: Element | null, skin: SkinId | null, 
       { at: 0, opacity: 0 }, { at: 1250 + i * 70, opacity: 0 }, { at: 1450 + i * 70, opacity: 1 },
       { at: 1950 + i * 70, opacity: 0 }, { at: 4000, opacity: 0 },
     ]));
-  } else if (skin === "league-of-legends") {
-    animate(select("portal"), [
-      { at: 0, opacity: 0, transform: reduced ? "none" : "scaleX(.04)" }, { at: 1000, opacity: 0, transform: reduced ? "none" : "scaleX(.04)" },
-      { at: 1450, opacity: 1, transform: "scaleX(1)" }, { at: 2800, opacity: 1, transform: "scaleX(1)" },
-      { at: 3400, opacity: 0, transform: "scaleX(1)" }, { at: 4000, opacity: 0, transform: "scaleX(1)" },
-    ]);
-    all("rune").forEach((element, i) => appear(element, i * 35));
   } else if (skin === "mario-odyssey") {
     animate(select("cap-flight"), reduced ? [
       { at: 0, opacity: 0, transform: "translate(175px, -20px)" }, { at: 1200, opacity: 1, transform: "translate(175px, -20px)" },

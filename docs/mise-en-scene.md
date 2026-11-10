@@ -85,7 +85,7 @@ par l'organisateur le **10 novembre 2026** :
 | Rocket League | Une vraie Octane (sprite) arrive en boost avec flamme et traînée, saute et frappe le ballon du jeu vers la TV ; la caméra tremble, explosion de but bleue et orange. |
 | Dofus | Le sol devient la grille isométrique de placement, cases rouges et bleues, les avatars des invités posés dessus ; un Bouftou et un Tofu passent. |
 | Overwatch | « Action de la partie » : bandes blanches, orange et bleues en biais balaient l’écran, flash, personnage (avatar de la vedette) en grand à droite, texte empilé à gauche « ACTION DE LA PARTIE » / pseudo orangé / « EN TANT QUE <avatar> » qui glisse lentement (vedette = `spotlightPlayerId`, choisie par le serveur : un des gagnants de la manche précédente, sinon au hasard), puis les bandes repassent avant le replongeon. Surimpression d’écran hors caméra : `signatures/Overwatch.tsx`. |
-| League of Legends | Un nexus apparaît sur la table basse, se fissure et explose. |
+| League of Legends | Les runes du socle s’allument, un vrai Nexus (sprite) se matérialise sur la table basse, encaisse des coups (fissures, secousses), puis explose : colonne de lumière, onde de choc au sol, éclats de cristal et tremblement de caméra ; la lueur file vers la TV. |
 | Mario Odyssey | Un Mario en pixel art 8-bit court sur la bande pixelisée du mur et saute dans la TV. |
 | Resonance : A Plague Tale Legacy | Pièce plongée dans le noir ; un fin réseau de veines noires ramifiées, traversé de filaments turquoise lumineux, gagne les murs depuis le poêle. Puis la Macula se déploie devant la cheminée : étoile à cinq tentacules osseux hérissés d'épines, cœur pâle aux alvéoles turquoise, longs filaments bleus qui ondulent ; elle pulse, et la caméra plonge dans la TV. |
 
