@@ -41,7 +41,8 @@ export function Button({ variant = "primary", size = "md", block, className = ""
     <motion.button
       animate={controls}
       whileTap={rest.disabled ? undefined : { scale: 0.94, y: 3, transition: { type: "spring", stiffness: 600, damping: 20 } }}
-      whileHover={rest.disabled ? undefined : { scale: 1.03 }}
+      // Survol court et sans rebond : un ressort qui oscille rend le bouton « instable » au moment du clic.
+      whileHover={rest.disabled ? undefined : { scale: 1.03, transition: { duration: 0.12, ease: "easeOut" } }}
       transition={{ type: "spring", stiffness: 500, damping: 11 }}
       onClick={(e) => {
         haptique(12);
