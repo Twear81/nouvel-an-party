@@ -321,7 +321,7 @@ function DuelTile({ m, index, size, mode, winsNeeded, playerById, final }: { m: 
         </motion.div>
         {showOutcome && m.last && (tie || m.byChance || m.last.random) && (
           <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`whitespace-nowrap rounded-chip px-3 py-0.5 font-bold ${size === "sm" ? "text-base" : "text-2xl"} ${tie ? "bg-warn/20 text-warn" : "bg-surface-strong text-ink"}`}>
-            {m.byChance || m.last.random ? "🎲 Au sort" : tie ? "Égalité !" : ""}
+            {m.byChance || m.last.random ? "🎲 Au sort" : tie ? "Égalité ! On rejoue" : ""}
           </motion.span>
         )}
       </div>
@@ -357,15 +357,15 @@ function StageTitle({ pub }: { pub: Pub }) {
   if (pub.step === "draw") title = "Tirage au sort";
   else if (pub.step === "done") title = "Champion !";
   else title = roundLabel(pub.roundCount, pub.round);
-  const replay = pub.throwNo > 0 && (pub.step === "pick" || pub.step === "reveal");
+  const replay = pub.step === "pick" && (pub.bracket[pub.round] ?? []).some((m) => m.active && m.ties > 0);
   return (
     <div className="flex shrink-0 items-center justify-center gap-5">
       <motion.h1 key={title} initial={{ opacity: 0, y: -20, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} data-testid="pfc-stage" className={`font-display leading-none ${final || pub.step === "done" ? "text-7xl text-gold-gradient" : "text-5xl text-ink"}`}>
         {title}
       </motion.h1>
       {replay && (
-        <motion.span key={`r${pub.throwNo}`} initial={{ scale: 0, rotate: -10 }} animate={{ scale: 1, rotate: -4 }} className="rounded-chip bg-warn px-5 py-1 font-display text-3xl text-accent-ink">
-          {pub.winsNeeded > 1 ? `Lancer ${pub.throwNo + 1}` : "On rejoue !"}
+        <motion.span data-testid="pfc-replay" key={`r${pub.throwNo}`} initial={{ scale: 0, rotate: -10 }} animate={{ scale: 1, rotate: -4 }} className="rounded-chip bg-warn px-5 py-1 font-display text-3xl text-accent-ink">
+          Égalité ! On rejoue
         </motion.span>
       )}
       <span className="rounded-chip bg-surface-strong px-4 py-1 text-2xl font-bold text-ink-muted">{pub.variant}</span>
@@ -455,7 +455,7 @@ function FaceOff({ m, me, playerById, winsNeeded, step }: { m: MatchView; me: st
         </div>
       </div>
       {step === "pick" && m.ties > 0 && (
-        <motion.div key={m.ties} initial={{ scale: 0 }} animate={{ scale: 1 }} className="rounded-chip bg-warn px-4 py-0.5 font-display text-base text-accent-ink">
+        <motion.div data-testid="pfc-replay" key={m.ties} initial={{ scale: 0 }} animate={{ scale: 1 }} className="rounded-chip bg-warn px-4 py-0.5 font-display text-base text-accent-ink">
           Égalité ! On rejoue
         </motion.div>
       )}

@@ -375,6 +375,11 @@ describe("pfc : déroulé d'une manche (6 joueurs)", () => {
     expect(t.ctx.countdownState!.seconds).toBe(6);
     const actives = t.pub().bracket[0]!.map((m) => m.active);
     expect(actives).toEqual([true, false]);
+    // Les deux adversaires retrouvent leurs choix ; le gagnant de l’autre duel attend.
+    expect(t.priv(m1!.a!).status).toBe("duel");
+    expect(t.priv(m1!.b!).status).toBe("duel");
+    expect(t.priv(m2!.a!).status).toBe("through");
+    expect(t.pub().bracket[0]![0]!.picked).toEqual([false, false]);
     expect(t.pub().bracket[0]![0]!.ties).toBe(1);
     // Le duel décidé n'accepte plus de choix.
     t.pick(m2!.a!, ROCK);

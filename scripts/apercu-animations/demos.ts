@@ -266,6 +266,13 @@ const pierreFeuilleCiseaux: Demo = {
     { id: "intro", titre: "Annonce de la manche", phase: "intro" },
     { id: "tirage", titre: "Tirage du tableau", phase: "playing" },
     { id: "choix", titre: "Les duels choisissent", phase: "playing", agir: (s) => s.advance(5000) },
+    { id: "egalite", titre: "Égalité : les mêmes coups", phase: "playing", alternatif: true, agir: (s) => {
+      for (const {duel} of pendingDuels(s.state.bracket, s.state.round)) { s.input(duel.a!, {choice: 0}); s.input(duel.b!, {choice: 0}); }
+    } },
+    { id: "rejeu", titre: "Égalité ! On rejoue", phase: "playing", alternatif: true, agir: (s) => {
+      for (const {duel} of pendingDuels(s.state.bracket, s.state.round)) { s.input(duel.a!, {choice: 0}); s.input(duel.b!, {choice: 0}); }
+      s.advance(6000);
+    } },
     { id: "revelation", titre: "Révélation des coups", phase: "playing", agir: (s) => jouerPfc(s, (x) => x.state.step === "reveal") },
     { id: "tour", titre: "Les gagnants avancent", phase: "playing", agir: (s) => jouerPfc(s, (x) => x.state.step === "advance") },
     { id: "resultats", titre: "Le champion", phase: "results", agir: (s) => jouerPfc(s, (x) => x.ctx.ended) },
