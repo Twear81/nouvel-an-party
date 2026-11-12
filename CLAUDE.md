@@ -102,6 +102,9 @@ téléphone, en regardant la TV : ils ne lisent pas.
   collé en bas) ; les gros boutons d'action peuvent être en bas, décollés du bord.
 - Règles d'ergonomie mobile (iOS : champs ≥ 16 px, `h-app`, pas de `filter: blur` géant…) :
   [docs/changer-le-design.md](docs/changer-le-design.md#règles-dergonomie-à-garder-en-ajoutant-un-écran).
+- **Animations** : uniquement `transform`/`opacity` ; dessins complexes en images fixes (sprite, canvas peint une fois),
+  jamais de SVG animé (`stroke-dashoffset`…), de `filter`/`mix-blend-mode` sur un grand calque ni de `currentTime`
+  recalé à chaque image : [règles et mesure](docs/mise-en-scene.md#performance-des-scènes).
 - Ajouter un `data-testid` (et des `data-*` d'état : `data-stage`, `data-status`…) aux éléments interactifs et aux
   états importants : les E2E s'appuient dessus, pas sur les textes ni les classes CSS.
 

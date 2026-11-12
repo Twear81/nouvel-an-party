@@ -120,6 +120,8 @@ avancent le long du tracé. Le badge reste à l'extérieur du portrait, sans êt
 - **Propres au skin** : réaction au toucher des boutons et des choix, mise en avant du choix sélectionné, chrono, fond
   d'ambiance (lent et léger), apparition des panneaux. Chaque skin définit les siennes, dans son fichier.
 - Animations toujours jouées, même si l'appareil demande de réduire les animations (`prefers-reduced-motion` ignoré : c'est un jeu de soirée) ; pas de `filter: blur` ni d'animation lourde sur les téléphones.
+- Fluidité des scènes de la pièce (TV) : n'animer que `transform`/`opacity`, dessins complexes en images fixes, pas
+  de SVG animé ni de `composite: "add"` — règles complètes : [Performance des scènes](mise-en-scene.md#performance-des-scènes).
 
 ## Ajouter un skin
 1. Ajouter l'id dans `SKINS` (`src/shared/skins.ts`).

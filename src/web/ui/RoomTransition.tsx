@@ -27,6 +27,23 @@ const ROOM = {
 type Frame = Keyframe & { at: number };
 const identity = "translate(0%, 0%) scale(1)";
 
+/** Écart toléré entre les animations qui tournent seules et l'horloge du serveur avant de les recaler. */
+const DRIFT_MS = 50;
+
+/**
+ * Cale les animations sur l'horloge du serveur, puis les laisse tourner seules : une animation qui joue
+ * (transform/opacity) est confiée au compositeur, alors qu'une animation en pause recalée à chaque image
+ * force le thread principal à tout recalculer et redessiner.
+ */
+function syncAnimations(list: Animation[], scene: TransitionInfo) {
+  const elapsed = transitionElapsed(scene, serverNow());
+  const running = scene.pausedSince === null && elapsed < scene.durationMs;
+  list.forEach((animation) => {
+    animation.currentTime = elapsed;
+    if (running) animation.play(); else animation.pause();
+  });
+}
+
 function sceneStage(scene: TransitionInfo, elapsed: number) {
   if (elapsed >= scene.durationMs) return "end";
   if (scene.kind === "opening") {
@@ -154,6 +171,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
       }
     });
     animations.current = list;
+    syncAnimations(list, scene);
     return () => {
       list.forEach((animation) => animation.cancel());
       animations.current = [];
@@ -163,13 +181,17 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
   useLayoutEffect(() => {
     if (!scene || !root.current) return;
     let frame: number | null = null;
+    syncAnimations(animations.current, scene);
+    // Boucle légère : elle ne touche aux animations qu'en cas de dérive, et n'écrit l'étape que quand elle change.
     const tick = () => {
       const info = currentScene.current;
       if (!info || !root.current) return;
       const elapsed = transitionElapsed(info, serverNow());
-      animations.current.forEach((animation) => { animation.currentTime = elapsed; });
+      const reference = animations.current[0]?.currentTime;
+      if (typeof reference === "number" && Math.abs(reference - Math.min(elapsed, info.durationMs)) > DRIFT_MS) syncAnimations(animations.current, info);
       root.current.dataset.elapsedMs = String(Math.round(elapsed));
-      root.current.dataset.stage = sceneStage(info, elapsed);
+      const stage = sceneStage(info, elapsed);
+      if (root.current.dataset.stage !== stage) root.current.dataset.stage = stage;
       if (info.pausedSince === null && elapsed < info.durationMs) frame = requestAnimationFrame(tick);
     };
     tick();
@@ -185,7 +207,8 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
       data-elapsed-ms={Math.round(transitionElapsed(scene, serverNow()))}
       data-player-count={scene.playerIds.length} className="room-scene"
       style={{ "--room-tv-left": `${tv.left * 100}%`, "--room-tv-top": `${tv.top * 100}%`, "--room-tv-width": `${tv.width * 100}%`, "--room-tv-height": `${tv.height * 100}%` } as CSSProperties}>
-      <div ref={camera} className="room-camera" data-testid="transition-camera">
+      {/* Support de caméra : secousses et zooms propres à une scène, séparés du dézoom/replongeon de la caméra. */}
+      <div className="room-rig"><div ref={camera} className="room-camera" data-testid="transition-camera">
         <img src={roomReference} alt="" draggable={false} data-testid="transition-room" className="room-image"
           onLoad={(event) => { event.currentTarget.dataset.image = "ready"; }} />
         {scene.kind === "skin" && skinImage && <img ref={roomSkin} src={skinImage} alt="" draggable={false} aria-hidden
@@ -206,7 +229,7 @@ export function RoomTransition({ snapshot }: { snapshot: GameSnapshot }) {
             </div>
           );
         })}
-      </div>
+      </div></div>
       {scene.kind === "skin" && scene.toSkin === "overwatch" && (
         <div ref={potg} className="room-overlay"><OverwatchScene profile={featured?.profile ?? null} playerId={featured?.id ?? null} /></div>
       )}

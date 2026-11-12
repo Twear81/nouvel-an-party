@@ -151,11 +151,11 @@ const pose = (at: number, x: number, y: number, o: { r?: number; s?: number; sx?
 const fade = (...points: [number, number][]): SignatureFrame[] => [{ at: 0, opacity: points[0]![1] }, ...points.map(([at, opacity]) => ({ at, opacity })), { at: D, opacity: points.at(-1)![1] }]
   .filter((frame, i, all) => i === 0 || frame.at > all[i - 1]!.at);
 
-/** Secousse de caméra : léger zoom (pour ne pas montrer les bords) et tremblement amorti, ajoutés à la caméra (`composite: "add"`). */
+/** Secousse de caméra : léger zoom (pour ne pas montrer les bords) et tremblement amorti, joués sur le support de caméra (`.room-rig`). */
 function shakeFrames(): SignatureFrame[] {
-  const rest = (at: number): SignatureFrame => ({ at, transform: "translate(0%, 0%) scale(1) translate(0px, 0px)", composite: "add" });
+  const rest = (at: number): SignatureFrame => ({ at, transform: "translate(0%, 0%) scale(1) translate(0px, 0px)" });
   const kick = (at: number, amp: number, zoom: number, i: number): SignatureFrame => ({
-    at, composite: "add",
+    at,
     transform: `translate(${-(zoom - 1) * 50}%, ${-(zoom - 1) * 50}%) scale(${zoom}) translate(${(Math.sin(i * 2.7) * amp).toFixed(1)}px, ${(Math.cos(i * 3.9) * amp).toFixed(1)}px)`,
   });
   const frames: SignatureFrame[] = [rest(0), rest(T.impact - 20)];
@@ -170,8 +170,8 @@ function shakeFrames(): SignatureFrame[] {
 export function animateRocketLeague(root: Element, _reduced: boolean, animate: Animate) {
   const one = (name: string) => root.querySelector(`[data-room-motion="${name}"]`);
   const all = (name: string) => [...root.querySelectorAll(`[data-room-motion="${name}"]`)];
-  // Les secousses s'ajoutent à l'animation de la caméra de la pièce, sans la remplacer.
-  animate(root.closest(".room-camera"), shakeFrames());
+  // Les secousses se jouent sur le support de caméra, indépendamment du dézoom/replongeon.
+  animate(root.closest(".room-rig"), shakeFrames());
 
   // Voiture : arrivée en boost par la droite (vibration du châssis), saut qui se cabre, frappe, puis elle file vers la gauche.
   const hitX = 1085, lift = 88, takeoffX = 1300;

@@ -124,10 +124,10 @@ export function MarioOdysseyScene() {
 
 const jump = (at: number, extra: Partial<SignatureFrame> = {}): SignatureFrame => ({ at, easing: STEPPED, ...extra });
 
-/** Zoom de caméra vers la bande (ajouté à la caméra, revenu à zéro avant le replongeon). */
+/** Zoom de caméra vers la bande (joué sur le support de caméra `.room-rig`, revenu à zéro avant le replongeon). */
 function cameraFrames(): SignatureFrame[] {
-  const rest = (at: number, easing?: string): SignatureFrame => ({ at, transform: "translate(0%, 0%) scale(1)", composite: "add", ...(easing ? { easing } : {}) });
-  const zoom = (at: number): SignatureFrame => ({ at, transform: `translate(0%, ${(-(ZOOM - 1) * 50).toFixed(2)}%) scale(${ZOOM.toFixed(4)})`, composite: "add" });
+  const rest = (at: number, easing?: string): SignatureFrame => ({ at, transform: "translate(0%, 0%) scale(1)", ...(easing ? { easing } : {}) });
+  const zoom = (at: number): SignatureFrame => ({ at, transform: `translate(0%, ${(-(ZOOM - 1) * 50).toFixed(2)}%) scale(${ZOOM.toFixed(4)})` });
   return [rest(0), rest(SKIN_TIMING.zoomOutEndMs, "ease-in-out"), zoom(T.zoomIn), zoom(T.zoomOut), rest(T.zoomEnd, "ease-in-out"), rest(D)];
 }
 
@@ -135,7 +135,7 @@ function cameraFrames(): SignatureFrame[] {
 export function animateMarioOdyssey(root: Element, animate: Animate) {
   const one = (name: string) => root.querySelector(`[data-room-motion="${name}"]`);
   const all = (name: string) => [...root.querySelectorAll(`[data-room-motion="${name}"]`)];
-  animate(root.closest(".room-camera"), cameraFrames());
+  animate(root.closest(".room-rig"), cameraFrames());
 
   // Mario : position (pas de 3 unités, saccadée) et image du sprite.
   const poses = track();
