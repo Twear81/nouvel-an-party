@@ -47,7 +47,7 @@ export function useSoundState(): SoundState {
 }
 
 /**
- * Planifie des sons à des heures serveur. Un son déjà passé de plus de ~300 ms au montage n'est pas joué (rechargement) ;
+ * Planifie des sons à des heures serveur. Un son déjà passé de plus de ~1 s au montage n'est pas joué (rechargement) ;
  * tout est annulé au démontage ; en pause les minuteurs sont suspendus et reprennent avec le temps restant.
  */
 function useSchedule(items: readonly SonPlanifie[]) {

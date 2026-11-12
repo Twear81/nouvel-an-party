@@ -310,7 +310,7 @@ useSfxTimeline(round.resultsAt, [{ à: 0, son: "roulement" }, { à: 2.5, son: "p
 ```
 
 - **Pas de son au montage** : une TV qui recharge en pleine manche ne doit rien rejouer. `useSfxOnChange` ignore la valeur
-  initiale ; `useSfxAt` / `useSfxTimeline` ne jouent pas un instant déjà passé de plus de ~300 ms au montage, s'annulent
+  initiale ; `useSfxAt` / `useSfxTimeline` ne jouent pas un instant déjà passé de plus de ~1 s au montage, s'annulent
   au démontage et se suspendent pendant la pause. Ne pas appeler `play()` directement dans le corps d'un composant ni dans un
   `useEffect` qui s'exécute au montage.
 - Les révélations se calent sur `round.resultsAt` (mêmes constantes que l'animation, comme pour `revealSeconds`).

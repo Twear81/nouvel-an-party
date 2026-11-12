@@ -2,8 +2,11 @@
 import type { NomSon } from "../theme/sons/catalogue";
 import type { PlayOptions } from "./engine";
 
-/** Retard toléré au montage : au-delà (rechargement de la TV en pleine révélation), on ne rejoue pas le son. */
-export const RETARD_TOLERE_MS = 300;
+/**
+ * Retard toléré au montage : au-delà (rechargement de la TV en pleine révélation), on ne rejoue pas le son.
+ * 1 s couvre la transition d'écran de la TV (sortie 0,3 s puis montage) : un son à `resultsAt + 0` n'est pas perdu.
+ */
+export const RETARD_TOLERE_MS = 1000;
 
 export interface SonPlanifie {
   /** Heure serveur (ms) du son. */

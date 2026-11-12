@@ -76,11 +76,11 @@ describe("liste des sons de l'organisateur", () => {
 });
 
 describe("planification des sons sur l'heure serveur", () => {
-  it("joue à l'heure prévue, tolère 300 ms de retard, pas plus", () => {
+  it("joue à l'heure prévue, tolère 1 s de retard, pas plus", () => {
     expect(delaiAvant(1500, 1000)).toBe(500);
     expect(delaiAvant(1000, 1200)).toBe(0);
-    expect(delaiAvant(1000, 1300)).toBe(0);
-    expect(delaiAvant(1000, 1301)).toBeNull();
+    expect(delaiAvant(1000, 2000)).toBe(0);
+    expect(delaiAvant(1000, 2001)).toBeNull();
     expect(delaiAvant(1000, 60_000)).toBeNull();
   });
 
