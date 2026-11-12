@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { interludeCounts } from "../../shared/interlude";
 import type { GameSnapshot } from "../../shared/types";
 import type { GameActions } from "../net/useGame";
-import { Button, CloseIcon, ConfirmDialog, Panel, PlayerAvatar, type AvatarSize } from "../ui";
+import { Button, CloseIcon, ConfirmDialog, Panel, PlayerAvatar, Pop, type AvatarSize } from "../ui";
 
 export function formatDuration(seconds: number): string {
   const min = Math.round(seconds / 60);
@@ -26,7 +26,7 @@ function QrCode({ url }: { url: string }) {
   }, [url]);
   return (
     // Taille fixe et grande (24 rem = 384 px, image 360 px à 1920×1080) : il se scanne de loin, quel que soit le nombre de jeux.
-    <div className="flex h-[24rem] w-[24rem] shrink-0 rounded-card bg-ink p-3 shadow-glow">
+    <div className="flex h-[24rem] w-[24rem] shrink-0 animate-breathe rounded-card bg-ink p-3 shadow-glow will-change-transform">
       {src ? <img data-testid="tv-qr" src={src} alt={`QR code ${url}`} className="h-full w-full rounded-btn" /> : <div className="h-full w-full" />}
     </div>
   );
@@ -124,10 +124,10 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
                   key={p.id}
                   data-testid={`tv-player-${p.id}`}
                   layout
-                  initial={{ opacity: 0, scale: 0.2, y: 40 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.2 }}
-                  transition={{ type: "spring", stiffness: 220, damping: 16 }}
+                  initial={{ opacity: 0, scale: 0.3, y: -120, rotate: -6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.2, rotate: 8, transition: { duration: 0.25 } }}
+                  transition={{ type: "spring", stiffness: 240, damping: 13 }}
                   className={`relative flex ${tileWidth} flex-col items-center gap-1.5`}
                 >
                   <PlayerAvatar profile={p.profile} size={avatarSize} dimmed={!p.connected} />
@@ -201,7 +201,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
                   −
                 </Button>
                 <div className="flex w-[4.5rem] shrink-0 items-baseline justify-center gap-1">
-                  <span data-testid={`setup-count-${g.id}`} className="font-display text-3xl text-accent">{count}</span>
+                  <Pop value={count} className="font-display text-3xl text-accent"><span data-testid={`setup-count-${g.id}`}>{count}</span></Pop>
                   <span className="text-base text-ink-muted">/{g.available}</span>
                 </div>
                 <Button data-testid={`setup-inc-${g.id}`} variant="secondary" size="sm" disabled={!host || count >= g.available} onClick={() => setCount(g.id, count + 1, g.available)} aria-label="Plus">
@@ -213,13 +213,24 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
         </div>
         <div className="flex items-center justify-between border-t border-line pt-3">
           <div data-testid="setup-total" className="text-3xl font-semibold">
-            <span className="text-accent">{totalRounds}</span> manche{totalRounds > 1 ? "s" : ""} · <span className="text-accent">{formatDuration(totalSeconds)}</span>
+            <Pop value={totalRounds} scale={1.15} className="text-accent">{totalRounds}</Pop> manche{totalRounds > 1 ? "s" : ""} · <span className="text-accent">{formatDuration(totalSeconds)}</span>
           </div>
           <div className="flex items-center gap-5">
             {(blocked || error) && <span data-testid="start-blocked" className="text-xl text-warn">{error ?? blocked}</span>}
-            <Button data-testid="start-game" size="lg" disabled={blocked !== null} onClick={() => void actions.start().catch((e: Error) => setError(e.message))}>
-              Lancer la partie
-            </Button>
+            <div className="relative">
+              {blocked === null && (
+                <motion.span
+                  aria-hidden
+                  data-ui="start-halo"
+                  animate={{ scale: [1, 1.14, 1.14], opacity: [0.55, 0, 0] }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+                  className="pointer-events-none absolute inset-0 rounded-btn border-[0.3rem] border-accent"
+                />
+              )}
+              <Button data-testid="start-game" size="lg" className="relative" disabled={blocked !== null} onClick={() => void actions.start().catch((e: Error) => setError(e.message))}>
+                Lancer la partie
+              </Button>
+            </div>
           </div>
         </div>
       </Panel>

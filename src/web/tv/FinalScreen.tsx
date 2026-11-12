@@ -6,7 +6,7 @@ import { useFinalReveal } from "../net/useFinalReveal";
 import { rankOf } from "../../shared/ranking";
 import { playersWithProfile } from "../net/helpers";
 import type { GameSnapshot } from "../../shared/types";
-import { fireConfetti, PlayerAvatar } from "../ui";
+import { CountUp, fireConfetti, PlayerAvatar } from "../ui";
 
 export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   const sorted = useMemo(
@@ -29,7 +29,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
 
   return (
     <div data-testid="tv-final" data-stage={done ? "done" : "reveal"} className="flex min-h-0 flex-1 flex-col items-center gap-2 px-12 pt-6">
-      <motion.h1 initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} className="font-display text-6xl text-gold-gradient">
+      <motion.h1 key={done ? "done" : "reveal"} initial={{ opacity: 0, y: -30, scale: done ? 0.5 : 1 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 12 }} className="font-display text-6xl text-gold-gradient">
         {done ? "Bonne année !" : "Le classement…"}
       </motion.h1>
 
@@ -52,10 +52,14 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                         transition={{ type: "spring", duration: FINAL_ENTRY_MS / 1000, bounce: 0.2 }}
                         className="flex flex-col items-center gap-2"
                       >
-                        {i === 0 && <motion.span animate={{ rotate: [-8, 8, -8] }} transition={{ repeat: Infinity, duration: 2 }} className="text-7xl">👑</motion.span>}
+                        {i === 0 && (
+                          <motion.span initial={{ y: -160, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.35 }} className="text-7xl">
+                            <motion.span animate={{ rotate: [-8, 8, -8] }} transition={{ repeat: Infinity, duration: 2 }} className="inline-block">👑</motion.span>
+                          </motion.span>
+                        )}
                         <PlayerAvatar profile={p.profile} size={i === 0 ? "xl" : "lg"} />
                         <span className="max-w-full truncate text-3xl font-bold">{p.profile!.name}</span>
-                        <span className="font-num text-4xl text-accent">{p.score}</span>
+                        <CountUp value={p.score} duration={1.2} className="font-num text-4xl text-accent" />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -91,14 +95,14 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                     data-highlight="false"
                     initial={{ opacity: 0, x: 120 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: FINAL_ENTRY_MS / 1000 }}
+                    transition={{ type: "spring", stiffness: 160, damping: 14 }}
                     className="glass flex items-center gap-4 rounded-btn px-5 py-2"
                     style={{ order: i }}
                   >
                     <span className="w-12 text-center font-num text-3xl text-ink-muted">{rankOf(sorted, i)}</span>
                     <PlayerAvatar profile={p.profile} size="sm" />
                     <span className="min-w-0 flex-1 truncate text-2xl font-bold">{p.profile!.name}</span>
-                    <span className="font-num text-3xl text-accent">{p.score}</span>
+                    <CountUp value={p.score} duration={0.8} className="font-num text-3xl text-accent" />
                   </motion.div>
                 );
               })}
