@@ -25,6 +25,7 @@ Tout le projet (code, commentaires, docs, commits, textes affichés) est **en fr
 | `config/partie.yaml`, dossier `data/` | [docs/configuration.md](docs/configuration.md) |
 | Skins (habillages imitant des jeux vidéo) : contrat, marqueurs, rotation | [docs/skins.md](docs/skins.md) |
 | Skins : bilan du chantier, validation, maquette et captures de référence | [docs/skins-suivi.md](docs/skins-suivi.md) |
+| Sons de la TV (moteur, catalogue, hooks `useSfx*`, surcharge par l'organisateur) | [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md#sons-tv-uniquement) |
 | Règles et contenu d'un mini-jeu | `src/minigames/<id>/README.md` |
 | Commandes, dev depuis WSL avec de vrais téléphones | [README.md](README.md) |
 

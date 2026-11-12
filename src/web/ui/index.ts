@@ -16,3 +16,7 @@ export * from "./Choice";
 export * from "./ResultBar";
 export * from "./DuelGauge";
 export * from "./RoomTransition";
+export * from "./SoundBadge";
+export { useSfx, useSfxOnChange, useSfxAt, useSfxTimeline, useSoundState } from "../sound/hooks";
+export { play as playSfx, type PlayOptions } from "../sound/engine";
+export { NOMS_SONS, type NomSon } from "../theme/sons/catalogue";

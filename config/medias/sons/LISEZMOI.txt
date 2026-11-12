@@ -1,0 +1,46 @@
+REMPLACER UN SON DE LA TV
+=========================
+
+Les sons sortent uniquement de la TV (jamais des téléphones). Pour remplacer un son, déposez ici un fichier
+.mp3, .ogg ou .wav dont le nom est le NOM LOGIQUE du son, par exemple :
+
+    chrono.fin.mp3          remplace le gong de fin de chrono
+    reponse.recue.ogg       remplace le petit "pop" de chaque réponse
+
+Pour changer le son d'un seul univers (skin), mettez le fichier dans un sous-dossier portant le nom du skin :
+
+    rocket-league/chrono.fin.ogg
+
+Skins : dofus, overwatch, league-of-legends, rocket-league, mario-odyssey, plague-tale.
+Un fichier du dossier d'un skin l'emporte sur celui de ce dossier, qui l'emporte sur le son fourni avec le jeu.
+Relancez NouvelAn.exe après avoir ajouté ou retiré un fichier. Gardez les fichiers courts et légers.
+
+Le volume général se règle avec "volume_sons" dans config/partie.yaml (le bouton haut-parleur de la barre
+de l'hôte coupe tout). Un fichier remplaçant garde le volume de base du son d'origine.
+
+NOMS LOGIQUES
+-------------
+Lobby
+    joueur.rejoint        un joueur rejoint
+    joueur.quitte         un joueur quitte ou se déconnecte
+    partie.lancement      la partie démarre
+Déroulé d'une manche
+    manche.intro          annonce d'une manche
+    reponse.recue         un joueur vient de répondre (hauteur montante)
+    reponse.toutes        tout le monde a répondu
+    chrono.tic            une seconde des 5 dernières (de plus en plus aigu)
+    chrono.fin            le chrono arrive à zéro
+    temps.ajoute          l'hôte ajoute du temps (+10 s)
+    pause                 pause
+    reprise               reprise
+    resultats.arrivee     les résultats arrivent
+    points.gagnes         fin de la révélation, les points sont gagnés
+Fin de partie et scènes
+    final.fanfare         fanfare du classement final
+    transition.entree     scène de changement d'univers : entrée
+    transition.sortie     scène de changement d'univers : sortie
+Pour les mini-jeux
+    ui.clic               petit clic
+    bonne.reponse         bonne réponse
+    mauvaise.reponse      mauvaise réponse
+    roulement             roulement de tambour (fabriqué par le jeu si aucun fichier)

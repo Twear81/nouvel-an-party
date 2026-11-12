@@ -291,3 +291,55 @@ une dernière manche qui ferme un univers mène directement à la sortie. Pendan
 | Joueurs de la manche | `ctx.players` côté serveur, `round.participants` côté écrans ; connectés maintenant : `ctx.isConnected` |
 | Heure de début des résultats | `round.resultsAt` (heure serveur, `null` avant la phase résultats) ; heure serveur côté écran : `serverNow()` (`src/web/net/socket.ts`) |
 | Tester sans moteur | `makeCtx()` (`tests/unit/helpers/minigame-ctx.ts`) : `ctx.advance(ms)` fait avancer le temps, `ctx.finishCountdown()` saute à la fin du chrono |
+
+## Sons (TV uniquement)
+
+Le moteur `src/web/sound/` (WebAudio) joue les sons **sur la TV seulement** : sur un téléphone tout est un no-op,
+aucun fichier n'est téléchargé. Les sons globaux (joueur qui rejoint, annonce de manche, pop à chaque réponse, tics et gong
+du chrono, pause, résultats, « points gagnés », fanfare, whoosh des scènes) sont déjà joués par `useGlobalSfx` dans `TvApp` :
+un mini-jeu n'a rien à faire pour eux. Il ajoute seulement ses sons propres, avec les hooks exportés par `src/web/ui` :
+
+```tsx
+import { useSfx, useSfxOnChange, useSfxAt, useSfxTimeline } from "../../web/ui";
+
+const play = useSfx();                               // play("ui.clic", { volume: 0.5, rate: 1.2 })
+useSfxOnChange(pub.step, "ui.clic");                 // quand `pub.step` change (jamais au montage)
+useSfxOnChange(pub.lives, (avant, apres) => (apres < avant ? "mauvaise.reponse" : null));
+useSfxAt(round.resultsAt === null ? null : round.resultsAt + 2000, "bonne.reponse");   // à une heure serveur
+useSfxTimeline(round.resultsAt, [{ à: 0, son: "roulement" }, { à: 2.5, son: "points.gagnes" }]); // « à N secondes »
+```
+
+- **Pas de son au montage** : une TV qui recharge en pleine manche ne doit rien rejouer. `useSfxOnChange` ignore la valeur
+  initiale ; `useSfxAt` / `useSfxTimeline` ne jouent pas un instant déjà passé de plus de ~300 ms au montage, s'annulent
+  au démontage et se suspendent pendant la pause. Ne pas appeler `play()` directement dans le corps d'un composant ni dans un
+  `useEffect` qui s'exécute au montage.
+- Les révélations se calent sur `round.resultsAt` (mêmes constantes que l'animation, comme pour `revealSeconds`).
+- Rien n'est joué en pause (sauf le son de pause lui-même) ; sous Playwright (`navigator.webdriver`) rien ne sort, les sons
+  demandés sont notés dans `window.__sfx` (utile pour un test E2E).
+- Options de `play` : `volume` (multiplicateur), `rate` (vitesse, 1 = normale), `detune` (centièmes de ton), `variation`
+  (± centièmes tirés au hasard ; déjà réglée dans le catalogue pour les sons fréquents), `ignorePause`.
+- Un son qui revient souvent doit rester discret (volume bas, `variation`).
+
+**Catalogue** : `src/web/theme/sons/catalogue.ts` (dans le thème : remplaçable) associe un nom logique à un fichier et un volume,
+avec des remplacements possibles par skin (`SONS_PAR_SKIN`). Pour un nouveau son : copier le fichier (court, `.ogg`, CC0 ou
+libre de droits) dans `src/web/theme/sons/`, le déclarer dans le catalogue, l'ajouter à `LICENCES.md` et à
+`config/medias/sons/LISEZMOI.txt`. L'organisateur peut remplacer n'importe quel son sans recompiler en déposant
+`config/medias/sons/<nom-logique>.(mp3|ogg|wav)`, ou `config/medias/sons/<skin>/<nom-logique>.*` pour un seul univers
+(priorité : dossier du skin, fichier général, catalogue du skin, catalogue par défaut ; `src/web/sound/resolve.ts`).
+
+| Nom logique | Quand |
+|---|---|
+| `joueur.rejoint`, `joueur.quitte`, `partie.lancement` | lobby, lancement de la partie |
+| `manche.intro` | annonce d'une manche |
+| `reponse.recue`, `reponse.toutes` | une réponse de plus (hauteur montante), tout le monde a répondu |
+| `chrono.tic`, `chrono.fin`, `temps.ajoute` | 5 dernières secondes, zéro, « +10 s » de l'hôte |
+| `pause`, `reprise` | pause de l'hôte |
+| `resultats.arrivee`, `points.gagnes` | arrivée des résultats, fin de la révélation (`revealSeconds`) |
+| `final.fanfare` | phase finale |
+| `transition.entree`, `transition.sortie` | scènes de changement d'univers |
+| `ui.clic`, `bonne.reponse`, `mauvaise.reponse`, `roulement` | à disposition des mini-jeux (le roulement est synthétisé) |
+
+Autoplay : Chromium refuse le son avant un geste ; le premier clic ou la première touche sur la TV le débloque (haut-parleur
+barré dans le coin du lobby d'ici là). Le bouton haut-parleur de la barre de l'hôte (ou la touche M) coupe le son ;
+`volume_sons` dans `partie.yaml` règle le volume général. Dans les E2E, l'état se lit sur `data-sound` (`locked`, `on`, `muted`)
+des éléments `sound-state` et `host-sound`.
