@@ -3,10 +3,28 @@
 Branche : `feat/sons-animations`. Travail local, sans push ni fusion dans `main`.
 Les profils Firefox non suivis ont été conservés. Aucun fichier de `src/server/engine` n’a été modifié.
 
+## Retouches après écoute de l’organisateur
+
+La [comparaison sonore avant / après](../captures/sons-retouches/index.html) isole les trois remplacements ;
+la [planche complète](../captures/sons/index.html) conserve tous les autres bruitages validés.
+
+- `roulement` : caisse claire seule en crescendo, exactement 2 s, sans cymbale ; −21,10 LUFS, pic −8,45 dBTP.
+- `bonne.reponse` : double ding de sonnette de comptoir, 1,1 s ; −19,04 LUFS, pic −3,33 dBTP.
+- `pfc.choc` : impact physique de combat, 0,4 s ; −20,25 LUFS, pic −3,72 dBTP.
+- Musique : résolution selon le skin affiché, y compris le skin forcé en développement, fondu croisé entre morceaux,
+  annulation des décodages devenus obsolètes. Aucun nouveau morceau n’est intégré en attendant le choix de l’organisateur
+  entre originaux à fournir et alternatives libres ; le périmètre lobby / partie reste à préciser.
+
+Vérifications ciblées : TypeScript, 25 tests unitaires audio, cinq E2E audio Chromium (dont décodage WebAudio réel
+et surcharge musicale d’un skin), aperçus en `file://` sans erreur ni requête HTTP. Le scénario WebAudio a été
+relancé seul après correction du chemin de sa fixture sous Node. Suite complète non relancée, conformément à la demande.
+Mesures des trois exports : `captures/sons/retouches-mesures.json`. La qualité artistique des trois remplacements
+reste à valider à l’écoute ; les niveaux et la durée ont été contrôlés.
+
 ## Sons
 
-Les 26 fichiers Kenney et le roulement synthétique ont été remplacés ; le catalogue compte **31 fichiers, 1 719 226 octets** (1,72 Mo).
-Roulement orchestral échantillonné de 2 s (contrat des révélations conservé), cuivres + applaudissements pour la
+Les 26 fichiers Kenney et le roulement synthétique ont été remplacés ; le catalogue compte **31 fichiers, 1 706 322 octets** (1,71 Mo).
+Roulement de caisse claire échantillonné de 2 s (contrat des révélations conservé), cuivres + applaudissements pour la
 fanfare, buzzer de fin, impact cinématique, sons physiques de cartes / jetons, piano do–mi–sol–do pour Simon.
 Un riser accompagne le dessin gagnant, les applaudissements suivent les gains après révélation et le trombone
 ponctue la victoire de l’imposteur. Les animations de feedback restent en place.
@@ -51,10 +69,10 @@ Fichiers : `src/web/theme/sons/`, `src/web/sound/engine.ts`, `useGlobalSfx.ts`, 
 | `tension` | `tension.ogg` | [deleted_user_3277771](https://freesound.org/people/deleted_user_3277771/sounds/177242/) | CC0 1.0 |
 | `echec.trombone` | `trombone.ogg` | [kirbydx](https://freesound.org/people/kirbydx/sounds/175409/) | CC0 1.0 |
 | `ui.clic` | `clic.ogg` | [Oculus VR, LLC](https://github.com/facebookincubator/Meta-open-sound/blob/main/corpora/oculus-audio-pack/ogg/UIClick_CasualPopsConfirm_OS_01.ogg) | CC BY 4.0 |
-| `bonne.reponse` | `bravo.ogg` | [Meta](https://github.com/facebookincubator/Meta-open-sound/tree/main/systems/instruments/meta-piano) | CC0 1.0 |
+| `bonne.reponse` | `bravo.ogg` | [Joseph SARDIN — Counter Bell #3](https://bigsoundbank.com/counter-bell-3-s2531.html) | CC0 1.0 |
 | `mauvaise.reponse` | `rate.ogg` | [guitarguy1985](https://freesound.org/people/guitarguy1985/sounds/54047/) | CC0 1.0 |
-| `roulement` | `roulement.ogg` | [Scheffler](https://freesound.org/people/Scheffler/sounds/201211/) | CC0 1.0 |
-| `pfc.choc` | `pfc-choc.ogg` | [deleted_user_3277771](https://freesound.org/people/deleted_user_3277771/sounds/177242/) | CC0 1.0 |
+| `roulement` | `roulement.ogg` | [Joseph SARDIN — Drum roll 3 L](https://bigsoundbank.com/drum-roll-3-l-s2408.html) | CC0 1.0 |
+| `pfc.choc` | `pfc-choc.ogg` | [Oculus VR, LLC — PunchHarder](https://github.com/facebookincubator/Meta-open-sound/blob/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/corpora/oculus-audio-pack/ogg/FGHTImpt_PunchHarder_OS_01.ogg) | CC BY 4.0 |
 | `pfc.egalite` | `pfc-egalite.ogg` | [Oculus VR, LLC](https://github.com/facebookincubator/Meta-open-sound/blob/main/corpora/oculus-audio-pack/ogg/UIAlert_MagicalError_OS_01.ogg) | CC BY 4.0 |
 | `simon.note` | `simon-note.ogg` | [Meta](https://github.com/facebookincubator/Meta-open-sound/tree/main/systems/instruments/meta-piano) | CC0 1.0 |
 | `simon.rate` | `simon-rate.ogg` | [Oculus VR, LLC](https://github.com/facebookincubator/Meta-open-sound/blob/main/corpora/oculus-audio-pack/ogg/UIAlert_MagicalError_OS_01.ogg) | CC BY 4.0 |

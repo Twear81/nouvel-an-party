@@ -40,10 +40,10 @@ const QUAND: Record<NomSon, string> = {
   "transition.entree": "Scène de changement d'univers : entrée (aussi changement de question/dessin dans certains jeux).",
   "transition.sortie": "Scène de changement d'univers : sortie.",
   "ui.clic": "Petit tic générique : compteurs, apparition d'un mot ou d'un choix, rythme d'une révélation (hauteur variable selon le jeu).",
-  "bonne.reponse": "Bonne réponse, bon choix, victoire d'une étape (révélations).",
+  "bonne.reponse": "Double ding de sonnette : bonne réponse, bon choix, victoire d'une étape.",
   "mauvaise.reponse": "Mauvaise réponse, erreur, perdant d'une révélation.",
-  "roulement": "Suspense avant un verdict ou un dévoilement (sample orchestral, deux secondes).",
-  "pfc.choc": "Pierre-feuille-ciseaux : les mains se heurtent.",
+  "roulement": "Caisse claire seule en crescendo, sans cymbale : deux secondes avant le verdict.",
+  "pfc.choc": "Pierre-feuille-ciseaux : impact de combat bref au choc des mains.",
   "pfc.egalite": "Pierre-feuille-ciseaux : égalité.",
   "simon.note": "Simon : une case s'allume ; la hauteur change selon la case.",
   "simon.rate": "Simon : un joueur se trompe.",
@@ -100,6 +100,7 @@ const SEQUENCES: { id: string; titre: string; pas: () => Pas[] }[] = [
   { id: "resultats", titre: "Résultats", pas: () => [[0, "resultats.arrivee"], [900, "roulement"], [900, "tension"], [2900, "boum"], [3400, "bonne.reponse"], [4500, "applaudissements"], [5000, "points.gagnes"]] },
   { id: "rejoint", titre: "Joueur rejoint ×3", pas: () => [[0, "joueur.rejoint"], [900, "joueur.rejoint"], [1700, "joueur.rejoint"]] },
   { id: "simon", titre: "Simon : do, mi, sol, do", pas: () => [1, 2 ** (4 / 12), 2 ** (7 / 12), 2].map((rate, i) => [i * 650, "simon.note", { rate }]) },
+  { id: "pfc", titre: "PFC : choc et verdict", pas: () => [[0, "roulement", { rate: 1.5 }], [1300, "pfc.choc"], [1900, "bonne.reponse"]] },
   { id: "final", titre: "Finale", pas: () => [[0, "transition.entree"], [700, "resultats.arrivee"], [2500, "final.fanfare"], [3500, "points.gagnes"]] },
 ];
 

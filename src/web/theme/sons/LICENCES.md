@@ -15,8 +15,9 @@ Les notices complètes sont dans `licences/` ; la version portable les copie dan
 Modification : extrait 8–72 s, raccord d’une seconde par fondu croisé, normalisation et export Vorbis.
 
 Les fichiers Freesound sont issus des aperçus HQ MP3 officiels (pas des originaux WAV nécessitant un compte).
-Leur licence CC0 a été contrôlée sur chaque page d’origine. Le roulement associe caisse claire orchestrale,
-timbale et cymbale de Scheffler ; c’est un échantillon, plus une synthèse WebAudio.
+Leur licence CC0 a été contrôlée sur chaque page d’origine. Le roulement utilise uniquement la caisse claire de
+Joseph Sardin, sans cymbale, avec un crescendo sur deux secondes. La bonne réponse est un double ding issu de
+sa sonnette de comptoir (deux enregistrements sous CC0, téléchargés en WAV auprès de BigSoundBank / LaSonothèque).
 La fanfare mélange les cuivres Meta et [le public de peridactyloptrix](https://freesound.org/people/peridactyloptrix/sounds/196094/).
 
 | Fichier | Source et auteur | Original | Licence |
@@ -38,10 +39,10 @@ La fanfare mélange les cuivres Meta et [le public de peridactyloptrix](https://
 | `whoosh-entree.ogg` | [Oculus VR, LLC](https://github.com/facebookincubator/Meta-open-sound/blob/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/corpora/oculus-audio-pack/ogg/SWSH_Swoosh_OS_02.ogg) | `SWSH_Swoosh_OS_02.ogg` | CC BY 4.0 |
 | `whoosh-sortie.ogg` | [Oculus VR, LLC](https://github.com/facebookincubator/Meta-open-sound/blob/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/corpora/oculus-audio-pack/ogg/SWSH_Swoosh_OS_04.ogg) | `SWSH_Swoosh_OS_04.ogg` | CC BY 4.0 |
 | `clic.ogg` | [Oculus VR, LLC](https://github.com/facebookincubator/Meta-open-sound/blob/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/corpora/oculus-audio-pack/ogg/UIClick_CasualPopsConfirm_OS_01.ogg) | `UIClick_CasualPopsConfirm_OS_01.ogg` | CC BY 4.0 |
-| `bravo.ogg` | [Meta](https://github.com/facebookincubator/Meta-open-sound/tree/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/systems/instruments/meta-piano) | `INSPiano_Vel02_C4_01.ogg` | CC0 1.0 |
+| `bravo.ogg` | [Joseph SARDIN](https://bigsoundbank.com/counter-bell-3-s2531.html) | `Counter Bell #3 — 2531.wav` | CC0 1.0 |
 | `rate.ogg` | [guitarguy1985](https://freesound.org/people/guitarguy1985/sounds/54047/) | `buzzer.wav by guitarguy1985` | CC0 1.0 |
-| `roulement.ogg` | [Scheffler](https://freesound.org/people/Scheffler/sounds/201211/) | `Drum Roll Please.wav by Scheffler` | CC0 1.0 |
-| `pfc-choc.ogg` | [deleted_user_3277771](https://freesound.org/people/deleted_user_3277771/sounds/177242/) | `Cinematic Impact by deleted_user_3277771` | CC0 1.0 |
+| `roulement.ogg` | [Joseph SARDIN](https://bigsoundbank.com/drum-roll-3-l-s2408.html) | `Drum roll 3 L — 2408.wav` | CC0 1.0 |
+| `pfc-choc.ogg` | [Oculus VR, LLC](https://github.com/facebookincubator/Meta-open-sound/blob/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/corpora/oculus-audio-pack/ogg/FGHTImpt_PunchHarder_OS_01.ogg) | `FGHTImpt_PunchHarder_OS_01.ogg` | CC BY 4.0 |
 | `pfc-egalite.ogg` | [Oculus VR, LLC](https://github.com/facebookincubator/Meta-open-sound/blob/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/corpora/oculus-audio-pack/ogg/UIAlert_MagicalError_OS_01.ogg) | `UIAlert_MagicalError_OS_01.ogg` | CC BY 4.0 |
 | `simon-note.ogg` | [Meta](https://github.com/facebookincubator/Meta-open-sound/tree/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/systems/instruments/meta-piano) | `INSPiano_Vel02_C4_01.ogg` | CC0 1.0 |
 | `simon-rate.ogg` | [Oculus VR, LLC](https://github.com/facebookincubator/Meta-open-sound/blob/251c0be57d5d1b3242b91f53e0cde62ab1cb42d9/corpora/oculus-audio-pack/ogg/UIAlert_MagicalError_OS_01.ogg) | `UIAlert_MagicalError_OS_01.ogg` | CC BY 4.0 |
@@ -56,7 +57,9 @@ La fanfare mélange les cuivres Meta et [le public de peridactyloptrix](https://
 `provenance.json` conserve les traitements, les cibles de sonie et les empreintes des exports.
 `scripts/preparer-sons.py` reproduit le traitement avec ffmpeg (sources téléchargées dans un dossier séparé) :
 `python3 scripts/preparer-sons.py /chemin/des/sources`. Nommer les Freesound `<id>.mp3`, le piano `piano.ogg`,
-la musique `lobby.mp3` et conserver les noms Oculus. Les deux WAV intermédiaires sont fabriqués par le script.
+la musique `lobby.mp3` et conserver les noms Oculus. Ajouter `2408.wav` et `2531.wav` depuis les liens BigSoundBank
+ci-dessus. Les deux WAV intermédiaires sont fabriqués par le script. `--selection bravo.ogg roulement.ogg pfc-choc.ogg`
+limite les réexports à ces trois sons ; les autres fichiers embarqués restent identiques.
 48 kHz, stéréo, Ogg Vorbis 128 kbit/s ; impacts / jingles −15 à −16 LUFS, sons fréquents −23 à −28 LUFS,
 pics limités à −2 dBTP avant encodage. Pour les sons de moins de 400 ms, mesure sur fenêtre complétée par du silence.
 Les volumes du catalogue s’ajoutent à cette normalisation. Aucun son Kenney ne reste dans ce dossier.

@@ -24,3 +24,22 @@ Le classement final et le lobby restent dans le thème de base : une fanfare dé
 Pour remplacer le roulement par un son de rats pendant les révélations de ce skin, déposer aussi
 `plague-tale/roulement.ogg` et **garder exactement 2 secondes** : les animations calculent leur vitesse à partir de cette durée.
 Pour Simon, garder un échantillon de **do4** si l’on remplace `simon.note` : les quatre hauteurs sont transposées par le jeu.
+
+## Musiques d’ambiance par univers
+
+Le moteur sait maintenant sélectionner `lobby.musique` selon le skin affiché et changer de morceau en fondu.
+Les originaux des jeux sont à fournir par l’organisateur ; ils ne sont pas inclus dans les sources ni les aperçus.
+Sans fichier propre au skin, la boucle jazz générale reste utilisée. La sélection entre originaux et alternatives
+libres, ainsi que l’éventuelle présence musicale pendant les mini-jeux, restent à confirmer avec l’organisateur.
+
+| Univers | Ambiance à chercher dans le jeu / la bande-son officielle | Fichier à déposer dans `config/medias/sons/` |
+|---|---|---|
+| Dofus | menu ou ambiance de village, version actuelle / Retro selon le souvenir recherché | `dofus/lobby.musique.ogg` |
+| Overwatch | musique orchestrale du menu, sans annonce ni voix | `overwatch/lobby.musique.ogg` |
+| League of Legends | ambiance instrumentale du client ou de la Faille | `league-of-legends/lobby.musique.ogg` |
+| Rocket League | musique de menu, de préférence instrumentale pour laisser parler les invités | `rocket-league/lobby.musique.ogg` |
+| Mario Odyssey | musique d’exploration d’un royaume, sans voix | `mario-odyssey/lobby.musique.ogg` |
+| Plague Tale | ambiance discrète du menu ou d’exploration, sans dialogue | `plague-tale/lobby.musique.ogg` |
+
+Choisir un extrait raccordable de 30 à 90 secondes, à volume modéré (environ −24 LUFS avant le volume du catalogue).
+Les adresses officielles des jeux figurent dans le tableau des signatures ci-dessus. `.mp3` / `.wav` sont aussi acceptés.

@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test } from "./helpers/fixtures";
 
@@ -75,9 +75,13 @@ test("la musique attend un geste, reste unique, et le rechargement reste silenci
 
 test("WebAudio réel : fichiers décodables, boucle unique, fondu de sortie", async ({ party }) => {
   const {tv} = party;
+  // Un morceau court permet de distinguer le fichier du skin de la boucle jazz de 63 secondes.
+  const dir = path.join(path.dirname(party.server.dataDir), "config", "medias", "sons", "dofus");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(path.join(dir, "lobby.musique.ogg"), readFileSync(new URL("../../src/web/theme/sons/bravo.ogg", import.meta.url)));
   await tv.addInitScript(() => {
     Object.defineProperty(navigator,"webdriver",{get:()=>false});
-    const etat = {decodes:0, erreurs:0, boucles:0, arrets:0, fondus:0};
+    const etat = {decodes:0, erreurs:0, boucles:0, arrets:0, fondus:0, dureeBoucle:0};
     (window as any).__audioRevue = etat;
     const decoder = AudioContext.prototype.decodeAudioData;
     AudioContext.prototype.decodeAudioData = function(...args: Parameters<AudioContext['decodeAudioData']>) {
@@ -87,19 +91,20 @@ test("WebAudio réel : fichiers décodables, boucle unique, fondu de sortie", as
     AudioContext.prototype.createBufferSource = function() {
       const source = creer.call(this);
       const demarrer = source.start.bind(source), arreter = source.stop.bind(source);
-      source.start = (...args) => {if(source.loop) etat.boucles++; demarrer(...args);};
+      source.start = (...args) => {if(source.loop) { etat.boucles++; etat.dureeBoucle = source.buffer?.duration ?? 0; } demarrer(...args);};
       source.stop = (...args) => {if(source.loop) etat.arrets++; arreter(...args);};
       return source;
     };
     const rampe = AudioParam.prototype.linearRampToValueAtTime;
     AudioParam.prototype.linearRampToValueAtTime = function(...args) {etat.fondus++; return rampe.apply(this,args);};
   });
-  await tv.reload();
+  await tv.goto(`${party.server.tvUrl}?skin=dofus`);
   await expect(tv.getByTestId('sound-state')).toHaveAttribute('data-sound','locked');
   await tv.locator('body').click({position:{x:5,y:5}});
   await expect.poll(()=>tv.evaluate(()=>(window as any).__audioRevue.decodes)).toBeGreaterThanOrEqual(31);
   expect(await tv.evaluate(()=>(window as any).__audioRevue.erreurs)).toBe(0);
   await expect.poll(()=>tv.evaluate(()=>(window as any).__audioRevue.boucles)).toBe(1);
+  expect(await tv.evaluate(()=>(window as any).__audioRevue.dureeBoucle)).toBeCloseTo(1.1, 1);
   await tv.locator('body').click({position:{x:5,y:5}});
   expect(await tv.evaluate(()=>(window as any).__audioRevue.boucles)).toBe(1);
   await party.addPhones('Alice','Bob');

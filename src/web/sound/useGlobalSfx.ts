@@ -5,15 +5,17 @@ import type { GameSnapshot } from "../../shared/types";
 import { gameViewProps } from "../net/helpers";
 import { serverNow } from "../net/socket";
 import { revealSecondsOf } from "../net/useReveal";
+import { useSkin } from "../theme/skin";
 import { play, sound } from "./engine";
 import { CHRONO_INITIAL, chronoStep, diffSnapshots, pointsSoundAt, type ChronoState } from "./events";
 import { useSfxAt } from "./hooks";
 
 export function useGlobalSfx(snapshot: GameSnapshot | null) {
+  const skin = useSkin();
   // Réglages du moteur : déclarés avant le calcul des sons pour qu'ils soient à jour (pause, skin).
   useEffect(() => sound.start(), []);
   useEffect(() => sound.setPaused(!!snapshot?.paused), [snapshot?.paused]);
-  useEffect(() => sound.setSkin(snapshot?.skin ?? null), [snapshot?.skin]);
+  useEffect(() => sound.setSkin(skin), [skin]);
   useEffect(() => { sound.setLobby(snapshot?.phase === "lobby"); return () => sound.setLobby(false); }, [snapshot?.phase]);
   // Raccourci : M coupe / remet le son (bonus silencieux, comme Espace et N dans HostBar).
   useEffect(() => {

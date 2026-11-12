@@ -39,11 +39,11 @@ export const SONS = {
   "echec.trombone": { fichier: "trombone.ogg", volume: 0.55 },
   // Pour les mini-jeux
   "ui.clic": { fichier: "clic.ogg", volume: 0.4, variation: 25 },
-  "bonne.reponse": { fichier: "bravo.ogg", volume: 0.5, variation: 15 },
+  "bonne.reponse": { fichier: "bravo.ogg", volume: 0.6 },
   "mauvaise.reponse": { fichier: "rate.ogg", volume: 0.5, variation: 15 },
   "roulement": { fichier: "roulement.ogg", volume: 0.68 },
   // — Mini-jeux : pierre-feuille-ciseaux, simon, qui-est-le-plus, le-bon-prix, compte-a-rebours, culture-genante
-  "pfc.choc": { fichier: "pfc-choc.ogg", volume: 0.6, variation: 30 },
+  "pfc.choc": { fichier: "pfc-choc.ogg", volume: 0.65, variation: 25 },
   "pfc.egalite": { fichier: "pfc-egalite.ogg", volume: 0.45 },
   "simon.note": { fichier: "simon-note.ogg", volume: 0.5 },
   "simon.rate": { fichier: "simon-rate.ogg", volume: 0.5 },

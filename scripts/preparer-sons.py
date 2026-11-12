@@ -8,6 +8,7 @@ parser=argparse.ArgumentParser(description="Normaliser les sources libres du cat
 parser.add_argument("sources",type=Path,help="Dossier des originaux nommés comme dans provenance.json")
 parser.add_argument("--ffmpeg",default="ffmpeg")
 parser.add_argument("--ffprobe",default="ffprobe")
+parser.add_argument("--selection",nargs="+",help="Ne réexporter que ces fichiers du catalogue")
 args=parser.parse_args()
 src=args.sources;out=Path(__file__).resolve().parent.parent/'src/web/theme/sons';ff=args.ffmpeg
 rapport=[]
@@ -16,6 +17,7 @@ def executer(args):
  if r.returncode:raise RuntimeError(r.stderr[-2500:])
  return r.stderr
 def son(dest,source,filtre='',lufs=-16,duree=None,boucle=False):
+ if args.selection and dest not in args.selection:return
  p=src/source
  # On élimine seulement le silence initial ; pas de découpe des silences internes.
  filt=('' if boucle else 'silenceremove=start_periods=1:start_duration=0.002:start_threshold=-48dB,')+filtre
@@ -48,11 +50,11 @@ son('fanfare.ogg','final.wav',lufs=-15,duree=7.8)
 son('whoosh-entree.ogg','SWSH_Swoosh_OS_02.ogg',lufs=-23,duree=.67)
 son('whoosh-sortie.ogg','SWSH_Swoosh_OS_04.ogg',lufs=-23,duree=.69)
 son('clic.ogg','UIClick_CasualPopsConfirm_OS_01.ogg',lufs=-28,duree=.26)
-son('bravo.ogg','piano.ogg','asetrate=96000,aresample=48000,aecho=0.8:0.6:90:0.25',lufs=-19,duree=1.1)
+son('bravo.ogg','2531.wav','highpass=f=650,lowpass=f=11000,aecho=0.8:0.8:140:0.68',lufs=-19,duree=1.1)
 son('rate.ogg','54047.mp3',lufs=-22,duree=.55)
 # Deux secondes : contrat des révélations existantes (leurs vitesses se calent sur cette durée).
-son('roulement.ogg','201211.mp3','atrim=start=5:duration=2,asetpts=PTS-STARTPTS',lufs=-21,duree=2)
-son('pfc-choc.ogg','177242.mp3',lufs=-20,duree=.65)
+son('roulement.ogg','2408.wav',"atrim=start=1.9:duration=2,asetpts=PTS-STARTPTS,volume='0.6+0.4*t/2':eval=frame",lufs=-21,duree=2)
+son('pfc-choc.ogg','FGHTImpt_PunchHarder_OS_01.ogg',lufs=-20,duree=.4)
 son('pfc-egalite.ogg','UIAlert_MagicalError_OS_01.ogg',lufs=-23,duree=1.2)
 son('simon-note.ogg','piano.ogg',lufs=-22,duree=.65)
 son('simon-rate.ogg','UIAlert_MagicalError_OS_01.ogg',lufs=-24,duree=.7)

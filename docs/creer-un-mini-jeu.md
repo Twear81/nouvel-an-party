@@ -344,7 +344,7 @@ volume/hauteur réglables, séquences réelles, skins).
 | `resultats.arrivee`, `points.gagnes` | arrivée des résultats, fin de la révélation (`revealSeconds`) |
 | `final.fanfare` | phase finale |
 | `transition.entree`, `transition.sortie` | scènes de changement d'univers |
-| `ui.clic`, `bonne.reponse`, `mauvaise.reponse`, `roulement` | à disposition des mini-jeux (roulement orchestral échantillonné de 2 s) |
+| `ui.clic`, `bonne.reponse`, `mauvaise.reponse`, `roulement` | à disposition des mini-jeux (double ding, buzzer, caisse claire seule de 2 s) |
 
 Autoplay : Chromium refuse le son avant un geste ; le premier clic ou la première touche sur la TV le débloque (haut-parleur
 barré dans le coin du lobby d'ici là). Le bouton haut-parleur de la barre de l'hôte (ou la touche M) coupe le son ;
@@ -357,5 +357,9 @@ décodage encore en cours si l’on quitte le lobby, applique les fondus et le d
 Pause et bouton muet arrêtent la boucle en fondu ; retour au lobby / reprise après geste la relancent. Les sons
 ponctuels continuent à passer par les hooks existants. Le roulement dure exactement 2 s pour conserver les vitesses
 et les chronologies des révélations. Simon utilise un piano échantillonné do4, transposé en mi4, sol4 et do5 (tempérament égal).
+La résolution de la boucle utilise le skin affiché, y compris `?skin=` en développement. Un fichier
+`config/medias/sons/<skin>/lobby.musique.ogg` remplace la boucle générale. Un changement de skin attend le décodage
+du nouveau morceau puis croise les fondus ; une requête devenue obsolète ne démarre jamais une ancienne boucle.
+Sans remplacement pour le skin, le morceau général reste utilisé. Le ducking reprend le volume du morceau en cours.
 La planche permet de lancer / arrêter la vraie boucle du lobby et d’écouter cet accord. Les niveaux cibles, sources,
 licences et traitements sont documentés dans `src/web/theme/sons/LICENCES.md` et `provenance.json`.

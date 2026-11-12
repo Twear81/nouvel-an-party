@@ -29,7 +29,7 @@ const DEFAULT_VOLUME = 0.8;
 declare global {
   interface Window {
     /** Sons « joués » en mode test (navigator.webdriver) : nom et options. */
-    __sfx?: { nom: string; options?: PlayOptions }[];
+    __sfx?: { nom: string; options?: PlayOptions; skin?: string | null; fichier?: string }[];
   }
 }
 
@@ -41,13 +41,13 @@ const readMuted = (): boolean => {
   }
 };
 
-class SoundEngine {
+export class SoundEngine {
   private mediasPrets = false;
   private lobby = false;
-  private musique: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
-  private musiqueTrace = false;
+  private musique: { source: AudioBufferSourceNode; gain: GainNode; url: string; volume: number } | null = null;
+  private musiqueTrace: string | null = null;
   private musiqueVersion = 0;
-  private musiqueEnChargement = false;
+  private musiqueEnChargement: string | null = null;
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private files: string[] = [];
@@ -159,7 +159,9 @@ class SoundEngine {
     if (this.master) this.master.gain.value = this.muted ? 0 : this.volume;
   }
   setSkin(skin: string | null) {
+    if (skin === this.skin) return;
     this.skin = skin;
+    this.syncMusique();
   }
   setPaused(paused: boolean) {
     if (paused === this.paused) return;
@@ -190,32 +192,30 @@ class SoundEngine {
 
   private syncMusique() {
     const actif = this.isTv && this.lobby && this.gesture && !this.muted && !this.paused;
+    const def = actif ? resolveSound("lobby.musique", this.skin, this.files) : null;
     if (this.silent) {
-      if (actif && !this.musiqueTrace) (window.__sfx ??= []).push({ nom: "lobby.musique" });
-      this.musiqueTrace = actif;
+      if (def && this.musiqueTrace !== def.url) (window.__sfx ??= []).push({ nom: "lobby.musique", skin: this.skin, fichier: def.url });
+      this.musiqueTrace = def?.url ?? null;
       return;
     }
-    if (!actif) {
+    if (!def) {
       this.musiqueVersion++;
-      this.musiqueEnChargement = false;
-      const ancienne = this.musique;
-      this.musique = null;
-      if (ancienne && this.ctx) {
-        const t = this.ctx.currentTime;
-        ancienne.gain.gain.cancelAndHoldAtTime(t);
-        ancienne.gain.gain.linearRampToValueAtTime(0, t + 0.8);
-        ancienne.source.stop(t + 0.85);
-      }
+      this.musiqueEnChargement = null;
+      this.arreterMusique();
       return;
     }
-    if (!this.mediasPrets || this.musique || this.musiqueEnChargement || !this.ctx || this.ctx.state !== "running" || !this.master) return;
-    const def = resolveSound("lobby.musique", null, this.files);
-    if (!def) return;
+    if (!this.mediasPrets || !this.ctx || this.ctx.state !== "running" || !this.master) return;
+    if (this.musique?.url === def.url) {
+      // Retour au morceau en cours pendant le décodage du suivant : invalider la requête devenue inutile.
+      if (this.musiqueEnChargement) { this.musiqueVersion++; this.musiqueEnChargement = null; }
+      return;
+    }
+    if (this.musiqueEnChargement === def.url) return;
     const version = ++this.musiqueVersion;
-    this.musiqueEnChargement = true;
+    this.musiqueEnChargement = def.url;
     void this.getBuffer(def).then((buffer) => {
       if (version !== this.musiqueVersion) return;
-      this.musiqueEnChargement = false;
+      this.musiqueEnChargement = null;
       if (!buffer || !this.ctx || !this.master) return;
       const source = this.ctx.createBufferSource();
       const gain = this.ctx.createGain();
@@ -225,15 +225,26 @@ class SoundEngine {
       gain.gain.linearRampToValueAtTime(def.volume, this.ctx.currentTime + 1.2);
       source.connect(gain).connect(this.master);
       source.onended = () => { source.disconnect(); gain.disconnect(); };
-      this.musique = { source, gain };
+      // L’ancienne boucle reste audible jusqu’au décodage, puis les deux fondus se croisent.
+      this.arreterMusique();
+      this.musique = { source, gain, url: def.url, volume: def.volume };
       source.start();
     });
   }
 
+  private arreterMusique() {
+    const ancienne = this.musique;
+    this.musique = null;
+    if (!ancienne || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    ancienne.gain.gain.cancelAndHoldAtTime(t);
+    ancienne.gain.gain.linearRampToValueAtTime(0, t + 0.8);
+    ancienne.source.stop(t + 0.85);
+  }
+
   private duckMusique(duree: number) {
     if (!this.musique || !this.ctx) return;
-    const def = resolveSound("lobby.musique", null, this.files);
-    const volume = def?.volume ?? 0;
+    const volume = this.musique.volume;
     const t = this.ctx.currentTime;
     const gain = this.musique.gain.gain;
     gain.cancelAndHoldAtTime(t);
