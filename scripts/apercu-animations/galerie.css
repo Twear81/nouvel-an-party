@@ -1,0 +1,80 @@
+/* Outil de revue : neutre. Seuls les cadres de la TV et des téléphones montrent le vrai thème du jeu. */
+:root {
+  --ga-fond: #0b1020;
+  --ga-surface: #172137;
+  --ga-ligne: #3c4961;
+  --ga-texte: #f4f5fa;
+  --ga-discret: #bac5d7;
+  --ga-accent: #f2d57b;
+  --ga-encre: #211b09;
+}
+/* La TV est dessinée en 1920×1080 avec 1 rem = 16 px : la galerie fixe la base et met le cadre à l'échelle. */
+html[data-app="tv"] { font-size: 16px; }
+html, body, #galerie { height: 100%; margin: 0; }
+body { background: var(--ga-fond); overflow: hidden; }
+
+.ga {
+  height: 100%; display: grid; grid-template-columns: 17rem minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
+  color: var(--ga-texte); background: var(--ga-fond); font: 400 15px/1.35 "Outfit Variable", system-ui, sans-serif;
+  text-transform: none; letter-spacing: normal;
+}
+.ga button, .ga select, .ga input, .ga label, .ga output, .ga figcaption { font-family: inherit; text-transform: none; letter-spacing: normal; }
+
+/* Menu */
+.ga-menu { grid-row: 1 / 3; overflow: auto; padding: .8rem .6rem 2rem; background: var(--ga-surface); border-right: 1px solid var(--ga-ligne); }
+.ga-titre { font-weight: 700; font-size: 1.1rem; margin: 0 .4rem .8rem; color: var(--ga-accent); }
+.ga-section { margin-bottom: .9rem; }
+.ga-section-titre { margin: .3rem .4rem; font-size: .75rem; font-weight: 700; letter-spacing: .08em !important; text-transform: uppercase !important; color: var(--ga-discret); }
+.ga-menu button { display: block; width: 100%; text-align: left; padding: .35rem .6rem; border: 0; border-radius: .4rem; background: transparent; color: var(--ga-texte); font-size: .9rem; cursor: pointer; }
+.ga-menu button:hover { background: rgba(255, 255, 255, .08); }
+.ga-menu .ga-scene { padding-left: 1.3rem; color: var(--ga-discret); }
+.ga-menu .ga-scene[aria-pressed="true"] { background: var(--ga-accent); color: var(--ga-encre); font-weight: 650; }
+.ga-menu .ga-groupe-titre { font-weight: 650; }
+.ga-menu .ga-groupe-titre[aria-expanded="true"] { color: var(--ga-accent); }
+
+/* Barre de contrôle */
+.ga-barre { display: flex; flex-direction: column; gap: .5rem; padding: .6rem 1rem; border-bottom: 1px solid var(--ga-ligne); }
+.ga-barre-ligne { display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
+.ga-legende { display: flex; flex-direction: column; min-width: 0; }
+.ga-legende span { color: var(--ga-discret); font-size: .85rem; }
+.ga-groupe-boutons { display: flex; gap: .4rem; flex-wrap: wrap; }
+.ga-barre button, .ga-actions button, .ga-barre select {
+  min-height: 2.3rem; padding: .35rem .8rem; border: 1px solid var(--ga-ligne); border-radius: .5rem; font-size: .9rem; font-weight: 600;
+  color: var(--ga-texte); background: var(--ga-surface); cursor: pointer;
+}
+.ga-barre button[aria-pressed="true"], .ga-barre [data-testid="ga-lecture"], .ga-actions button { background: var(--ga-accent); color: var(--ga-encre); border-color: var(--ga-accent); }
+.ga-barre button:disabled, .ga-actions button:disabled { opacity: .4; cursor: default; }
+.ga-barre button:focus-visible, .ga-barre input:focus-visible, .ga-actions button:focus-visible { outline: 3px solid var(--ga-accent); outline-offset: 2px; }
+.ga-champ { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--ga-discret); }
+.ga-barre select { background: var(--ga-surface); }
+.ga-curseur { display: flex; align-items: center; gap: .6rem; flex: 1; min-width: 12rem; }
+.ga-curseur input { flex: 1; accent-color: var(--ga-accent); }
+.ga-curseur output { min-width: 7rem; text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; }
+
+/* Zone de scène */
+.ga-scene-zone { overflow: auto; padding: .8rem 1rem 2rem; min-width: 0; }
+.ga-disposition { display: flex; align-items: flex-start; gap: 20px; width: 100%; }
+.ga-disposition-tv { flex: 0 0 auto; }
+.ga-disposition-tels { display: flex; flex-direction: column; gap: 12px; }
+.ga-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .8rem; }
+
+.ga-tv { position: relative; overflow: hidden; border-radius: .5rem; background: #000; box-shadow: 0 0 0 1px var(--ga-ligne); }
+.ga-tv-box { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; isolation: isolate; }
+/* TvStage dimensionne son cadre sur la fenêtre (vw/vh) : dans la galerie il fait toujours 1920×1080. */
+.ga-tv-box [data-ui="stage-tv"] > div { width: 1920px !important; height: 1080px !important; }
+
+.ga-phone-figure { margin: 0; display: flex; flex-direction: column; gap: .3rem; align-items: flex-start; }
+.ga-phone-figure figcaption { font-size: .8rem; color: var(--ga-discret); max-width: 16rem; }
+.ga-phone { position: relative; overflow: hidden; border-radius: 1rem; background: #000; box-shadow: 0 0 0 2px var(--ga-ligne); }
+.ga-phone-box { position: absolute; left: 0; top: 0; transform-origin: 0 0; overflow: hidden; isolation: isolate; }
+.ga-phone-box .h-app { height: 100% !important; }
+
+/* La pause de la galerie est dans la barre de contrôle : pas de rideau « PAUSE » sur la scène. */
+.ga-tv-box [data-ui="paused"], .ga-phone-box [data-ui="paused"] { display: none !important; }
+.ga-fige .ga-tv-box *, .ga-fige .ga-phone-box * { animation-play-state: paused !important; }
+
+/* Vignettes (chrono sous chaque skin) */
+.ga-vignettes { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+.ga-vignette { margin: 0; display: flex; flex-direction: column; gap: .3rem; }
+.ga-vignette iframe { border: 1px solid var(--ga-ligne); border-radius: .5rem; background: #000; }
+.ga-vignette figcaption { font-size: .8rem; color: var(--ga-discret); }

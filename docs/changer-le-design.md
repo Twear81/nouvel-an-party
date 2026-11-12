@@ -71,6 +71,23 @@ elle réutilise les composants du jeu et propose lecture, pause et déplacement 
 
 Le jeu change d'habillage au fil de la soirée (6 skins qui imitent des interfaces de jeux vidéo) : tout est dans [skins.md](skins.md). En bref : `SkinProvider` (`src/web/theme/skin.tsx`) pose `html[data-skin]` ; **un fichier CSS par skin** (`src/web/theme/skins/<id>.css`) redéfinit les jetons puis habille les composants via leurs marqueurs `data-ui` (`panel`, `button`, `choice`, `result-bar`, `countdown`, `avatar`, `score-row`…, tableau dans skins.md). Pour qu'un écran soit habillable : n'utiliser que les composants de `src/web/ui` et les classes du thème ; une zone neuve et récurrente reçoit son `data-ui` (et ses `data-*` d'état) dans le composant, jamais de style de skin dans un mini-jeu.
 
+## Galerie des animations
+
+`bun run apercu:animations` construit `captures/animations/index.html` (non commité) : un fichier autonome, ouvrable depuis
+le disque, sans serveur ni réseau. Il rejoue **chaque animation et son son** isolément, avec les vrais écrans du jeu
+(`TvScreens`, `PhoneScreen`, vues `Tv` / `TvResults` / `Phone` des mini-jeux) et une horloge locale qui remplace `serverNow`
+(`imposerHorloge`, `src/web/net/socket.ts`). Menu à gauche (Composants, Chrono, Écrans TV, Mini-jeux), barre de contrôle en
+haut : Pause / Rejouer, curseur de temps sur les scènes chronométrées (révélations calées sur `resultsAt`), habillage (thème
+de base + 6 skins), 3 ou 8 joueurs (pseudos de 16 caractères), taille du téléphone, bouton son (le premier clic déverrouille
+l'audio). Un lien `#scene=jeu/imposteur/vote&skin=dofus&n=8` ouvre une scène précise. La pause fige l'horloge et les
+animations CSS ; les ressorts `motion` finissent leur course (utiliser le curseur pour examiner un instant).
+
+Les manches de démonstration sont **jouées par la vraie logique du jeu** (`game.ts` dans le faux contexte de
+`tests/unit/helpers/minigame-ctx.ts`, config réelle de `config/minijeux/`) : elles restent justes si le jeu change.
+Pour ajouter un mini-jeu : une entrée dans `DEMOS` (`scripts/apercu-animations/demos.ts`) = des étapes cumulatives
+(`intro`, `jeu`, `resultats`…) dont les `agir(s)` font `s.input(joueur, payload)` / `s.advance(ms)` ; `repondre` alimente le bouton
+« Faire répondre le suivant ». Le code de la galerie est dans `scripts/apercu-animations/`.
+
 ## Composants réutilisables (`src/web/ui/`)
 - `Button`, `ConfirmDialog` (confirmation dans le style du jeu, jamais `window.confirm`), `Icons` (icônes SVG : pause, passer, accueil…), `Panel` (carte en verre, prop `title` facultative), `PlayerAvatar` (avatar + cadre + couleur, tailles `xs`→`2xl`, `AVATAR_REM` = taille en rem).
 - `Choice` : carte de choix cliquable du téléphone (réponse, vote, camp, oui / non). Props `selected`, `state` (`idle` / `correct` / `wrong` / `faded`), `keyLabel` (A, B…), `tone` (`glass` par défaut, `cool` / `hot` / `good` / `bad` pleins, `plain`, `flat` sans relief ni anneau), `radius` (`card` / `btn`), `showCheck` (faux pour les petits boutons serrés), ✓ intégré quand `selected` (taille / position via `checkSize`, `checkTone`, `checkClassName`) ; la mise en page vient de `className`. Marqueurs `choice`, `choice-key`, `choice-label`, `choice-check`. Ne plus écrire de `motion.button` de choix à la main.

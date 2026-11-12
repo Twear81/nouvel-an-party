@@ -22,7 +22,12 @@ export function call<T = object>(event: keyof ClientToServer, ...args: unknown[]
 
 // ── Horloge : décalage = heure serveur − heure locale, mesuré sur l'échantillon au plus faible aller-retour.
 let offset = 0;
-export const serverNow = () => Date.now() + offset;
+let horlogeImposee: (() => number) | null = null;
+export const serverNow = () => (horlogeImposee ? horlogeImposee() : Date.now() + offset);
+/** Galerie des animations seulement : remplace l'horloge serveur par une horloge locale pilotable (pause, curseur). */
+export const imposerHorloge = (horloge: (() => number) | null) => {
+  horlogeImposee = horloge;
+};
 
 export async function syncClock(samples = 8): Promise<boolean> {
   let best: { rtt: number; offset: number } | null = null;

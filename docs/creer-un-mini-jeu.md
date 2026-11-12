@@ -109,6 +109,8 @@ Si `config/minijeux/<id>.yaml` est absent, le jeu est désactivé avec un averti
 - **Unit** (`tests/unit/<id>.test.ts`) : testez `game.ts` sans réseau avec un faux `ctx` (`rng` fixe, `setTimeout` qui stocke les callbacks pour les déclencher à la main, `players` factices) : `start` → `onPlay` → `input` → `finish`. Vérifiez surtout la validation des `payload` invalides, les égalités, les joueurs absents et le calcul des points.
 - **E2E** (`tests/e2e`) : une partie complète avec plusieurs faux téléphones : lobby, une manche de votre jeu, résultats, classement.
 
+- **Galerie des animations** : ajouter la démo du jeu dans `scripts/apercu-animations/demos.ts` (étapes jouées par la vraie logique du jeu, voir [changer-le-design.md](changer-le-design.md#galerie-des-animations)), puis `bun run apercu:animations` pour regarder et écouter chaque étape, révélation comprise.
+
 ## 7. Exemple complet : « Plus rapide »
 Principe : après un délai aléatoire, un gros **GO** apparaît. Le premier à toucher son écran gagne. Le temps est **mesuré sur le téléphone** avec `performance.now()` à partir de l'affichage du GO, puis envoyé : la latence wifi ne favorise personne. Points par rang.
 

@@ -23,7 +23,7 @@ export function TvApp() {
   );
 }
 
-function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
+export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
   const { snapshot, connected, host, actions } = game;
   useGlobalSfx(snapshot);
 
