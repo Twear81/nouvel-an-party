@@ -3,7 +3,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Button, CheckIcon, Choice, fireConfetti, Panel, PlayerAvatar, ResultBar } from "../../web/ui";
+import { Button, CheckIcon, Choice, fireConfetti, haptique, Panel, PlayerAvatar, Pop, ResultBar, useSfxOnChange, useSfxTimeline, type NomSon } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -29,8 +29,8 @@ function TvWord() {
       <motion.span animate={{ scale: [1, 1.15, 1], rotate: [0, -8, 8, 0] }} transition={{ duration: 2.4, repeat: Infinity }} className="text-[9rem] leading-none" aria-hidden>
         🤫
       </motion.span>
-      <h1 data-testid="tv-word-title" className="text-balance text-[6rem] font-extrabold leading-[1.05]">Regardez votre mot en cachette</h1>
-      <p className="font-display text-5xl text-ink-muted">Sur votre téléphone. Ne le montrez à personne.</p>
+      <motion.h1 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 160, damping: 14 }} data-testid="tv-word-title" className="text-balance text-[6rem] font-extrabold leading-[1.05]">Regardez votre mot en cachette</motion.h1>
+      <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="font-display text-5xl text-ink-muted">Sur votre téléphone. Ne le montrez à personne.</motion.p>
     </div>
   );
 }
@@ -44,7 +44,10 @@ function TvSpeech({ pub, playerById }: Props) {
       <p className="shrink-0 font-display text-4xl text-ink-muted">{pub.tours > 1 ? `Tour ${pub.tour}/${pub.tours}` : "Indice"}</p>
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5">
         <motion.div key={pub.currentId ?? "none"} initial={{ scale: 0.5, opacity: 0, rotate: -6 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 200, damping: 13 }} className="flex flex-col items-center gap-4">
-          <PlayerAvatar profile={current?.profile ?? null} size="2xl" />
+          <div className="relative">
+            <motion.span aria-hidden animate={{ scale: [1, 1.35], opacity: [0.5, 0] }} transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }} className="absolute inset-0 rounded-full bg-accent" />
+            <PlayerAvatar profile={current?.profile ?? null} size="2xl" className="relative" />
+          </div>
           <h1 data-testid="tv-speaker" data-speaker={pub.currentId ?? ""} className="max-w-full truncate text-[5.5rem] font-extrabold leading-none">
             À <span className="text-accent">{current?.profile?.name ?? "…"}</span> !
           </h1>
@@ -57,7 +60,7 @@ function TvSpeech({ pub, playerById }: Props) {
           const isCur = id === pub.currentId;
           return (
             <div key={id} data-testid={`queue-${id}`} data-state={done ? "done" : isCur ? "current" : "wait"} className={`flex w-[11rem] flex-col items-center gap-1 ${isCur ? "scale-110" : ""}`}>
-              <PlayerAvatar profile={playerById(id)?.profile ?? null} size="md" dimmed={!done && !isCur} badge={done ? <CheckIcon /> : undefined} className={isCur ? "drop-shadow-[0_0_1.2rem_var(--color-accent)]" : ""} />
+              <PlayerAvatar profile={playerById(id)?.profile ?? null} size="md" dimmed={!done && !isCur} badge={done ? <Pop appear><CheckIcon /></Pop> : undefined} className={isCur ? "drop-shadow-[0_0_1.2rem_var(--color-accent)]" : ""} />
               <span className={`w-full truncate text-xl font-bold ${isCur ? "text-accent" : done ? "text-ink-muted" : ""}`}>{playerById(id)?.profile?.name}</span>
             </div>
           );
@@ -82,7 +85,7 @@ function TvDecision({ pub }: Props) {
           <div key={c.id} data-testid={`tv-count-${c.id}`} data-count={c.n} className="glass flex w-[40rem] flex-col items-center gap-5 rounded-card px-8 py-10">
             <span className="text-[7rem] leading-none" aria-hidden>{c.emoji}</span>
             <span className="font-display text-6xl">{c.label}</span>
-            <span className="font-num text-[9rem] leading-none text-accent">{c.n}</span>
+            <Pop value={c.n} className="font-num text-[9rem] leading-none text-accent">{c.n}</Pop>
             <ResultBar pill tone="gold" value={c.n / total} fromZero={false} transition={{ type: "spring", stiffness: 120, damping: 16 }} className="h-6 w-full" />
           </div>
         ))}
@@ -95,15 +98,15 @@ function TvVote({ pub, round, playerById }: Props) {
   const list = round.participants;
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <Title sub={<span data-testid="tv-vote-count"><span className="text-accent">{pub.votedCount}</span> / {list.length} ont voté</span>} testId="tv-imposteur-title">
+      <Title sub={<span data-testid="tv-vote-count"><Pop value={pub.votedCount} className="text-accent">{pub.votedCount}</Pop> / {list.length} ont voté</span>} testId="tv-imposteur-title">
         Qui n'a pas le même mot ?
       </Title>
       <div className="flex min-h-0 flex-1 flex-wrap content-center items-start justify-center gap-x-6 gap-y-6">
-        {list.map((id) => (
-          <div key={id} className="flex w-[13rem] flex-col items-center gap-2">
+        {list.map((id, i) => (
+          <motion.div key={id} initial={{ opacity: 0, y: 40, scale: 0.7 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: i * 0.07, type: "spring", stiffness: 220, damping: 14 }} className="flex w-[13rem] flex-col items-center gap-2">
             <PlayerAvatar profile={playerById(id)?.profile ?? null} size="xl" />
             <span className="w-full truncate text-2xl font-bold">{playerById(id)?.profile?.name}</span>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
@@ -112,6 +115,9 @@ function TvVote({ pub, round, playerById }: Props) {
 
 function Tv(props: Props) {
   const { pub } = props;
+  // Sons de la TV : changement d'étape, orateur suivant, compteurs de décision et de vote (jamais au montage).
+  useSfxOnChange(pub.step, "transition.entree");
+  useSfxOnChange(pub.currentId, (_avant, apres) => (apres ? { nom: "ui.clic", options: { rate: 1.3 } } : null));
   if (pub.step === "mot") return <TvWord />;
   return (
     <div data-testid="tv-imposteur" data-step={pub.step} data-tour={pub.tour} className="flex min-h-0 flex-1 flex-col">
@@ -135,7 +141,10 @@ function WordPeek({ word }: { word: string }) {
       variant="secondary"
       data-testid="word-peek"
       data-shown={shown}
-      onClick={() => setShown((s) => !s)}
+      onClick={() => {
+        haptique(10);
+        setShown((s) => !s);
+      }}
       className="flex h-[3.25rem] w-full shrink-0 items-center justify-center gap-2 !px-4 !py-0 !text-xl !font-bold [-webkit-touch-callout:none]"
     >
       {shown ? (
@@ -184,6 +193,7 @@ function PhoneSpeech({ pub, sendInput, playerById, snapshot }: Props) {
           disabled={busy}
           onClick={() => {
             setBusy(true);
+            haptique(30);
             void sendInput({ done: true }).catch(() => setBusy(false));
           }}
           className="min-h-0 flex-1 !text-3xl"
@@ -195,9 +205,11 @@ function PhoneSpeech({ pub, sendInput, playerById, snapshot }: Props) {
   }
   return (
     <div data-testid="phone-speaking" data-me="false" className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 text-center">
-      <PlayerAvatar profile={current?.profile ?? null} size="xl" />
+      <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 1.2, repeat: Infinity }}>
+        <PlayerAvatar profile={current?.profile ?? null} size="xl" />
+      </motion.div>
       <p className="w-full truncate text-4xl font-extrabold">{current?.profile?.name ?? "…"}</p>
-      <p className="font-display text-3xl text-accent">parle…</p>
+      <Pop appear key={pub.currentId ?? "none"} className="font-display text-3xl text-accent">parle…</Pop>
       <p className="text-xl text-ink-muted">Écoute bien son indice</p>
     </div>
   );
@@ -225,7 +237,10 @@ function PhoneDecision({ priv, sendInput }: Props) {
               tone={DECISION_TONES[o.id]}
               selected={selected}
               state={choice !== null && !selected ? "faded" : "idle"}
-              onClick={() => void sendInput({ choice: o.id }).catch(() => {})}
+              onClick={() => {
+                haptique();
+                void sendInput({ choice: o.id }).catch(() => {});
+              }}
               className="min-h-[5rem] flex-1 px-4"
             >
               <span className="text-balance font-display text-3xl leading-tight">{o.label}</span>
@@ -255,7 +270,10 @@ function PhoneVote({ round, priv, sendInput, playerById, snapshot }: Props) {
               data-testid={`vote-option-${id}`}
               selected={selected}
               state={vote !== null && !selected ? "faded" : "idle"}
-              onClick={() => void sendInput({ target: id }).catch(() => {})}
+              onClick={() => {
+                haptique();
+                void sendInput({ target: id }).catch(() => {});
+              }}
               checkTone="accent"
               checkSize="sm"
               checkClassName="absolute right-1.5 top-1.5"
@@ -298,6 +316,16 @@ export const revealSeconds = (n: number) => unveilAt(n) + SETTLE_S;
 function TvResults({ results, round, playerById }: Props) {
   const votes = results?.votes ?? [];
   const at = unveilAt(votes.length);
+  // Sons calés sur les mêmes constantes que l'animation : un « pop » par vote qui tombe, roulement pendant le suspense, verdict.
+  useSfxTimeline(
+    results ? round.resultsAt : null,
+    [
+      ...votes.map((_, k) => ({ à: VOTES_START_S + k * VOTE_STEP_S, son: "reponse.recue" as NomSon, options: { rate: 0.9 + Math.min(k, 8) * 0.06 } })),
+      { à: Math.max(0, at - 2), son: "roulement" as NomSon },
+      { à: at, son: (results?.unmasked ? "bonne.reponse" : "mauvaise.reponse") as NomSon },
+      ...(results?.unmasked ? [] : [{ à: at + 0.25, son: "mauvaise.reponse" as NomSon, options: { rate: 0.8 } }]),
+    ],
+  );
   const [unveiled, setUnveiled] = useState(false);
   useEffect(() => {
     const id = setTimeout(() => {
@@ -321,11 +349,11 @@ function TvResults({ results, round, playerById }: Props) {
               data-testid={isImp && unveiled ? "tv-imposter" : undefined}
               animate={{ opacity: unveiled && !isImp ? 0.35 : 1, scale: unveiled && isImp ? 1.2 : 1, y: unveiled && isImp ? -8 : 0 }}
               transition={{ type: "spring", stiffness: 160, damping: 11 }}
-              className={`flex flex-col items-center gap-1 ${crowd ? "w-[13rem]" : "w-[14rem]"} ${unveiled && isImp ? "z-10" : ""}`}
+              className={`flex flex-col items-center gap-1 ${crowd ? "w-[11.5rem]" : "w-[14rem]"} ${unveiled && isImp ? "z-10" : ""}`}
             >
               <div className="relative">
                 {unveiled && isImp && (
-                  <motion.span initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: -14 }} transition={{ type: "spring" }} className="absolute -left-4 -top-6 z-10 text-6xl">
+                  <motion.span initial={{ scale: 0, rotate: -30 }} animate={{ scale: [0, 1.8, 1], rotate: -14 }} transition={{ duration: 0.5 }} className="absolute -left-4 -top-6 z-10 text-6xl">
                     🕵️
                   </motion.span>
                 )}

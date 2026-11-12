@@ -1,7 +1,7 @@
 // Écrans de "Tier list" : n'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { AnsweredCount, AnsweredRoster, CheckIcon, Choice, fireConfetti, PlayerAvatar, ResultBar, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, CheckIcon, Choice, fireConfetti, haptique, PlayerAvatar, ResultBar, typo, useSfxTimeline, type NomSon } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 import { TIER_BG, TIER_BORDER, TIER_TEXT, TierBadge, TierBoard } from "./tiers";
@@ -94,7 +94,10 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
                       state={tier !== undefined && !selected ? "faded" : "idle"}
                       data-testid={`rate-${p.id}-${i}`}
                       aria-label={`${p.profile!.name} : ${label}`}
-                      onClick={() => void sendInput({ target: p.id, tier: i }).catch(() => {})}
+                      onClick={() => {
+                        haptique(selected ? 8 : 15);
+                        void sendInput({ target: p.id, tier: i }).catch(() => {});
+                      }}
                       className={`min-w-0 flex-1 border-2 font-display text-lg leading-none ${TIER_BORDER[i]} ${selected ? `${TIER_BG[i]} text-accent-ink` : `bg-bg/40 ${TIER_TEXT[i]}`}`}
                     >
                       {label}
@@ -132,10 +135,32 @@ export function revealSeconds(placements: Results["placements"]): number {
   return (order.reduce((sum, _, k) => sum + pauseBefore(order, k), 0) + SETTLE_MS) / 1000;
 }
 
-const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
+/** Délai (s) entre le début de la chute d'un invité et son impact sur la rangée (le ressort de l'animation). */
+const IMPACT_S = 0.35;
+
+/** Sons de la révélation : impact à chaque atterrissage (plus grave en bas), roulement avant le suspense du haut, sacre du S. */
+function revealSounds(order: Results["placements"], tierCount: number) {
+  const out: { à: number; son: NomSon; options?: { rate?: number; volume?: number } }[] = [];
+  let t = 0;
+  order.forEach((p, k) => {
+    const pause = pauseBefore(order, k);
+    t += pause / 1000;
+    const high = p.tier === 0;
+    if (high && pause >= 1900) out.push({ à: Math.max(0, t - 1.9), son: "roulement" });
+    const rate = 0.7 + (1 - p.tier / Math.max(1, tierCount - 1)) * 0.6;
+    out.push({ à: t + IMPACT_S, son: "ui.clic", options: { rate, volume: 0.8 } });
+    if (high) out.push({ à: t + IMPACT_S, son: "bonne.reponse", options: { rate: k === order.length - 1 ? 1 : 1.2 } });
+    else if (p.tier === tierCount - 1 && tierCount > 1) out.push({ à: t + IMPACT_S, son: "mauvaise.reponse", options: { volume: 0.5 } });
+    if (k === order.length - 1) out.push({ à: t + IMPACT_S + 0.1, son: "bonne.reponse", options: { rate: 1.35, volume: 0.7 } });
+  });
+  return out;
+}
+
+const TvResults = ({ results, round, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
   // Du plus bas étage vers le S : le meilleur arrive en dernier.
   const order = useMemo(() => (results ? revealOrder(results.placements) : []), [results]);
   const [revealed, setRevealed] = useState(0);
+  useSfxTimeline(results && order.length ? round.resultsAt : null, results ? revealSounds(order, results.tiers.length) : []);
 
   useEffect(() => {
     if (revealed >= order.length) return;
