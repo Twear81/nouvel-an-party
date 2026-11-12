@@ -15,7 +15,7 @@ ils emploient les classes Tailwind issues du thème (`bg-surface`, `text-accent`
 ### Palette
 Dans `theme.css`, modifier les variables `--color-*` :
 `bg` / `bg-2` / `bg-3` (fonds de nuit), `surface` (verre), `ink` / `ink-muted` (textes), `accent*` (or champagne),
-`hot` (rose), `cool`, `good` / `bad` / `warn` (états), `qr-dark` / `qr-light` (QR code, garder un fort contraste).
+`hot` (bleu électrique dans le thème de base), `cool`, `good` / `bad` / `warn` (états), `qr-dark` / `qr-light` (QR code, garder un fort contraste).
 Les dégradés (`--gradient-bg`, `--gradient-gold`…) sont construits à partir de ces couleurs.
 Classes disponibles : `bg-bg`, `text-ink`, `text-ink-muted`, `bg-accent`, `text-accent`, `bg-gold`, `bg-night`, `glass`, `text-gold-gradient`…
 
@@ -118,3 +118,8 @@ Un mini-jeu ne doit utiliser que ces composants + les classes du thème.
 - **Animations fluides** (TV comme téléphones) : n'animer que `transform` et `opacity` ; pas de propriété SVG ou de peinture animée (`stroke-dashoffset`, `width`, `box-shadow`…), pas de `filter`/`mix-blend-mode` sur un grand calque, pas de recalage d'animation à chaque image. Détails et mesure : [Performance des scènes](mise-en-scene.md#performance-des-scènes).
 - **Téléphones modestes (ex. iPhone XR à la batterie usée)** : jamais de flou (`glass`, `backdrop-filter`) au-dessus d'un élément animé — le flou serait recalculé à chaque image ; le fond par défaut est donc figé sur téléphone (`<Backdrop still />` dans `PhoneStage`), et un skin qui anime son fond n'utilise pas de flou. Pas d'animation infinie de `stroke-dashoffset`, `box-shadow` ou `filter` sur un élément toujours visible (cadres d'avatar : scintillement en `opacity`).
 - **Temps de réaction** : prendre l'instant du toucher avec `eventTime(e.timeStamp, performance.now())` (`src/shared/clock.ts`), pas `performance.now()` dans le gestionnaire : un téléphone lent à traiter l'événement ne doit pas être pénalisé.
+
+Les textes à dégradé / ellipse qui contiennent des jambages réservent leur encre via `glyph-safe`.
+`PlayerAvatar` accepte `crowned` et `crownDelay` : la couronne est ancrée et proportionnelle au portrait, pour les
+résultats et le podium. La décoration de `Drawing` est attachée au carré réel, hors du masque de la feuille.
+Les règles de camps des skins excluent `selected-badge` et `choice-check` : une pastille de validation reste pleine.

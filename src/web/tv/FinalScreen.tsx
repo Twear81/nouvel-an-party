@@ -52,12 +52,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                         transition={{ type: "spring", duration: FINAL_ENTRY_MS / 1000, bounce: 0.2 }}
                         className="flex flex-col items-center gap-2"
                       >
-                        {i === 0 && (
-                          <motion.span initial={{ y: -160, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.35 }} className="text-7xl">
-                            <motion.span animate={{ rotate: [-8, 8, -8] }} transition={{ repeat: Infinity, duration: 2 }} className="inline-block">👑</motion.span>
-                          </motion.span>
-                        )}
-                        <PlayerAvatar profile={p.profile} size={i === 0 ? "xl" : "lg"} />
+                        <PlayerAvatar profile={p.profile} size={i === 0 ? "xl" : "lg"} crowned={i === 0} crownDelay={0.35} />
                         <span className="max-w-full truncate text-3xl font-bold">{p.profile!.name}</span>
                         <CountUp value={p.score} duration={1.2} className="font-num text-4xl text-accent" />
                       </motion.div>

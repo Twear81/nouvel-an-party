@@ -43,7 +43,7 @@ export function ResultsScreen({ snapshot, round }: { snapshot: GameSnapshot; rou
                   className="flex min-w-0 flex-col items-center gap-0.5"
                 >
                   {/* Emplacement réservé pour que la bande ne saute pas quand les points arrivent. */}
-                  <span className="relative flex h-[2.25rem] items-center">
+                  <span className="relative flex h-[3.25rem] items-center">
                     {revealed && <FlyingPoints value={gained} delay={i * 0.07} />}
                     {revealed && (
                       <motion.span
@@ -58,22 +58,10 @@ export function ResultsScreen({ snapshot, round }: { snapshot: GameSnapshot; rou
                     )}
                   </span>
                   <div className="relative">
-                    {/* Le meneur du manche reçoit sa couronne (après la révélation seulement). */}
-                    {revealed && i === 0 && gained > 0 && (
-                      <motion.span
-                        aria-hidden
-                        data-ui="crown"
-                        initial={{ y: -90, opacity: 0, rotate: -35, scale: 0.5 }}
-                        animate={{ y: 0, opacity: 1, rotate: -16, scale: 1 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 11, delay: 0.5 }}
-                        className="absolute -left-3 -top-1 z-10 text-3xl"
-                      >
-                        👑
-                      </motion.span>
-                    )}
                     <PlayerAvatar
                       profile={p.profile}
                       size="sm"
+                      crowned={revealed && i === 0 && gained > 0}
                       dimmed={!p.connected}
                       badge={snapshot.continued.includes(p.id) ? <Pop appear><CheckIcon /></Pop> : p.connected ? <span className="animate-pulse-soft">…</span> : undefined}
                       className={done && p.connected ? "drop-shadow-[0_0_0.8rem_var(--color-good)]" : ""}

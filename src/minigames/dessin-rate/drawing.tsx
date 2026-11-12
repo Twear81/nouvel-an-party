@@ -1,6 +1,6 @@
 // Rendu et tracé des dessins : le même composant sert sur la TV, sur les miniatures et sur la page du téléphone.
 // Couleurs = feutres du thème (pen-0…pen-4) dans l'ordre de la palette ; la page est le « papier » du thème.
-import { memo, useRef, type PointerEvent as ReactPointerEvent } from "react";
+import { memo, useRef, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { GRID, MAX_POINTS, MAX_POINTS_PER_STROKE, MAX_STROKES, MIN_STEP, WIDTHS, type Stroke } from "./shared";
 
 /** Classes littérales (Tailwind doit les voir en entier) : index de palette → couleur du thème. */
@@ -44,25 +44,29 @@ interface SheetProps {
   blankLabel?: string;
   testId?: string;
   className?: string;
+  decoration?: ReactNode;
 }
 
 /**
  * Une page carrée qui remplit le carré disponible dans son parent (qui doit avoir une taille définie).
  * Le trait est en unités de la grille : il grossit avec la page.
  */
-export function Drawing({ strokes, blankLabel, testId, className = "" }: SheetProps) {
+export function Drawing({ strokes, blankLabel, testId, decoration, className = "" }: SheetProps) {
   return (
     <div className="size-full [container-type:size]">
       <div className="flex size-full items-center justify-center">
         <div
           data-testid={testId}
           data-strokes={strokes.length}
-          className={`relative overflow-hidden rounded-btn bg-paper shadow-card ${className}`}
+          className={`relative [container-type:size] rounded-btn bg-paper shadow-card ${className}`}
           style={{ width: "min(100cqw, 100cqh)", height: "min(100cqw, 100cqh)" }}
         >
-          <svg viewBox={`0 0 ${GRID} ${GRID}`} className="absolute inset-0 size-full" aria-hidden>
-            <StrokesSvg strokes={strokes} />
-          </svg>
+          <div className="absolute inset-0 overflow-hidden rounded-btn">
+            <svg viewBox={`0 0 ${GRID} ${GRID}`} className="absolute inset-0 size-full" aria-hidden>
+              <StrokesSvg strokes={strokes} />
+            </svg>
+          </div>
+          {decoration}
           {blankLabel && strokes.length === 0 && (
             <span className="absolute inset-0 flex items-center justify-center p-2 text-center text-base font-bold italic leading-tight text-bg-3/60">{blankLabel}</span>
           )}
@@ -154,8 +158,8 @@ export function DrawingPad({ strokes, color, width, disabled, onChange }: PadPro
             onPointerCancel={up}
             onContextMenu={(e) => e.preventDefault()}
           >
-            <StrokesSvg strokes={strokes} />
-          </svg>
+              <StrokesSvg strokes={strokes} />
+            </svg>
         </div>
       </div>
     </div>

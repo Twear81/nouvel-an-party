@@ -92,7 +92,7 @@ html[data-skin="dofus"] [data-ui="game-frame-body"] { padding: 1.2rem 2rem 1.4re
 
 /* Camps (cool / hot / good / bad + text-bg) : panneau ardoise, liseré épais de la couleur du camp, libellé blanc gras.
    Jamais d'aplat saturé : le texte resterait illisible dessus. Les boutons gardent leur propre style. */
-html[data-skin="dofus"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg:is(:not(button), [data-ui="choice"]) {
+html[data-skin="dofus"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg:not([data-ui="selected-badge"], [data-ui="choice-check"]):is(:not(button), [data-ui="choice"]) {
   --camp: #6aa6e8;
   color: #ffffff;
   font-weight: 800;

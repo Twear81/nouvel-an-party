@@ -13,7 +13,7 @@ import { PADS, PadShape } from "./pads";
 const LIT_RATIO = 0.7;
 
 /** Hauteur (vitesse de lecture de `simon.note`) de chaque pastille : un accord que l'oreille reconnaît. */
-const NOTE_RATES = [1, 1.26, 1.5, 2] as const;
+const NOTE_RATES = [1, 2 ** (4 / 12), 2 ** (7 / 12), 2] as const;
 
 /** Heure serveur, rafraîchie souvent tant que `active` (animation de la suite). */
 function useServerNow(active: boolean) {
@@ -85,9 +85,9 @@ function Banner({ pub, aliveCount, names }: { pub: Pub; aliveCount: number; name
   if (pub.stage === "over") {
     content =
       names.length === 1 ? (
-        <span className="text-gold-gradient">👑 {names[0]} gagne !</span>
+        <span className="inline-block glyph-safe text-gold-gradient">👑 {names[0]} gagne !</span>
       ) : (
-        <span className="text-gold-gradient">👑 Égalité !</span>
+        <span className="inline-block glyph-safe text-gold-gradient">👑 Égalité !</span>
       );
   } else if (pub.stage === "between") {
     content = <span className="text-good">✓ Bien joué !</span>;
@@ -388,7 +388,7 @@ const TvResults = ({ results, playerById, round }: MiniGameViewProps<Pub, Priv, 
           <Column key={r.playerId} row={r} rank={i} max={max} count={rows.length} playerById={playerById} />
         ))}
       </div>
-      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: TEXT_DELAY_S }} className="max-w-[100rem] truncate text-center text-4xl font-bold text-accent">
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: TEXT_DELAY_S }} data-testid="simon-verdict" className="glyph-safe max-w-[100rem] truncate text-center text-4xl font-bold text-accent">
         {text}
       </motion.p>
     </div>

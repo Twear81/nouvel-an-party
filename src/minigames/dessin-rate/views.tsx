@@ -202,7 +202,7 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
   return (
     <div data-testid="phone-dessin" data-stage="draw" className="flex min-h-0 flex-1 flex-col gap-2 pb-2">
       <Panel className="flex min-h-[3.5rem] shrink-0 items-center justify-center px-4 py-1.5">
-        <h1 data-testid="draw-word" className={`line-clamp-2 text-balance text-center font-extrabold leading-tight ${word.length > 28 ? "text-xl" : "text-2xl"}`}>
+        <h1 data-testid="draw-word" className={`glyph-safe line-clamp-2 text-balance text-center font-extrabold leading-tight ${word.length > 28 ? "text-xl" : "text-2xl"}`}>
           {word}
         </h1>
       </Panel>
@@ -320,7 +320,9 @@ const Phone = (props: Props) => (props.pub.step === "draw" ? <PhoneDraw {...prop
 const FIRST_MS = 1500; // avant le premier dessin
 const STEP_MS = 1900; // entre deux dessins
 const WINNER_MS = 3000; // suspense avant le(s) gagnant(s)
-const SETTLE_MS = 1500; // couronne, confettis, compteur de votes
+const CROWN_DELAY_MS = 500;
+const CROWN_DURATION_MS = 650;
+const SETTLE_MS = Math.max(1500, CROWN_DELAY_MS + CROWN_DURATION_MS); // couronne, confettis, compteur de votes
 
 /** Découpe les dessins : les perdants du moins voté au plus voté, puis le(s) gagnant(s). */
 function split(results: Results) {
@@ -352,7 +354,7 @@ function ResultCaption({ card, props, big, crown, noVotes }: { card: ResultCard;
   const author = props.playerById(card.playerId);
   return (
     <div className={`flex max-w-full shrink-0 flex-col items-center ${big ? "gap-2" : "gap-1"}`}>
-      <span className={`line-clamp-2 text-balance text-center font-extrabold leading-tight ${big ? "text-5xl text-gold-gradient" : "text-2xl"}`}>{typo(card.word)}</span>
+      <span className={`glyph-safe line-clamp-2 text-balance text-center font-extrabold leading-tight ${big ? "text-5xl text-gold-gradient" : "text-2xl"}`}>{typo(card.word)}</span>
       {/* Pseudo puis badge de votes sur deux lignes : le badge « rebondit » à l'arrivée, il ne doit jamais toucher le pseudo. */}
       <div className={`flex max-w-full flex-col items-center ${big ? "gap-4" : "gap-1"}`}>
         <div className="flex max-w-full items-center gap-3">
@@ -400,12 +402,12 @@ function TvResults(props: Props) {
       ...times.slice(0, -1).map((t, j) => ({ à: t, son: "ui.clic" as NomSon, options: { rate: 0.9 + j * 0.08 } })),
       { à: Math.max(0, winnerAt - 2), son: "roulement" as NomSon },
       { à: winnerAt, son: "bonne.reponse" as NomSon },
-      { à: winnerAt + 0.5, son: "bonne.reponse" as NomSon, options: { rate: 1.3 } },
+      { à: winnerAt + CROWN_DELAY_MS / 1000, son: "bonne.reponse" as NomSon, options: { rate: 1.3 } },
     ],
   );
   useEffect(() => {
     if (!run || !done) return;
-    const t = setTimeout(() => fireConfetti("big"), 500);
+    const t = setTimeout(() => fireConfetti("big"), CROWN_DELAY_MS);
     return () => clearTimeout(t);
   }, [run, done]);
 
@@ -461,12 +463,9 @@ function TvResults(props: Props) {
                   className="relative flex min-h-0 min-w-0 flex-col items-center gap-2"
                 >
                   <div className="relative min-h-0 w-full flex-1">
-                    <Drawing strokes={c.strokes} className={done ? "ring-[0.5rem] ring-accent" : ""} />
-                    {done && (
-                      <motion.span initial={{ scale: 0, y: 30, rotate: -30 }} animate={{ scale: 1, y: 0, rotate: -14 }} transition={{ delay: 0.3, type: "spring" }} className="absolute -left-4 -top-6 text-[7rem] leading-none drop-shadow-lg" aria-hidden>
-                        👑
-                      </motion.span>
-                    )}
+                    <Drawing strokes={c.strokes} className={done ? "ring-[0.5rem] ring-accent" : ""} decoration={done && (
+                      <motion.span key="couronne" data-ui="drawing-crown" initial={{ scale: 0, opacity: 0, y: -60, rotate: -30 }} animate={{ scale: 1, opacity: 1, y: 0, rotate: -14 }} transition={{ delay: CROWN_DELAY_MS / 1000, duration: CROWN_DURATION_MS / 1000, type: "spring", bounce: 0.35 }} className="drawing-crown" aria-hidden>👑</motion.span>
+                    )} />
                   </div>
                   <ResultCaption card={c} props={props} big crown={done} />
                 </motion.div>
