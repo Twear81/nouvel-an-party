@@ -35,15 +35,20 @@ interface Props {
 
 export function ResultBar({ value, highlight = false, tone = "hot", pill = false, delay, duration, ease, transition, fromZero = true, children, className = "", fillClassName = "", ...rest }: Props) {
   const radius = pill ? "rounded-full" : "rounded-btn";
-  const width = `${Math.max(0, Math.min(1, value)) * 100}%`;
+  const part = Math.max(0, Math.min(1, value));
+  // Le remplissage « pousse » en glissant depuis la gauche (translateX, jamais `width`) : rien n'est redessiné.
+  // Depuis zéro : il garde sa largeur finale (contenu et min-w intacts) et entre par la gauche. Sinon (jauge qui suit une
+  // valeur) : il fait toute la largeur et se décale de la part manquante.
+  const target = fromZero ? "0%" : `${-(1 - part) * 100}%`;
   return (
     <div data-ui="result-bar" data-highlight={highlight ? "true" : "false"} data-testid={rest["data-testid"]} className={`relative overflow-hidden ${radius} ${pill ? "bg-surface-strong" : "bg-surface"} ${className}`}>
       <motion.div
         data-ui="result-bar-fill"
-        initial={fromZero ? { width: 0 } : false}
-        animate={{ width }}
+        initial={fromZero ? { x: "-100%" } : false}
+        animate={{ x: target }}
+        style={{ width: fromZero ? `${part * 100}%` : "100%" }}
         transition={transition ?? { delay, duration, ease }}
-        className={`flex h-full items-center ${radius} ${highlight ? "bg-gold shadow-glow" : FILL_TONES[tone]} ${fillClassName}`}
+        className={`flex h-full items-center will-change-transform ${radius} ${highlight ? "bg-gold shadow-glow" : FILL_TONES[tone]} ${fillClassName}`}
       >
         {children}
       </motion.div>

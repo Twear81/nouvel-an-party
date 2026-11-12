@@ -104,10 +104,19 @@
   --animate-wiggle: wiggle 1.4s ease-in-out infinite;
   --animate-nudge: nudge 1s ease-in-out infinite;
   --animate-attention: attention 1.8s ease-in-out infinite;
+  --animate-rise: rise 0.4s ease-out backwards;
+  --animate-breathe: breathe 4s ease-in-out infinite;
 }
 
 @keyframes twinkle { 0%, 100% { opacity: 0.15; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
 @keyframes float { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(4%, -6%, 0); } }
+/* Entrée douce d'un panneau (opacité + translation) et respiration lente (QR code, halo). */
+@keyframes rise { from { opacity: 0; transform: translate3d(0, 1.2rem, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+/* Chrono : battement du chiffre à chaque seconde des 5 dernières (taille de la boîte inchangée : on ne touche qu'au chiffre
+   lui-même, --beat = amplitude) ; à 3-2-1, il tremble en plus. */
+@keyframes countdown-beat { 0% { transform: scale(var(--beat, 1.15)); } 45%, 100% { transform: scale(1); } }
+@keyframes countdown-beat-shake { 0% { transform: scale(var(--beat, 1.15)) rotate(-4deg); } 20% { transform: scale(var(--beat, 1.15)) rotate(4deg); } 40% { transform: scale(1.04) rotate(-2deg); } 60%, 100% { transform: scale(1) rotate(0); } }
 @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 /* Panneau d'alerte « cheap » : le ⚠️ se dandine, le 👉 pointe, le cadre respire (doux, pas de stroboscope). */
 @keyframes wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }

@@ -23,9 +23,9 @@ export function SelectedBadge({ tone = "ink", size = "lg", className = "", ui = 
   return (
     <motion.span
       data-ui={ui}
-      initial={{ scale: 0 }}
-      animate={{ scale: 1 }}
-      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+      initial={{ scale: 0, rotate: -45 }}
+      animate={{ scale: 1, rotate: 0 }}
+      transition={{ type: "spring", stiffness: 500, damping: 11, delay: 0.08 }}
       className={`flex items-center justify-center rounded-full ${SIZES[size]} ${TONES[tone]} ${className}`}
     >
       <CheckIcon />

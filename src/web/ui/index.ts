@@ -16,3 +16,5 @@ export * from "./Choice";
 export * from "./ResultBar";
 export * from "./DuelGauge";
 export * from "./RoomTransition";
+export * from "./Pop";
+export * from "./haptique";
