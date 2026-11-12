@@ -94,12 +94,52 @@ Overwatch, League of Legends, Dofus (phase de placement, `signatures/Dofus.tsx`)
 Plus rien à refaire : toutes les scènes sont dans leur version actuelle.
 Les sprites sont dans `src/web/theme/assets/sprites/` ; modèle à imiter : `src/web/ui/signatures/RocketLeague.tsx`.
 
-**Fluidité** : un SVG dont un seul élément s'anime est redessiné en entier à chaque image. Pour les scènes lourdes
-(Resonance : centaines de tracés), séparer en couches : tracés dans leur propre SVG (qui ne bouge plus une fois dessiné),
-éléments mobiles en HTML animés par `transform`/`opacity` (`will-change`), pas de filtre SVG (`feGaussianBlur`) ni
-de `mix-blend-mode` sur un grand calque. Mesure possible : durée des images dans la galerie, par tranche de 2 s.
+Fluidité : voir [Performance des scènes](#performance-des-scènes) (règles obligatoires pour toute nouvelle scène).
 
-Tous les mouvements suivent la même horloge que la caméra, pause comprise. La préférence système « réduire les animations » est ignorée : les scènes jouent toujours en entier.
+Tous les mouvements suivent la même horloge que la caméra, pause comprise : `RoomTransition` cale les animations sur
+l'horloge du serveur puis les **laisse tourner seules** ; il ne les recale qu'en pause/reprise ou si elles dérivent
+de plus de 50 ms. La préférence système « réduire les animations » est ignorée : les scènes jouent toujours en entier.
+
+## Performance des scènes
+
+La TV est un PC ordinaire, souvent avec une puce graphique intégrée : une scène qui rame casse tout l'effet.
+**Leçon de Resonance (12 novembre 2026)** : la première version tombait à 14–26 images/s. Le profil Firefox montrait
+~80 tracés SVG animés en `stroke-dashoffset` redessinés au processeur à chaque image (23 ms de thread principal, jusqu'à
+~40 Mo de textures renvoyées au GPU par image), redessinés encore à chaque échelle pendant le replongeon (×6), et
+des animations figées puis recalées en JS à chaque image, donc jamais confiées au compositeur.
+
+### À faire
+- **N'animer que `transform` et `opacity`**, sur des éléments HTML, des `<img>` ou des `<canvas>` déjà dessinés.
+  Ce sont les seules propriétés que le compositeur anime sans redessiner.
+- **Dessins complexes = images fixes** : sprites PNG, ou canvas dessiné **une seule fois** au montage (Resonance :
+  veines générées dans le code puis peintes dans 5 canvas concentriques, révélés en `opacity` + `scale`). Un effet
+  « qui pousse » se fait par bandes révélées l'une après l'autre, pas en animant le tracé.
+- **Laisser les animations natives tourner** (`animate` fourni à la scène) : jamais de `currentTime` recalé à chaque
+  image, jamais de `requestAnimationFrame` propre à une scène, jamais d'écriture dans le DOM ou de style inline à chaque image.
+- **Une seule animation de `transform` par élément**, en mode « replace » : les secousses et zooms propres à une scène
+  vont sur le support de caméra `.room-rig`, la caméra `.room-camera` garde le dézoom/replongeon. Pas de
+  `composite: "add"` (Chromium refuse alors de jouer l'animation sur le compositeur).
+- **Calques à la taille de l'écran** (au plus ~1,4× s'ils s'agrandissent ou rétrécissent) : un élément animé bien plus
+  grand que l'écran n'est plus confié au compositeur.
+- `will-change: transform, opacity` sur les éléments **réellement** animés, pas ailleurs.
+
+### À éviter
+- Animer des propriétés SVG ou de peinture : `stroke-dashoffset`, `d`, `stroke-width`, `fill`, `stop-color`,
+  `width`/`height`, `top`/`left`, `background`, `box-shadow`, `clip-path`, `mask`.
+- Un SVG lourd (des dizaines de tracés) dans un conteneur qui zoome : il est redessiné à chaque nouvelle échelle.
+  Même un `scale(1.02)` de secousse suffit.
+- `filter` (`blur`, `drop-shadow`, `feGaussianBlur`), `mix-blend-mode`, `backdrop-filter` sur un grand calque
+  (le `mix-blend-mode` de `.room-light` coûtait ~25 ms par image sous Resonance). Une lueur = un dégradé radial ou une
+  sous-couche translucide, ou un `shadowBlur` peint une seule fois dans un canvas.
+- Des centaines d'animations séparées : regrouper ce qui apparaît ensemble dans une même couche.
+
+### Mesurer
+La TV du jour J est **Chromium** : vérifier là d'abord (DevTools → Performance ; Rendering → « Frame Rendering
+Stats »), puis sous Firefox, plus sévère sur les SVG. Dans la galerie (`bun run apercu:transitions`), lancer la lecture
+d'un univers et enregistrer le profil sur toute la scène. Signes d'alerte : images à plus de 16 ms, longues tâches
+« Paint »/« WebRender display list » (Firefox) ou « Paint »/« Rasterize » (Chromium) pendant que rien de neuf
+n'apparaît, gros volume de « Texture uploads ». Une scène saine ne fait presque rien sur le thread principal entre
+deux étapes de la scène.
 
 ## Changements techniques nécessaires
 
