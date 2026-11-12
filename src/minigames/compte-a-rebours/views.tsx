@@ -4,7 +4,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { AnimatePresence, motion } from "motion/react";
 import { useLayoutEffect, useRef, useState } from "react";
-import { activeNow } from "../../shared/clock";
+import { activeNow, eventTime } from "../../shared/clock";
 import type { RoundInfo } from "../../shared/types";
 import { serverNow } from "../../web/net/socket";
 import { Button, ordinal, PlayerAvatar } from "../../web/ui";
@@ -86,7 +86,8 @@ const Tv = ({ pub, playerById, round }: Props) => {
 
 /** Le gros bouton STOP. Réagit au contact (pointerdown), pas au relâchement, pour ne pas perdre ~100 ms. */
 function StopPad({ pub, round, sendInput }: { pub: Pub; round: RoundInfo; sendInput: Props["sendInput"] }) {
-  // Le temps est mesuré ICI : depuis l'affichage du bouton sur ce téléphone (performance.now), jamais à l'arrivée au serveur.
+  // Le temps est mesuré ICI : depuis l'affichage du bouton sur ce téléphone (performance.now, instant réel du toucher via
+  // event.timeStamp), jamais à l'arrivée au serveur.
   const t0 = useRef(0);
   // Les pauses de l'hôte ne comptent pas : on retire celles survenues depuis l'affichage du bouton.
   const pausedAtStart = useRef(round.pausedMs);
@@ -100,8 +101,8 @@ function StopPad({ pub, round, sendInput }: { pub: Pub; round: RoundInfo; sendIn
     t0.current = performance.now();
   }, []);
 
-  const stop = () => {
-    const now = performance.now();
+  const stop = (e: { timeStamp: number }) => {
+    const now = eventTime(e.timeStamp, performance.now());
     // Verrou de 250 ms : un doigt encore posé après « GO » ne déclenche pas STOP sans le vouloir.
     if (done.current || (!late.current && now - t0.current < 250)) return;
     done.current = true;

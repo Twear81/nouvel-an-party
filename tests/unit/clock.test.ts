@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { TimerGroup } from "../../src/server/engine/clock";
+import { eventTime } from "../../src/shared/clock";
 import { FakeClock } from "./helpers/fake-clock";
 
 function setup() {
@@ -148,5 +149,15 @@ describe("TimerGroup", () => {
     clock.advance(100);
     expect(fired).toEqual([]);
     expect(clock.pendingCount).toBe(0);
+  });
+});
+
+describe("eventTime (instant réel d'un toucher)", () => {
+  it("prend event.timeStamp quand il est dans le repère de performance.now()", () => {
+    expect(eventTime(1200, 1260)).toBe(1200);
+  });
+  it("retombe sur maintenant si le repère est différent (époque Unix) ou absent", () => {
+    expect(eventTime(1_700_000_000_000, 1260)).toBe(1260);
+    expect(eventTime(0, 1260)).toBe(1260);
   });
 });

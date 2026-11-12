@@ -96,5 +96,6 @@ joueurs connectés (`allConnectedDone`, `helpers.ts`), un téléphone planté ne
 ## Temps réel
 - Les chronos sont des timestamps serveur (`deadline`) ; les écrans corrigent le décalage d'horloge
   via `time:sync`.
-- Pour un futur jeu de réflexe : mesurer le temps de réaction SUR le téléphone (performance.now)
+- Pour un futur jeu de réflexe : mesurer le temps de réaction SUR le téléphone (`performance.now()`, instant du toucher via
+  `eventTime(e.timeStamp, …)`)
   et l'envoyer, pour que la latence wifi n'avantage personne.

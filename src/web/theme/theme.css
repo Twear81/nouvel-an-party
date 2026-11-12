@@ -212,10 +212,11 @@ html[data-skin] [data-ui="round-game-name"] { display: none; }
 .frame-neon [data-ui="avatar-frame-outer"] { stroke: var(--p); stroke-width: 3; filter: drop-shadow(0 0 0.6em var(--p)); }
 .frame-double [data-ui="avatar-frame-outer"] { stroke: var(--p); stroke-width: 2.5; }
 .frame-double [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--color-accent); stroke-width: 2.5; }
-.frame-dashed [data-ui="avatar-frame-outer"] { stroke: var(--p); stroke-width: 3.5; stroke-dasharray: 3 2; animation: avatar-dashes 14s linear infinite; }
+.frame-dashed [data-ui="avatar-frame-outer"] { stroke: var(--p); stroke-width: 3.5; stroke-dasharray: 3 2; }
 .frame-sparkle [data-ui="avatar-frame-outer"] { stroke: var(--frame-shimmer); stroke-width: 4; filter: drop-shadow(0 0 0.3em var(--color-accent)); }
-.frame-sparkle [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--color-ink); stroke-width: 2; stroke-dasharray: 1 9; animation: avatar-dashes 3s linear infinite; }
-@keyframes avatar-dashes { to { stroke-dashoffset: -100; } }
+.frame-sparkle [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--color-ink); stroke-width: 2; stroke-dasharray: 1 9; animation: avatar-sparkle 1.6s ease-in-out infinite; }
+/* Cadres : jamais de stroke-dashoffset animé (tout le SVG et son ombre sont redessinés à chaque image) ; l'étincelle scintille en opacité. */
+@keyframes avatar-sparkle { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 /* ─── mini-jeu tier-list ─── */
 /* Couleurs des étages, du plus haut (1) au plus bas (6) : classes bg-tier-1, text-tier-1, border-tier-1… */
 @theme static {
