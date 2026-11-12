@@ -71,6 +71,7 @@ Si le QR code pointe sur la mauvaise IP, la forcer dans `config/partie.yaml` (`i
 | `bun run test:e2e` | Tests de bout en bout (TV Chromium + téléphones Chromium, Firefox et WebKit). 1re fois : `bunx playwright install --with-deps chromium firefox webkit` |
 | `CAPTURES_SKIN=<id> bun run captures:skin` | Photographie tous les écrans (TV + téléphone) dans un skin, dans `test-results/skins/<id>/` (voir docs/skins.md) |
 | `bun run apercu:transitions` | Génère la galerie animée des six changements d'univers, ouvrable hors ligne dans `captures/transitions/index.html` |
+| `bun run apercu:animations` | Génère la galerie qui rejoue chaque animation et son son (composants, chrono, écrans TV, révélations de chaque mini-jeu), hors ligne, dans `captures/animations/index.html` |
 | `bun run typecheck` | Vérification TypeScript |
 | `bun run release` | Construit `release/nouvel-an-party-windows-x64.zip` (fonctionne depuis WSL) |
 | `bun run release -- linux` | Même chose en exécutable Linux, pour tester sous WSL |

@@ -2,7 +2,8 @@
 import { createContext, useContext, useLayoutEffect, useState, type ReactNode } from "react";
 import { isSkinId, type SkinId } from "../../shared/skins";
 
-const SkinContext = createContext<SkinId | null>(null);
+/** Exporté pour la galerie des animations (un skin par vignette, sans toucher au skin de la page). */
+export const SkinContext = createContext<SkinId | null>(null);
 export const useSkin = (): SkinId | null => useContext(SkinContext);
 
 /** Outil de dev/captures : ?skin=<id> force le skin local ; ?skin= oublie ce choix. */

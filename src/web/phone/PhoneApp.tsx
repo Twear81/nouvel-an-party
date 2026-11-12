@@ -58,7 +58,7 @@ interface ScreenProps {
   onEdit: () => void;
 }
 
-function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
+export function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
   const round = snapshot.round;
   const finalReveal = useFinalReveal(snapshot.finalReveal);
 
