@@ -327,6 +327,9 @@ libre de droits) dans `src/web/theme/sons/`, le déclarer dans le catalogue, l'a
 `config/medias/sons/<nom-logique>.(mp3|ogg|wav)`, ou `config/medias/sons/<skin>/<nom-logique>.*` pour un seul univers
 (priorité : dossier du skin, fichier général, catalogue du skin, catalogue par défaut ; `src/web/sound/resolve.ts`).
 
+Écouter tous les sons : `bun run apercu:sons` puis ouvrir `captures/sons/index.html` (planche autonome : un ▶ par son,
+volume/hauteur réglables, séquences réelles, skins).
+
 | Nom logique | Quand |
 |---|---|
 | `joueur.rejoint`, `joueur.quitte`, `partie.lancement` | lobby, lancement de la partie |

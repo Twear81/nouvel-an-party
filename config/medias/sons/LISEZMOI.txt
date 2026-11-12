@@ -52,3 +52,5 @@ Mini-jeux : pierre-feuille-ciseaux, simon, qui-est-le-plus, le-bon-prix, compte-
     carte.pose            une carte se pose (vote révélé, indice)
     jeton.pose            un jeton se pose (chiffre du prix qui tombe)
     boum                  gros impact (révélation, explosion)
+
+Écouter tous les sons : "bun run apercu:sons" puis ouvrir captures/sons/index.html (planche autonome, hors ligne).

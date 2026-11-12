@@ -90,7 +90,8 @@ class SoundEngine {
   };
 
   // ── Démarrage (TV uniquement, idempotent)
-  start() {
+  /** `sansReseau` : page autonome (planche d'écoute), pas de liste de sons à demander au serveur de la TV. */
+  start(options: { sansReseau?: boolean } = {}) {
     if (this.started || !this.isTv) return;
     this.started = true;
     const unlock = () => {
@@ -102,6 +103,10 @@ class SoundEngine {
     addEventListener("pointerdown", unlock, true);
     addEventListener("keydown", unlock, true);
     if (this.silent) return;
+    if (options.sansReseau) {
+      this.preload();
+      return;
+    }
     // Liste des sons de l'organisateur, puis préchargement des octets (sans contexte audio : pas d'avertissement du navigateur).
     void fetch("/medias/_sons")
       .then((r) => (r.ok ? r.json() : null))
