@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@600;700;800;900&family=Roboto:wght@400;500;700&family=Barlow+Condensed:ital,wght@0,300;0,400;0,500;1,600;1,700;1,800&family=Jost:wght@400;500;700&family=Bebas+Neue&family=Cinzel:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Exo+2:wght@300;400;500;600&family=Orbitron:wght@400;500&family=Jura:wght@500;600;700&family=Share+Tech+Mono&family=M+PLUS+1p:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@600;700;800;900&family=Roboto:wght@400;500;700&family=Barlow+Condensed:ital,wght@0,300;0,400;0,500;1,600;1,700;1,800&family=Jost:wght@400;500;700&family=Bebas+Neue&family=Cinzel:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Exo+2:wght@300;400;500;600&family=Orbitron:wght@400;500&family=M+PLUS+1p:wght@500;700;800&display=swap">
 <style>
 /* Mise en page : barre de choix des skins, puis TV (16:9, 1em = 32px en 1920) à gauche et téléphone 360 px à droite.
    Page d'outil volontairement neutre : chaque skin porte sa propre identité. */
@@ -345,61 +345,6 @@ body {
 [data-skin="rl"] .ph-choices .choice { font-size: 18px; }
 [data-skin="rl"] .ph-cta { font-size: 22px; }
 
-/* ═════════════════════ SHOOTER ANNÉES 2000 (GunZ) ═════════════════════
-   Boutique d'origine : fond noir, bandeau de métal sale à rangée de rivets, onglet vert lumineux (« Shop »), cadres de métal gris
-   arrondis vissés aux coins, en-têtes de colonnes métalliques gravés, petit texte Arial blanc, ligne sélectionnée = fond blanc texte noir gras,
-   boutons gris en relief (« Buy (B) »), cases d'équipement carrées. */
-[data-skin="gunz"] {
-  --bg: #000; --bg-img: radial-gradient(60% 50% at 35% 55%, #1a1a1a, #000 70%);
-  --ink: #ffffff; --muted: #a8a8a8; --line: #4a4a4a; --accent: #9be22d; --good: #9be22d; --good-ink: #0d1a00;
-  --fd: "Jura", "Eurostile", sans-serif; --fb: Arial, Helvetica, sans-serif; --cap: butt;
-  --metal: linear-gradient(180deg, #5c5c5c 0%, #3a3a3a 50%, #262626 100%);
-  --brushed: repeating-linear-gradient(90deg, rgb(255 255 255 / .03) 0 1px, transparent 1px 4px), repeating-linear-gradient(0deg, rgb(0 0 0 / .25) 0 2px, transparent 2px 7px), linear-gradient(180deg, #2c2a26 0%, #141310 100%);
-  --rivets: radial-gradient(circle, #9a9a9a 0 .09em, #2a2a2a .12em, transparent .15em) 0 50% / .7em .35em repeat-x;
-  --screw: radial-gradient(circle, #b8b8b8 0 18%, #6a6a6a 22% 38%, #1e1e1e 42% 52%, transparent 56%);
-}
-[data-skin="gunz"] .tv-top { margin: -1.4em -1.8em 0; padding: .8em 1.8em 1em; background: var(--rivets) bottom / .7em .35em repeat-x, var(--brushed); border-bottom: .15em solid #555; }
-[data-skin="gunz"] .game { font-weight: 700; font-size: 2em; text-transform: none; background: linear-gradient(180deg, #e2ff9a 0%, #9be22d 50%, #5fa312 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 .25em rgb(155 226 45 / .55)); text-shadow: none; }
-[data-skin="gunz"] .tag { order: -1; background: none; border: 0; box-shadow: none; color: #fff; font-family: var(--fb); font-size: .7em; padding: 0; }
-[data-skin="gunz"] .tag::after { content: "  ›"; }
-[data-skin="gunz"] .host .btn, [data-skin="gunz"] .btn { background: linear-gradient(180deg, #4a4a4a, #2a2a2a); color: #fff; font-family: var(--fb); font-weight: 400; text-transform: none; letter-spacing: 0; text-shadow: none; border: 1px solid; border-color: #8a8a8a #1a1a1a #1a1a1a #8a8a8a; box-shadow: 0 0 0 1px #000; }
-[data-skin="gunz"] .host .btn { font-size: .65em; padding: .5em 1.2em; }
-[data-skin="gunz"] .panel, [data-skin="gunz"] .ph-top .score {
-  background: var(--screw) left .25em top .25em / 1.1em 1.1em no-repeat, var(--screw) right .25em top .25em / 1.1em 1.1em no-repeat, var(--screw) left .25em bottom .25em / 1.1em 1.1em no-repeat, var(--screw) right .25em bottom .25em / 1.1em 1.1em no-repeat, #000;
-  border: .5em solid #3a3a3a; border-radius: .8em; box-shadow: 0 0 0 .1em #7a7a7a, inset 0 0 0 .1em #111, inset 0 0 0 .2em #4a4a4a;
-}
-[data-skin="gunz"] .panel { padding: 1em 1.3em 1.2em; }
-[data-skin="gunz"] .p-title { align-self: flex-start; margin: -.4em 0 0; padding: .25em 1.3em; background: var(--metal); color: #fff; font-family: var(--fd); font-weight: 700; font-size: 1.05em; letter-spacing: 0; text-transform: none; border-radius: .45em .45em 0 0; border: 1px solid #777; border-bottom: 0; }
-[data-skin="gunz"] .q { font-family: var(--fd); font-weight: 700; font-size: 1.95em; color: #fff; text-transform: none; text-shadow: none; line-height: 1.15; }
-[data-skin="gunz"] .choices { gap: .1em; grid-template-columns: 1fr; border: 1px solid #555; padding: .3em; border-radius: .2em; }
-[data-skin="gunz"] .choice { background: transparent; border: 0; color: #fff; font-family: var(--fb); font-weight: 400; font-size: 1.1em; padding: .25em .5em; box-shadow: none; }
-[data-skin="gunz"] .key { background: var(--metal); color: #cfcfcf; border: 1px solid #777; box-shadow: none; font-family: var(--fd); font-size: .85em; border-radius: 50%; }
-[data-skin="gunz"] .choice.sel { background: #fff; color: #000; font-weight: 700; box-shadow: none; }
-[data-skin="gunz"] .choice.sel .key { border-color: #000; }
-[data-skin="gunz"] .check { color: #000; }
-[data-skin="gunz"] .board { padding-top: 1em; }
-[data-skin="gunz"] .board .p-title { align-self: stretch; text-align: center; border-radius: .2em; border: 1px solid #1a1a1a; color: #b8b8b8; text-shadow: 0 -1px 0 #000, 0 1px 0 #666; font-size: .8em; margin: 0 0 .2em; }
-[data-skin="gunz"] .board ol { gap: 0; }
-[data-skin="gunz"] .row { background: transparent; border: 0; font-family: var(--fb); font-size: .72em; padding: .3em .4em; }
-[data-skin="gunz"] .row .rk, [data-skin="gunz"] .row .sc { color: #fff; font-family: var(--fb); font-size: 1em; font-weight: 400; }
-[data-skin="gunz"] .row .nm { font-weight: 400; }
-[data-skin="gunz"] .row:first-child { background: #fff; color: #000; }
-[data-skin="gunz"] .row:first-child .rk, [data-skin="gunz"] .row:first-child .sc, [data-skin="gunz"] .row:first-child .nm { color: #000; font-weight: 700; }
-[data-skin="gunz"] .av { background: linear-gradient(180deg, #1c1c1c, #0a0a0a); border: 1px solid #5a5a5a; border-radius: .2em; box-shadow: inset 0 0 0 1px #000; }
-[data-skin="gunz"] .row .av { border-radius: 50%; }
-[data-skin="gunz"] .roster { background: var(--rivets) top / .7em .35em repeat-x; padding-top: .6em; }
-[data-skin="gunz"] .pl .nm { font-family: var(--fb); font-weight: 400; color: #fff; }
-[data-skin="gunz"] .pl .ok { border-radius: .15em; }
-[data-skin="gunz"] .timer svg { display: none; }
-[data-skin="gunz"] .t-num { font-family: "Share Tech Mono", monospace; font-size: 3.4em; color: #ff3b1f; text-shadow: 0 0 .3em rgb(255 59 31 / .8); background: #000; border: .12em solid #4a4a4a; border-radius: .2em; box-shadow: 0 0 0 .04em #7a7a7a; padding: 0 .35em; }
-[data-skin="gunz"] .ph-top { margin: -22px -16px 0; padding: 14px 16px 18px; background: var(--rivets) bottom / 11px 6px repeat-x, var(--brushed); border-bottom: 2px solid #555; font-size: 16px; }
-[data-skin="gunz"] .ph-top .nm { font-family: var(--fd); font-weight: 700; font-size: 24px; background: linear-gradient(180deg, #e2ff9a, #9be22d 50%, #5fa312); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 6px rgb(155 226 45 / .55)); }
-[data-skin="gunz"] .ph-top .score { font-family: var(--fb); font-size: 13px; color: #fff; background: #000; border-width: 3px; border-radius: 6px; padding: 5px 10px; }
-[data-skin="gunz"] .ph-q { font-family: var(--fd); font-weight: 700; font-size: 22px; text-transform: none; text-shadow: none; line-height: 1.2; }
-[data-skin="gunz"] .ph-choices { gap: 4px; }
-[data-skin="gunz"] .ph-choices .choice { font-size: 17px; padding: 10px 10px; min-height: 56px; border-bottom: 1px solid #262626; }
-[data-skin="gunz"] .ph-cta { font-size: 18px; padding: 18px; }
-
 /* ═════════════════════ PLATEFORME 3D (Mario Odyssey) ═════════════════════
    Menus d'origine : rouge vif sur carte du monde (méridiens blancs), gothique grasse blanche légèrement penchée, élément actif = barre blanche
    inclinée à texte gris, étiquettes rouges/grises de l'écran des commandes avec case blanche, carte claire à bandeau or-olive liseré blanc,
@@ -526,7 +471,6 @@ body {
     <button class="tab" data-s="ow" id="t-ow">Hero shooter <kbd>Overwatch</kbd></button>
     <button class="tab" data-s="lol" id="t-lol">MOBA <kbd>LoL</kbd></button>
     <button class="tab" data-s="rl" id="t-rl">Foot-voiture <kbd>Rocket League</kbd></button>
-    <button class="tab" data-s="gunz" id="t-gunz">Shooter 2000 <kbd>GunZ</kbd></button>
     <button class="tab" data-s="mario" id="t-mario">Plateforme 3D <kbd>Mario Odyssey</kbd></button>
     <button class="tab" data-s="plague" id="t-plague">Aventure sombre <kbd>A Plague Tale</kbd></button>
     <button class="tab auto" id="t-auto" aria-pressed="false">▶ Rotation auto</button>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import ceciOuCela, { type Pub, type Priv, type Results } from "../../src/minigames/ceci-ou-cela/game";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
 const game = ceciOuCela;
@@ -248,7 +248,7 @@ describe("ceci-ou-cela : via le moteur", () => {
     const cfg = game.configSchema.parse({ duree: 20, questions: [{ texte: "Plutôt…", choix: ["Mer", "Montagne"] }] });
     const t = createTestEngine({ games: [{ game, cfg }], players: 3 });
     t.engine.setSetup({ counts: { "ceci-ou-cela": 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(4000);
     t.engine.input(t.ids[0]!, { choice: 0 });
     t.engine.input(t.ids[1]!, { choice: 0 });

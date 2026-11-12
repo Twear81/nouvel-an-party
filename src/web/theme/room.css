@@ -1,0 +1,306 @@
+/* La pièce est un calque TV : ces jetons et coordonnées règlent son rendu. */
+.room-scene {
+  --room-screen: #061e68;
+  --room-ink: #f4f5fa;
+  --room-shadow: #090d19;
+  --room-accent: #f5d878;
+  --room-tint: #223e67;
+  --room-avatar-size: 7rem;
+  --room-avatar-scale: .875;
+  --room-label-width: 16.8rem;
+  --room-name-size: 1.42rem;
+  --room-label-gap: .6rem;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  container-type: size;
+  background: var(--color-bg);
+}
+.room-camera, .room-light, .room-signature, .room-cover, .room-overlay { position: absolute; inset: 0; }
+.room-camera { transform-origin: 0 0; will-change: transform; }
+.room-image { width: 100%; height: 100%; object-fit: cover; user-select: none; }
+/* Pièce transformée : superposée à la référence, fondu piloté par la chronologie. */
+.room-image-skin { position: absolute; inset: 0; opacity: 0; }
+.room-person { position: absolute; width: var(--room-label-width); transform: translate(-50%, -50%); }
+.room-visitor { position: relative; display: flex; justify-content: center; opacity: 0; }
+.room-portrait { width: var(--room-avatar-size); height: var(--room-avatar-size); }
+.room-portrait > [data-ui="avatar"] { transform: scale(var(--room-avatar-scale)); transform-origin: 0 0; }
+.room-name {
+  position: absolute;
+  top: calc(100% + var(--room-label-gap));
+  width: var(--room-label-width);
+  padding: .3rem .55rem;
+  border-radius: .45rem;
+  background: color-mix(in srgb, var(--room-shadow) 85%, transparent);
+  color: var(--room-ink);
+  font-family: var(--font-sans);
+  font-size: var(--room-name-size);
+  font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+.room-person[data-label="top"] .room-name { top: auto; bottom: calc(100% + var(--room-label-gap)); }
+.room-person[data-label="left"] .room-name { top: 50%; right: calc(50% + var(--room-avatar-size) / 2 + var(--room-label-gap)); transform: translateY(-50%); }
+.room-person[data-label="right"] .room-name { top: 50%; left: calc(50% + var(--room-avatar-size) / 2 + var(--room-label-gap)); transform: translateY(-50%); }
+.room-cover { background: var(--color-bg); opacity: 0; pointer-events: none; }
+.room-tv-light {
+  position: absolute;
+  left: var(--room-tv-left); top: var(--room-tv-top);
+  width: var(--room-tv-width); height: var(--room-tv-height);
+  background: var(--room-screen);
+  box-shadow: 0 0 3rem 1rem color-mix(in srgb, var(--room-screen) 75%, transparent);
+  opacity: 0;
+}
+.room-light { background: linear-gradient(130deg, var(--room-tint), transparent 40%, var(--room-accent)); mix-blend-mode: soft-light; opacity: 0; }
+.room-signature { overflow: hidden; opacity: 0; color: var(--room-accent); pointer-events: none; }
+.room-scene[data-room-skin="dofus"] { --room-accent: #b4e979; --room-tint: #3e5540; }
+.room-scene[data-room-skin="overwatch"] { --room-accent: #72dcff; --room-tint: #d3dcec; }
+.room-scene[data-room-skin="league-of-legends"] { --room-accent: #e5bf69; --room-tint: #0a323c; }
+.room-scene[data-room-skin="rocket-league"] { --room-accent: #59b6ff; --room-tint: #123376; --room-rival: #ee8b39; }
+.room-scene[data-room-skin="mario-odyssey"] { --room-accent: #e83d42; --room-tint: #f1e4d0; }
+.room-scene[data-room-skin="plague-tale"] { --room-accent: #e3a558; --room-tint: #33271f; }
+/* Resonance : la pièce transformée est déjà sombre ; la teinte en fusion (mix-blend-mode) coûtait ~25 ms par image sans rien apporter. */
+.room-scene[data-room-skin="plague-tale"] .room-light { display: none; }
+
+/* Les dessins utilisent les coordonnées de la pièce ; couleurs et traits sont regroupés ici. */
+.room-signature-art {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; overflow: visible;
+}
+.room-signature-art [data-room-motion] { transform-box: fill-box; transform-origin: center; }
+/* Mario Odyssey : pixel art net (sprites en pixels carrés, pas de dégradé), mouvements en coordonnées du viewBox. */
+.sig-mario {
+  --sig-mario-coin-dark: #b84800;
+  --sig-mario-coin: #f8b800;
+  --sig-mario-coin-light: #fff4a8;
+  --sig-mario-pouf: #ffffff;
+  --sig-mario-pouf-b: #fcd89c;
+  --sig-mario-iris: #ffffff;
+  --sig-mario-iris-edge: #f8b800;
+}
+.sig-mario [data-room-motion] { transform-box: view-box; transform-origin: 0 0; opacity: 0; }
+.sig-mario [data-room-motion="iris"], .sig-mario [data-room-motion="iris-edge"] { transform-box: fill-box; transform-origin: center; }
+.sig-mario [data-room-motion="coin-frame"] { opacity: 1; }
+.sig-mario image, .sig-mario rect { image-rendering: crisp-edges; image-rendering: pixelated; shape-rendering: crispEdges; }
+.sig-mario [data-room-motion="block"] image { image-rendering: auto; shape-rendering: auto; }
+.sig-mario-coin-dark { fill: var(--sig-mario-coin-dark); }
+.sig-mario-coin { fill: var(--sig-mario-coin); }
+.sig-mario-coin-light { fill: var(--sig-mario-coin-light); }
+.sig-mario-pouf { fill: var(--sig-mario-pouf); }
+.sig-mario-pouf-b { fill: var(--sig-mario-pouf-b); }
+.sig-mario-iris { fill: var(--sig-mario-iris); }
+.sig-mario-iris-edge { fill: var(--sig-mario-iris-edge); }
+
+/* Overwatch : « Action de la partie », surimpression d'écran (tailles en cqw/cqh : proportionnelles à la TV). */
+.room-overlay { pointer-events: none; overflow: hidden; }
+.sig-ow {
+  --sig-ow-white: #ffffff;
+  --sig-ow-orange: #ff9c1a;
+  --sig-ow-orange-deep: #d9560b;
+  --sig-ow-gold: #fba91f;
+  --sig-ow-blue: #2fb4f0;
+  --sig-ow-navy: #151c33;
+  --sig-ow-font: "Big Noodle Titling", "Bebas Neue", "Arial Narrow", sans-serif;
+  position: absolute; inset: 0; overflow: hidden;
+}
+.sig-ow-dim {
+  position: absolute; inset: 0; opacity: 0;
+  background: radial-gradient(ellipse at 60% 50%, color-mix(in srgb, var(--sig-ow-navy) 40%, transparent), color-mix(in srgb, var(--sig-ow-navy) 88%, transparent) 85%);
+}
+.sig-ow-card { position: absolute; inset: 0; }
+.sig-ow-text {
+  position: absolute; left: 7cqw; top: 50%; margin-top: -9cqw; max-width: 46cqw;
+  display: flex; flex-direction: column; align-items: flex-start; opacity: 0;
+  font-family: var(--sig-ow-font); font-style: italic; font-weight: 400; text-transform: uppercase;
+  text-shadow: .15cqw .2cqw 0 color-mix(in srgb, var(--sig-ow-navy) 80%, transparent);
+}
+.sig-ow-title { font-size: 4.4cqw; line-height: 1; letter-spacing: .02em; white-space: nowrap; color: var(--sig-ow-white); }
+.sig-ow-name { line-height: 1; margin-top: .4cqw; white-space: nowrap; color: var(--sig-ow-gold); letter-spacing: .01em; }
+.sig-ow-role { font-size: 2.6cqw; line-height: 1.1; margin-top: .6cqw; white-space: nowrap; color: var(--sig-ow-white); letter-spacing: .03em; }
+/* Le personnage : toute la moitié droite, coupé par le bas de l'écran. */
+.sig-ow-hero { position: absolute; right: 0; bottom: 0; width: 52cqw; height: 100cqh; overflow: hidden; opacity: 0; }
+.sig-ow-hero-in {
+  position: absolute; inset: 0; transform-origin: 50% 80%;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: radial-gradient(ellipse at 55% 75%, color-mix(in srgb, var(--sig-ow-glow) 55%, transparent), transparent 68%);
+}
+.sig-ow-hero-face {
+  /* Twemoji (vectorielle, embarquée) : net à cette taille, contrairement aux emojis en image du système. */
+  font-family: "Twemoji", var(--font-sans);
+  font-size: 38cqw; line-height: 1; margin-bottom: -7cqw;
+  filter: drop-shadow(-1.2cqw 1.2cqw 2cqw color-mix(in srgb, var(--sig-ow-navy) 70%, transparent));
+}
+.sig-ow-flash { position: absolute; inset: 0; background: var(--sig-ow-white); opacity: 0; }
+.sig-ow-stripes {
+  position: absolute; left: -40cqw; top: -45cqh; width: 180cqw; height: 190cqh;
+  display: flex; flex-direction: column; transform: rotate(-14deg);
+}
+.sig-ow-stripe {
+  flex: 1; background: var(--sig-ow-white);
+  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+  transform: translateX(-125%);
+}
+.sig-ow-stripe[data-tone="orange"] { background: var(--sig-ow-orange); }
+.sig-ow-stripe[data-tone="blue"] { background: var(--sig-ow-blue); }
+
+/* Rocket League : tout est dessiné autour de (0,0) et placé par transform (coordonnées absolues du viewBox). */
+.sig-rl {
+  --sig-rl-white: #ffffff;
+  --sig-rl-blue-light: #7cc4ff;
+  --sig-rl-blue: #2b6ff0;
+  --sig-rl-navy: #060f33;
+  --sig-rl-orange-light: #ffd884;
+  --sig-rl-orange: #ff8a1f;
+  --sig-rl-orange-dark: #c7470b;
+  --sig-rl-flame-core: #fff4be;
+}
+.sig-rl [data-room-motion] { transform-box: view-box; transform-origin: 0 0; }
+.sig-rl [data-room-motion="puff"] { transform-box: fill-box; transform-origin: center; }
+.sig-rl [data-room-motion="tongue"] { transform-box: fill-box; transform-origin: left center; }
+.sig-rl [data-room-motion="flame"] { transform-box: fill-box; transform-origin: left center; }
+.sig-rl [data-room-motion="trail"] { transform-box: fill-box; transform-origin: left center; }
+.sig-rl-shadow { fill: var(--room-shadow); }
+.sig-rl-flame-outer { fill: url(#rl-flame); }
+.sig-rl-flame-mid { fill: url(#rl-flame-mid); }
+.sig-rl-flame-core { fill: url(#rl-flame-core); }
+.sig-rl-trail { fill: url(#rl-trail-blue); }
+.sig-rl-puff-hot { fill: url(#rl-puff-hot); }
+.sig-rl-puff-cool { fill: url(#rl-puff-cool); }
+.sig-rl-halo { fill: url(#rl-ball-halo); }
+.sig-rl-ghost { fill: var(--sig-rl-blue-light); }
+.sig-rl-impact { fill: url(#rl-impact); }
+.sig-rl-impact-star { fill: var(--sig-rl-flame-core); opacity: .95; }
+.sig-rl-tv-glow { fill: url(#rl-screen); }
+.sig-rl-dim { fill: var(--sig-rl-navy); }
+.sig-rl-flash { fill: url(#rl-flash); }
+.sig-rl-burst { fill: url(#rl-burst); }
+.sig-rl-ray-blue { fill: url(#rl-ray-blue); }
+.sig-rl-ray-orange { fill: url(#rl-ray-orange); }
+.sig-rl-ring { fill: none; stroke-width: 8; }
+.sig-rl-ring-blue { stroke: var(--sig-rl-blue-light); }
+.sig-rl-ring-orange { stroke: var(--sig-rl-orange); }
+.sig-rl-spark-blue { fill: var(--sig-rl-blue-light); }
+.sig-rl-spark-orange { fill: var(--sig-rl-orange); }
+.sig-rl-spark-white { fill: var(--sig-rl-white); }
+
+/* League of Legends : Nexus qui explose. Tout est dessiné autour de (0,0) dans un <g transform> statique. */
+.sig-lol {
+  --sig-lol-white: #eafcff;
+  --sig-lol-cyan: #4fe3ff;
+  --sig-lol-blue: #0b7fe0;
+  --sig-lol-navy: #04122b;
+  --sig-lol-gold: #f6ce63;
+  --sig-lol-gold-light: #fff0b0;
+}
+.sig-lol [data-room-motion] { transform-box: view-box; transform-origin: 0 0; }
+.sig-lol [data-room-motion="rune"], .sig-lol [data-room-motion="rune-ring"], .sig-lol [data-room-motion="table-glow"],
+.sig-lol [data-room-motion="mote"], .sig-lol [data-room-motion="tv-glow"], .sig-lol [data-room-motion="nexus-white"],
+.sig-lol [data-room-motion="crack"] { transform-box: fill-box; transform-origin: center; }
+.sig-lol [data-room-motion="pillar"], .sig-lol [data-room-motion="pillar-wide"] { transform-box: fill-box; transform-origin: center bottom; }
+.sig-lol-dim { fill: var(--sig-lol-navy); opacity: 0; }
+.sig-lol-ring { fill: none; stroke: var(--sig-lol-cyan); stroke-width: 5; }
+.sig-lol-ring-fine { stroke: var(--sig-lol-gold); stroke-width: 3; opacity: .8; }
+.sig-lol-ring-glow { fill: color-mix(in srgb, var(--sig-lol-blue) 22%, transparent); stroke: var(--sig-lol-cyan); stroke-width: 22; opacity: .35; }
+.sig-lol-rune { fill: color-mix(in srgb, var(--sig-lol-cyan) 35%, transparent); stroke: var(--sig-lol-white); stroke-width: 2.5; stroke-linejoin: round; }
+.sig-lol-table-glow { fill: url(#lol-halo); }
+.sig-lol-halo { fill: url(#lol-halo); }
+.sig-lol-crack-glow { fill: none; stroke: var(--sig-lol-cyan); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; opacity: .75; }
+.sig-lol-crack-core { fill: none; stroke: var(--sig-lol-white); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; }
+.sig-lol-pillar { fill: url(#lol-pillar); }
+.sig-lol-pillar-wide { fill: url(#lol-pillar-side); }
+.sig-lol-shockwave { fill: none; stroke: var(--sig-lol-cyan); stroke-width: 7; }
+.sig-lol-flash { fill: url(#lol-flash); }
+.sig-lol-burst { fill: url(#lol-halo); }
+.sig-lol-shard { fill: url(#lol-shard); stroke: var(--sig-lol-white); stroke-width: 2; stroke-linejoin: round; }
+.sig-lol-shard-pale { fill: var(--sig-lol-gold-light); stroke: var(--sig-lol-gold); }
+.sig-lol-mote { fill: var(--sig-lol-cyan); }
+.sig-lol-mote-gold { fill: var(--sig-lol-gold); }
+.sig-lol-tv-glow { fill: url(#lol-screen); }
+
+/* Resonance : veines générées dans le code (poêle -> murs), Macula (sprite) qui pulse. */
+.sig-pt {
+  --sig-pt-night: #03050a;
+  --sig-pt-vein: #05070b;
+  --sig-pt-ember: #ff8a2a;
+  --sig-pt-ember-light: #ffd08a;
+  --sig-pt-glow: #35e6dc;
+  --sig-pt-glow-light: #d4fffb;
+  --sig-pt-glow-deep: #0a7f9c;
+  --sig-pt-ribbon: #4af0e4;
+}
+.sig-pt-stack { position: absolute; inset: 0; }
+.sig-pt-stack > * { position: absolute; }
+/* Chaque élément animé est sa propre couche : le navigateur n'a plus qu'à les recomposer, sans redessiner le reste. */
+.sig-pt-night, .sig-pt-stove, .sig-pt-halo, .sig-pt-macula, .sig-pt-tv-glow, .sig-pt-veins-layer { will-change: transform, opacity; opacity: 0; }
+.sig-pt-veins-layer { inset: 0; opacity: 1; }
+.sig-pt-night { background: radial-gradient(ellipse closest-side, transparent 0%, color-mix(in srgb, var(--sig-pt-night) 6%, transparent) 30%,
+  color-mix(in srgb, var(--sig-pt-night) 78%, transparent) 55%, color-mix(in srgb, var(--sig-pt-night) 94%, transparent) 100%); }
+.sig-pt-stove { background: radial-gradient(ellipse closest-side, color-mix(in srgb, var(--sig-pt-ember-light) 70%, transparent) 0%,
+  color-mix(in srgb, var(--sig-pt-ember) 32%, transparent) 40%, transparent 100%); }
+.sig-pt-vein { fill: none; stroke: var(--sig-pt-vein); stroke-dasharray: 1 2; stroke-dashoffset: 1; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.sig-pt-vein-0 { stroke-width: 2.6; }
+.sig-pt-vein-1 { stroke-width: 1.5; }
+.sig-pt-vein-2 { stroke-width: .9; stroke-linecap: butt; }
+.sig-pt-ribbons { opacity: 0; }
+.sig-pt-ribbon { fill: none; stroke: var(--sig-pt-ribbon); stroke-width: 1; stroke-dasharray: 1 2; stroke-dashoffset: 1; stroke-linecap: round; opacity: 0; }
+.sig-pt-ribbon-main { stroke-width: 1.5; }
+/* Lueur des rubans : sous-couche large et translucide, bien moins coûteuse qu'un flou SVG sur tout le groupe. */
+.sig-pt-ribbon-glow { stroke-width: 6; stroke: color-mix(in srgb, var(--sig-pt-ribbon) 30%, transparent); }
+.sig-pt-halo { border-radius: 50%; background: radial-gradient(circle closest-side, color-mix(in srgb, var(--sig-pt-glow-light) 95%, transparent) 0%,
+  color-mix(in srgb, var(--sig-pt-glow) 55%, transparent) 30%, color-mix(in srgb, var(--sig-pt-glow-deep) 18%, transparent) 70%, transparent 100%); }
+.sig-pt-macula { object-fit: fill; }
+.sig-pt-tv-glow { border-radius: .36cqw; background: radial-gradient(ellipse 60% 60% at 50% 50%, var(--sig-pt-glow-light) 0%,
+  color-mix(in srgb, var(--sig-pt-glow) 85%, transparent) 50%, color-mix(in srgb, var(--sig-pt-glow-deep) 40%, transparent) 100%); }
+
+/* Dofus : phase de placement d'un combat (cases bleues/rouges, avatars, Bouftou, Tofu, timeline). */
+.sig-df {
+  --sig-df-blue: #3a7bd5;
+  --sig-df-blue-light: #9cc4ff;
+  --sig-df-red: #d23c3c;
+  --sig-df-red-light: #ffa097;
+  --sig-df-line: #f7f4dc;
+  --sig-df-gold: #ecdb4f;
+  --sig-df-gold-light: #fff6a8;
+  --sig-df-slate: #45465f;
+  --sig-df-slate-deep: #1d1e2b;
+  --sig-df-shadow: #090d19;
+}
+.sig-df [data-room-motion] { transform-box: view-box; transform-origin: 0 0; }
+.sig-df [data-room-motion="cell"], .sig-df [data-room-motion="team"], .sig-df [data-room-motion="flash"], .sig-df [data-room-motion="ring"],
+.sig-df [data-room-motion$="shadow"] { transform-box: fill-box; transform-origin: center; }
+.sig-df-dim { fill: var(--sig-df-shadow); opacity: 0; }
+.sig-df-cell { fill: color-mix(in srgb, var(--sig-df-line) 7%, transparent); stroke: color-mix(in srgb, var(--sig-df-line) 75%, transparent); stroke-width: 1.6; stroke-linejoin: round; opacity: 0; }
+.sig-df-team { stroke-width: 3; stroke-linejoin: round; opacity: 0; }
+.sig-df-blue { fill: color-mix(in srgb, var(--sig-df-blue) 55%, transparent); stroke: var(--sig-df-blue-light); }
+.sig-df-red { fill: color-mix(in srgb, var(--sig-df-red) 55%, transparent); stroke: var(--sig-df-red-light); }
+.sig-df-shadow { fill: var(--sig-df-shadow); opacity: 0; }
+.sig-df-shadow { fill-opacity: .5; }
+.sig-df-flash { fill: url(#df-flash); opacity: 0; }
+.sig-df-ring { fill: none; stroke: var(--sig-df-gold-light); stroke-width: 7; opacity: 0; }
+.sig-df-actors { position: absolute; inset: 0; pointer-events: none; }
+.sig-df-actor { position: absolute; width: 0; height: 0; }
+.sig-df-actor-in { position: absolute; left: 0; bottom: 0; width: 0; height: 0; opacity: 0; }
+.sig-df-actor-size { position: absolute; left: -4rem; bottom: .2rem; width: 8rem; height: 8rem; transform: scale(.72); transform-origin: 50% 100%; }
+.sig-df-actor-size > [data-ui="avatar"] { filter: drop-shadow(0 .3rem .25rem color-mix(in srgb, var(--sig-df-shadow) 55%, transparent)); }
+.sig-df-timeline-host { position: absolute; right: 2.2rem; bottom: 2.2rem; opacity: 0; }
+.sig-df-timeline { display: flex; gap: .35rem; padding: .4rem; border-radius: .5rem; background: color-mix(in srgb, var(--sig-df-slate-deep) 80%, transparent); }
+.sig-df-tile {
+  display: flex; align-items: center; justify-content: center; width: 3.7rem; height: 3.7rem; border-radius: .3rem;
+  background: var(--sig-df-slate); border: .18rem solid color-mix(in srgb, var(--sig-df-gold) 55%, var(--sig-df-slate-deep));
+}
+.sig-df-tile[data-active="true"] { border-color: var(--sig-df-gold-light); box-shadow: 0 0 .8rem var(--sig-df-gold); }
+.sig-df-tile-monster { width: 3rem; height: 3rem; object-fit: contain; transform: scaleX(-1); }
+
+/* Les avatars de la scène Dofus prennent la forme du skin dès le début : sinon ils passeraient de ronds à carrés
+   au moment où l'interface bascule dans le skin (milieu de la scène). Valeurs reprises de skins/dofus.css. */
+.room-scene[data-room-skin="dofus"] {
+  --avatar-radius: .2em; --avatar-clip: none;
+  --avatar-circle: none; --avatar-square: inline; --avatar-hexagon: none;
+}
+.room-scene[data-room-skin="dofus"] [data-ui="avatar-face"] {
+  background: linear-gradient(180deg, #5d5e7e, #4b4c6a) !important; border: 1px solid #1d1e2c; box-shadow: inset 0 1px 0 #7d7ea0;
+}

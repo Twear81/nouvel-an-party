@@ -34,6 +34,7 @@ tests/unit/<id>.test.ts        tests de la logique
 | `onPresenceChange?(state, ctx)` | optionnel : un participant se connecte ou se déconnecte pendant le jeu (voir ci-dessous) |
 | `progress?(state, ctx)` | optionnel : compteur commun « qui a répondu » du chrono de la TV : `{ done, expected }` (nombres seulement, rien de secret), ou `null` hors étape de réponse (révélation, tour par tour, animation). `expected` = participants concernés par l'étape en cours, déconnectés compris (c'est un affichage, pas une condition de fin). Helper `progressOf(ctx, (id) => state.votes.has(id))`. Le moteur le recopie dans `round.progress` (null hors phase `playing`, si le jeu ne l'implémente pas, ou s'il lève une exception) |
 | `interlude?(cfg)` | optionnel : renvoie N = « une fois toutes les N manches » pour faire de ce jeu une surprise sans annonce (voir « Jeux interlude » plus bas) ; absent ou `null` = jeu normal |
+| `changeSkinAfter?` | optionnel : `true` ferme l'univers après les résultats ; le moteur joue la transition de pièce avant la manche suivante (Culture gênante l'utilise) |
 | `finish(state, ctx)` | fin de manche : renvoie `{ results, scores }`. `results` est libre (affiché par `TvResults`), `scores` = points gagnés **dans cette manche** par `playerId` (absents = 0) |
 
 Le moteur envoie `publicView` / `privateView` à chaque changement (après un `input` ou un `ctx.update()`).
@@ -268,6 +269,13 @@ interlude: (cfg) => cfg.tous_les,   // N, lu dans le yaml du jeu (entier ≥ 1).
 | Sauvegarde | `PlannedRound.interlude` est dans `data/save.json` ; une manche interrompue est rejouée depuis son début à la reprise |
 
 Un interlude choisit lui-même ses étapes (ex. `culture-genante` : accroche → bascule → question, avec `roundSeconds: () => null` et des `ctx.countdown` en cascade) et expose l'étape dans `publicView` (`data-stage`).
+
+Un jeu peut déclarer `changeSkinAfter: true` pour terminer un univers. Le moteur annote alors le plan et joue
+une transition **après les résultats**, une fois « Continuer » terminé ou « Passer » choisi. Cela ne modifie ni
+les règles du jeu ni ses points. Ce choix est indépendant de `interlude` : un autre jeu surprise ne change pas
+le skin par défaut. Le moteur prend aussi en charge l'ouverture de la partie et la sortie avant le podium ;
+une dernière manche qui ferme un univers mène directement à la sortie. Pendant ces scènes,
+`snapshot.phase === "transition"`, `round === null`, et aucun code de mini-jeu n'est exécuté.
 
 ## Briques pour les jeux plus riches
 

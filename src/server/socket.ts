@@ -1,6 +1,4 @@
 // Branche les événements Socket.IO sur le moteur et rediffuse l'état à chaque changement.
-import { mkdirSync, writeFileSync } from "node:fs";
-import path from "node:path";
 import type { Server, Socket } from "socket.io";
 import type { Ack, ClientToServer, ServerToClient } from "../shared/protocol";
 import type { PlayerId } from "../shared/types";
@@ -14,8 +12,6 @@ interface SocketData {
   isTv: boolean;
   isHost: boolean;
 }
-
-const MAX_PHOTO_BYTES = 3_000_000;
 
 /** Les actions du maître du jeu ne sont acceptées que depuis le PC lui-même. */
 function isFromHostMachine(socket: S, hostIps: string[]): boolean {
@@ -55,7 +51,7 @@ export function createBroadcaster(io: IO, getEngine: () => GameEngine) {
   };
 }
 
-export function attachSockets(io: IO, engine: GameEngine, opts: { dataDir: string; hostIps: string[] }) {
+export function attachSockets(io: IO, engine: GameEngine, opts: { hostIps: string[] }) {
   io.on("connection", (socket) => {
     const data: SocketData = { playerId: null, isTv: false, isHost: isFromHostMachine(socket, opts.hostIps) };
     socket.data = data;
@@ -114,30 +110,8 @@ export function attachSockets(io: IO, engine: GameEngine, opts: { dataDir: strin
     socket.on("player:profile", (profile, ack) => player(ack, (id) => engine.setProfile(id, profile)));
     socket.on("player:input", (payload, ack) => player(ack, (id) => engine.input(id, payload)));
     socket.on("player:continue", (ack) => player(ack, (id) => engine.continue(id)));
-    socket.on("player:photo", (buf, ack) =>
-      player(ack, (id) => {
-        const bytes = Buffer.from(buf as ArrayBuffer);
-        if (bytes.length === 0 || bytes.length > MAX_PHOTO_BYTES) throw new GameError("Photo trop lourde");
-        const ext = imageExt(bytes);
-        if (!ext) throw new GameError("Format d'image non supporté");
-        const name = `${id}-${Date.now()}.${ext}`;
-        const dir = path.join(opts.dataDir, "photos");
-        mkdirSync(dir, { recursive: true });
-        writeFileSync(path.join(dir, name), bytes);
-        return { url: `/photos/${name}` };
-      }),
-    );
-
     socket.on("disconnect", () => {
       if (data.playerId) engine.disconnect(data.playerId);
     });
   });
-}
-
-/** Reconnaît le format via les premiers octets (on ne fait pas confiance au client). */
-function imageExt(b: Buffer): string | null {
-  if (b[0] === 0xff && b[1] === 0xd8) return "jpg";
-  if (b[0] === 0x89 && b[1] === 0x50) return "png";
-  if (b.subarray(0, 4).toString() === "RIFF" && b.subarray(8, 12).toString() === "WEBP") return "webp";
-  return null;
 }

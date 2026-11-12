@@ -176,6 +176,7 @@ export default defineMiniGame<Cfg, Item, State>({
   id: "culture-genante",
   configSchema,
   interlude: (cfg) => cfg.tous_les,
+  changeSkinAfter: true,
   name: (cfg) => cfg.nom,
   description: (cfg) => cfg.description,
   items: (cfg) => cfg.questions,

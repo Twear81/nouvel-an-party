@@ -23,6 +23,10 @@ Un fichier `partie.yaml` absent ou vide utilise les valeurs par défaut. Une fau
 
 Le nombre de manches par mini-jeu n'est **pas** dans ce fichier : il se choisit sur l'écran TV avant de lancer la partie. Les jeux « surprise » (interludes, ex. Culture gênante) n'ont pas de nombre de manches mais un interrupteur Activé / Désactivé ; leur rythme (« une fois tous les N jeux ») se règle dans le yaml du jeu (`tous_les`). `intro_secondes` ne s'applique pas à eux : pas d'annonce.
 
+`intro_secondes` concerne seulement l'annonce de chaque manche. L'installation dans la pièce en début de partie
+dure 9 s ; les changements d'univers après Culture gênante durent 4 s et la sortie avant le podium 2,4 s.
+Ces scènes utilisent les durées partagées du thème et se pilotent aussi avec Pause/Reprendre/Passer.
+
 ### Plafonner les manches d'un jeu : `manches_max`
 Dans le yaml de **n'importe quel** mini-jeu, `manches_max: 3` (entier ≥ 1, optionnel, placé juste après `actif`) limite le nombre de manches que le lobby propose pour ce jeu (le « sur N » est le plus petit de `manches_max` et du nombre de questions disponibles). Utile pour qu'un jeu long ne prenne pas toute la soirée. Pour un jeu surprise, cela plafonne le nombre de surprises. Sans la ligne, pas de plafond.
 
@@ -41,8 +45,11 @@ Créé automatiquement à côté de l'exe. Ne pas y toucher pendant la partie.
 | Contenu | Rôle |
 |---|---|
 | `save.json` | sauvegarde de la partie, réécrite à chaque étape. Après un crash ou un redémarrage, la TV propose de **reprendre** |
-| `photos/` | photos de profil des joueurs |
-| `certs/` | certificat HTTPS auto-signé (nécessaire pour la caméra du téléphone). Les téléphones affichent un avertissement la première fois : il faut accepter |
+| `certs/` | certificat HTTPS auto-signé (nécessaire pour garder l'écran du téléphone allumé). Les téléphones affichent un avertissement la première fois : il faut accepter |
 
 ### Repartir de zéro
-Fermez `NouvelAn.exe`, supprimez le dossier `data/`, relancez. Les joueurs et scores sont effacés. Le certificat est régénéré (les téléphones devront accepter à nouveau l'avertissement). Pour ne réinitialiser que la partie en gardant photos et certificat, supprimez seulement `save.json`.
+Fermez `NouvelAn.exe`, supprimez le dossier `data/`, relancez. Les joueurs et scores sont effacés. Le certificat est régénéré (les téléphones devront accepter à nouveau l'avertissement). Pour ne réinitialiser que la partie en gardant le certificat, supprimez seulement `save.json`.
+
+Une ancienne sauvegarde avec un portrait photo reste utilisable : le portrait devient l'avatar Renard ; le pseudo,
+le cadre, la couleur, le score et le jeton sont conservés. Un ancien dossier `photos/` n'est plus utilisé ni servi par
+l'application ; ses fichiers ne sont pas supprimés automatiquement.

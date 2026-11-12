@@ -10,7 +10,7 @@ SOIRÉE DU NOUVEL AN — version portable Windows
    Mets-le en plein écran (F11) et duplique l'écran sur la TV.
 4. Les invités scannent le QR code. Leur téléphone affiche un avertissement
    de sécurité (certificat local) : "Paramètres avancés" → "Continuer".
-   C'est normal, c'est ce qui permet la caméra et l'écran toujours allumé.
+   C'est normal, c'est ce qui permet de garder l'écran du téléphone allumé.
 
 Modifier les questions : dossier config/minijeux/*.yaml (Bloc-notes suffit),
 puis relancer NouvelAn.exe.

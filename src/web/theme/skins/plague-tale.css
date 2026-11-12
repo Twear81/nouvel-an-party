@@ -417,13 +417,12 @@ html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="3"] { backg
 @keyframes plague-panel-in { from { opacity: 0; transform: translate3d(0, 0.6rem, 0); } to { opacity: 1; transform: none; } }
 @keyframes plague-low { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
-@media (prefers-reduced-motion: no-preference) {
-  html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="1"] { animation: plague-mist-a 70s ease-in-out infinite alternate; }
-  html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="2"] { animation: plague-mist-b 95s ease-in-out infinite alternate; }
-  html[data-skin="plague-tale"] [data-ui="choice"][data-selected="true"]::before { animation: plague-diamond-glow 2.8s ease-in-out infinite; }
-  html[data-skin="plague-tale"] [data-ui="panel"] { animation: plague-panel-in 0.5s ease-out both; }
-  html[data-skin="plague-tale"] [data-ui="button"]:not(:disabled):hover,
-  html[data-skin="plague-tale"] [data-ui="choice"]:not(:disabled):hover { border-color: var(--plague-gold-line); }
-  html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-ring"],
-  html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-fill"] { animation: plague-low 1s ease-in-out infinite; }
-}
+html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="1"] { animation: plague-mist-a 70s ease-in-out infinite alternate; }
+html[data-skin="plague-tale"] [data-ui="backdrop-layer"][data-layer="2"] { animation: plague-mist-b 95s ease-in-out infinite alternate; }
+html[data-skin="plague-tale"] [data-ui="choice"][data-selected="true"]::before { animation: plague-diamond-glow 2.8s ease-in-out infinite; }
+html[data-skin="plague-tale"] [data-ui="panel"] { animation: plague-panel-in 0.5s ease-out both; }
+html[data-skin="plague-tale"] [data-ui="button"]:not(:disabled):hover,
+html[data-skin="plague-tale"] [data-ui="choice"]:not(:disabled):hover { border-color: var(--plague-gold-line); }
+html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-ring"],
+html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-fill"] { animation: plague-low 1s ease-in-out infinite; }
+

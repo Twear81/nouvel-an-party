@@ -13,7 +13,7 @@ import {
   roundLabel,
   tournamentScores,
 } from "../../src/minigames/pierre-feuille-ciseaux/bracket";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 import { seededRng } from "./helpers/rng";
 
@@ -469,7 +469,7 @@ describe("pfc : à travers le moteur", () => {
     const cfg = parse({ duree: 5, variantes: [{ nom: "Tournoi classique" }] });
     const t = createTestEngine({ players: 3, games: [{ game, cfg }], settings: { introSeconds: 1 } });
     t.engine.setSetup({ counts: { "pierre-feuille-ciseaux": 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(1000); // fin de l'intro
     expect(t.engine.snapshot(null).phase).toBe("playing");
     t.clock.advance(TIMINGS.draw);

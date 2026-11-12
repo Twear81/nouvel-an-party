@@ -24,7 +24,7 @@ export default defineConfig({
     https,
     proxy: {
       "/socket.io": { target: `http://localhost:${serverPort}`, ws: true, xfwd: true },
-      "/photos": { target: `http://localhost:${serverPort}`, xfwd: true },
+      "/medias": { target: `http://localhost:${serverPort}`, xfwd: true },
     },
   },
 });

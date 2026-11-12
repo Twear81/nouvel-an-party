@@ -1,4 +1,4 @@
-// Avatar d'un joueur : avatar (emoji ou photo) + couleur + cadre. Taille en rem, donc proportionnelle sur la TV.
+// Avatar d'un joueur : avatar prédéfini + couleur + cadre. Taille en rem, donc proportionnelle sur la TV.
 import type { CSSProperties, ReactNode } from "react";
 import type { Profile } from "../../shared/types";
 import { avatarById, frameById } from "../theme/profile-options";
@@ -34,8 +34,6 @@ export function PlayerAvatar({ profile, size = "md", dimmed, badge, className = 
       >
         {!profile ? (
           <span className="font-display text-[5em] text-bg/60">?</span>
-        ) : profile.avatar.kind === "photo" ? (
-          <img src={profile.avatar.url} alt="" draggable={false} className="h-full w-full object-cover" />
         ) : (
           <span className="select-none text-[5.4em] leading-none">{avatarById(profile.avatar.id).emoji}</span>
         )}

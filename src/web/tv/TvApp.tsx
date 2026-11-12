@@ -2,7 +2,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useGame } from "../net/useGame";
 import { SkinProvider } from "../theme/skin";
-import { PausedOverlay, ReconnectBanner, TvStage } from "../ui";
+import { PausedOverlay, ReconnectBanner, RoomTransition, roomReference, TvStage } from "../ui";
 import { FinalScreen } from "./FinalScreen";
 import { HostBar } from "./HostBar";
 import { IntroScreen } from "./IntroScreen";
@@ -13,9 +13,12 @@ import { ResultsScreen } from "./ResultsScreen";
 export function TvApp() {
   const game = useGame("tv");
   return (
-    <SkinProvider skin={game.snapshot?.skin}>
-      <TvScreens game={game} />
-    </SkinProvider>
+    <>
+      <link rel="preload" as="image" href={roomReference} />
+      <SkinProvider skin={game.snapshot?.skin}>
+        <TvScreens game={game} />
+      </SkinProvider>
+    </>
   );
 }
 
@@ -37,6 +40,9 @@ function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
     case "lobby":
       screen = <Lobby snapshot={snapshot} host={host} actions={actions} />;
       break;
+    case "transition":
+      screen = <RoomTransition key={`${snapshot.transition?.kind}-${snapshot.transition?.startedAt}`} snapshot={snapshot} />;
+      break;
     case "intro":
       screen = round && <IntroScreen snapshot={snapshot} round={round} />;
       break;
@@ -53,7 +59,7 @@ function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
 
   return (
     <TvStage phase={snapshot.phase}>
-      <AnimatePresence mode="wait">
+      {snapshot.phase === "transition" ? screen : <AnimatePresence mode="wait">
         <motion.div
           key={`${snapshot.phase}-${round?.index ?? ""}`}
           className="flex min-h-0 flex-1 flex-col"
@@ -64,8 +70,8 @@ function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
         >
           {screen}
         </motion.div>
-      </AnimatePresence>
-      {host && snapshot.phase !== "lobby" && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "playing" && !!round?.interlude} />}
+      </AnimatePresence>}
+      {host && snapshot.phase !== "lobby" && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || (snapshot.phase === "playing" && !!round?.interlude)} />}
       <PausedOverlay show={snapshot.paused} big />
       <ReconnectBanner show={!connected} />
     </TvStage>

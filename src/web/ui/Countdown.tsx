@@ -19,13 +19,12 @@ export function useRemainingMs(round: RoundInfo | null): number | null {
   return null;
 }
 
-export type CountdownVariant = "bar" | "heart" | "hex" | "ring" | "scoreboard" | "led" | "coin";
+export type CountdownVariant = "bar" | "heart" | "hex" | "ring" | "scoreboard" | "coin";
 const VARIANT_OF_SKIN: Record<SkinId, CountdownVariant> = {
   dofus: "heart",
   overwatch: "hex",
   "league-of-legends": "ring",
   "rocket-league": "scoreboard",
-  gunz: "led",
   "mario-odyssey": "coin",
   "plague-tale": "ring",
 };
@@ -134,14 +133,6 @@ export function Countdown({ round, size = "tv", answeredCount, waitingCount }: P
         </div>
       );
     }
-    case "led":
-      return (
-        <div {...common} className={box}>
-          <span data-ui="countdown-frame" className="flex h-full w-[12rem] items-center justify-center rounded-card border-4 border-line bg-bg">
-            <span data-ui="countdown-num" className={`font-num text-6xl tabular-nums ${low ? "text-bad animate-pulse-soft" : "text-hot"}`}>{pad2(seconds)}</span>
-          </span>
-        </div>
-      );
     case "coin":
       return (
         <div {...common} className={box}>

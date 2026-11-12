@@ -12,19 +12,21 @@ Bilan du chantier et validation : [skins-suivi.md](skins-suivi.md).
 | `overwatch` | Overwatch | bandeau marine, fond bleu-gris clair, onglet cyan, cartes ardoise, lignes de tableau claires, grande condensée oblique, hexagones à liseré bleu, bandeaux VS biseautés, bouton orange liseré blanc |
 | `league-of-legends` | client LoL | bleu abysse, filet or, bandeaux « ▾ SECTION », tableau de stats (ligne surlignée par barre or), choix en losanges, bouton turquoise en flèche, cadres or |
 | `rocket-league` | Rocket League | stade de nuit, barres de menu sombres biseautées, barre active bleu pâle lumineuse, fenêtres marine à liseré bleu, titres fins, boutons bleus en parallélogramme, tableau des scores bleu \| chrono \| orange |
-| `gunz` | GunZ | fond noir, bandeau métal à rivets, titre vert lumineux, cadres métal vissés, ligne sélectionnée blanche texte noir, boutons gris en relief, LED rouge |
 | `mario-odyssey` | Mario Odyssey | rouge sur carte du monde, gothique grasse penchée, barre blanche inclinée, étiquettes rouges/grises à case blanche, carte claire à bandeau or-olive, barre blanche à filet or |
 | `plague-tale` | A Plague Tale | brume grise, Cinzel + Barlow Condensed, lin #E0CB7D / perle #E3DBBF, filets dorés à encoche, losanges, lignes sombres, cases brunes |
 
 ## Rotation
 - Le **serveur** choisit le skin et l'envoie dans `GameSnapshot.skin` : la TV et les téléphones changent ensemble, un
   téléphone qui recharge retrouve le bon skin, la sauvegarde le garde.
-- Les 7 skins sont toujours tous utilisés, dans un **ordre tiré au hasard** (rien à régler). L'ordre est tiré au
-  démarrage et à chaque retour au lobby ; le lobby montre le premier skin, celui de la 1re manche.
-- `skinForRound(ordre, indexManche, totalManches)` (`src/shared/skins.ts`) répartit les skins en tranches égales du
-  plan (interludes compris) : chacun passe une fois. 14 manches → un changement toutes les 2 manches. Moins de manches
-  que de skins → on en voit autant que de manches. Classement final : skin de la dernière manche.
-- Le skin ne change **qu'à l'annonce d'une manche** (phase `intro`), jamais pendant une question ni les résultats.
+- Le lobby utilise le thème de base bleu (`skin: null`). L'ouverture de la pièce mène dans la TV et le premier
+  skin, tiré au hasard. Culture gênante et ses résultats gardent l'univers courant ; une fois ces résultats quittés,
+  une scène de la pièce couvre la bascule vers le prochain skin. Aucun changement pendant une question.
+- `assignRoundSkins` (`src/server/engine/planner.ts`) annote les manches selon les frontières `changeSkinAfter`.
+  Le plan complet et les univers sont sauvegardés. Les six skins passent dans un ordre mélangé ; après six univers,
+  un nouveau cycle mélangé commence, avec un premier skin différent du précédent.
+- Sans Culture gênante, ou si ses questions s'épuisent, le skin courant reste jusqu'à la fin. Une partie courte
+  ne force pas la visite de tous les univers. Une surprise en dernière manche mène directement à la sortie.
+- Après le dernier jeu, la sortie de la TV revient au thème de base avant le classement final.
 
 ## Architecture front
 - `html[data-skin="<id>"]` porte le skin courant (posé par `SkinProvider`, `src/web/theme/skin.tsx`, à partir du
@@ -83,7 +85,7 @@ redéfinit pas.
 | `score-row` | lignes de classement (résultats, final, téléphone) | `data-rank`, `data-highlight` |
 | `podium` | podium du classement final | |
 | `paused` | `PausedOverlay` | |
-| `skin-transition` | rideau de changement de skin | |
+| `room-scene` | scène de la pièce (ouverture, changement, sortie) | `data-kind`, `data-stage`, `data-room-skin` |
 
 ### Chrono
 `Countdown` a une variante de structure par skin (`data-variant`), qui suit la deadline serveur : il garde le même
@@ -94,31 +96,30 @@ encombrement, seule la forme change.
 | `overwatch` | `hex` : chiffre marine dans un hexagone blanc |
 | `league-of-legends` | `ring` : anneau or qui se vide, cartouche de niveau dessous |
 | `rocket-league` | `scoreboard` : bloc bleu \| `0:12` \| bloc orange, chiffres fins |
-| `gunz` | `led` : afficheur LED rouge dans un cadre arrondi |
 | `mario-odyssey` | `coin` : rond or façon bouton « A » |
 | `plague-tale` | `ring` (fin, or) |
 Sur le téléphone, le chrono garde une forme compacte (barre) habillée par le skin.
 
 ### Avatars et cadres : contrat commun
 Le profil conserve ses identifiants d'avatar et de cadre ; un changement de skin ne les modifie pas.
-`PlayerAvatar` affiche le contenu (emoji ou photo) et `AvatarFrame` trace le décor, sans connaître les skins.
+`PlayerAvatar` affiche le portrait prédéfini et `AvatarFrame` trace le décor, sans connaître les skins.
 Pour remplacer les emojis par d'autres portraits, modifier le contenu de `PlayerAvatar` : les choix du profil,
 les aperçus des six cadres et les écrans de jeu en profitent ensemble.
 
 Le skin définit sa silhouette avec `--avatar-radius`, `--avatar-clip` et les trois commutateurs
 `--avatar-circle`, `--avatar-square`, `--avatar-hexagon` (`inline` pour la forme choisie, `none` pour les autres).
-Par défaut : cercle, rayon `50%`, aucun découpage. Dofus, GunZ, Rocket League et Plague Tale emploient le carré
+Par défaut : cercle, rayon `50%`, aucun découpage. Dofus, Rocket League et Plague Tale emploient le carré
 arrondi (`.2em`), Overwatch l'hexagone, LoL et Mario le cercle. Portrait, cadre et boutons du profil suivent ces jetons.
 Les tracés SVG normalisés suivent toutes les tailles (`xs` à `2xl`). Les effets `.frame-*` dessinent les traits
 extérieur/intérieur : ne pas ajouter de masque radial ni faire tourner la silhouette. Les pointillés et étincelles
-avancent le long du tracé ; `prefers-reduced-motion` les fige. Le badge reste à l'extérieur du portrait, sans être coupé.
+avancent le long du tracé. Le badge reste à l'extérieur du portrait, sans être coupé.
 
 ### Animations
-- **Changement de skin** : rideau neutre (6 volets qui balaient l'écran, ~0,6 s), le skin bascule au milieu.
-  Pas d'annonce ni de texte.
+- **Changement de skin** : scène de la pièce synchronisée par le serveur, après les résultats de Culture gênante.
+  Le décor et la signature visuelle ne jouent qu'à ce moment. L'ancien rideau automatique est supprimé.
 - **Propres au skin** : réaction au toucher des boutons et des choix, mise en avant du choix sélectionné, chrono, fond
   d'ambiance (lent et léger), apparition des panneaux. Chaque skin définit les siennes, dans son fichier.
-- Tout respecte `prefers-reduced-motion` ; pas de `filter: blur` ni d'animation lourde sur les téléphones.
+- Animations toujours jouées, même si l'appareil demande de réduire les animations (`prefers-reduced-motion` ignoré : c'est un jeu de soirée) ; pas de `filter: blur` ni d'animation lourde sur les téléphones.
 
 ## Ajouter un skin
 1. Ajouter l'id dans `SKINS` (`src/shared/skins.ts`).
@@ -132,5 +133,8 @@ avancent le long du tracé ; `prefers-reduced-motion` les fige. Le badge reste �
 Pour vérifier les téléphones iPhone ou Firefox :
 `CAPTURES_SKIN=<id> CAPTURES_DIR=$PWD/captures/<id>/webkit bunx playwright test skins-captures --project=webkit --workers=1`
 (remplacer `webkit` par `firefox` selon le moteur). La TV reste un Chromium, forcé sur le même skin.
-`13-avatars-skins.spec.ts` vérifie les six cadres, leur conservation après rechargement et les photos sur les trois
+`13-avatars-skins.spec.ts` vérifie les six cadres et leur conservation après rechargement sur les trois
 moteurs ; ses captures des cadres et du profil 360×640 sont dans `test-results/`.
+
+Les sauvegardes antérieures restent utilisables : les skins retirés sont écartés de l'ordre sauvegardé ; un ancien
+portrait personnalisé devient l'avatar Renard, en conservant pseudo, cadre, couleur, score et jeton de reconnexion.

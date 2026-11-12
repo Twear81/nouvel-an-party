@@ -200,14 +200,13 @@ html[data-skin="dofus"] [data-ui="backdrop-layer"][data-layer="3"] { background:
 @keyframes dofus-pop { from { opacity: 0; transform: translateY(0.6rem); } to { opacity: 1; transform: none; } }
 @keyframes dofus-pulse-gold { 0%, 100% { box-shadow: 0 0 0.5rem rgb(236 219 79 / 0.25); } 50% { box-shadow: 0 0 1rem rgb(236 219 79 / 0.5); } }
 @keyframes dofus-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-@media (prefers-reduced-motion: no-preference) {
-  html[data-skin="dofus"] [data-ui="backdrop-layer"][data-layer="1"] { animation: dofus-glow 9s ease-in-out infinite; }
-  html[data-skin="dofus"] [data-ui="backdrop-layer"][data-layer="2"] { animation: dofus-glow 13s ease-in-out infinite reverse; }
-  html[data-skin="dofus"] [data-ui="panel"] { animation: dofus-pop 0.35s ease-out both; }
-  html[data-skin="dofus"] [data-ui="button"], html[data-skin="dofus"] [data-ui="choice"] { transition: filter 0.12s, border-color 0.12s, box-shadow 0.12s; }
-  html[data-skin="dofus"] [data-ui="button"]:not(:disabled):hover, html[data-skin="dofus"] [data-ui="choice"]:not(:disabled):hover { filter: brightness(1.12); }
-  html[data-skin="dofus"] [data-ui="button"]:not(:disabled):active, html[data-skin="dofus"] [data-ui="choice"]:not(:disabled):active { filter: brightness(0.9); }
-  html[data-skin="dofus"] [data-ui="choice"][data-selected="true"] { animation: dofus-pulse-gold 1.8s ease-in-out infinite; }
-  html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-shape"],
-  html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-fill"] { animation: dofus-beat 0.8s ease-in-out infinite; }
-}
+html[data-skin="dofus"] [data-ui="backdrop-layer"][data-layer="1"] { animation: dofus-glow 9s ease-in-out infinite; }
+html[data-skin="dofus"] [data-ui="backdrop-layer"][data-layer="2"] { animation: dofus-glow 13s ease-in-out infinite reverse; }
+html[data-skin="dofus"] [data-ui="panel"] { animation: dofus-pop 0.35s ease-out both; }
+html[data-skin="dofus"] [data-ui="button"], html[data-skin="dofus"] [data-ui="choice"] { transition: filter 0.12s, border-color 0.12s, box-shadow 0.12s; }
+html[data-skin="dofus"] [data-ui="button"]:not(:disabled):hover, html[data-skin="dofus"] [data-ui="choice"]:not(:disabled):hover { filter: brightness(1.12); }
+html[data-skin="dofus"] [data-ui="button"]:not(:disabled):active, html[data-skin="dofus"] [data-ui="choice"]:not(:disabled):active { filter: brightness(0.9); }
+html[data-skin="dofus"] [data-ui="choice"][data-selected="true"] { animation: dofus-pulse-gold 1.8s ease-in-out infinite; }
+html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-shape"],
+html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-fill"] { animation: dofus-beat 0.8s ease-in-out infinite; }
+

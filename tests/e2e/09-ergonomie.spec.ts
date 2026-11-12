@@ -45,25 +45,6 @@ test.describe("Ergonomie téléphone", () => {
     expect(await submit.evaluate((el) => { const cs = getComputedStyle(el) as CSSStyleDeclaration & { webkitUserSelect?: string }; return cs.userSelect || cs.webkitUserSelect; })).toBe("none");
   });
 
-  test("la caméra est un <video playsinline muted autoplay> et se coupe en quittant", { tag: "@compat" }, async ({ party, browserName }) => {
-    test.skip(browserName === "webkit", "WebKit (Playwright) n'a pas de caméra factice.");
-    const { page } = await party.openPhonePage();
-    await page.getByTestId("take-photo").click();
-    await expect(page.getByTestId("capture-photo")).toBeVisible();
-    const video = page.locator("video");
-    await expect(video).toHaveAttribute("playsinline", "");
-    expect(await video.evaluate((v: HTMLVideoElement) => v.muted && v.autoplay)).toBe(true);
-    const tracks = () => page.evaluate(() => (document.querySelector("video")?.srcObject as MediaStream | null)?.getTracks().map((t) => t.readyState) ?? []);
-    expect(await tracks()).toEqual(["live"]);
-    // On garde la référence au flux pour vérifier qu'il est bien arrêté après « Annuler ».
-    await page.evaluate(() => {
-      (window as unknown as { __stream: MediaStream }).__stream = document.querySelector("video")!.srcObject as MediaStream;
-    });
-    await page.getByRole("button", { name: "Annuler" }).click();
-    await expect(page.locator("video")).toHaveCount(0);
-    expect(await page.evaluate(() => (window as unknown as { __stream: MediaStream }).__stream.getTracks().map((t) => t.readyState))).toEqual(["ended"]);
-  });
-
   test("la phase de vote indique clairement quel choix est enregistré", async ({ party }) => {
     const [a, b] = await party.addPhones("Alice", "Bob");
     await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 0 });
@@ -102,6 +83,7 @@ async function lowestControlGap(page: Page) {
 }
 
 test.describe("Zone du geste « accueil »", () => {
+  test.setTimeout(120_000);
   for (const size of [{ width: 390, height: 844 }, { width: 360, height: 640 }]) {
     test(`aucun contrôle collé au bas de l'écran (${size.width}×${size.height})`, { tag: "@compat" }, async ({ party }) => {
       const check = async (label: string, page: Page) => {
@@ -120,7 +102,9 @@ test.describe("Zone du geste « accueil »", () => {
       await expect(phones[0]!.t("continue-button")).toBeVisible({ timeout: 60_000 });
       await check("résultats : Continuer", phones[0]!.page);
       await party.continueAll();
-      await expect(phones[0]!.t("phone-final")).toBeVisible({ timeout: 15_000 });
+      // Mesure d'ergonomie après la sortie et le podium : la vitesse de révélation a ses propres tests.
+      await expect(party.tv.getByTestId("tv-final")).toHaveAttribute("data-stage", "done", { timeout: 45_000 });
+      await expect(phones[0]!.t("phone-final")).toBeVisible({ timeout: 20_000 });
       await check("classement final", phones[0]!.page);
     });
   }

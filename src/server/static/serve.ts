@@ -1,4 +1,4 @@
-// Sert le front (dist/web ou fichiers embarqués dans l'exe) et les photos des joueurs.
+// Sert le front (dist/web ou fichiers embarqués dans l'exe) et les médias de la configuration.
 import { existsSync, readFileSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
@@ -58,14 +58,6 @@ export async function handleHttp(req: IncomingMessage, res: ServerResponse) {
   if (pathname === "/") {
     res.writeHead(302, { Location: "/play" });
     return res.end();
-  }
-
-  // Photos de profil
-  if (pathname.startsWith("/photos/")) {
-    const name = path.basename(pathname);
-    const file = path.join(paths.data, "photos", name);
-    if (existsSync(file)) return send(res, 200, readFileSync(file), path.extname(name));
-    return send(res, 404, "not found", ".txt");
   }
 
   // Images/sons fournis avec la config (config/medias), ex : les objets du "bon prix"

@@ -405,13 +405,12 @@ html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="3"] {
 @keyframes ow-select { 0%, 100% { box-shadow: 0 0 0 0.12rem var(--ow-navy-2), 0 0 0.6rem rgb(46 230 242 / 0.5); } 50% { box-shadow: 0 0 0 0.12rem var(--ow-navy-2), 0 0 1.4rem rgb(46 230 242 / 0.95); } }
 @keyframes ow-low { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 
-@media (prefers-reduced-motion: no-preference) {
-  html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="1"] { animation: ow-drift 40s linear infinite alternate; }
-  html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="2"] { animation: ow-sweep 22s ease-in-out infinite alternate; }
-  html[data-skin="overwatch"] [data-ui="panel"] { animation: ow-in 0.35s ease-out both; }
-  html[data-skin="overwatch"] [data-ui="button"]:not(:disabled):hover { filter: brightness(1.12); }
-  html[data-skin="overwatch"] [data-ui="button"][data-variant="primary"]:not(:disabled):hover { box-shadow: 0 0 0 1px rgb(42 51 82 / 0.45), 0 0 1rem rgb(240 106 46 / 0.7); }
-  html[data-skin="overwatch"] [data-ui="choice"]:not(:disabled):hover { filter: brightness(1.06); }
-  html[data-skin="overwatch"] [data-ui="choice"][data-selected="true"] { animation: ow-select 1.8s ease-in-out infinite; }
-  html[data-skin="overwatch"] [data-ui="countdown"][data-low="true"][data-variant="hex"] [data-ui="countdown-shape"] { animation: ow-low 0.8s ease-in-out infinite; }
-}
+html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="1"] { animation: ow-drift 40s linear infinite alternate; }
+html[data-skin="overwatch"] [data-ui="backdrop-layer"][data-layer="2"] { animation: ow-sweep 22s ease-in-out infinite alternate; }
+html[data-skin="overwatch"] [data-ui="panel"] { animation: ow-in 0.35s ease-out both; }
+html[data-skin="overwatch"] [data-ui="button"]:not(:disabled):hover { filter: brightness(1.12); }
+html[data-skin="overwatch"] [data-ui="button"][data-variant="primary"]:not(:disabled):hover { box-shadow: 0 0 0 1px rgb(42 51 82 / 0.45), 0 0 1rem rgb(240 106 46 / 0.7); }
+html[data-skin="overwatch"] [data-ui="choice"]:not(:disabled):hover { filter: brightness(1.06); }
+html[data-skin="overwatch"] [data-ui="choice"][data-selected="true"] { animation: ow-select 1.8s ease-in-out infinite; }
+html[data-skin="overwatch"] [data-ui="countdown"][data-low="true"][data-variant="hex"] [data-ui="countdown-shape"] { animation: ow-low 0.8s ease-in-out infinite; }
+

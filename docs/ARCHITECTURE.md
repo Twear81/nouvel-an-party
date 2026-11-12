@@ -13,7 +13,7 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
  Téléphones ◄──►│   static/       sert le front (embarqué dans l'exe)        │
  https://IP:    │                                                           │
  3443/play      │  config/  (à côté de l'exe, modifiable)  data/ (sauvegarde,│
-                │                                          photos, certificat)│
+                │                                          certificat)        │
                 └───────────────────────────────────────────────────────────┘
 ```
 
@@ -23,24 +23,50 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   Les écrans n'ont pas d'état de jeu à eux : un téléphone qui recharge la page retrouve tout.
 - Les actions passent par les événements de `src/shared/protocol.ts`.
 - `round.progress` (`{ done, expected }` ou `null`) : compteur « qui a répondu » calculé par le moteur via `MiniGame.progress` (phase `playing` seulement, protégé comme `publicView`) ; la TV l'affiche dans le chrono sans connaître le jeu.
-- Le snapshot porte aussi `skin` (habillage courant, identique TV + téléphones) : calculé par le moteur depuis l'ordre des 7 skins tiré au hasard (`skinOrder`, retiré à chaque retour au lobby, sauvegardé dans `save.json`) et `skinForRound` ; voir [skins.md](skins.md#rotation).
+- Le snapshot porte aussi `skin` (habillage courant, identique TV + téléphones ; `null` = thème de base).
+  Les univers sont attribués au plan sauvegardé par `assignRoundSkins`, avec changement après une frontière
+  `changeSkinAfter`. Culture gênante ferme un univers ; voir [skins.md](skins.md#rotation).
 
 ## Déroulé
-`lobby → (intro → playing → results) × N → final`
+`lobby → transition d'ouverture → (intro → playing → results) × N → transition de sortie → final`
 - **lobby** : les joueurs rejoignent et créent leur profil ; la TV règle le nombre de manches par mini-jeu.
+- **transition** : scène de la pièce, avec `snapshot.transition` ; `round` vaut `null` et aucun mini-jeu n'est lancé.
+  L'ouverture dure 9 s, le changement d'univers 4 s, la sortie 2,4 s. Les durées et l'instant de bascule du skin
+  sont partagés dans `src/shared/transitions.ts`. Le serveur utilise `TimerGroup` ; Pause/Reprendre/Passer et
+  retour au lobby s'appliquent aussi à ces scènes. Les téléphones attendent la TV. Le rendu compte depuis
+  le départ serveur, en retirant les pauses ; un rechargement reprend le bon instant de l'animation.
+  `transition.spotlightPlayerId` est la **vedette** de la scène, choisie par le serveur à sa création (brique
+  générique, utilisable par n'importe quelle scène) : pour un changement d'univers, un des participants ayant gagné
+  le plus de points à la manche qui vient de finir (`deltas`, gain > 0), départagés par le `rng` du moteur ; si
+  personne n'a marqué, un participant au hasard (`rng`) ; `null` pour l'ouverture et la sortie. Elle est sauvegardée
+  avec la scène (une ancienne sauvegarde sans le champ donne `null`) et rien n'y est secret.
 - **intro** : annonce de la manche (`intro_secondes`).
 - **playing** : chrono du mini-jeu (ou fin anticipée quand tout le monde a répondu).
 - **results** : animation de révélation sur la TV (`revealSeconds` du mini-jeu), puis les points et le bouton
   "Continuer" apparaissent ; on avance quand tous les joueurs connectés ont cliqué (la TV peut forcer avec "Passer").
   Avant la fin de l'animation les téléphones affichent « Regarde la TV » pour ne rien spoiler. Tous les écrans
   comptent depuis `round.resultsAt` (heure serveur) : un téléphone qui recharge en pleine révélation est resynchronisé.
-- **final** : classement.
+- **final** : classement. `snapshot.finalReveal` fixe le départ serveur et les participants de la cérémonie.
+  TV et téléphones partagent la cadence de `src/shared/final-reveal.ts` via `useFinalReveal` : les téléphones
+  gardent « Regarde la TV ! » jusqu'à la fin de l'entrée du dernier portrait révélé. Un rechargement de la TV
+  ou d'un téléphone reprend au bon moment au lieu de relancer le classement. Il s'agit d'une synchronisation
+  d'affichage : les scores cumulés restent publics, comme pendant les manches. Le final terminé conserve le
+  comportement de sauvegarde existant : après un redémarrage serveur, retour au lobby avec les profils et scores.
+  Un nouvel invité arrivé pendant le podium reste spectateur. La première synchronisation d'horloge précède
+  l'inscription réseau des écrans, pour éviter qu'une horloge locale en avance dévoile les rangs au rechargement.
 
 Les jeux « interlude » (surprises, ex. Culture gênante) s'insèrent dans le plan environ toutes les N manches
 normales, sans **intro** (le moteur passe directement de la manche précédente à `playing`) et avec une TV en plein
 écran gérée par le jeu ; ils ne comptent pas dans « Manche x / y ». Voir `docs/creer-un-mini-jeu.md`, « Jeux interlude ».
 
+La propriété facultative `MiniGame.changeSkinAfter` marque une frontière dans le plan. Après ses résultats,
+le moteur joue la scène vers l'univers suivant avant la prochaine manche. Si c'était la dernière manche,
+il joue directement la sortie ; Culture gênante ne change jamais d'univers au milieu de sa question.
+
+Le décor, la chronologie et les futurs souvenirs de fin sont décrits dans [mise-en-scene.md](mise-en-scene.md).
+
 ## Mini-jeux (`src/minigames/<id>/`)
+
 | Fichier | Rôle |
 |---|---|
 | `game.ts` | logique serveur : schéma du yaml, tirage des questions, réponses, points (`contract.ts`) |
@@ -63,6 +89,9 @@ joueurs connectés (`allConnectedDone`, `helpers.ts`), un téléphone planté ne
 ## Reconnexion & crash
 - Le téléphone garde un jeton dans `localStorage` → il retrouve son joueur à la reconnexion.
 - `data/save.json` est réécrit à chaque étape → au redémarrage du serveur, la TV propose de reprendre.
+- Une scène sauvegarde sa destination, ses participants, sa progression et un horodatage de contrôle. Sa reprise
+  garde le temps écoulé (y compris l'arrêt du serveur hors pause) ou reste figée si elle était en pause.
+  Une scène déjà achevée mène directement à sa destination ; aucun résultat ni point n'est recalculé.
 
 ## Temps réel
 - Les chronos sont des timestamps serveur (`deadline`) ; les écrans corrigent le décalage d'horloge

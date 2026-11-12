@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import simon, { noteDuration, playSeconds, type Priv, type Pub, type Results } from "../../src/minigames/simon/game";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
 const game = simon;
@@ -261,7 +261,7 @@ describe("simon : avec le moteur", () => {
     const cfg = parse({ longueur_depart: 2 });
     const t = createTestEngine({ games: [{ game, cfg }], players: 2, settings: { introSeconds: 1 } });
     t.engine.setSetup({ counts: { simon: 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(1000);
     const [a, b] = t.ids as [string, string];
     const pub = () => t.engine.snapshot(null).round!.public as Pub;

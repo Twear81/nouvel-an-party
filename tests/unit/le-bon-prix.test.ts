@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { centsToDraft, draftToCents, formatCents, formatDraft, pressKey } from "../../src/minigames/le-bon-prix/amount";
 import leBonPrix, { type Pub, type Results } from "../../src/minigames/le-bon-prix/game";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 
 const game = leBonPrix;
@@ -220,7 +220,7 @@ describe("le-bon-prix : via le moteur", () => {
     const cfg = parse();
     const t = createTestEngine({ games: [{ game, cfg }], players: 3 });
     t.engine.setSetup({ counts: { "le-bon-prix": 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(4000);
     const [a, b, c] = t.ids as [string, string, string];
     t.engine.input(a, { cents: 9_000 });

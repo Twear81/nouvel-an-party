@@ -9,9 +9,9 @@
 @import "./skins/overwatch.css";
 @import "./skins/league-of-legends.css";
 @import "./skins/rocket-league.css";
-@import "./skins/gunz.css";
 @import "./skins/mario-odyssey.css";
 @import "./skins/plague-tale.css";
+@import "./room.css";
 /* Tailwind ne regarde pas hors de src/web par défaut : on lui indique les écrans des mini-jeux. */
 @source "../../minigames";
 
@@ -64,7 +64,6 @@
   --color-shade: rgb(0 0 0 / 0.55);
 
   /* ── Rideau de changement de skin (neutre, ne change pas avec le skin) */
-  --color-curtain: #ffffff;
 
   /* ── Dessin (mini-jeu « Dessin raté ») : papier et 5 feutres, dans l'ordre de la palette (index envoyé au serveur) */
   --color-paper: #fff8e8;
@@ -217,10 +216,6 @@ html[data-skin] [data-ui="round-game-name"] { display: none; }
 .frame-sparkle [data-ui="avatar-frame-outer"] { stroke: var(--frame-shimmer); stroke-width: 4; filter: drop-shadow(0 0 0.3em var(--color-accent)); }
 .frame-sparkle [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--color-ink); stroke-width: 2; stroke-dasharray: 1 9; animation: avatar-dashes 3s linear infinite; }
 @keyframes avatar-dashes { to { stroke-dashoffset: -100; } }
-@media (prefers-reduced-motion: reduce) {
-  [data-ui="avatar-frame"] :is([data-ui="avatar-frame-outer"], [data-ui="avatar-frame-inner"]) { animation: none; }
-}
-
 /* ─── mini-jeu tier-list ─── */
 /* Couleurs des étages, du plus haut (1) au plus bas (6) : classes bg-tier-1, text-tier-1, border-tier-1… */
 @theme static {

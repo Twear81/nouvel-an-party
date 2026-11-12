@@ -1,5 +1,5 @@
 // Détection de l'IP du PC sur le wifi + certificat HTTPS auto-signé.
-// Le HTTPS est nécessaire sur les téléphones pour la caméra et pour garder l'écran allumé.
+// Le HTTPS est nécessaire sur les téléphones pour garder l'écran allumé.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";

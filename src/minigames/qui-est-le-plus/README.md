@@ -4,7 +4,7 @@ Une question s'affiche sur la TV (« Qui est le plus gourmand ? »). Chacun vote
 
 ## Déroulé d'une manche
 1. **TV** : annonce du jeu, puis la question et la liste des invités avec le chrono. Les pastilles se cochent au fur et à mesure des votes (sans dire pour qui).
-2. **Téléphone** : on touche le nom (ou la photo) de l'invité choisi. On peut changer d'avis tant que le chrono tourne.
+2. **Téléphone** : on touche le nom ou l'avatar de l'invité choisi. On peut changer d'avis tant que le chrono tourne.
 3. La manche se termine quand tout le monde a voté, ou quand le chrono arrive à zéro.
 4. **Résultats** : la TV montre le classement des votes et qui a voté pour qui ; chaque téléphone clique sur « Continuer ».
 

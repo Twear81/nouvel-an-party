@@ -14,7 +14,12 @@ Un **jeu surprise** (« interlude ») : il ne se programme pas comme les autres.
 3. **Question** (15 s) : la TV, sobre et solennelle, affiche la question. Les choix (ou le pavé numérique) n'apparaissent sur les téléphones qu'à ce moment. La manche s'arrête dès que tout le monde (les téléphones connectés) a répondu.
 4. **Résultats** : la bonne réponse s'allume, chacun apparaît sous la réponse qu'il a choisie (avec son temps), puis la phrase qui gêne (« 2 / 7 ont trouvé. », « Personne n'a trouvé. Personne. »).
 
+Les résultats terminent l'univers courant. Après « Continuer » ou le passage de l'hôte, la pièce mène au
+skin suivant avant la prochaine manche. La surprise et ses résultats gardent leur skin jusqu'au bout.
+Si c'est la dernière manche, la pièce mène directement au classement final.
+
 ## Points
+
 - **QCM** : bonne réponse = `bonne_reponse` (100) + un bonus de rapidité jusqu'à `bonus_rapidite` (50). Le bonus décroît avec le temps de réaction, **mesuré sur le téléphone** (à partir de l'affichage des choix) : 50 si instantané, 25 à mi-temps, 0 à la dernière seconde. Mauvaise réponse ou pas de réponse : 0. La réponse est définitive (un seul essai).
 - **Estimation** : on classe par écart avec la bonne valeur. Le plus proche : `estimation_premier` (150), puis −`estimation_decroissance` (50) par rang : 150, 100, 50, 0. Égalité d'écart : même rang, mêmes points.
 

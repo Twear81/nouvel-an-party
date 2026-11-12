@@ -1,11 +1,10 @@
-// Création / modification du profil : pseudo, avatar (préréglage ou photo), cadre, couleur, avec aperçu en direct.
+// Création / modification du profil : pseudo, avatar prédéfini, cadre, couleur, avec aperçu en direct.
 import { useRef, useState } from "react";
 import { NAME_MAX } from "../../shared/schemas";
 import type { Profile } from "../../shared/types";
 import type { GameActions } from "../net/useGame";
 import { AVATARS, COLORS, FRAMES, randomDefaults } from "../theme/profile-options";
 import { Button, PlayerAvatar } from "../ui";
-import { CameraCapture } from "./CameraCapture";
 
 interface Props {
   initial: Profile | null;
@@ -24,31 +23,10 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
   const [avatar, setAvatar] = useState<Profile["avatar"]>(initial?.avatar ?? { kind: "preset", id: defaults.avatarId });
   const [frame, setFrame] = useState(initial?.frame ?? defaults.frame);
   const [color, setColor] = useState(initial?.color ?? defaults.color);
-  const [camera, setCamera] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const profile: Profile = { name: name.trim(), avatar, frame, color };
-  // Pendant l'envoi, la photo a juste une URL locale d'aperçu.
-  const previewProfile: Profile = photoPreview && avatar.kind === "photo" ? { ...profile, avatar: { kind: "photo", url: photoPreview } } : profile;
-
-  const onPhoto = async (data: ArrayBuffer, preview: string) => {
-    setBusy(true);
-    try {
-      const url = await actions.uploadPhoto(data);
-      setAvatar({ kind: "photo", url });
-      setPhotoPreview(preview);
-      setCamera(false);
-      setError(null);
-    } catch (e) {
-      setError((e as Error).message);
-      setCamera(false);
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const submit = async () => {
     if (!profile.name) return setError("Choisis un pseudo");
     setBusy(true);
@@ -62,8 +40,6 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
     }
   };
 
-  if (camera) return <CameraCapture onPhoto={onPhoto} onClose={() => setCamera(false)} />;
-
   return (
     <form
       onSubmit={(e) => {
@@ -74,7 +50,7 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
       className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
     >
       <div data-testid="profile-preview" className="flex shrink-0 items-center gap-4 pb-2 pt-1">
-        <PlayerAvatar profile={previewProfile} size="md" />
+        <PlayerAvatar profile={profile} size="md" />
         <div className="min-w-0 flex-1">
           <label htmlFor="pseudo" className="text-sm font-bold uppercase tracking-widest text-ink-muted">
             {initial ? "Ton profil" : "Crée ton profil"}
@@ -100,20 +76,8 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
       <div className="px-1.5 pb-6">
         <SectionTitle>Avatar</SectionTitle>
         <div className="grid grid-cols-5 gap-2">
-          <button
-            type="button"
-            data-testid="take-photo"
-            data-ui="avatar-option"
-            data-selected={avatar.kind === "photo"}
-            onClick={() => setCamera(true)}
-            className={`flex aspect-square flex-col items-center justify-center rounded-full border-2 border-dashed text-2xl ${avatar.kind === "photo" ? "border-accent bg-accent/20" : "border-line bg-surface"}`}
-            aria-label="Prendre une photo"
-          >
-            📸
-            <span className="text-[0.6rem] font-bold leading-none text-ink-muted">PHOTO</span>
-          </button>
           {AVATARS.map((a) => {
-            const selected = avatar.kind === "preset" && avatar.id === a.id;
+            const selected = avatar.id === a.id;
             return (
               <button
                 type="button"
@@ -146,7 +110,7 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
               onClick={() => setFrame(f.id)}
               className={`flex flex-col items-center gap-1 rounded-btn p-1 ${frame === f.id ? "bg-accent/25 ring-2 ring-accent" : "bg-surface"}`}
             >
-              <PlayerAvatar profile={{ ...previewProfile, frame: f.id }} size="sm" />
+              <PlayerAvatar profile={{ ...profile, frame: f.id }} size="sm" />
               <span className="text-xs font-bold text-ink-muted">{f.label}</span>
             </button>
           ))}

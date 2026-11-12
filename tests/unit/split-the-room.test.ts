@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import splitTheRoom, { GRACE_SECONDS, scoreSplit, type Priv, type Pub, type Results } from "../../src/minigames/split-the-room/game";
-import { createTestEngine } from "./helpers/engine-setup";
+import { createTestEngine, startRounds } from "./helpers/engine-setup";
 import { makeCtx, makePlayers } from "./helpers/minigame-ctx";
 import { seededRng } from "./helpers/rng";
 
@@ -300,7 +300,7 @@ describe("split-the-room : à travers le moteur", () => {
     const cfg = game.configSchema.parse({ situations: ["Tu peux voler, mais…"], duree_vote: 10, duree_revelation: 2 });
     const t = createTestEngine({ games: [{ game, cfg }], players: 4, settings: { introSeconds: 1 } });
     t.engine.setSetup({ counts: { "split-the-room": 1 } });
-    t.engine.start();
+    startRounds(t.engine);
     t.clock.advance(1_000);
     const snap = () => t.engine.snapshot(null).round!;
     const pub = () => snap().public as Pub;

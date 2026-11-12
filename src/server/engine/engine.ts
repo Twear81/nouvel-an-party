@@ -1,22 +1,28 @@
 // Le moteur de partie : une machine à états qui fait autorité.
 // Les écrans ne font qu'afficher le snapshot qu'il produit et lui envoyer des actions.
 //
-//   lobby ──start──► intro ──(intro_secondes)──► playing ──(chrono ou ctx.end)──► results
-//                      ▲                                                            │
-//                      └──────────── tout le monde a cliqué "Continuer" ◄───────────┘
-//   … après la dernière manche : final
-// Une manche « interlude » (jeu surprise) saute l'intro : lobby/results ──► playing directement.
+//   lobby → ouverture de la pièce → (intro → playing → results) × N → sortie de la pièce → final
+// Une frontière d'univers ferme ses résultats par une scène, avant la manche suivante.
+// Une manche « interlude » saute uniquement son annonce de manche, jamais l'ouverture de la partie.
 import { randomBytes, randomUUID } from "node:crypto";
 import type { RoundContext } from "../../minigames/contract";
 import { activeNow } from "../../shared/clock";
+import type { FinalRevealInfo } from "../../shared/final-reveal";
 import { profileSchema } from "../../shared/schemas";
 import { shuffle } from "../../shared/shuffle";
-import { SKINS, isSkinId, skinForRound, type SkinId } from "../../shared/skins";
+import { SKINS, isSkinId, type SkinId } from "../../shared/skins";
+import { TRANSITION_TIMING, transitionElapsed, type TransitionInfo, type TransitionKind } from "../../shared/transitions";
 import type { GameSnapshot, Phase, PlayerId, Profile, PublicPlayer, RoundInfo, Setup } from "../../shared/types";
 import { realClock, TimerGroup, type Clock } from "./clock";
-import { buildCatalog, buildPlan, defaultSetup, sanitizeSetup, type LoadedGame, type PlannedRound } from "./planner";
+import { assignRoundSkins, buildCatalog, buildPlan, defaultSetup, sanitizeSetup, type LoadedGame, type PlannedRound } from "./planner";
 
 export class GameError extends Error {}
+
+export interface SavedTransition extends TransitionInfo {
+  elapsedMs: number;
+  checkpointAt: number;
+  paused: boolean;
+}
 
 export interface EngineSettings {
   title: string;
@@ -33,6 +39,8 @@ export interface SaveData {
   plan: PlannedRound[];
   roundIndex: number;
   phase: Phase;
+  finalReveal?: FinalRevealInfo | null;
+  transition?: SavedTransition | null;
   /** Ordre des skins de la partie (absent des anciennes sauvegardes : un nouvel ordre est tiré). */
   skinOrder?: SkinId[];
 }
@@ -82,9 +90,12 @@ export class GameEngine {
   private players = new Map<PlayerId, PlayerRecord>();
   private phase: Phase = "lobby";
   private paused = false;
+  private finalReveal: FinalRevealInfo | null = null;
+  private transition: TransitionInfo | null = null;
+  private transitionTimers: TimerGroup | null = null;
   private plan: PlannedRound[] = [];
   private roundIndex = -1;
-  /** Ordre (tiré au hasard) des 7 skins : le lobby montre le premier, la partie les enchaîne. Retiré à chaque retour au lobby. */
+  /** Premier cycle de skins ; les suivants sont préparés dans le plan et tous restent sauvegardés. */
   private skinOrder: SkinId[] = [];
   private current: CurrentRound | null = null;
   private continued = new Set<PlayerId>();
@@ -166,32 +177,53 @@ export class GameEngine {
     const plan = buildPlan(this.opts.games, this.setup, this.opts.settings.order, this.rng);
     if (plan.length === 0) throw new GameError("Choisis au moins une manche");
     for (const p of this.players.values()) p.score = 0;
-    this.plan = plan;
+    this.plan = assignRoundSkins(plan, this.skinOrder, this.rng);
     this.roundIndex = -1;
     this.resumable = null;
-    this.nextRound();
+    this.beginTransition("opening", null, this.plan[0]!.skin!);
   }
 
   /** Reprend la partie sauvegardée (après un crash ou une fermeture). */
   resumeSave() {
     const save = this.resumable;
     if (!save || this.phase !== "lobby") throw new GameError("Rien à reprendre");
-    this.plan = save.plan.filter((r) => this.games.has(r.gameId));
-    // Une manche interrompue avant ses résultats est rejouée, sinon on passe à la suivante.
     this.skinOrder = validSkinOrder(save.skinOrder) ?? this.skinOrder;
-    this.roundIndex = save.phase === "results" ? save.roundIndex : save.roundIndex - 1;
+    this.plan = save.plan.filter((r) => this.games.has(r.gameId)).map((r) => {
+      const { changeSkinAfter: _previousBoundary, ...round } = r;
+      return this.games.get(r.gameId)!.game.changeSkinAfter ? { ...round, changeSkinAfter: true } : round;
+    });
+    if (!this.plan.every((r) => isSkinId(r.skin))) this.plan = assignRoundSkins(this.plan, this.skinOrder, this.rng);
     this.resumable = null;
-    this.nextRound();
+    if (save.phase === "transition" && validSavedTransition(save.transition)) {
+      this.roundIndex = save.roundIndex;
+      const scene = save.transition;
+      const elapsed = scene.elapsedMs + (scene.paused ? 0 : Math.max(0, this.clock.now() - scene.checkpointAt));
+      this.beginTransition(scene.kind, scene.fromSkin, scene.toSkin, { ...scene, elapsedMs: elapsed });
+    } else {
+      // Une manche interrompue avant ses résultats est rejouée ; les points déjà attribués ne le sont jamais deux fois.
+      this.roundIndex = save.phase === "results" || save.phase === "transition" ? save.roundIndex : save.roundIndex - 1;
+      if (save.phase === "results") this.advanceAfterResults();
+      else this.nextRound();
+    }
   }
 
   /** Bouton "Passer" : fait avancer la phase en cours. */
   skip() {
-    if (this.phase === "intro") this.beginPlaying();
+    if (this.phase === "transition") this.finishTransition();
+    else if (this.phase === "intro") this.beginPlaying();
     else if (this.phase === "playing") this.endRound();
-    else if (this.phase === "results") this.nextRound();
+    else if (this.phase === "results") this.advanceAfterResults();
   }
 
   pause() {
+    if (this.transition && !this.paused) {
+      this.paused = true;
+      this.transition.pausedSince = this.clock.now();
+      this.transitionTimers?.pause();
+      this.save();
+      this.changed();
+      return;
+    }
     if (!this.current || this.paused) return;
     this.paused = true;
     this.current.pausedSince = this.clock.now();
@@ -200,6 +232,15 @@ export class GameEngine {
   }
 
   resume() {
+    if (this.transition && this.paused) {
+      this.paused = false;
+      this.transition.pausedMs += this.clock.now() - this.transition.pausedSince!;
+      this.transition.pausedSince = null;
+      this.transitionTimers?.resume();
+      this.save();
+      this.changed();
+      return;
+    }
     if (!this.current || !this.paused) return;
     this.paused = false;
     if (this.current.pausedSince !== null) this.current.pausedMs += this.clock.now() - this.current.pausedSince;
@@ -221,10 +262,14 @@ export class GameEngine {
 
   /** Retour au lobby : on garde les joueurs, on remet les scores à zéro. */
   backToLobby() {
+    this.transitionTimers?.clear();
+    this.transitionTimers = null;
+    this.transition = null;
     this.current?.timers.clear();
     this.current = null;
     this.phase = "lobby";
     this.paused = false;
+    this.finalReveal = null;
     this.plan = [];
     this.skinOrder = shuffle([...SKINS], this.rng);
     this.roundIndex = -1;
@@ -253,6 +298,80 @@ export class GameEngine {
 
   // ───────────────────────────── Déroulé ─────────────────────────────
 
+  /** Vedette d'une scène d'univers : un des meilleurs gains de la dernière manche, sinon un participant au hasard. */
+  private pickSpotlight(kind: TransitionKind, playerIds: string[]): string | null {
+    if (kind !== "skin" || playerIds.length === 0) return null;
+    const deltas = this.current?.deltas ?? {};
+    const best = Math.max(0, ...playerIds.map((id) => deltas[id] ?? 0));
+    const pool = best > 0 ? playerIds.filter((id) => (deltas[id] ?? 0) === best) : playerIds;
+    return pool[Math.min(pool.length - 1, Math.floor(this.rng() * pool.length))]!;
+  }
+
+  private beginTransition(kind: TransitionKind, fromSkin: SkinId | null, toSkin: SkinId | null, restored?: SavedTransition) {
+    // Les gains de la dernière manche sont lus avant d'effacer `current` (une reprise réutilise la vedette sauvegardée).
+    const playerIds = restored ? [...new Set(restored.playerIds)].filter((id) => this.players.get(id)?.profile)
+      : this.publicPlayers().filter((p) => p.profile).map((p) => p.id);
+    const spotlightPlayerId = restored
+      ? (restored.spotlightPlayerId && playerIds.includes(restored.spotlightPlayerId) ? restored.spotlightPlayerId : null)
+      : this.pickSpotlight(kind, playerIds);
+    this.current?.timers.clear();
+    this.current = null;
+    this.transitionTimers?.clear();
+    this.continued.clear();
+    this.finalReveal = null;
+    this.phase = "transition";
+    this.paused = restored?.paused === true;
+    const now = this.clock.now();
+    const timing = TRANSITION_TIMING[kind];
+    const elapsed = Math.max(0, Math.min(timing.durationMs, restored?.elapsedMs ?? 0));
+    const scene: TransitionInfo = {
+      kind, fromSkin, toSkin,
+      startedAt: now - elapsed,
+      durationMs: timing.durationMs,
+      pausedMs: 0,
+      pausedSince: this.paused ? now : null,
+      playerIds, spotlightPlayerId,
+    };
+    this.transition = scene;
+    const timers = new TimerGroup(this.clock);
+    this.transitionTimers = timers;
+    if (this.paused) timers.pause();
+    if (elapsed < timing.swapAtMs) timers.add(timing.swapAtMs - elapsed, () => {
+      if (this.transition !== scene) return;
+      this.save();
+      this.changed();
+    });
+    if (elapsed >= timing.durationMs) {
+      this.finishTransition();
+      return;
+    }
+    timers.add(timing.durationMs - elapsed, () => this.finishTransition());
+    this.save();
+    this.changed();
+  }
+
+  private finishTransition() {
+    const scene = this.transition;
+    if (!scene) return;
+    this.transitionTimers?.clear();
+    this.transitionTimers = null;
+    this.transition = null;
+    this.paused = false;
+    if (scene.kind === "closing") {
+      this.phase = "final";
+      this.finalReveal = { startedAt: this.clock.now(), playerIds: scene.playerIds };
+      this.save();
+      this.changed();
+    } else this.nextRound();
+  }
+
+  private advanceAfterResults() {
+    const previous = this.plan[this.roundIndex];
+    const next = this.plan[this.roundIndex + 1];
+    if (previous?.changeSkinAfter && next) this.beginTransition("skin", previous.skin!, next.skin!);
+    else this.nextRound();
+  }
+
   private nextRound(): void {
     this.current?.timers.clear();
     this.current = null;
@@ -261,9 +380,7 @@ export class GameEngine {
     this.roundIndex++;
 
     if (this.roundIndex >= this.plan.length) {
-      this.phase = "final";
-      this.save();
-      this.changed();
+      this.beginTransition("closing", this.plan.at(-1)?.skin ?? null, null);
       return;
     }
 
@@ -417,7 +534,7 @@ export class GameEngine {
   private checkAllContinued() {
     if (this.phase !== "results") return;
     const waiting = [...this.players.values()].filter((p) => p.profile && p.sockets > 0);
-    if (waiting.length > 0 && waiting.every((p) => this.continued.has(p.id))) this.nextRound();
+    if (waiting.length > 0 && waiting.every((p) => this.continued.has(p.id))) this.advanceAfterResults();
   }
 
   // ───────────────────────────── Snapshot ─────────────────────────────
@@ -460,6 +577,8 @@ export class GameEngine {
       title: this.opts.settings.title,
       phase: this.phase,
       paused: this.paused,
+      finalReveal: this.finalReveal,
+      transition: this.transition ? { ...this.transition, playerIds: [...this.transition.playerIds] } : null,
       players: this.publicPlayers(),
       round,
       continued: [...this.continued],
@@ -480,10 +599,14 @@ export class GameEngine {
 
   // ───────────────────────────── Skins ─────────────────────────────
 
-  /** Lobby : skin de la 1re manche à venir ; en partie : skin de la manche (final : celui de la dernière manche jouée). */
-  private currentSkin(): SkinId {
-    if (this.phase === "lobby" || this.plan.length === 0) return this.skinOrder[0]!;
-    return skinForRound(this.skinOrder, Math.min(this.roundIndex, this.plan.length - 1), this.plan.length);
+  /** Le lobby et le final reviennent au thème de base ; une scène couvre chaque bascule. */
+  private currentSkin(): SkinId | null {
+    if (this.transition) {
+      const scene = this.transition;
+      return transitionElapsed(scene, this.clock.now()) >= TRANSITION_TIMING[scene.kind].swapAtMs ? scene.toSkin : scene.fromSkin;
+    }
+    if (this.phase === "lobby" || this.phase === "final") return null;
+    return this.plan[this.roundIndex]?.skin ?? this.skinOrder[0]!;
   }
 
   // ───────────────────────────── Sauvegarde ─────────────────────────────
@@ -497,15 +620,29 @@ export class GameEngine {
       roundIndex: this.roundIndex,
       phase: this.phase,
       skinOrder: this.skinOrder,
+      finalReveal: this.finalReveal,
+      transition: this.transition ? {
+        ...this.transition,
+        elapsedMs: transitionElapsed(this.transition, this.clock.now()),
+        checkpointAt: this.clock.now(),
+        paused: this.paused,
+      } : null,
     });
   }
 
   private restoreFromSave() {
     const save = this.opts.persistence?.load();
     if (!save || save.version !== 1) return;
-    for (const p of save.players) this.players.set(p.id, { ...p, sockets: 0 });
+    for (const p of save.players) {
+      // Les anciens portraits personnalisés deviennent un avatar prédéfini, sans perdre identité ni score.
+      const parsed = p.profile ? profileSchema.safeParse({
+        ...p.profile,
+        avatar: p.profile.avatar?.kind === "preset" ? p.profile.avatar : { kind: "preset", id: "renard" },
+      }) : null;
+      this.players.set(p.id, { ...p, profile: parsed?.success ? parsed.data : null, sockets: 0 });
+    }
     if (save.setup) this.setup = sanitizeSetup(save.setup, this.catalog);
-    const inProgress = save.phase === "intro" || save.phase === "playing" || save.phase === "results";
+    const inProgress = save.phase === "transition" || save.phase === "intro" || save.phase === "playing" || save.phase === "results";
     if (inProgress && save.plan.length > 0) this.resumable = save;
   }
 
@@ -534,7 +671,20 @@ function safe<T>(fn: () => T): T | null {
   }
 }
 
-/** Ordre de skins sauvegardé, s'il est complet et valide. */
+/** Ordre sauvegardé complet, après retrait des habillages qui n'existent plus. */
 function validSkinOrder(o: unknown): SkinId[] | null {
-  return Array.isArray(o) && o.length === SKINS.length && o.every(isSkinId) && new Set(o).size === SKINS.length ? [...o] : null;
+  if (!Array.isArray(o)) return null;
+  const order = o.filter(isSkinId);
+  return order.length === SKINS.length && new Set(order).size === SKINS.length ? order : null;
+}
+
+function validSavedTransition(scene: SavedTransition | null | undefined): scene is SavedTransition {
+  if (!scene || !["opening", "skin", "closing"].includes(scene.kind)) return false;
+  // Les anciennes sauvegardes n'ont pas de vedette : elles restent valides.
+  if (scene.spotlightPlayerId === undefined) scene.spotlightPlayerId = null;
+  if (scene.spotlightPlayerId !== null && typeof scene.spotlightPlayerId !== "string") return false;
+  if (scene.fromSkin !== null && !isSkinId(scene.fromSkin)) return false;
+  if (scene.toSkin !== null && !isSkinId(scene.toSkin)) return false;
+  return Number.isFinite(scene.elapsedMs) && Number.isFinite(scene.checkpointAt) && typeof scene.paused === "boolean"
+    && Array.isArray(scene.playerIds) && scene.playerIds.every((id) => typeof id === "string");
 }

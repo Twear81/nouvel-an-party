@@ -326,18 +326,17 @@ html[data-skin="rocket-league"] [data-ui="backdrop-layer"][data-layer="3"] {
 }
 
 /* ── Animations (toucher, choix sélectionné, chrono, fond, apparition des panneaux) */
-@media (prefers-reduced-motion: no-preference) {
-  html[data-skin="rocket-league"] [data-ui="button"]:not(:disabled):hover,
-  html[data-skin="rocket-league"] [data-ui="button"]:not(:disabled):active { filter: brightness(1.25) saturate(1.1); }
-  html[data-skin="rocket-league"] [data-ui="choice"]:not(:disabled):active { filter: brightness(1.4); }
-  html[data-skin="rocket-league"] [data-ui="choice"][data-selected="true"],
-  html[data-skin="rocket-league"] [data-ui="result-bar"][data-highlight="true"] [data-ui="result-bar-fill"] { animation: rl-glow 1.8s ease-in-out infinite; }
-  html[data-skin="rocket-league"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-num"] { animation: rl-tick 1s ease-in-out infinite; }
-  html[data-skin="rocket-league"] [data-ui="panel"],
-  html[data-skin="rocket-league"] [data-ui="dialog"] { animation: rl-open 0.35s ease-out both; }
-  html[data-skin="rocket-league"] [data-ui="backdrop-layer"][data-layer="1"] { animation: rl-halo 9s ease-in-out infinite; }
-  html[data-skin="rocket-league"] [data-ui="backdrop-layer"][data-layer="3"] { animation: rl-sweep 14s ease-in-out infinite alternate; }
-}
+html[data-skin="rocket-league"] [data-ui="button"]:not(:disabled):hover,
+html[data-skin="rocket-league"] [data-ui="button"]:not(:disabled):active { filter: brightness(1.25) saturate(1.1); }
+html[data-skin="rocket-league"] [data-ui="choice"]:not(:disabled):active { filter: brightness(1.4); }
+html[data-skin="rocket-league"] [data-ui="choice"][data-selected="true"],
+html[data-skin="rocket-league"] [data-ui="result-bar"][data-highlight="true"] [data-ui="result-bar-fill"] { animation: rl-glow 1.8s ease-in-out infinite; }
+html[data-skin="rocket-league"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-num"] { animation: rl-tick 1s ease-in-out infinite; }
+html[data-skin="rocket-league"] [data-ui="panel"],
+html[data-skin="rocket-league"] [data-ui="dialog"] { animation: rl-open 0.35s ease-out both; }
+html[data-skin="rocket-league"] [data-ui="backdrop-layer"][data-layer="1"] { animation: rl-halo 9s ease-in-out infinite; }
+html[data-skin="rocket-league"] [data-ui="backdrop-layer"][data-layer="3"] { animation: rl-sweep 14s ease-in-out infinite alternate; }
+
 @keyframes rl-glow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.12); } }
 @keyframes rl-tick { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 @keyframes rl-open { from { opacity: 0; transform: translateY(0.6rem); } to { opacity: 1; transform: none; } }
