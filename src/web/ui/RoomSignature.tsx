@@ -38,6 +38,8 @@ export function RoomSignature({ skin, players = [] }: { skin: SkinId | null; pla
     : skin === "league-of-legends" ? <LeagueOfLegendsScene /> : skin === "rocket-league" ? <RocketLeagueScene />
       : skin === "mario-odyssey" ? <MarioOdysseyScene /> : skin === "plague-tale" ? <PlagueTaleScene /> : null;
   if (!content) return null;
+  // Resonance rend ses propres couches (SVG des veines + éléments HTML) : pas de SVG englobant.
+  if (skin === "plague-tale") return content;
   return <>
     <svg className="room-signature-art" viewBox="0 0 1672 941" aria-hidden="true" data-testid="transition-signature" data-signature={skin}>{content}</svg>
     {skin === "dofus" && <DofusActors players={players} />}

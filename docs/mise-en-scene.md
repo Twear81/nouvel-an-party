@@ -94,6 +94,11 @@ Overwatch, League of Legends, Dofus (phase de placement, `signatures/Dofus.tsx`)
 Plus rien à refaire : toutes les scènes sont dans leur version actuelle.
 Les sprites sont dans `src/web/theme/assets/sprites/` ; modèle à imiter : `src/web/ui/signatures/RocketLeague.tsx`.
 
+**Fluidité** : un SVG dont un seul élément s'anime est redessiné en entier à chaque image. Pour les scènes lourdes
+(Resonance : centaines de tracés), séparer en couches : tracés dans leur propre SVG (qui ne bouge plus une fois dessiné),
+éléments mobiles en HTML animés par `transform`/`opacity` (`will-change`), pas de filtre SVG (`feGaussianBlur`) ni
+de `mix-blend-mode` sur un grand calque. Mesure possible : durée des images dans la galerie, par tranche de 2 s.
+
 Tous les mouvements suivent la même horloge que la caméra, pause comprise. La préférence système « réduire les animations » est ignorée : les scènes jouent toujours en entier.
 
 ## Changements techniques nécessaires

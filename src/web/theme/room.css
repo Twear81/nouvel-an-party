@@ -63,6 +63,8 @@
 .room-scene[data-room-skin="rocket-league"] { --room-accent: #59b6ff; --room-tint: #123376; --room-rival: #ee8b39; }
 .room-scene[data-room-skin="mario-odyssey"] { --room-accent: #e83d42; --room-tint: #f1e4d0; }
 .room-scene[data-room-skin="plague-tale"] { --room-accent: #e3a558; --room-tint: #33271f; }
+/* Resonance : la pièce transformée est déjà sombre ; la teinte en fusion (mix-blend-mode) coûtait ~25 ms par image sans rien apporter. */
+.room-scene[data-room-skin="plague-tale"] .room-light { display: none; }
 
 /* Les dessins utilisent les coordonnées de la pièce ; couleurs et traits sont regroupés ici. */
 .room-signature-art {
@@ -230,9 +232,15 @@
   --sig-pt-glow-deep: #0a7f9c;
   --sig-pt-ribbon: #4af0e4;
 }
-.sig-pt [data-room-motion] { transform-box: fill-box; transform-origin: center; }
-.sig-pt-night { fill: url(#pt-night); opacity: 0; }
-.sig-pt-stove { fill: url(#pt-stove); opacity: 0; }
+.sig-pt-stack { position: absolute; inset: 0; }
+.sig-pt-stack > * { position: absolute; }
+/* Chaque élément animé est sa propre couche : le navigateur n'a plus qu'à les recomposer, sans redessiner le reste. */
+.sig-pt-night, .sig-pt-stove, .sig-pt-halo, .sig-pt-macula, .sig-pt-tv-glow, .sig-pt-veins-layer { will-change: transform, opacity; opacity: 0; }
+.sig-pt-veins-layer { inset: 0; opacity: 1; }
+.sig-pt-night { background: radial-gradient(ellipse closest-side, transparent 0%, color-mix(in srgb, var(--sig-pt-night) 6%, transparent) 30%,
+  color-mix(in srgb, var(--sig-pt-night) 78%, transparent) 55%, color-mix(in srgb, var(--sig-pt-night) 94%, transparent) 100%); }
+.sig-pt-stove { background: radial-gradient(ellipse closest-side, color-mix(in srgb, var(--sig-pt-ember-light) 70%, transparent) 0%,
+  color-mix(in srgb, var(--sig-pt-ember) 32%, transparent) 40%, transparent 100%); }
 .sig-pt-vein { fill: none; stroke: var(--sig-pt-vein); stroke-dasharray: 1 2; stroke-dashoffset: 1; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
 .sig-pt-vein-0 { stroke-width: 2.6; }
 .sig-pt-vein-1 { stroke-width: 1.5; }
@@ -240,8 +248,13 @@
 .sig-pt-ribbons { opacity: 0; }
 .sig-pt-ribbon { fill: none; stroke: var(--sig-pt-ribbon); stroke-width: 1; stroke-dasharray: 1 2; stroke-dashoffset: 1; stroke-linecap: round; opacity: 0; }
 .sig-pt-ribbon-main { stroke-width: 1.5; }
-.sig-pt-halo { fill: url(#pt-halo); opacity: 0; }
-.sig-pt-tv-glow { fill: url(#pt-screen); opacity: 0; }
+/* Lueur des rubans : sous-couche large et translucide, bien moins coûteuse qu'un flou SVG sur tout le groupe. */
+.sig-pt-ribbon-glow { stroke-width: 6; stroke: color-mix(in srgb, var(--sig-pt-ribbon) 30%, transparent); }
+.sig-pt-halo { border-radius: 50%; background: radial-gradient(circle closest-side, color-mix(in srgb, var(--sig-pt-glow-light) 95%, transparent) 0%,
+  color-mix(in srgb, var(--sig-pt-glow) 55%, transparent) 30%, color-mix(in srgb, var(--sig-pt-glow-deep) 18%, transparent) 70%, transparent 100%); }
+.sig-pt-macula { object-fit: fill; }
+.sig-pt-tv-glow { border-radius: .36cqw; background: radial-gradient(ellipse 60% 60% at 50% 50%, var(--sig-pt-glow-light) 0%,
+  color-mix(in srgb, var(--sig-pt-glow) 85%, transparent) 50%, color-mix(in srgb, var(--sig-pt-glow-deep) 40%, transparent) 100%); }
 
 /* Dofus : phase de placement d'un combat (cases bleues/rouges, avatars, Bouftou, Tofu, timeline). */
 .sig-df {

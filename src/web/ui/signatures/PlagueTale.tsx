@@ -103,52 +103,34 @@ function buildVeins() {
 
 const { veins: VEINS, ribbons: RIBBONS } = buildVeins();
 
-const Stop = ({ at, tone, alpha = 1 }: { at: number; tone: string; alpha?: number }) =>
-  <stop offset={at} style={{ stopColor: `var(--sig-pt-${tone})`, stopOpacity: alpha } as CSSProperties} />;
+// Rendu en couches : le SVG des veines ne bouge plus après ~3,5 s, et tout ce qui anime ensuite (nuit, poêle, halo, Macula,
+// lueur de la TV) est un élément HTML animé par transformation/opacité, donc sans redessiner les centaines de tracés.
+// Positions en % de la scène (même repère que le viewBox 1672×941).
+const pct = (v: number, total: number) => `${((v / total) * 100).toFixed(3)}%`;
+const X = (v: number) => pct(v, 1672), Y = (v: number) => pct(v, 941);
+const box = (cx: number, cy: number, w: number, h: number): CSSProperties =>
+  ({ left: X(cx - w / 2), top: Y(cy - h / 2), width: X(w), height: Y(h) });
 
-function Defs() {
-  return <defs>
-    {/* Nuit : le centre (poêle) reste éclairé, les bords s'enfoncent dans le noir */}
-    <radialGradient id="pt-night" cx=".5" cy=".5" r=".5">
-      <Stop at={0} tone="night" alpha={0} /><Stop at={0.3} tone="night" alpha={0.06} /><Stop at={0.55} tone="night" alpha={0.78} /><Stop at={1} tone="night" alpha={0.94} />
-    </radialGradient>
-    <radialGradient id="pt-stove" cx=".5" cy=".5" r=".5">
-      <Stop at={0} tone="ember-light" alpha={0.7} /><Stop at={0.4} tone="ember" alpha={0.32} /><Stop at={1} tone="ember" alpha={0} />
-    </radialGradient>
-    <radialGradient id="pt-halo" cx=".5" cy=".5" r=".5">
-      <Stop at={0} tone="glow-light" alpha={0.95} /><Stop at={0.3} tone="glow" alpha={0.55} /><Stop at={0.7} tone="glow-deep" alpha={0.18} /><Stop at={1} tone="glow-deep" alpha={0} />
-    </radialGradient>
-    <radialGradient id="pt-screen" cx=".5" cy=".5" r=".6">
-      <Stop at={0} tone="glow-light" alpha={1} /><Stop at={0.5} tone="glow" alpha={0.85} /><Stop at={1} tone="glow-deep" alpha={0.4} />
-    </radialGradient>
-    {/* Lueur commune des rubans : un seul filtre pour tout le groupe */}
-    <filter id="pt-ribbon-glow" x="-5%" y="-5%" width="110%" height="110%">
-      <feGaussianBlur stdDeviation="3.5" result="blur" />
-      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-    </filter>
-  </defs>;
-}
-
+/** Les couches sont rendues dans le calque de signature, à la suite les unes des autres. */
 export function PlagueTaleScene() {
-  return <g className="sig-pt">
-    <Defs />
-    <rect data-room-motion="night" className="sig-pt-night" x={STOVE.x - 1700} y={STOVE.y - 1000} width="3400" height="2000" />
-    <ellipse data-room-motion="stove" className="sig-pt-stove" cx={STOVE.x} cy={STOVE.y + 10} rx="260" ry="190" />
-    <g className="sig-pt-veins">
-      {VEINS.map((v, i) => <path key={i} data-room-motion="vein" data-trunk={v.trunk} data-fine={v.fine} data-order={i} pathLength="1"
-        className={`sig-pt-vein sig-pt-vein-${v.fine}`} d={v.d} />)}
-    </g>
-    <g data-room-motion="ribbons" filter="url(#pt-ribbon-glow)" className="sig-pt-ribbons">
-      {RIBBONS.map((r, i) => <path key={i} data-room-motion="ribbon" data-order={i} pathLength="1" className={r.depth === 0 ? "sig-pt-ribbon sig-pt-ribbon-main" : "sig-pt-ribbon"} d={r.d} />)}
-    </g>
-    <g transform={`translate(${CENTER.x} ${CENTER.y})`}>
-      <circle data-room-motion="halo" className="sig-pt-halo" r="430" />
-      <g data-room-motion="macula">
-        <image href={macula} x={-SIZE.w * MACULA_SCALE / 2} y={-SIZE.h * MACULA_SCALE / 2} width={SIZE.w * MACULA_SCALE} height={SIZE.h * MACULA_SCALE} />
+  return <div className="sig-pt sig-pt-stack" data-testid="transition-signature" data-signature="plague-tale">
+    <div data-room-motion="night" className="sig-pt-night" style={box(STOVE.x, STOVE.y, 3400, 2000)} />
+    <div data-room-motion="stove" className="sig-pt-stove" style={box(STOVE.x, STOVE.y + 10, 520, 380)} />
+    <svg className="room-signature-art sig-pt-veins-layer" viewBox="0 0 1672 941" aria-hidden="true">
+      <g className="sig-pt-veins">
+        {VEINS.map((v, i) => <path key={i} data-room-motion="vein" data-trunk={v.trunk} data-fine={v.fine} data-order={i} pathLength="1"
+          className={`sig-pt-vein sig-pt-vein-${v.fine}`} d={v.d} />)}
       </g>
-    </g>
-    <rect data-room-motion="tv-glow" className="sig-pt-tv-glow" x={TV.left} y={TV.top} width={TV.width} height={TV.height} rx="6" />
-  </g>;
+      <g data-room-motion="ribbons" className="sig-pt-ribbons">
+        {RIBBONS.map((r, i) => r.depth === 0 && <path key={`g${i}`} data-room-motion="ribbon" data-order={i} pathLength="1" className="sig-pt-ribbon sig-pt-ribbon-glow" d={r.d} />)}
+        {RIBBONS.map((r, i) => <path key={i} data-room-motion="ribbon" data-order={i} pathLength="1" className={r.depth === 0 ? "sig-pt-ribbon sig-pt-ribbon-main" : "sig-pt-ribbon"} d={r.d} />)}
+      </g>
+    </svg>
+    <div data-room-motion="halo" className="sig-pt-halo" style={box(CENTER.x, CENTER.y, 860, 860)} />
+    <img data-room-motion="macula" className="sig-pt-macula" src={macula} alt="" draggable={false}
+      style={box(CENTER.x, CENTER.y, SIZE.w * MACULA_SCALE, SIZE.h * MACULA_SCALE)} />
+    <div data-room-motion="tv-glow" className="sig-pt-tv-glow" style={{ ...box(TV.left + TV.width / 2, TV.top + TV.height / 2, TV.width, TV.height) }} />
+  </div>;
 }
 
 const fade = (...points: [number, number][]): SignatureFrame[] => [{ at: 0, opacity: points[0]![1] }, ...points.map(([at, opacity]) => ({ at, opacity })), { at: D, opacity: points.at(-1)![1] }]
