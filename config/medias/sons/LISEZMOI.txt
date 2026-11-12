@@ -4,7 +4,7 @@ REMPLACER UN SON DE LA TV
 Les sons sortent uniquement de la TV (jamais des téléphones). Pour remplacer un son, déposez ici un fichier
 .mp3, .ogg ou .wav dont le nom est le NOM LOGIQUE du son, par exemple :
 
-    chrono.fin.mp3          remplace le gong de fin de chrono
+    chrono.fin.mp3          remplace le buzzer de fin de chrono
     reponse.recue.ogg       remplace le petit "pop" de chaque réponse
 
 Pour changer le son d'un seul univers (skin), mettez le fichier dans un sous-dossier portant le nom du skin :
@@ -21,6 +21,7 @@ de l'hôte coupe tout). Un fichier remplaçant garde le volume de base du son d'
 NOMS LOGIQUES
 -------------
 Lobby
+    lobby.musique         musique en boucle (raccord sans silence, volume bas)
     joueur.rejoint        un joueur rejoint
     joueur.quitte         un joueur quitte ou se déconnecte
     partie.lancement      la partie démarre
@@ -40,10 +41,13 @@ Fin de partie et scènes
     transition.entree     scène de changement d'univers : entrée
     transition.sortie     scène de changement d'univers : sortie
 Pour les mini-jeux
+    tension               montée de tension (2 s)
+    applaudissements      public après la révélation
+    echec.trombone        trombone triste, chute amicale
     ui.clic               petit clic
     bonne.reponse         bonne réponse
     mauvaise.reponse      mauvaise réponse
-    roulement             roulement de tambour (fabriqué par le jeu si aucun fichier)
+    roulement             roulement orchestral échantillonné (2 s ; garder cette durée pour les révélations)
 Mini-jeux : pierre-feuille-ciseaux, simon, qui-est-le-plus, le-bon-prix, compte-a-rebours, culture-genante
     pfc.choc              pierre-feuille-ciseaux : les mains se heurtent
     pfc.egalite           pierre-feuille-ciseaux : égalité
@@ -54,3 +58,10 @@ Mini-jeux : pierre-feuille-ciseaux, simon, qui-est-le-plus, le-bon-prix, compte-
     boum                  gros impact (révélation, explosion)
 
 Écouter tous les sons : "bun run apercu:sons" puis ouvrir captures/sons/index.html (planche autonome, hors ligne).
+
+La musique attend le premier clic sur la TV ; elle ne joue jamais au chargement. Elle entre en fondu (1,2 s),
+sort au lancement / en pause / au bouton muet (0,8 s), et baisse pendant les jingles. Une nouvelle ouverture
+ou un rechargement demande à nouveau un geste. Aucun son sur les téléphones.
+Crédits des sons embarqués : LICENCES-SONS.md dans la version portable, src/web/theme/sons/LICENCES.md dans les sources.
+Signatures de jeux à déposer soi-même : SIGNATURES-SONORES.md dans la version portable,
+ou docs/signatures-sonores.md dans les sources (aucun extrait propriétaire fourni).

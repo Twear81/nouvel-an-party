@@ -113,6 +113,6 @@ export const SCENES_ECRANS: Scene[] = [
 ];
 
 export const SCENES_CHRONO: Scene[] = [
-  { id: "chrono/dix-secondes", section: "chrono", titre: "Les 10 dernières secondes", aide: "Le chiffre ne doit jamais sortir de l'encadré rouge (la boîte du chrono) ; tics à 5, gong à 0.", Composant: SceneChrono },
+  { id: "chrono/dix-secondes", section: "chrono", titre: "Les 10 dernières secondes", aide: "Le chiffre ne doit jamais sortir de l'encadré rouge (la boîte du chrono) ; tics à 5, buzzer à 0.", Composant: SceneChrono },
 ];
 

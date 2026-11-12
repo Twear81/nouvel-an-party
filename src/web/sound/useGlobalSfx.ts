@@ -14,6 +14,7 @@ export function useGlobalSfx(snapshot: GameSnapshot | null) {
   useEffect(() => sound.start(), []);
   useEffect(() => sound.setPaused(!!snapshot?.paused), [snapshot?.paused]);
   useEffect(() => sound.setSkin(snapshot?.skin ?? null), [snapshot?.skin]);
+  useEffect(() => { sound.setLobby(snapshot?.phase === "lobby"); return () => sound.setLobby(false); }, [snapshot?.phase]);
   // Raccourci : M coupe / remet le son (bonus silencieux, comme Espace et N dans HostBar).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -32,7 +33,7 @@ export function useGlobalSfx(snapshot: GameSnapshot | null) {
     for (const call of calls) play(call.nom, call.options);
   }, [snapshot]);
 
-  // Chrono : un tic par seconde sur les 5 dernières, un gong à zéro (pause et +10 s se lisent dans `round`).
+  // Chrono : un tic par seconde sur les 5 dernières, un buzzer à zéro (pause et +10 s se lisent dans `round`).
   const round = snapshot?.phase === "playing" ? snapshot.round : null;
   const latestRound = useRef(round);
   latestRound.current = round;
@@ -57,5 +58,7 @@ export function useGlobalSfx(snapshot: GameSnapshot | null) {
   // Fin de la révélation des résultats : « points gagnés », calé sur la même durée que l'animation.
   const results = snapshot?.phase === "results" ? snapshot.round : null;
   const revealSeconds = snapshot && results ? revealSecondsOf(gameViewProps(snapshot, results, null, async () => {})) : 0;
-  useSfxAt(results ? pointsSoundAt(results.resultsAt, revealSeconds, results.deltas) : null, "points.gagnes");
+  const pointsAt = results ? pointsSoundAt(results.resultsAt, revealSeconds, results.deltas) : null;
+  useSfxAt(pointsAt, "points.gagnes");
+  useSfxAt(pointsAt === null ? null : pointsAt + 100, "applaudissements", { volume: 0.45 });
 }

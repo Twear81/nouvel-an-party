@@ -36,8 +36,8 @@ describe("résolution des sons", () => {
     expect(resolveSound("chrono.fin", "dofus", ["chrono.fin.mp3"], fakeUrl, SONS, parSkin)).toMatchObject({ url: "/medias/sons/chrono.fin.mp3", volume: 0.9 });
   });
 
-  it("le roulement est synthétisé, un nom inconnu ou un fichier introuvable ne donne rien", () => {
-    expect(resolveSound("roulement", null, [], fakeUrl)).toMatchObject({ url: null, synth: "roulement" });
+  it("le roulement est échantillonné, un nom inconnu ou un fichier introuvable ne donne rien", () => {
+    expect(resolveSound("roulement", null, [], fakeUrl)).toMatchObject({ url: "/assets/roulement.ogg" });
     expect(resolveSound("roulement", null, ["roulement.mp3"], fakeUrl)?.url).toBe("/medias/sons/roulement.mp3");
     expect(resolveSound("nimporte.quoi", null, [], fakeUrl)).toBeNull();
     expect(resolveSound("toString", null, [], fakeUrl)).toBeNull();

@@ -4,10 +4,8 @@
 import type { SkinId } from "../../../shared/skins";
 
 export interface SonDef {
-  /** Fichier de ce dossier ; absent = son synthétisé (voir `synth`). */
-  fichier?: string;
-  /** Son fabriqué par `src/web/sound/synth.ts` quand aucun fichier ne convient. */
-  synth?: "roulement";
+  /** Fichier embarqué de ce dossier. */
+  fichier: string;
   /** Volume de base 0–1 (multiplié par le réglage `volume_sons` et par l'option `volume`). */
   volume: number;
   /** Variation de hauteur aléatoire (± centièmes de ton) pour qu'un son fréquent ne lasse pas. Défaut 0. */
@@ -16,13 +14,14 @@ export interface SonDef {
 
 /** Mixage sobre : sons fréquents faibles, jingles plus forts. */
 export const SONS = {
-  // Lobby
-  "joueur.rejoint": { fichier: "rejoint.ogg", volume: 0.5, variation: 50 },
-  "joueur.quitte": { fichier: "quitte.ogg", volume: 0.4, variation: 50 },
+  // Lobby : la musique ne démarre qu’après un geste, et sort en fondu (engine.ts).
+  "lobby.musique": { fichier: "lobby.ogg", volume: 0.32 },
+  "joueur.rejoint": { fichier: "rejoint.ogg", volume: 0.5, variation: 20 },
+  "joueur.quitte": { fichier: "quitte.ogg", volume: 0.4, variation: 20 },
   "partie.lancement": { fichier: "lancement.ogg", volume: 0.6 },
   // Déroulé d'une manche
   "manche.intro": { fichier: "intro.ogg", volume: 0.6 },
-  "reponse.recue": { fichier: "pop.ogg", volume: 0.35, variation: 40 },
+  "reponse.recue": { fichier: "pop.ogg", volume: 0.35, variation: 15 },
   "reponse.toutes": { fichier: "complet.ogg", volume: 0.5 },
   "chrono.tic": { fichier: "tic.ogg", volume: 0.45 },
   "chrono.fin": { fichier: "gong.ogg", volume: 0.7 },
@@ -30,23 +29,26 @@ export const SONS = {
   "pause": { fichier: "pause.ogg", volume: 0.4 },
   "reprise": { fichier: "reprise.ogg", volume: 0.4 },
   "resultats.arrivee": { fichier: "resultats.ogg", volume: 0.6 },
-  "points.gagnes": { fichier: "points.ogg", volume: 0.5, variation: 40 },
+  "points.gagnes": { fichier: "points.ogg", volume: 0.5, variation: 15 },
   // Fin de partie et scènes
-  "final.fanfare": { fichier: "fanfare.ogg", volume: 0.75 },
+  "final.fanfare": { fichier: "fanfare.ogg", volume: 0.8 },
   "transition.entree": { fichier: "whoosh-entree.ogg", volume: 0.4 },
   "transition.sortie": { fichier: "whoosh-sortie.ogg", volume: 0.4 },
+  "applaudissements": { fichier: "applaudissements.ogg", volume: 0.6 },
+  "tension": { fichier: "tension.ogg", volume: 0.45 },
+  "echec.trombone": { fichier: "trombone.ogg", volume: 0.55 },
   // Pour les mini-jeux
-  "ui.clic": { fichier: "clic.ogg", volume: 0.4, variation: 60 },
-  "bonne.reponse": { fichier: "bravo.ogg", volume: 0.5, variation: 40 },
-  "mauvaise.reponse": { fichier: "rate.ogg", volume: 0.5, variation: 40 },
-  "roulement": { synth: "roulement", volume: 0.5 },
+  "ui.clic": { fichier: "clic.ogg", volume: 0.4, variation: 25 },
+  "bonne.reponse": { fichier: "bravo.ogg", volume: 0.5, variation: 15 },
+  "mauvaise.reponse": { fichier: "rate.ogg", volume: 0.5, variation: 15 },
+  "roulement": { fichier: "roulement.ogg", volume: 0.68 },
   // — Mini-jeux : pierre-feuille-ciseaux, simon, qui-est-le-plus, le-bon-prix, compte-a-rebours, culture-genante
   "pfc.choc": { fichier: "pfc-choc.ogg", volume: 0.6, variation: 30 },
   "pfc.egalite": { fichier: "pfc-egalite.ogg", volume: 0.45 },
   "simon.note": { fichier: "simon-note.ogg", volume: 0.5 },
   "simon.rate": { fichier: "simon-rate.ogg", volume: 0.5 },
-  "carte.pose": { fichier: "carte.ogg", volume: 0.5, variation: 40 },
-  "jeton.pose": { fichier: "jeton.ogg", volume: 0.45, variation: 40 },
+  "carte.pose": { fichier: "carte.ogg", volume: 0.5, variation: 15 },
+  "jeton.pose": { fichier: "jeton.ogg", volume: 0.45, variation: 15 },
   "boum": { fichier: "boum.ogg", volume: 0.55, variation: 30 },
 } as const satisfies Record<string, SonDef>;
 

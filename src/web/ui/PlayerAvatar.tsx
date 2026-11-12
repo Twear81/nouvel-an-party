@@ -42,7 +42,7 @@ export function PlayerAvatar({ profile, size = "md", dimmed, badge, crowned = fa
         )}
       </div>
       <AvatarFrame className={frameById(profile?.frame ?? "none").className} />
-      {crowned && <motion.span aria-hidden data-ui="crown" className="avatar-crown" style={{ fontSize: `${px * 0.62}rem` }}
+      {crowned && <motion.span aria-hidden data-ui="crown" className="avatar-crown"
         initial={{ y: -90, opacity: 0, rotate: -35, scale: 0.5 }} animate={{ y: 0, opacity: 1, rotate: -16, scale: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 11, delay: crownDelay }}>👑</motion.span>}
       {badge != null && (

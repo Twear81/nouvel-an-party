@@ -20,10 +20,10 @@ for (const jeu of readdirSync(dossierJeux, { withFileTypes: true }).filter((d) =
     .filter((f) => /\.tsx?$/.test(f)).map((f) => readFileSync(path.join(dossierJeux, jeu.name, f), "utf8")).join("\n");
   for (const nom of noms) if (sources.includes(`"${nom}"`)) (usages[nom] ??= []).push(jeu.name);
 }
-// Fichier Kenney d'origine : lu dans le tableau de LICENCES.md.
+// Origine et licence de chaque fichier : lues dans le tableau de LICENCES.md.
 const origines: Record<string, string> = {};
-for (const m of readFileSync(path.join(racine, "src/web/theme/sons/LICENCES.md"), "utf8").matchAll(/^\| `([^`]+)` \| ([^|]+) \| `([^`]+)` \|/gm)) {
-  origines[m[1]!] = `${m[3]} (${m[2]!.trim()})`;
+for (const m of readFileSync(path.join(racine, "src/web/theme/sons/LICENCES.md"), "utf8").matchAll(/^\| `([^`]+)` \| ([^|]+) \| `([^`]+)` \| ([^|]+) \|/gm)) {
+  origines[m[1]!] = `${m[3]} (${m[2]!.trim().replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")} ; ${m[4]!.trim()})`;
 }
 const result = await build({
   configFile: false,

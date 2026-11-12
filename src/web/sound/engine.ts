@@ -7,7 +7,6 @@
 import { SKINS } from "../../shared/skins";
 import type { NomSon } from "../theme/sons/catalogue";
 import { allSounds, resolveSound, type SonResolu } from "./resolve";
-import { makeRoulement } from "./synth";
 
 export type SoundState = "locked" | "on" | "muted";
 
@@ -43,6 +42,12 @@ const readMuted = (): boolean => {
 };
 
 class SoundEngine {
+  private mediasPrets = false;
+  private lobby = false;
+  private musique: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private musiqueTrace = false;
+  private musiqueVersion = 0;
+  private musiqueEnChargement = false;
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private files: string[] = [];
@@ -99,11 +104,13 @@ class SoundEngine {
       this.ensureContext();
       void this.ctx?.resume().then(() => this.afterUnlock(), () => {});
       this.emit();
+      this.syncMusique();
     };
     addEventListener("pointerdown", unlock, true);
     addEventListener("keydown", unlock, true);
-    if (this.silent) return;
+    if (this.silent) { this.mediasPrets = true; return; }
     if (options.sansReseau) {
+      this.mediasPrets = true;
       this.preload();
       return;
     }
@@ -116,7 +123,9 @@ class SoundEngine {
           if (typeof info.volume === "number") this.setVolume(info.volume);
           if (Array.isArray(info.fichiers)) this.files = info.fichiers.filter((f) => typeof f === "string");
         }
+        this.mediasPrets = true;
         this.preload();
+        this.syncMusique();
       });
   }
 
@@ -139,6 +148,7 @@ class SoundEngine {
 
   private afterUnlock() {
     this.emit();
+    this.syncMusique();
     // Décodage anticipé : le premier son joué ne doit pas attendre.
     for (const s of allSounds(this.skin, this.files).values()) void this.getBuffer(s);
   }
@@ -155,6 +165,7 @@ class SoundEngine {
     if (paused === this.paused) return;
     this.paused = paused;
     this.pauseListeners.forEach((l) => l());
+    this.syncMusique();
   }
   setMuted(muted: boolean) {
     this.muted = muted;
@@ -165,9 +176,70 @@ class SoundEngine {
     }
     if (this.master) this.master.gain.value = muted ? 0 : this.volume;
     this.emit();
+    this.syncMusique();
   }
   toggleMuted() {
     this.setMuted(!this.muted);
+  }
+
+  /** Configure l’ambiance ; un geste explicite sur la TV est requis, même si le lobby est déjà affiché. */
+  setLobby(actif: boolean) {
+    this.lobby = actif;
+    this.syncMusique();
+  }
+
+  private syncMusique() {
+    const actif = this.isTv && this.lobby && this.gesture && !this.muted && !this.paused;
+    if (this.silent) {
+      if (actif && !this.musiqueTrace) (window.__sfx ??= []).push({ nom: "lobby.musique" });
+      this.musiqueTrace = actif;
+      return;
+    }
+    if (!actif) {
+      this.musiqueVersion++;
+      this.musiqueEnChargement = false;
+      const ancienne = this.musique;
+      this.musique = null;
+      if (ancienne && this.ctx) {
+        const t = this.ctx.currentTime;
+        ancienne.gain.gain.cancelAndHoldAtTime(t);
+        ancienne.gain.gain.linearRampToValueAtTime(0, t + 0.8);
+        ancienne.source.stop(t + 0.85);
+      }
+      return;
+    }
+    if (!this.mediasPrets || this.musique || this.musiqueEnChargement || !this.ctx || this.ctx.state !== "running" || !this.master) return;
+    const def = resolveSound("lobby.musique", null, this.files);
+    if (!def) return;
+    const version = ++this.musiqueVersion;
+    this.musiqueEnChargement = true;
+    void this.getBuffer(def).then((buffer) => {
+      if (version !== this.musiqueVersion) return;
+      this.musiqueEnChargement = false;
+      if (!buffer || !this.ctx || !this.master) return;
+      const source = this.ctx.createBufferSource();
+      const gain = this.ctx.createGain();
+      source.buffer = buffer;
+      source.loop = true;
+      gain.gain.value = 0;
+      gain.gain.linearRampToValueAtTime(def.volume, this.ctx.currentTime + 1.2);
+      source.connect(gain).connect(this.master);
+      source.onended = () => { source.disconnect(); gain.disconnect(); };
+      this.musique = { source, gain };
+      source.start();
+    });
+  }
+
+  private duckMusique(duree: number) {
+    if (!this.musique || !this.ctx) return;
+    const def = resolveSound("lobby.musique", null, this.files);
+    const volume = def?.volume ?? 0;
+    const t = this.ctx.currentTime;
+    const gain = this.musique.gain.gain;
+    gain.cancelAndHoldAtTime(t);
+    gain.linearRampToValueAtTime(volume * 0.25, t + 0.06);
+    gain.setValueAtTime(volume * 0.25, t + Math.max(duree, 0.1));
+    gain.linearRampToValueAtTime(volume, t + Math.max(duree, 0.1) + 0.6);
   }
 
   // ── Chargement
@@ -183,12 +255,10 @@ class SoundEngine {
   private getBuffer(sound: SonResolu): Promise<AudioBuffer | null> {
     const ctx = this.ctx;
     if (!ctx) return Promise.resolve(null);
-    const key = sound.url ?? `synth:${sound.synth}`;
+    const key = sound.url;
     let p = this.decoded.get(key);
     if (!p) {
-      if (sound.url) {
-        p = this.getRaw(sound.url).then((bytes) => (bytes ? ctx.decodeAudioData(bytes.slice(0)) : null)).catch(() => null);
-      } else p = Promise.resolve(sound.synth === "roulement" ? makeRoulement(ctx) : null);
+      p = this.getRaw(sound.url).then((bytes) => (bytes ? ctx.decodeAudioData(bytes.slice(0)) : null)).catch(() => null);
       this.decoded.set(key, p);
     }
     return p;
@@ -208,7 +278,7 @@ class SoundEngine {
     const ctx = this.ctx;
     const master = this.master;
     void this.getBuffer(sound).then((buffer) => {
-      if (!buffer || ctx.state !== "running") return;
+      if (!buffer || ctx.state !== "running" || this.muted || (this.paused && !options.ignorePause)) return;
       const source = ctx.createBufferSource();
       source.buffer = buffer;
       source.playbackRate.value = options.rate ?? 1;
@@ -219,6 +289,8 @@ class SoundEngine {
       source.connect(gain).connect(master);
       source.onended = () => gain.disconnect();
       source.start();
+      // Les jingles prennent la place de la musique ; les petits clics ne font pas pomper le mixage.
+      if (["partie.lancement", "manche.intro", "resultats.arrivee", "final.fanfare", "boum"].includes(nom)) this.duckMusique(buffer.duration / source.playbackRate.value);
     });
   }
 }

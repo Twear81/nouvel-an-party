@@ -60,3 +60,50 @@ test.describe("Sons de la TV", () => {
     expect(await sfx(tv)).toEqual([]); // rien rejoué au rechargement
   });
 });
+
+test("la musique attend un geste, reste unique, et le rechargement reste silencieux", async ({ party }) => {
+  const {tv} = party;
+  expect(await sfx(tv)).not.toContain("lobby.musique");
+  await tv.locator("body").click({position:{x:5,y:5}});
+  await expect.poll(()=>sfx(tv)).toContain("lobby.musique");
+  await tv.locator("body").click({position:{x:5,y:5}});
+  expect((await sfx(tv)).filter(n=>n === "lobby.musique")).toHaveLength(1);
+  await tv.reload();
+  await expect(tv.getByTestId("sound-state")).toHaveAttribute("data-sound","locked");
+  expect(await sfx(tv)).toEqual([]);
+});
+
+test("WebAudio réel : fichiers décodables, boucle unique, fondu de sortie", async ({ party }) => {
+  const {tv} = party;
+  await tv.addInitScript(() => {
+    Object.defineProperty(navigator,"webdriver",{get:()=>false});
+    const etat = {decodes:0, erreurs:0, boucles:0, arrets:0, fondus:0};
+    (window as any).__audioRevue = etat;
+    const decoder = AudioContext.prototype.decodeAudioData;
+    AudioContext.prototype.decodeAudioData = function(...args: Parameters<AudioContext['decodeAudioData']>) {
+      return decoder.apply(this,args).then(b=>{etat.decodes++; return b;},e=>{etat.erreurs++; throw e;});
+    };
+    const creer = AudioContext.prototype.createBufferSource;
+    AudioContext.prototype.createBufferSource = function() {
+      const source = creer.call(this);
+      const demarrer = source.start.bind(source), arreter = source.stop.bind(source);
+      source.start = (...args) => {if(source.loop) etat.boucles++; demarrer(...args);};
+      source.stop = (...args) => {if(source.loop) etat.arrets++; arreter(...args);};
+      return source;
+    };
+    const rampe = AudioParam.prototype.linearRampToValueAtTime;
+    AudioParam.prototype.linearRampToValueAtTime = function(...args) {etat.fondus++; return rampe.apply(this,args);};
+  });
+  await tv.reload();
+  await expect(tv.getByTestId('sound-state')).toHaveAttribute('data-sound','locked');
+  await tv.locator('body').click({position:{x:5,y:5}});
+  await expect.poll(()=>tv.evaluate(()=>(window as any).__audioRevue.decodes)).toBeGreaterThanOrEqual(31);
+  expect(await tv.evaluate(()=>(window as any).__audioRevue.erreurs)).toBe(0);
+  await expect.poll(()=>tv.evaluate(()=>(window as any).__audioRevue.boucles)).toBe(1);
+  await tv.locator('body').click({position:{x:5,y:5}});
+  expect(await tv.evaluate(()=>(window as any).__audioRevue.boucles)).toBe(1);
+  await party.addPhones('Alice','Bob');
+  await party.startGame({'ceci-ou-cela':1});
+  await expect.poll(()=>tv.evaluate(()=>(window as any).__audioRevue.arrets)).toBe(1);
+  expect(await tv.evaluate(()=>(window as any).__audioRevue.fondus)).toBeGreaterThanOrEqual(2);
+});

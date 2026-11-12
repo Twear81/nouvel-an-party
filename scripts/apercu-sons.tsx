@@ -19,6 +19,10 @@ sound.start({ sansReseau: true });
 
 /** Quand le jeu joue ce son (écrit à la main d'après events.ts, useGlobalSfx.ts et les mini-jeux). */
 const QUAND: Record<NomSon, string> = {
+  "lobby.musique": "Boucle jazz du lobby (63 s) : démarre au clic, fondus et baisse pendant les jingles.",
+  "applaudissements": "Public au gain des points : bref, discret, après la révélation.",
+  "tension": "Riser de deux secondes avant le dessin gagnant.",
+  "echec.trombone": "Trombone acoustique : l’imposteur s’en sort (chute amicale).",
   "joueur.rejoint": "Lobby : un invité rejoint la partie (hauteur légèrement variable).",
   "joueur.quitte": "Lobby : un invité part ou se déconnecte.",
   "partie.lancement": "L'hôte lance la partie (lobby vers intro).",
@@ -26,7 +30,7 @@ const QUAND: Record<NomSon, string> = {
   "reponse.recue": "Un joueur vient de répondre ; la hauteur monte à chaque réponse (popRate).",
   "reponse.toutes": "Tout le monde a répondu (juste après le dernier pop).",
   "chrono.tic": "Chacune des 5 dernières secondes d'un chrono, de plus en plus aigu.",
-  "chrono.fin": "Le chrono arrive à zéro (gong).",
+  "chrono.fin": "Le chrono arrive à zéro (buzzer de jeu télé).",
   "temps.ajoute": "L'hôte clique « +10 s ».",
   "pause": "L'hôte met la partie en pause.",
   "reprise": "L'hôte reprend la partie.",
@@ -38,7 +42,7 @@ const QUAND: Record<NomSon, string> = {
   "ui.clic": "Petit tic générique : compteurs, apparition d'un mot ou d'un choix, rythme d'une révélation (hauteur variable selon le jeu).",
   "bonne.reponse": "Bonne réponse, bon choix, victoire d'une étape (révélations).",
   "mauvaise.reponse": "Mauvaise réponse, erreur, perdant d'une révélation.",
-  "roulement": "Suspense avant un verdict ou un dévoilement (son synthétisé, pas de fichier).",
+  "roulement": "Suspense avant un verdict ou un dévoilement (sample orchestral, deux secondes).",
   "pfc.choc": "Pierre-feuille-ciseaux : les mains se heurtent.",
   "pfc.egalite": "Pierre-feuille-ciseaux : égalité.",
   "simon.note": "Simon : une case s'allume ; la hauteur change selon la case.",
@@ -49,10 +53,10 @@ const QUAND: Record<NomSon, string> = {
 };
 
 const GROUPES: { titre: string; noms: NomSon[] }[] = [
-  { titre: "Partie et lobby", noms: ["joueur.rejoint", "joueur.quitte", "partie.lancement"] },
+  { titre: "Partie et lobby", noms: ["lobby.musique", "joueur.rejoint", "joueur.quitte", "partie.lancement"] },
   { titre: "Manche", noms: ["manche.intro", "reponse.recue", "reponse.toutes", "temps.ajoute", "pause", "reprise"] },
   { titre: "Chrono", noms: ["chrono.tic", "chrono.fin"] },
-  { titre: "Résultats", noms: ["resultats.arrivee", "roulement", "points.gagnes", "final.fanfare"] },
+  { titre: "Résultats", noms: ["resultats.arrivee", "roulement", "tension", "applaudissements", "echec.trombone", "points.gagnes", "final.fanfare"] },
   { titre: "Transitions", noms: ["transition.entree", "transition.sortie"] },
   { titre: "Interface et verdicts", noms: ["ui.clic", "bonne.reponse", "mauvaise.reponse"] },
 ];
@@ -93,8 +97,9 @@ const SEQUENCES: { id: string; titre: string; pas: () => Pas[] }[] = [
       return i === 7 ? [[i * 450, "reponse.recue", { rate }], [i * 450 + 150, "reponse.toutes"]] : [[i * 450, "reponse.recue", { rate }]];
     }).flat(),
   },
-  { id: "resultats", titre: "Résultats", pas: () => [[0, "resultats.arrivee"], [900, "roulement"], [3300, "boum"], [3800, "bonne.reponse"], [5000, "points.gagnes"]] },
+  { id: "resultats", titre: "Résultats", pas: () => [[0, "resultats.arrivee"], [900, "roulement"], [900, "tension"], [2900, "boum"], [3400, "bonne.reponse"], [4500, "applaudissements"], [5000, "points.gagnes"]] },
   { id: "rejoint", titre: "Joueur rejoint ×3", pas: () => [[0, "joueur.rejoint"], [900, "joueur.rejoint"], [1700, "joueur.rejoint"]] },
+  { id: "simon", titre: "Simon : do, mi, sol, do", pas: () => [1, 2 ** (4 / 12), 2 ** (7 / 12), 2].map((rate, i) => [i * 650, "simon.note", { rate }]) },
   { id: "final", titre: "Finale", pas: () => [[0, "transition.entree"], [700, "resultats.arrivee"], [2500, "final.fanfare"], [3500, "points.gagnes"]] },
 ];
 
@@ -113,6 +118,7 @@ function Planche() {
   const arreter = () => {
     minuteurs.current.forEach(clearTimeout);
     minuteurs.current = [];
+    sound.setLobby(false);
     setEnCours(null);
   };
   const programmer = (id: string, pas: Pas[]) => {
@@ -174,17 +180,18 @@ function Planche() {
                 const r = reglage(nom);
                 return (
                   <div key={nom} className="flex flex-wrap items-center gap-x-6 gap-y-2 py-3" data-testid={`son-${nom}`}>
-                    <Button size="sm" data-testid={`play-${nom}`} onClick={() => play(nom, options(nom))}>▶</Button>
+                    <Button size="sm" data-testid={`play-${nom}`} onClick={() => { if (nom === "lobby.musique") { sound.setLobby(enCours !== "musique"); setEnCours(enCours === "musique" ? null : "musique"); } else play(nom, options(nom)); }}>{nom === "lobby.musique" && enCours === "musique" ? "■" : "▶"}</Button>
                     <div className="w-[26rem] min-w-[16rem] flex-1">
                       <div className="font-mono text-xl text-accent">{nom}</div>
                       <div>{QUAND[nom]}</div>
                       {usages.length > 0 && <div className="text-sm text-ink-muted">Utilisé par : {usages.join(", ")}</div>}
                     </div>
                     <div className="w-60 text-sm text-ink-muted">
-                      <div>Fichier : <span className="text-ink">{def.fichier ?? `synthétisé (${def.synth})`}</span>{duSkin && " (skin)"}</div>
-                      {def.fichier && <div>Origine Kenney : {__ORIGINES__[def.fichier] ?? "?"}</div>}
+                      <div>Fichier : <span className="text-ink">{def.fichier}</span>{duSkin && " (skin)"}</div>
+                      {def.fichier && <div>Source et licence : {__ORIGINES__[def.fichier] ?? "?"}</div>}
                       <div>Volume catalogue : {def.volume}{def.variation ? ` · variation ±${def.variation}` : ""}</div>
                     </div>
+                    {nom !== "lobby.musique" && <>
                     <label className="flex items-center gap-2 text-sm">Volume ×{r.volume.toFixed(2)}
                       <input type="range" min={0} max={2} step={0.05} value={r.volume} onChange={(e) => regler(nom, { volume: Number(e.target.value) })} />
                     </label>
@@ -192,6 +199,7 @@ function Planche() {
                       <input type="range" min={0.5} max={2} step={0.05} value={r.rate} onChange={(e) => regler(nom, { rate: Number(e.target.value) })} />
                     </label>
                     <Button size="sm" variant="secondary" onClick={() => programmer(`boucle-${nom}`, [0, 1, 2, 3, 4].map((i): Pas => [i * 350, nom, options(nom)]))}>Boucle ×5</Button>
+                    </>}
                   </div>
                 );
               })}

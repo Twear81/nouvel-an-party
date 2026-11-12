@@ -57,11 +57,11 @@ export function pointsSoundAt(resultsAt: number | null, revealSeconds: number, d
   return resultsAt + Math.max(revealSeconds, 0.8) * 1000;
 }
 
-// ── Chrono : un tic par seconde sur les 5 dernières, un gong à zéro.
+// ── Chrono : un tic par seconde sur les 5 dernières, un buzzer à zéro.
 export interface ChronoState {
   /** Dernière seconde affichée (arrondie au-dessus) ; null = pas encore vue. */
   last: number | null;
-  /** Le gong de ce chrono a déjà retenti. */
+  /** Le buzzer de ce chrono a déjà retenti. */
   ended: boolean;
 }
 export const CHRONO_INITIAL: ChronoState = { last: null, ended: false };

@@ -323,7 +323,7 @@ function TvResults({ results, round, playerById }: Props) {
       ...votes.map((_, k) => ({ à: VOTES_START_S + k * VOTE_STEP_S, son: "reponse.recue" as NomSon, options: { rate: 0.9 + Math.min(k, 8) * 0.06 } })),
       { à: Math.max(0, at - 2), son: "roulement" as NomSon },
       { à: at, son: (results?.unmasked ? "bonne.reponse" : "mauvaise.reponse") as NomSon },
-      ...(results?.unmasked ? [] : [{ à: at + 0.25, son: "mauvaise.reponse" as NomSon, options: { rate: 0.8 } }]),
+      ...(results?.unmasked ? [] : [{ à: at + 0.25, son: "echec.trombone" as NomSon, options: { volume: 0.65 } }]),
     ],
   );
   const [unveiled, setUnveiled] = useState(false);

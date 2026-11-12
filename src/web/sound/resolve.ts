@@ -4,9 +4,8 @@ import { SONS, SONS_PAR_SKIN, type NomSon, type SonDef } from "../theme/sons/cat
 import { urlDuFichier } from "../theme/sons/urls";
 
 export interface SonResolu {
-  /** Adresse du fichier à charger ; null pour un son synthétisé. */
-  url: string | null;
-  synth?: SonDef["synth"];
+  /** Adresse du fichier à charger. */
+  url: string;
   volume: number;
   /** Variation de hauteur aléatoire (± centièmes de ton). */
   variation: number;
@@ -43,14 +42,11 @@ export function resolveSound(
   const override = (skin ? findOverride(fichiers, nom, `${skin}/`) : null) ?? findOverride(fichiers, nom);
   if (override) return { url: OVERRIDE_BASE + override.split("/").map(encodeURIComponent).join("/"), volume: def.volume, variation };
 
-  if (def.fichier) {
-    const url = urlOf(def.fichier);
-    return url ? { url, volume: def.volume, variation } : null;
-  }
-  return def.synth ? { url: null, synth: def.synth, volume: def.volume, variation } : null;
+  const url = urlOf(def.fichier);
+  return url ? { url, volume: def.volume, variation } : null;
 }
 
-/** Tous les sons (url + synth) qui peuvent servir : pour le préchargement. */
+/** Tous les sons qui peuvent servir : pour le préchargement. */
 export function allSounds(skin: string | null, fichiers: readonly string[]): Map<NomSon, SonResolu> {
   const out = new Map<NomSon, SonResolu>();
   for (const nom of Object.keys(SONS) as NomSon[]) {

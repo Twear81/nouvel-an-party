@@ -401,6 +401,7 @@ function TvResults(props: Props) {
     [
       ...times.slice(0, -1).map((t, j) => ({ à: t, son: "ui.clic" as NomSon, options: { rate: 0.9 + j * 0.08 } })),
       { à: Math.max(0, winnerAt - 2), son: "roulement" as NomSon },
+      { à: Math.max(0, winnerAt - 2), son: "tension" as NomSon },
       { à: winnerAt, son: "bonne.reponse" as NomSon },
       { à: winnerAt + CROWN_DELAY_MS / 1000, son: "bonne.reponse" as NomSon, options: { rate: 1.3 } },
     ],

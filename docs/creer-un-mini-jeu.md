@@ -297,7 +297,7 @@ une dernière manche qui ferme un univers mène directement à la sortie. Pendan
 ## Sons (TV uniquement)
 
 Le moteur `src/web/sound/` (WebAudio) joue les sons **sur la TV seulement** : sur un téléphone tout est un no-op,
-aucun fichier n'est téléchargé. Les sons globaux (joueur qui rejoint, annonce de manche, pop à chaque réponse, tics et gong
+aucun fichier n'est téléchargé. Les sons globaux (joueur qui rejoint, annonce de manche, pop à chaque réponse, tics et buzzer
 du chrono, pause, résultats, « points gagnés », fanfare, whoosh des scènes) sont déjà joués par `useGlobalSfx` dans `TvApp` :
 un mini-jeu n'a rien à faire pour eux. Il ajoute seulement ses sons propres, avec les hooks exportés par `src/web/ui` :
 
@@ -334,6 +334,8 @@ volume/hauteur réglables, séquences réelles, skins).
 
 | Nom logique | Quand |
 |---|---|
+| `lobby.musique` | ambiance jazz en boucle, au premier geste sur la TV ; fondu à la sortie |
+| `tension`, `applaudissements`, `echec.trombone` | riser de 2 s, public après verdict, chute au trombone |
 | `joueur.rejoint`, `joueur.quitte`, `partie.lancement` | lobby, lancement de la partie |
 | `manche.intro` | annonce d'une manche |
 | `reponse.recue`, `reponse.toutes` | une réponse de plus (hauteur montante), tout le monde a répondu |
@@ -342,9 +344,18 @@ volume/hauteur réglables, séquences réelles, skins).
 | `resultats.arrivee`, `points.gagnes` | arrivée des résultats, fin de la révélation (`revealSeconds`) |
 | `final.fanfare` | phase finale |
 | `transition.entree`, `transition.sortie` | scènes de changement d'univers |
-| `ui.clic`, `bonne.reponse`, `mauvaise.reponse`, `roulement` | à disposition des mini-jeux (le roulement est synthétisé) |
+| `ui.clic`, `bonne.reponse`, `mauvaise.reponse`, `roulement` | à disposition des mini-jeux (roulement orchestral échantillonné de 2 s) |
 
 Autoplay : Chromium refuse le son avant un geste ; le premier clic ou la première touche sur la TV le débloque (haut-parleur
 barré dans le coin du lobby d'ici là). Le bouton haut-parleur de la barre de l'hôte (ou la touche M) coupe le son ;
 `volume_sons` dans `partie.yaml` règle le volume général. Dans les E2E, l'état se lit sur `data-sound` (`locked`, `on`, `muted`)
 des éléments `sound-state` et `host-sound`.
+
+La musique du lobby est pilotée par `sound.setLobby(actif)` dans `useGlobalSfx` : cet appel configure l’intention,
+mais ne joue rien au montage. Il faut un geste dans la page courante. Le moteur garde une seule boucle, annule un
+décodage encore en cours si l’on quitte le lobby, applique les fondus et le ducking (volume à 25 % pendant un jingle).
+Pause et bouton muet arrêtent la boucle en fondu ; retour au lobby / reprise après geste la relancent. Les sons
+ponctuels continuent à passer par les hooks existants. Le roulement dure exactement 2 s pour conserver les vitesses
+et les chronologies des révélations. Simon utilise un piano échantillonné do4, transposé en mi4, sol4 et do5 (tempérament égal).
+La planche permet de lancer / arrêter la vraie boucle du lobby et d’écouter cet accord. Les niveaux cibles, sources,
+licences et traitements sont documentés dans `src/web/theme/sons/LICENCES.md` et `provenance.json`.
