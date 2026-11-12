@@ -44,3 +44,11 @@ Pour les mini-jeux
     bonne.reponse         bonne réponse
     mauvaise.reponse      mauvaise réponse
     roulement             roulement de tambour (fabriqué par le jeu si aucun fichier)
+Mini-jeux : pierre-feuille-ciseaux, simon, qui-est-le-plus, le-bon-prix, compte-a-rebours, culture-genante
+    pfc.choc              pierre-feuille-ciseaux : les mains se heurtent
+    pfc.egalite           pierre-feuille-ciseaux : égalité
+    simon.note            Simon : une case s'allume (la hauteur change selon la case)
+    simon.rate            Simon : erreur
+    carte.pose            une carte se pose (vote révélé, indice)
+    jeton.pose            un jeton se pose (chiffre du prix qui tombe)
+    boum                  gros impact (révélation, explosion)

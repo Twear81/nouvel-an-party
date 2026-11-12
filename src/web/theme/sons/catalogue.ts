@@ -40,6 +40,14 @@ export const SONS = {
   "bonne.reponse": { fichier: "bravo.ogg", volume: 0.5, variation: 40 },
   "mauvaise.reponse": { fichier: "rate.ogg", volume: 0.5, variation: 40 },
   "roulement": { synth: "roulement", volume: 0.5 },
+  // — Mini-jeux : pierre-feuille-ciseaux, simon, qui-est-le-plus, le-bon-prix, compte-a-rebours, culture-genante
+  "pfc.choc": { fichier: "pfc-choc.ogg", volume: 0.6, variation: 30 },
+  "pfc.egalite": { fichier: "pfc-egalite.ogg", volume: 0.45 },
+  "simon.note": { fichier: "simon-note.ogg", volume: 0.5 },
+  "simon.rate": { fichier: "simon-rate.ogg", volume: 0.5 },
+  "carte.pose": { fichier: "carte.ogg", volume: 0.5, variation: 40 },
+  "jeton.pose": { fichier: "jeton.ogg", volume: 0.45, variation: 40 },
+  "boum": { fichier: "boum.ogg", volume: 0.55, variation: 30 },
 } as const satisfies Record<string, SonDef>;
 
 export type NomSon = keyof typeof SONS;

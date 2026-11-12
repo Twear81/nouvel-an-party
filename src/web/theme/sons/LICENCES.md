@@ -26,3 +26,15 @@ aucune attribution requise). Ils sont renommés ici ; le tableau donne l'origine
 | `rate.ogg` | Interface Sounds | `error_004.ogg` |
 
 Le roulement de tambour (`roulement`) n'est pas un fichier : il est synthétisé en WebAudio par `src/web/sound/synth.ts`.
+
+Mini-jeux (lot 1) :
+
+| Fichier | Pack Kenney | Original |
+|---|---|---|
+| `pfc-choc.ogg` | Impact Sounds | `impactPunch_heavy_000.ogg` |
+| `pfc-egalite.ogg` | Digital Audio | `twoTone1.ogg` |
+| `simon-note.ogg` | Digital Audio | `tone1.ogg` |
+| `simon-rate.ogg` | Digital Audio | `zapThreeToneDown.ogg` |
+| `carte.ogg` | Casino Audio | `card-place-1.ogg` |
+| `jeton.ogg` | Casino Audio | `chip-lay-1.ogg` |
+| `boum.ogg` | Impact Sounds | `impactMetal_heavy_000.ogg` |

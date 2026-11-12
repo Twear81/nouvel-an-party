@@ -1,6 +1,8 @@
 // Écrans de "Qui est le plus… ?" : n'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
-import { AnsweredCount, AnsweredRoster, Choice, PlayerAvatar, ResultBar, typo } from "../../web/ui";
+import { useEffect } from "react";
+import { AnsweredCount, AnsweredRoster, Choice, fireConfetti, haptique, PlayerAvatar, Pop, ResultBar, typo, useSfxTimeline, WaitingDots } from "../../web/ui";
+import { useAtServerTime } from "../../web/ui/sfxSequence";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -49,6 +51,11 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
           );
         })}
       </div>
+      {voted !== null && (
+        <div className="flex shrink-0 justify-center text-accent">
+          <WaitingDots />
+        </div>
+      )}
     </div>
   );
 };
@@ -63,7 +70,24 @@ const SETTLE_S = 0.5;
 /** Durée totale (s) de l'animation pour `n` lignes. */
 export const revealSeconds = (n: number) => (n === 0 ? 0 : Math.max(BAR_DELAY_S + BAR_DURATION_S, CROWN_DELAY_S) + (n - 1) * ROW_STEP_S + SETTLE_S);
 
-const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
+const TvResults = ({ results, playerById, round }: MiniGameViewProps<Pub, Priv, Results>) => {
+  const rows = results?.tally.length ?? 0;
+  const hasWinner = !!results && results.winners.length > 0;
+  // Roulement pendant que les barres se remplissent, une carte qui se pose par ligne (même rythme que l'animation),
+  // impact quand la couronne tombe sur l'élu(e).
+  useSfxTimeline(
+    round.resultsAt,
+    rows === 0
+      ? []
+      : [
+          { à: 0.3, son: "roulement", options: { rate: 2.5 } },
+          ...Array.from({ length: rows }, (_, i) => ({ à: i * ROW_STEP_S, son: "carte.pose" as const, options: { rate: 1 + i * 0.05, volume: 0.7 } })),
+          ...(hasWinner ? [{ à: CROWN_DELAY_S, son: "boum" as const }, { à: CROWN_DELAY_S + 0.12, son: "bonne.reponse" as const }] : []),
+        ],
+  );
+  useAtServerTime(round.resultsAt, CROWN_DELAY_S, () => {
+    if (hasWinner) fireConfetti("small");
+  });
   if (!results) return null;
   const max = Math.max(1, ...results.tally.map((t) => t.votes));
   const n = results.tally.length;
@@ -109,6 +133,10 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
 
 const PhoneResults = ({ results, snapshot, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
   const myId = snapshot.me?.id;
+  const electedNow = !!results && !!myId && results.winners.includes(myId);
+  useEffect(() => {
+    if (electedNow) haptique(120);
+  }, [electedNow]);
   if (!results || !myId) return null;
   const mine = results.tally.find((t) => t.voters.includes(myId));
   const target = mine ? playerById(mine.playerId) : undefined;
@@ -128,7 +156,11 @@ const PhoneResults = ({ results, snapshot, playerById }: MiniGameViewProps<Pub, 
       ) : (
         <p className="text-xl text-ink-muted">Tu n'as pas voté</p>
       )}
-      {elected && <p className="font-display text-2xl text-accent">👑 Tu as été élu(e) !</p>}
+      {elected && (
+        <Pop appear scale={1.4} className="font-display text-2xl text-accent">
+          👑 Tu as été élu(e) !
+        </Pop>
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@
 // autorise le son une fois que l'hôte a cliqué sur la page, ce qui est le cas pour lancer la partie).
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useSfxOnChange } from "../../web/ui";
 import { fitText } from "./Serious";
 
 /** Fait apparaître `text` lettre par lettre en `ms` millisecondes. */
@@ -33,6 +34,8 @@ export function Accroche({ text, seconds, image, son }: { text: string; seconds:
   // Le texte finit de s'écrire avant la fin de l'étape, pour qu'on ait le temps de le lire.
   const shown = useTypewriter(text, Math.max(500, seconds * 1000 * 0.65));
   const size = fitText(text, 78, 3.5, 7.5, 2);
+  // Un petit clic de machine à écrire par lettre qui s'écrit (jamais au montage, discret). L'<audio> facultatif plus bas est inchangé.
+  useSfxOnChange(shown, (avant, apres) => (apres > avant && text[apres - 1]?.trim() ? { nom: "ui.clic", options: { volume: 0.5, rate: 1.4 } } : null));
   return (
     <div data-testid="cg-accroche" className="flex min-h-0 flex-1 items-center justify-center gap-16 px-20 pb-16">
       {CONFETTI.map((c) => (

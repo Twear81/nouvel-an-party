@@ -3,13 +3,17 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { serverNow } from "../../web/net/socket";
-import { CheckIcon, CloseIcon, fireConfetti, PlayerAvatar, ResultBar } from "../../web/ui";
+import { CheckIcon, CloseIcon, fireConfetti, haptique, PlayerAvatar, ResultBar, useChanged, useSfxOnChange, useSfxTimeline } from "../../web/ui";
+import { useAtServerTime } from "../../web/ui/sfxSequence";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { PlayerResult, Priv, Pub, Results } from "./game";
 import { PADS, PadShape } from "./pads";
 
 /** Part de chaque note pendant laquelle la pastille reste allumée (le reste est le silence qui sépare deux notes identiques). */
 const LIT_RATIO = 0.7;
+
+/** Hauteur (vitesse de lecture de `simon.note`) de chaque pastille : un accord que l'oreille reconnaît. */
+const NOTE_RATES = [1, 1.26, 1.5, 2] as const;
 
 /** Heure serveur, rafraîchie souvent tant que `active` (animation de la suite). */
 function useServerNow(active: boolean) {
@@ -56,6 +60,8 @@ function Disc({ pub }: { pub: Pub }) {
   const now = useServerNow(!!show);
   const note = show ? litNote(show, now) : null;
   const lit = note !== null ? show!.sequence[note]! : null;
+  // Une note par pastille allumée, d'une hauteur propre à sa couleur (jamais au montage : pas de rejeu au rechargement).
+  useSfxOnChange(note, (_avant, apres) => (apres === null || !show ? null : { nom: "simon.note", options: { rate: NOTE_RATES[show.sequence[apres]!] ?? 1 } }));
   return (
     <div className="relative h-[34rem] w-[34rem] shrink-0">
       <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-[0.9rem]">
@@ -121,10 +127,19 @@ const Tv = ({ pub, round, players }: MiniGameViewProps<Pub>) => {
     if (over) fireConfetti("big");
   }, [over]);
 
+  // Sons : touche juste d'un joueur (discret), élimination, étape réussie, victoire.
+  const totalProgress = Object.values(pub.progress).reduce((a, b) => a + b, 0);
+  useSfxOnChange(totalProgress, (avant, apres) => (apres > avant ? { nom: "ui.clic", options: { volume: 0.4, rate: 1 + Math.min(apres, 12) * 0.03 } } : null));
+  useSfxOnChange(pub.out.length, (avant, apres) => (apres > avant ? "simon.rate" : null));
+  useSfxOnChange(pub.stage, (_avant, apres) => (apres === "between" ? "bonne.reponse" : apres === "over" ? "boum" : apres === "play" ? { nom: "ui.clic", options: { rate: 1.5 } } : null));
+  const someoneFell = useChanged(pub.out.length);
+
   return (
     <div data-testid="simon-tv" data-stage={pub.stage} data-length={pub.length} data-sequence={pub.show?.sequence.join(",") ?? ""} className="flex min-h-0 flex-1 flex-col items-center justify-between gap-3 text-center">
       <Banner pub={pub} aliveCount={alive.length} names={winnerNames} />
-      <Disc pub={pub} />
+      <motion.div animate={someoneFell ? { x: [0, -18, 18, -12, 12, 0], rotate: [0, -1.5, 1.5, 0] } : { x: 0 }} transition={{ duration: 0.6 }}>
+        <Disc pub={pub} />
+      </motion.div>
       <div data-testid="simon-players" className="flex w-full flex-wrap items-start justify-center gap-x-3 gap-y-2">
         {ordered.map((p) => {
           const isOut = outIds.has(p.id);
@@ -250,16 +265,20 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
   const [flash, setFlash] = useState<number | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
+  // Secousse du téléphone : étape réussie (court), erreur (long). Jamais au montage.
+  const prevStatus = useRef(status);
+  useEffect(() => {
+    if (prevStatus.current === status) return;
+    prevStatus.current = status;
+    if (status === "done" || status === "win") haptique(50);
+    else if (status === "out") haptique(350);
+  }, [status]);
 
   const tap = (i: number) => {
     setFlash(i);
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setFlash(null), 170);
-    try {
-      navigator.vibrate?.(12);
-    } catch {
-      /* iOS : pas de vibration */
-    }
+    haptique(12);
     void sendInput({ pad: i }).catch(() => {});
   };
 
@@ -282,7 +301,9 @@ const Phone = ({ pub, priv, round, players, snapshot, sendInput }: MiniGameViewP
         {!active && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass flex flex-col items-center gap-1 rounded-card px-8 py-5">
-              <span className="animate-pulse-soft text-6xl">📺</span>
+              <motion.span animate={{ scale: [1, 1.12, 1], rotate: [-3, 3, -3] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }} className="text-6xl">
+                📺
+              </motion.span>
               <span className="font-display text-2xl">Regarde la TV</span>
             </motion.div>
           </div>
@@ -330,7 +351,23 @@ function Column({ row, rank, max, count, playerById }: { row: PlayerResult; rank
   );
 }
 
-const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
+const TvResults = ({ results, playerById, round }: MiniGameViewProps<Pub, Priv, Results>) => {
+  const n = results?.rows.length ?? 0;
+  const hasWinner = !!results?.rows.some((r) => r.winner);
+  // Roulement pendant que les colonnes montent, un jeton par colonne (même rythme que `Column`), puis impact quand les couronnes tombent.
+  useSfxTimeline(
+    round.resultsAt,
+    n === 0
+      ? []
+      : [
+          { à: 0.3, son: "roulement", options: { rate: 2.2 } },
+          ...Array.from({ length: n }, (_, i) => ({ à: BAR_DELAY_S + COLUMN_STEP_S * i, son: "jeton.pose" as const, options: { rate: 1 + i * 0.06 } })),
+          ...(hasWinner ? [{ à: CROWN_DELAY_S, son: "boum" as const }, { à: CROWN_DELAY_S + 0.15, son: "bonne.reponse" as const }] : [{ à: CROWN_DELAY_S, son: "mauvaise.reponse" as const }]),
+        ],
+  );
+  useAtServerTime(round.resultsAt, CROWN_DELAY_S, () => {
+    if (hasWinner) fireConfetti("small");
+  });
   if (!results) return null;
   const rows = results.rows;
   const max = Math.max(0, ...rows.map((r) => r.mastered));

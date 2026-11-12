@@ -6,6 +6,10 @@ import { AnsweredCount, AnsweredRoster, typo } from "../../web/ui";
 import type { Pub } from "./game";
 import { fitText, LETTERS, SeriousTimer, Unbroken } from "./Serious";
 
+/** Cascade des plaques de réponse (s) : le décalage de la première et l'écart entre deux plaques. */
+export const PLAQUE_DELAY_S = 0.25;
+export const PLAQUE_STEP_S = 0.12;
+
 /** Une plaque de réponse (A, B, C, D). */
 function Plaque({ letter, label, i, count }: { letter: string; label: string; i: number; count: number }) {
   // 2 ou 3 choix : de grandes plaques (sinon l'écran est vide) ; 4 choix : deux rangées plus basses.
@@ -15,7 +19,7 @@ function Plaque({ letter, label, i, count }: { letter: string; label: string; i:
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.25 + i * 0.12 }}
+      transition={{ delay: PLAQUE_DELAY_S + i * PLAQUE_STEP_S }}
       className={`flex items-center gap-6 border border-serious-line bg-serious-bg-2/60 px-8 py-6 ${tall ? "min-h-[17rem]" : ""} ${count === 3 ? "flex-col justify-center text-center" : ""}`}
     >
       <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-serious-accent text-4xl text-serious-accent">{letter}</span>

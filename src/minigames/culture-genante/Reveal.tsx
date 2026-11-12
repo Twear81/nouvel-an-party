@@ -3,7 +3,8 @@
 // constantes que l'animation (la TV cache les points et les téléphones restent sur « Regarde la TV » pendant ce temps).
 import { motion } from "motion/react";
 import type { MiniGameViewProps } from "../views-contract";
-import { PlayerAvatar, typo } from "../../web/ui";
+import { haptique, PlayerAvatar, Pop, typo, useSfxTimeline } from "../../web/ui";
+import { useEffect } from "react";
 import type { Priv, Pub, ResultAnswer, Results } from "./game";
 import { withUnit } from "./number";
 import { fitText, LETTERS, Unbroken } from "./Serious";
@@ -111,7 +112,23 @@ function EstimationRows({ results, playerById }: { results: Results; playerById:
   );
 }
 
-export function TvResults({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) {
+/** Sons de la révélation : roulement, la bonne réponse s'allume, les joueurs tombent en cascade, la stat (la chute). */
+function sonsRevelation(results: Results | null) {
+  if (!results) return [];
+  const n = results.answers.length;
+  const statAt = revealSeconds(results) - SETTLE_S + 0.1;
+  const verdict = results.kind === "qcm" ? (results.right === 0 ? ("mauvaise.reponse" as const) : ("bonne.reponse" as const)) : n > 0 ? ("bonne.reponse" as const) : ("mauvaise.reponse" as const);
+  return [
+    { à: 0.3, son: "roulement" as const, options: { rate: 2 / (ANSWER_AT_S - 0.3) } },
+    { à: ANSWER_AT_S, son: "boum" as const, options: { rate: 0.8 } },
+    { à: ANSWER_AT_S + 0.05, son: verdict },
+    ...Array.from({ length: Math.min(n, 8) }, (_, i) => ({ à: ANSWER_AT_S + 0.2 + i * PLAYER_STEP_S, son: "carte.pose" as const, options: { rate: 0.9 + i * 0.05, volume: 0.6 } })),
+    { à: statAt, son: "ui.clic" as const, options: { rate: 0.6 } },
+  ];
+}
+
+export function TvResults({ results, playerById, round }: MiniGameViewProps<Pub, Priv, Results>) {
+  useSfxTimeline(round.resultsAt, sonsRevelation(results));
   if (!results) return null;
   const missing = results.missingIds.map((id) => playerById(id)?.profile?.name).filter(Boolean);
   return (
@@ -144,6 +161,11 @@ export function TvResults({ results, playerById }: MiniGameViewProps<Pub, Priv, 
 
 export function PhoneResults({ results, snapshot }: MiniGameViewProps<Pub, Priv, Results>) {
   const myId = snapshot.me?.id;
+  const hasResults = !!results;
+  const okNow = !!results && !!myId && (results.kind === "qcm" ? !!results.answers.find((a) => a.playerId === myId)?.correct : results.answers.find((a) => a.playerId === myId)?.rank === 1);
+  useEffect(() => {
+    if (hasResults && myId) haptique(okNow ? 60 : 200);
+  }, [okNow, hasResults, myId]);
   if (!results || !myId) return null;
   const mine = results.answers.find((a) => a.playerId === myId);
   const goodAnswer = results.kind === "qcm" ? results.choices[results.correctIndex!]! : withUnit(results.value!, results.unit);
@@ -161,7 +183,9 @@ export function PhoneResults({ results, snapshot }: MiniGameViewProps<Pub, Priv,
   }
   return (
     <div data-testid="phone-cg-result" data-ok={ok ? "true" : "false"} className="flex flex-col items-center gap-2 text-center font-serious">
-      <p className={`text-balance text-2xl ${ok ? "text-good" : "text-bad"}`}>{verdict}</p>
+      <Pop appear scale={1.2} className={`text-balance text-2xl ${ok ? "text-good" : "text-bad"}`}>
+        {verdict}
+      </Pop>
       <p className="text-ink-muted">
         Bonne réponse : <b className="text-ink">{goodAnswer}</b>
       </p>
