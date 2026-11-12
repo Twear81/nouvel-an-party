@@ -108,14 +108,14 @@ describe("comme-les-autres : réponses", () => {
     expect(ctx.ended).toBe(false);
   });
 
-  it("on peut modifier puis se rétracter", () => {
+  it("la première réponse valable est définitive, même si un client tente de modifier ou retirer", () => {
     const { ctx, state, answer, finish } = round(3);
     answer("p1", "pomme");
     answer("p1", "poire");
-    expect(state.answers.get("p1")).toEqual(["poire"]);
+    expect(state.answers.get("p1")).toEqual(["pomme"]);
     answer("p1", "");
-    expect(state.answers.has("p1")).toBe(false);
-    expect((finish().results as Results).silentIds).toEqual(["p1", "p2", "p3"]);
+    expect(state.answers.get("p1")).toEqual(["pomme"]);
+    expect((finish().results as Results).silentIds).toEqual(["p2", "p3"]);
     expect(ctx.ended).toBe(false);
   });
 

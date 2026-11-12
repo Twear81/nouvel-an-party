@@ -28,7 +28,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   const heights = ["h-[17rem]", "h-[12rem]", "h-[9rem]"];
 
   return (
-    <div data-testid="tv-final" data-stage={done ? "done" : "reveal"} className="flex min-h-0 flex-1 flex-col items-center gap-2 px-12 pt-6">
+    <div data-testid="tv-final" data-stage={done ? "done" : "reveal"} className="flex min-h-0 flex-1 flex-col items-center gap-2 px-tv-gutter pt-6">
       <motion.h1 key={done ? "done" : "reveal"} initial={{ opacity: 0, y: -30, scale: done ? 0.5 : 1 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 12 }} className="font-display text-6xl text-gold-gradient">
         {done ? "Bonne année !" : "Le classement…"}
       </motion.h1>

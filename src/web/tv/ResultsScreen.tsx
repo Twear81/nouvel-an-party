@@ -23,7 +23,7 @@ export function ResultsScreen({ snapshot, round }: { snapshot: GameSnapshot; rou
       <GameFrame title={round.gameName} className="mt-2">
         <TvGameView snapshot={snapshot} round={round} kind="TvResults" />
       </GameFrame>
-      <footer className="glass mx-10 mb-3 mt-3 shrink-0 rounded-card px-6 py-3">
+      <footer data-ui="results-footer" className="glass mx-tv-gutter mb-3 mt-3 shrink-0 rounded-card px-tv-panel py-3">
         <div className="flex items-center gap-4">
           <div className="grid min-w-0 flex-1 gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(strip.length, 1)}, minmax(0, 1fr))` }}>
             {strip.map((p, i) => {

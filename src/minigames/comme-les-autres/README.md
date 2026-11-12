@@ -4,7 +4,7 @@ Une consigne s'affiche sur la TV (« Cite un truc qu'on trouve dans un frigo. »
 
 ## Déroulé d'une manche
 1. **TV** : annonce du jeu, puis la consigne et le chrono. Les avatars s'allument au fur et à mesure que les joueurs répondent (les réponses restent cachées).
-2. **Téléphone** : un champ de texte (ou 2-3 avec l'option `reponses`) et un bouton **Envoyer**. Une fois envoyé, le bouton devient **Envoyé** ; si on modifie le texte, il redevient **Renvoyer**. On peut changer d'avis jusqu'à la fin du chrono.
+2. **Téléphone** : un champ de texte (ou 2-3 avec l'option `reponses`) et un bouton **Envoyer**. Une fois envoyé, le bouton devient **Envoyé** et tous les champs sont grisés et verrouillés. La première réponse valable est définitive, y compris après rechargement ; le serveur ignore toute modification ou tentative de retrait.
 3. La manche se termine quand tout le monde a répondu, ou quand le chrono arrive à zéro.
 4. **Résultats** : la TV regroupe les réponses identiques. Les réponses isolées apparaissent d'abord (grisées), puis les groupes un par un, du plus petit au plus grand : le plus grand arrive en dernier, avec sa couronne. Chaque téléphone affiche ses réponses et avec qui il les partage, puis « Continuer ».
 

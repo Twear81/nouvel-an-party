@@ -212,8 +212,8 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
   const [draft, setDraft] = useState(sent ?? "");
   const [busy, setBusy] = useState(false);
   const typed = cleanText(draft);
-  const isSent = sent !== null && typed === sent;
-  const canSend = !busy && !isSent && (typed !== "" || sent !== null);
+  const isSent = sent !== null;
+  const canSend = !busy && !isSent && typed !== "";
 
   const submit = () => {
     if (!canSend) return;
@@ -227,11 +227,12 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center gap-3 pb-3">
       <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight min-[400px]:text-3xl">{typo(pub.start)}</h1>
-      <div data-ui="text-field-shell" className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
+      <div data-ui="text-field-shell" data-sent={isSent} className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
         <textarea
           data-ui="text-field"
           data-testid="split-input"
-          value={draft}
+          disabled={isSent || busy}
+          value={sent ?? draft}
           maxLength={pub.maxLength}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -252,8 +253,8 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
           <SelectedBadge tone="good" size="md" className="pointer-events-none absolute bottom-2 left-4" />
         )}
       </div>
-      <Button data-testid="split-send" data-sent={isSent} variant={isSent ? "good" : "primary"} size="lg" block disabled={!canSend && !isSent} onClick={submit} className="shrink-0">
-        {isSent ? <span className="inline-flex items-center gap-2">Envoyé <Pop appear><CheckIcon /></Pop></span> : typed === "" && sent !== null ? "Retirer" : sent !== null ? "Modifier" : "Envoyer"}
+      <Button data-testid="split-send" data-sent={isSent} variant={isSent ? "good" : "primary"} size="lg" block disabled={!canSend} onClick={submit} className="shrink-0">
+        {isSent ? <span className="inline-flex items-center gap-2">Envoyé <Pop appear><CheckIcon /></Pop></span> : "Envoyer"}
       </Button>
     </div>
   );

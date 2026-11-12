@@ -98,7 +98,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   const tileWidth = players.length <= 3 ? "w-[17rem]" : "w-[14rem]";
 
   return (
-    <div data-testid="tv-lobby" className="flex min-h-0 flex-1 flex-col gap-5 px-12 py-8">
+    <div data-testid="tv-lobby" className="flex min-h-0 flex-1 flex-col gap-5 px-tv-gutter py-8">
       <div className="flex min-h-0 flex-1 gap-10">
         {/* Inscription */}
         <div className="flex min-h-0 w-[26rem] shrink-0 flex-col items-center gap-4 text-center">

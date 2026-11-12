@@ -62,18 +62,18 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
   const [sending, setSending] = useState(false);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Au rechargement, la vue privée peut arriver après le premier rendu.
+  // La vue privée confirme le texte accepté, y compris si elle arrive après le premier rendu.
   const restored = useRef(sent !== null);
   useEffect(() => {
     if (restored.current || !priv?.answers.length) return;
     restored.current = true;
-    setValues((v) => (v.some((x) => x) ? v : fields.map((i) => priv.answers[i] ?? "")));
+    setValues(fields.map((i) => priv.answers[i] ?? ""));
     setSent(signature(priv.answers));
   }, [priv?.answers.join("\n")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const current = signature(values);
-  const dirty = JSON.stringify(current) !== JSON.stringify(sent ?? []);
-  const state: "empty" | "ready" | "sent" = sent && !dirty ? "sent" : current.length === 0 && !sent ? "empty" : "ready";
+  const dirty = sent === null && current.length > 0;
+  const state: "empty" | "ready" | "sent" = sent ? "sent" : current.length === 0 ? "empty" : "ready";
 
   const submit = async () => {
     if (!dirty || sending) return;
@@ -82,7 +82,7 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
     haptique(25);
     try {
       await sendInput({ answers: current });
-      setSent(current);
+      // Seule la vue privée confirme une réponse acceptée ; un texte invalide reste corrigeable.
     } catch {
       /* l'erreur s'affiche déjà dans PhoneApp ; le bouton reste disponible pour réessayer */
     } finally {
@@ -108,10 +108,11 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
         {fields.map((i) => {
           const done = state === "sent" && !!values[i]?.trim();
           return (
-            <div key={i} data-ui="text-field-shell" className="relative">
+            <div key={i} data-ui="text-field-shell" data-sent={sent !== null} className="relative rounded-btn">
               {n > 1 && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-display text-xl text-accent">{i + 1}</span>}
               <input
                 data-ui="text-field"
+                disabled={sent !== null || sending}
                 ref={(el) => {
                   refs.current[i] = el;
                 }}
@@ -154,7 +155,7 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
         </motion.div>
       ) : (
         <Button data-testid="answer-send" type="submit" size="lg" block disabled={state === "empty" || sending} className="shrink-0">
-          {sent ? "Renvoyer" : "Envoyer"}
+          Envoyer
         </Button>
       )}
 

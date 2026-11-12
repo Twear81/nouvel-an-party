@@ -336,12 +336,8 @@ function Column({ row, rank, max, count, playerById }: { row: PlayerResult; rank
   return (
     <motion.div data-testid={`simon-col-${row.playerId}`} data-winner={row.winner ? "true" : "false"} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: COLUMN_STEP_S * rank }} className="flex w-[11rem] flex-col items-center justify-end gap-2">
       <div className="relative">
-        {row.winner && (
-          <motion.span initial={{ y: -40, opacity: 0, rotate: -30 }} animate={{ y: 0, opacity: 1, rotate: -8 }} transition={{ delay: CROWN_DELAY_S + CROWN_STEP_S * rank, type: "spring", stiffness: 200, damping: 10 }} className="absolute -top-[3rem] left-1/2 -translate-x-1/2 text-[3.5rem] leading-none">
-            👑
-          </motion.span>
-        )}
-        <PlayerAvatar profile={p?.profile ?? null} size={crowd ? "md" : "lg"} dimmed={!row.winner && row.mastered === 0} />
+        <PlayerAvatar profile={p?.profile ?? null} size={crowd ? "md" : "lg"} dimmed={!row.winner && row.mastered === 0}
+          crowned={row.winner} crownDelay={CROWN_DELAY_S + CROWN_STEP_S * rank} />
       </div>
       <motion.div initial={{ height: "3rem" }} animate={{ height: `${height}rem` }} transition={{ delay: BAR_DELAY_S + COLUMN_STEP_S * rank, type: "spring", stiffness: 70, damping: 14 }} className={`flex w-[7.5rem] items-start justify-center rounded-t-card pt-2 font-display text-4xl ${row.winner ? "bg-gold text-accent-ink shadow-glow" : "bg-surface-strong text-ink"}`}>
         {row.mastered}

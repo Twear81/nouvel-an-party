@@ -137,10 +137,11 @@ export default defineMiniGame<Cfg, Item, State>({
     const p = payload as { text?: unknown; vote?: unknown } | null;
 
     if (state.step === "write") {
+      if (state.texts.has(playerId)) return; // une phrase envoyée est définitive
       if (typeof p?.text !== "string") return;
       const text = cleanText(p.text, ctx.cfg.longueur_max);
-      if (text) state.texts.set(playerId, text);
-      else state.texts.delete(playerId); // vide = pas de phrase
+      if (!text) return;
+      state.texts.set(playerId, text);
       checkWritten(state, ctx);
       return;
     }

@@ -121,5 +121,10 @@ Un mini-jeu ne doit utiliser que ces composants + les classes du thème.
 
 Les textes à dégradé / ellipse qui contiennent des jambages réservent leur encre via `glyph-safe`.
 `PlayerAvatar` accepte `crowned` et `crownDelay` : la couronne est ancrée et proportionnelle au portrait, pour les
-résultats et le podium. La décoration de `Drawing` est attachée au carré réel, hors du masque de la feuille.
+résultats et le podium. La couronne du dessin gagnant est au-dessus du carré réel, avec une place réservée pour laisser la feuille entièrement visible.
 Les règles de camps des skins excluent `selected-badge` et `choice-check` : une pastille de validation reste pleine.
+
+Les écrans TV partagent `--spacing-tv-gutter` (marge extérieure) et `--spacing-tv-panel` (retrait intérieur).
+Cadre de jeu, en-tête, bande des points et titres suivent cette grille, même sous un skin.
+Les champs texte envoyés de Comme les autres et Split the Room sont réellement désactivés et leur enveloppe porte
+`data-sent="true"` : fond atténué, texte grisé et coche de validation conservée.

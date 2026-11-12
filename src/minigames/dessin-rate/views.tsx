@@ -463,7 +463,7 @@ function TvResults(props: Props) {
                   transition={{ type: "spring", stiffness: 150, damping: 13 }}
                   className="relative flex min-h-0 min-w-0 flex-col items-center gap-2"
                 >
-                  <div className="relative min-h-0 w-full flex-1">
+                  <div className={`relative min-h-0 w-full flex-1 ${done ? "pt-20" : ""}`}>
                     <Drawing strokes={c.strokes} className={done ? "ring-[0.5rem] ring-accent" : ""} decoration={done && (
                       <motion.span key="couronne" data-ui="drawing-crown" initial={{ scale: 0, opacity: 0, y: -60, rotate: -30 }} animate={{ scale: 1, opacity: 1, y: 0, rotate: -14 }} transition={{ delay: CROWN_DELAY_MS / 1000, duration: CROWN_DURATION_MS / 1000, type: "spring", bounce: 0.35 }} className="drawing-crown" aria-hidden>👑</motion.span>
                     )} />

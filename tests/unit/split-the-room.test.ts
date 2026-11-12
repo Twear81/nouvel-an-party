@@ -75,22 +75,22 @@ describe("split-the-room : écriture", () => {
     expect(r.pub().step).toBe("write");
   });
 
-  it("nettoie le texte, le coupe à la longueur max, vide = rien", () => {
+  it("nettoie le texte, le coupe à la longueur max et ignore un retrait après envoi", () => {
     const r = round(3, { longueur_max: 12 });
     r.write("p1", "abcdefghijklmnopqrstuvwxyz");
     expect(r.priv("p1").text).toBe("abcdefghijkl");
     r.write("p1", "   ");
-    expect(r.priv("p1").text).toBeNull();
-    expect(r.pub().writtenIds).toEqual([]);
+    expect(r.priv("p1").text).toBe("abcdefghijkl");
+    expect(r.pub().writtenIds).toEqual(["p1"]);
   });
 
-  it("modifiable ; les textes des autres ne fuitent pas", () => {
+  it("la première phrase envoyée reste verrouillée ; les textes des autres ne fuitent pas", () => {
     const r = round();
     r.write("p1", "premier");
     r.write("p1", "second");
-    expect(r.priv("p1").text).toBe("second");
+    expect(r.priv("p1").text).toBe("premier");
     expect(r.priv("p2").text).toBeNull();
-    expect(JSON.stringify(r.pub())).not.toContain("second");
+    expect(JSON.stringify(r.pub())).not.toContain("premier");
   });
 
   it("ignore payloads invalides, vote pendant l'écriture", () => {
@@ -106,7 +106,7 @@ describe("split-the-room : écriture", () => {
     writeAll(r, ["p1", "p2", "p3"]);
     expect(r.ctx.countdownState!.seconds).toBe(GRACE_SECONDS);
     r.write("p2", "corrigé");
-    expect(r.priv("p2").text).toBe("corrigé");
+    expect(r.priv("p2").text).toBe("tp2");
     r.ctx.finishCountdown();
     expect(r.pub().step).toBe("vote");
     expect(r.pub().total).toBe(3);

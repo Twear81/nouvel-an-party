@@ -7,16 +7,17 @@ test.describe("Split the Room", () => {
     await party.startGame({ "split-the-room": 1 });
     await expect(tv.getByTestId("tv-start")).toBeVisible({ timeout: 15_000 });
 
-    // Étape écrire : on peut corriger tant que l'étape dure.
+    // Étape écrire : une phrase envoyée est verrouillée.
     const [a, ...others] = phones;
-    await a!.t("split-input").fill("brouillon");
+    await a!.t("split-input").fill("Fin de Alice");
     await a!.t("split-send").click();
     await expect(a!.t("split-send")).toHaveAttribute("data-sent", "true");
     await expect(tv.getByTestId("tv-written-count")).toContainText("1 / 4");
-    await a!.t("split-input").fill("Fin de Alice");
-    await expect(a!.t("split-send")).toHaveAttribute("data-sent", "false");
-    await a!.t("split-send").click();
-    await expect(a!.t("split-send")).toHaveAttribute("data-sent", "true");
+    await expect(a!.t("split-input")).toBeDisabled();
+    await expect(a!.t("split-send")).toBeDisabled();
+    await a!.page.reload();
+    await expect(a!.t("split-input")).toBeDisabled();
+    await expect(a!.t("split-input")).toHaveValue("Fin de Alice");
     for (const p of others) {
       await p.t("split-input").fill(`  Fin   de ${p.name} `);
       await p.t("split-send").click();

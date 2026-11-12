@@ -6,7 +6,7 @@ export function IntroScreen({ snapshot, round }: { snapshot: GameSnapshot; round
   // Un nom long (« Pierre-feuille-ciseaux : le tournoi ») tient sur une ligne pour laisser la place au jeu dessous.
   const long = round.gameName.length > 18;
   return (
-    <div data-testid="tv-intro" className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-16 text-center">
+    <div data-testid="tv-intro" className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-tv-gutter text-center">
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
