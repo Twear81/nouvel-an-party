@@ -1,8 +1,9 @@
 // Scène Resonance : la pièce s'assombrit, un réseau de veines noires très fines (dentelle de capillaires, parcourue de
-// rubans turquoise) pousse depuis le poêle jusqu'aux murs, puis la Macula (sprite) se déploie devant la cheminée,
+// rubans turquoise) pousse depuis le poêle jusqu'aux murs (cinq bandes concentriques, des canvas dessinés une fois), puis la Macula (sprite) se déploie devant la cheminée,
 // pulse trois fois et éblouit l'écran de la TV avant le replongeon.
-// Les veines sont générées dans le code, de façon déterministe (graine fixe, aucun hasard) : coordonnées du viewBox 1672×941.
-import type { CSSProperties } from "react";
+// Les veines sont générées dans le code, de façon déterministe (graine fixe, aucun hasard) : coordonnées du viewBox 1672×941,
+// dessinées dans des canvas (aucun SVG animé : trop coûteux à redessiner à chaque image).
+import { useLayoutEffect, useRef, type CSSProperties } from "react";
 import { SKIN_TIMING } from "../../../shared/transitions";
 import type { Animate, SignatureFrame } from "../RoomSignature";
 import macula from "../../theme/assets/sprites/plague-tale-macula.png";
@@ -67,65 +68,118 @@ function grow(x: number, y: number, angle: number, length: number, depth: number
   if (points.length > 2) out.push({ points, depth, trunk });
 }
 
-/** Courbe lisse (quadratiques passant par les milieux) avec coordonnées entières : chemin compact. */
-function smooth(points: Pt[]): string {
-  const f = (n: number) => Math.round(n * 10) / 10;
-  let d = `M${f(points[0]![0])} ${f(points[0]![1])}`;
-  for (let i = 1; i < points.length - 1; i++) {
-    const [cx, cy] = points[i]!, [nx, ny] = points[i + 1]!;
-    d += `Q${f(cx)} ${f(cy)} ${f((cx + nx) / 2)} ${f((cy + ny) / 2)}`;
-  }
-  const last = points.at(-1)!;
-  return `${d}L${f(last[0])} ${f(last[1])}`;
-}
-
 const dist = (p: Pt) => Math.hypot(p[0] - STOVE.x, p[1] - STOVE.y);
+
+/** Bandes concentriques autour du poêle (bornes hautes, en unités du viewBox) : la pousse se révèle bande après bande. */
+const BAND_LIMITS = [140, 280, 450, 650, Infinity] as const;
+const BANDS = BAND_LIMITS.length;
+const bandOf = (p: Pt) => BAND_LIMITS.findIndex((limit) => dist(p) < limit);
+
+interface Piece { points: Pt[]; fine: number; ribbon: boolean; depth: number }
+
+/** Coupe une branche en morceaux par bande ; le point de passage est partagé par les deux morceaux (pas de trou). */
+function splitByBand(points: Pt[]): { band: number; points: Pt[] }[] {
+  const out: { band: number; points: Pt[] }[] = [];
+  let band = bandOf(points[0]!), current: Pt[] = [points[0]!];
+  for (let i = 1; i < points.length; i++) {
+    const p = points[i]!, b = bandOf(p);
+    current.push(p);
+    if (b !== band) {
+      out.push({ band, points: current });
+      band = b; current = [points[i - 1]!, p];
+    }
+  }
+  if (current.length > 1) out.push({ band, points: current });
+  return out;
+}
 
 function buildVeins() {
   const rnd = seeded(20261231);
   const branches: Branch[] = [];
   TRUNKS.forEach(([x, y, a, len], i) => grow(x, y, a, len, 0, i, rnd, branches));
-  // Un élément par (tronc, finesse) : révélé d'un seul tenant, du poêle vers les extrémités.
-  const veins: { trunk: number; fine: number; d: string; start: number }[] = [];
-  for (let trunk = 0; trunk < TRUNKS.length; trunk++) {
-    for (let fine = 0; fine < 3; fine++) {
-      const group = branches.filter((b) => b.trunk === trunk && Math.min(2, b.depth === 0 ? 0 : b.depth <= 2 ? 1 : 2) === fine)
-        .sort((a, b) => dist(a.points[0]!) - dist(b.points[0]!));
-      if (!group.length) continue;
-      veins.push({ trunk, fine, d: group.map((b) => smooth(b.points)).join(""), start: dist(group[0]!.points[0]!) });
-    }
+  const bands: Piece[][] = Array.from({ length: BANDS }, () => []);
+  for (const b of branches) {
+    const fine = b.depth === 0 ? 0 : b.depth <= 2 ? 1 : 2;
+    // Rubans turquoise : les troncs et une branche sur trois de premier niveau.
+    const ribbon = b.depth === 0 || (b.depth === 1 && b.points.length > 14 && b.points.length % 4 === 0);
+    for (const part of splitByBand(b.points)) bands[part.band]!.push({ points: part.points, fine, ribbon, depth: b.depth });
   }
-  // Rubans turquoise : les troncs et une branche sur trois de premier niveau.
-  const ribbons = branches.filter((b) => b.depth === 0 || (b.depth === 1 && b.points.length > 14 && b.points.length % 4 === 0))
-    .map((b) => ({ d: smooth(b.points), depth: b.depth, trunk: b.trunk }));
-  return { veins, ribbons };
+  return bands;
 }
 
-const { veins: VEINS, ribbons: RIBBONS } = buildVeins();
+const BAND_PIECES = buildVeins();
 
-// Rendu en couches : le SVG des veines ne bouge plus après ~3,5 s, et tout ce qui anime ensuite (nuit, poêle, halo, Macula,
-// lueur de la TV) est un élément HTML animé par transformation/opacité, donc sans redessiner les centaines de tracés.
+/** Trace une courbe lisse (quadratiques passant par les milieux). */
+function trace(ctx: CanvasRenderingContext2D, points: Pt[]) {
+  ctx.beginPath();
+  ctx.moveTo(points[0]![0], points[0]![1]);
+  for (let i = 1; i < points.length - 1; i++) {
+    const [cx, cy] = points[i]!, [nx, ny] = points[i + 1]!;
+    ctx.quadraticCurveTo(cx, cy, (cx + nx) / 2, (cy + ny) / 2);
+  }
+  const last = points.at(-1)!;
+  ctx.lineTo(last[0], last[1]);
+  ctx.stroke();
+}
+
+/** Résolution interne des canvas par rapport au viewBox 1672×941. */
+const RES = 1.25;
+
+/** Dessine une bande (veines noires puis rubans turquoise) une seule fois : ensuite ce n'est plus qu'une image. */
+function drawBand(canvas: HTMLCanvasElement, pieces: Piece[]) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  const css = getComputedStyle(canvas);
+  const veinColor = css.getPropertyValue("--sig-pt-vein").trim(), ribbonColor = css.getPropertyValue("--sig-pt-ribbon").trim();
+  ctx.setTransform(RES, 0, 0, RES, 0, 0);
+  ctx.clearRect(0, 0, 1672, 941);
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = veinColor;
+  const widths = [2.6, 1.5, 0.9];
+  for (const p of pieces) {
+    ctx.lineWidth = widths[p.fine]!;
+    ctx.lineCap = p.fine === 2 ? "butt" : "round";
+    trace(ctx, p.points);
+  }
+  ctx.strokeStyle = ribbonColor;
+  ctx.lineCap = "round";
+  // Lueur : sous-couche large et translucide, puis le trait principal.
+  ctx.globalAlpha = 0.3;
+  for (const p of pieces) if (p.ribbon && p.depth === 0) { ctx.lineWidth = 6; trace(ctx, p.points); }
+  ctx.globalAlpha = 0.9;
+  for (const p of pieces) if (p.ribbon) { ctx.lineWidth = p.depth === 0 ? 1.5 : 1; trace(ctx, p.points); }
+  ctx.globalAlpha = 1;
+}
+
+// Rendu en couches : les veines sont dessinées une seule fois dans des canvas (une image fixe par bande, du poêle vers les
+// murs) ; on ne fait ensuite qu'animer leur opacité / échelle, ce que le compositeur du GPU sait faire sans rien redessiner.
+// Tout ce qui anime (nuit, poêle, halo, Macula, lueur de la TV) est aussi un élément animé par transformation/opacité.
 // Positions en % de la scène (même repère que le viewBox 1672×941).
 const pct = (v: number, total: number) => `${((v / total) * 100).toFixed(3)}%`;
 const X = (v: number) => pct(v, 1672), Y = (v: number) => pct(v, 941);
 const box = (cx: number, cy: number, w: number, h: number): CSSProperties =>
   ({ left: X(cx - w / 2), top: Y(cy - h / 2), width: X(w), height: Y(h) });
 
+/** La nuit déborde de 20 % de chaque côté (140 % de la scène) : assez pour rester couvrant à l'échelle 0,8 autour du poêle. */
+const NIGHT_MARGIN = 0.2, NIGHT_SPAN = 1 + 2 * NIGHT_MARGIN;
+const nightX = (STOVE.x / 1672 + NIGHT_MARGIN) / NIGHT_SPAN * 100;   // poêle, en % de l'élément
+const nightY = (STOVE.y / 941 + NIGHT_MARGIN) / NIGHT_SPAN * 100;
+const nightRx = 1700 / (1672 * NIGHT_SPAN) * 100, nightRy = 1000 / (941 * NIGHT_SPAN) * 100;   // rayons de l'ancienne boîte 3400×2000
+const NIGHT_STYLE: CSSProperties = {
+  inset: `${-NIGHT_MARGIN * 100}%`, transformOrigin: `${nightX.toFixed(2)}% ${nightY.toFixed(2)}%`,
+  backgroundImage: `radial-gradient(ellipse ${nightRx.toFixed(2)}% ${nightRy.toFixed(2)}% at ${nightX.toFixed(2)}% ${nightY.toFixed(2)}%, var(--sig-pt-night-gradient))`,
+};
+const STOVE_ORIGIN = `${(STOVE.x / 1672 * 100).toFixed(2)}% ${(STOVE.y / 941 * 100).toFixed(2)}%`;
+
 /** Les couches sont rendues dans le calque de signature, à la suite les unes des autres. */
 export function PlagueTaleScene() {
+  const refs = useRef<(HTMLCanvasElement | null)[]>([]);
+  useLayoutEffect(() => { refs.current.forEach((c, i) => c && drawBand(c, BAND_PIECES[i]!)); }, []);
   return <div className="sig-pt sig-pt-stack" data-testid="transition-signature" data-signature="plague-tale">
-    <div data-room-motion="night" className="sig-pt-night" style={box(STOVE.x, STOVE.y, 3400, 2000)} />
+    <div data-room-motion="night" className="sig-pt-night" style={NIGHT_STYLE} />
     <div data-room-motion="stove" className="sig-pt-stove" style={box(STOVE.x, STOVE.y + 10, 520, 380)} />
-    <svg className="room-signature-art sig-pt-veins-layer" viewBox="0 0 1672 941" aria-hidden="true">
-      <g className="sig-pt-veins">
-        {VEINS.map((v, i) => <path key={i} data-room-motion="vein" data-trunk={v.trunk} data-fine={v.fine} data-order={i} pathLength="1"
-          className={`sig-pt-vein sig-pt-vein-${v.fine}`} d={v.d} />)}
-      </g>
-      <g data-room-motion="ribbons" className="sig-pt-ribbons">
-        {RIBBONS.map((r, i) => r.depth === 0 && <path key={`g${i}`} data-room-motion="ribbon" data-order={i} pathLength="1" className="sig-pt-ribbon sig-pt-ribbon-glow" d={r.d} />)}
-        {RIBBONS.map((r, i) => <path key={i} data-room-motion="ribbon" data-order={i} pathLength="1" className={r.depth === 0 ? "sig-pt-ribbon sig-pt-ribbon-main" : "sig-pt-ribbon"} d={r.d} />)}
-      </g>
-    </svg>
+    {BAND_PIECES.map((_, i) => <canvas key={i} ref={(c) => { refs.current[i] = c; }} data-room-motion="vein-band" data-band={i}
+      className="sig-pt-band" width={Math.round(1672 * RES)} height={Math.round(941 * RES)} style={{ transformOrigin: STOVE_ORIGIN }} aria-hidden="true" />)}
     <div data-room-motion="halo" className="sig-pt-halo" style={box(CENTER.x, CENTER.y, 860, 860)} />
     <img data-room-motion="macula" className="sig-pt-macula" src={macula} alt="" draggable={false}
       style={box(CENTER.x, CENTER.y, SIZE.w * MACULA_SCALE, SIZE.h * MACULA_SCALE)} />
@@ -136,11 +190,11 @@ export function PlagueTaleScene() {
 const fade = (...points: [number, number][]): SignatureFrame[] => [{ at: 0, opacity: points[0]![1] }, ...points.map(([at, opacity]) => ({ at, opacity })), { at: D, opacity: points.at(-1)![1] }]
   .filter((frame, i, all) => i === 0 || frame.at > all[i - 1]!.at);
 
-/** Tremblement de la pièce, ajouté à la caméra (`composite: "add"`) : léger à chaque battement, plus fort au dernier. */
+/** Tremblement de la pièce, joué sur l'enveloppe `.room-rig` de la caméra : léger à chaque battement, plus fort au dernier. */
 function shakeFrames(): SignatureFrame[] {
-  const rest = (at: number): SignatureFrame => ({ at, transform: "translate(0%, 0%) scale(1) translate(0px, 0px)", composite: "add" });
+  const rest = (at: number): SignatureFrame => ({ at, transform: "translate(0%, 0%) scale(1) translate(0px, 0px)" });
   const kick = (at: number, amp: number, zoom: number, i: number): SignatureFrame => ({
-    at, composite: "add",
+    at,
     transform: `translate(${-(zoom - 1) * 50}%, ${-(zoom - 1) * 50}%) scale(${zoom}) translate(${(Math.sin(i * 2.7) * amp).toFixed(1)}px, ${(Math.cos(i * 3.9) * amp).toFixed(1)}px)`,
   });
   const frames: SignatureFrame[] = [rest(0)];
@@ -158,7 +212,7 @@ function shakeFrames(): SignatureFrame[] {
 export function animatePlagueTale(root: Element, _reduced: boolean, animate: Animate) {
   const one = (name: string) => root.querySelector(`[data-room-motion="${name}"]`);
   const all = (name: string) => [...root.querySelectorAll(`[data-room-motion="${name}"]`)];
-  animate(root.closest(".room-camera"), shakeFrames());
+  animate(root.closest(".room-rig"), shakeFrames());
 
   // 1. La nuit se resserre autour du poêle, qui vacille (valeurs déterministes).
   animate(one("night"), [
@@ -171,25 +225,15 @@ export function animatePlagueTale(root: Element, _reduced: boolean, animate: Ani
   flicker.push([SKIN_TIMING.plungeEndMs - 400, 0.3]);
   animate(one("stove"), fade(...flicker));
 
-  // 2. Les veines poussent du poêle vers les murs : les plus fines un peu après les troncs.
-  all("vein").forEach((e) => {
-    const trunk = Number((e as HTMLElement).dataset.trunk ?? 0), fine = Number((e as HTMLElement).dataset.fine ?? 0);
-    const start = T.veins + 60 + trunk * 45 + fine * 140, end = Math.min(T.veinsEnd + 300, start + 1300 + fine * 150);
+  // 2. Les veines poussent du poêle vers les murs : chaque bande apparaît (opacité + léger grossissement) à son tour.
+  const bandMs = 600, step = (T.veinsEnd - T.veins - bandMs) / (BANDS - 1);
+  all("vein-band").forEach((e) => {
+    const i = Number((e as HTMLElement).dataset.band ?? 0), start = T.veins + i * step, end = start + bandMs;
     animate(e, [
-      { at: 0, strokeDashoffset: 1, opacity: 0 }, { at: start, strokeDashoffset: 1, opacity: 0 }, { at: start + 20, strokeDashoffset: 1, opacity: 1 },
-      { at: end, strokeDashoffset: 0, opacity: 1, easing: "ease-out" }, { at: D, strokeDashoffset: 0, opacity: 1 },
+      { at: 0, opacity: 0, transform: "scale(.94)" }, { at: start, opacity: 0, transform: "scale(.94)" },
+      { at: end, opacity: 1, transform: "scale(1)", easing: "ease-out" }, { at: D, opacity: 1, transform: "scale(1)" },
     ]);
   });
-  all("ribbon").forEach((e) => {
-    const order = Number((e as HTMLElement).dataset.order ?? 0);
-    const start = T.veins + 350 + (order % 12) * 55, end = start + 1500;
-    animate(e, [
-      { at: 0, strokeDashoffset: 1, opacity: 0 }, { at: start, strokeDashoffset: 1, opacity: 0 }, { at: start + 20, strokeDashoffset: 1, opacity: 0.9 },
-      { at: end, strokeDashoffset: 0, opacity: 1, easing: "ease-out" },
-      { at: D, strokeDashoffset: 0, opacity: 1 },
-    ]);
-  });
-  animate(one("ribbons"), fade([T.veins, 0], [T.veins + 700, 0.65], [T.beats[0], 1], [T.last, 1]));
 
   // 3. La Macula se déploie depuis le cœur, tourne lentement, puis bat (échelle + lueur) sur chaque pulsation.
   const pose = (at: number, scale: number, rotate: number, opacity: number, easing?: string): SignatureFrame =>

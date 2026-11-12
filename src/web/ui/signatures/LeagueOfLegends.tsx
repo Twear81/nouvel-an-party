@@ -133,11 +133,11 @@ export function LeagueOfLegendsScene() {
 const fade = (...points: [number, number][]): SignatureFrame[] => [{ at: 0, opacity: points[0]![1] }, ...points.map(([at, opacity]) => ({ at, opacity })), { at: D, opacity: points.at(-1)![1] }]
   .filter((frame, i, all) => i === 0 || frame.at > all[i - 1]!.at);
 
-/** Secousse de caméra ajoutée à la caméra de la pièce (`composite: "add"`) : petits coups, puis grosse explosion. */
+/** Secousse de caméra jouée sur le support de caméra (`.room-rig`) : petits coups, puis grosse explosion. */
 function shakeFrames(): SignatureFrame[] {
-  const rest = (at: number): SignatureFrame => ({ at, transform: "translate(0%, 0%) scale(1) translate(0px, 0px)", composite: "add" });
+  const rest = (at: number): SignatureFrame => ({ at, transform: "translate(0%, 0%) scale(1) translate(0px, 0px)" });
   const kick = (at: number, amp: number, zoom: number, i: number): SignatureFrame => ({
-    at, composite: "add",
+    at,
     transform: `translate(${-(zoom - 1) * 50}%, ${-(zoom - 1) * 50}%) scale(${zoom}) translate(${(Math.sin(i * 2.7) * amp).toFixed(1)}px, ${(Math.cos(i * 3.9) * amp).toFixed(1)}px)`,
   });
   const frames: SignatureFrame[] = [rest(0)];
@@ -156,7 +156,7 @@ function shakeFrames(): SignatureFrame[] {
 export function animateLeagueOfLegends(root: Element, _reduced: boolean, animate: Animate) {
   const one = (name: string) => root.querySelector(`[data-room-motion="${name}"]`);
   const all = (name: string) => [...root.querySelectorAll(`[data-room-motion="${name}"]`)];
-  animate(root.closest(".room-camera"), shakeFrames());
+  animate(root.closest(".room-rig"), shakeFrames());
 
   animate(one("dim"), fade([T.runes, 0], [T.rise + 400, .25], [T.boom - 100, .4], [T.boom + 200, .55], [T.fxEnd - 300, .3], [SKIN_TIMING.plungeEndMs - 300, 0]));
   // Runes : l'anneau s'allume rune après rune, puis pulse de plus en plus vite.
