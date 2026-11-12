@@ -3,6 +3,7 @@
 // Temps de réaction (QCM) : mesuré ICI, avec performance.now(), à partir de l'affichage des choix (invariant 7).
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { eventTime } from "../../shared/clock";
 import { CheckIcon, NumPad, SelectedBadge } from "../../web/ui";
 import type { MiniGameViewProps } from "../views-contract";
 import type { Priv, Pub } from "./game";
@@ -50,9 +51,10 @@ function QcmPhone({ pub, priv, round, sendInput }: MiniGameViewProps<Pub, Priv>)
 
   const choices = pub.choices ?? [];
   const mine = priv?.choice ?? null;
-  const answer = (i: number) => {
+  const answer = (i: number, timeStamp: number) => {
     if (answered(priv)) return;
-    const ms = shownAt.current === null ? 0 : performance.now() - shownAt.current;
+    // Instant réel du toucher : un téléphone lent à traiter l'événement n'est pas pénalisé.
+    const ms = shownAt.current === null ? 0 : Math.max(0, eventTime(timeStamp, performance.now()) - shownAt.current);
     void sendInput({ choice: i, ms }).catch(() => {});
   };
 
@@ -74,7 +76,7 @@ function QcmPhone({ pub, priv, round, sendInput }: MiniGameViewProps<Pub, Priv>)
                 whileTap={{ scale: 0.97 }}
                 animate={{ opacity: answered(priv) && !selected ? 0.35 : 1 }}
                 disabled={answered(priv)}
-                onClick={() => answer(i)}
+                onClick={(e) => answer(i, e.timeStamp)}
                 aria-pressed={selected}
                 className={`relative flex min-h-[4rem] flex-1 items-center gap-4 border px-4 text-left ${selected ? "border-serious-good bg-serious-good/15" : "border-serious-line bg-serious-bg-2/70"}`}
               >

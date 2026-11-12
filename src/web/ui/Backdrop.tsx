@@ -5,7 +5,11 @@
 import { useMemo } from "react";
 import { useSkin } from "../theme/skin";
 
-export function Backdrop({ stars = 46 }: { stars?: number }) {
+/**
+ * `still` : décor par défaut figé (téléphones). Les panneaux en verre floutent ce qu'il y a dessous : sur un fond animé,
+ * le flou serait recalculé à chaque image, ce qui fait ramer et chauffer les vieux iPhone.
+ */
+export function Backdrop({ stars = 46, still = false }: { stars?: number; still?: boolean }) {
   const skin = useSkin();
   const dots = useMemo(
     () =>
@@ -19,15 +23,15 @@ export function Backdrop({ stars = 46 }: { stars?: number }) {
     [stars],
   );
   return (
-    <div aria-hidden data-ui="backdrop" data-skin-backdrop={skin ?? ""} className="pointer-events-none absolute inset-0 overflow-hidden bg-night">
+    <div aria-hidden data-ui="backdrop" data-skin-backdrop={skin ?? ""} data-still={still} className="pointer-events-none absolute inset-0 overflow-hidden bg-night">
       {/* Halos en dégradé radial (pas de filtre blur : trop lourd pour Safari iOS et Firefox Android) */}
-      <div data-backdrop-default className="absolute -left-1/4 top-[-20%] h-[80%] w-[80%] animate-float" style={{ background: "radial-gradient(closest-side, color-mix(in srgb, var(--color-hot) 28%, transparent), transparent)" }} />
-      <div data-backdrop-default className="absolute -right-1/4 bottom-[-25%] h-[80%] w-[80%] animate-float" style={{ background: "radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 17%, transparent), transparent)", animationDelay: "-3s" }} />
+      <div data-backdrop-default className={`absolute -left-1/4 top-[-20%] h-[80%] w-[80%] ${still ? "" : "animate-float"}`} style={{ background: "radial-gradient(closest-side, color-mix(in srgb, var(--color-hot) 28%, transparent), transparent)" }} />
+      <div data-backdrop-default className={`absolute -right-1/4 bottom-[-25%] h-[80%] w-[80%] ${still ? "" : "animate-float"}`} style={{ background: "radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 17%, transparent), transparent)", animationDelay: "-3s" }} />
       {dots.map((d, i) => (
         <span
           key={i}
           data-backdrop-default
-          className="absolute rounded-full bg-ink animate-twinkle"
+          className={`absolute rounded-full bg-ink ${still ? "opacity-50" : "animate-twinkle"}`}
           style={{ left: `${d.left}%`, top: `${d.top}%`, width: `${d.size}rem`, height: `${d.size}rem`, animationDelay: `${d.delay}s`, animationDuration: `${d.duration}s` }}
         />
       ))}

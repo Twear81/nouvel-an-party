@@ -55,7 +55,8 @@ un front React 19 + Tailwind 4 + motion (Vite). Validation zod, config YAML.
    doit jamais bloquer la manche.
 6. **Pas de spoil** : une animation de `TvResults` déclare sa durée via `revealSeconds`, calculée avec les mêmes
    constantes que l'animation.
-7. **Temps de réaction mesuré sur le téléphone** (`performance.now()`), jamais à l'arrivée côté serveur.
+7. **Temps de réaction mesuré sur le téléphone** (`performance.now()`, instant du toucher via `eventTime(e.timeStamp, …)`),
+   jamais à l'arrivée côté serveur.
 8. Sauvegarde `data/save.json` à chaque étape : un changement d'état moteur doit rester sérialisable/reprenable.
 
 ## Ajouter un mini-jeu

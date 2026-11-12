@@ -16,7 +16,7 @@ export function TvStage({ phase, children }: { phase?: string; children: ReactNo
 export function PhoneStage({ phase, children }: { phase?: string; children: ReactNode }) {
   return (
     <div data-phase={phase} data-ui="stage-phone" className="relative mx-auto h-full w-full max-w-[34rem] overflow-hidden">
-      <div className="fixed inset-0 -z-0"><Backdrop stars={24} /></div>
+      <div className="fixed inset-0 -z-0"><Backdrop stars={24} still /></div>
       <div className="relative z-10 flex h-app min-h-0 flex-col pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.75rem,env(safe-area-inset-top))]">
         {children}
       </div>

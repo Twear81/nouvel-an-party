@@ -224,6 +224,7 @@ Le téléphone note l'instant où le GO s'affiche, puis mesure localement :
 ```tsx
 import { useEffect, useRef } from "react";
 import type { MiniGameViewProps } from "../views-contract";
+import { eventTime } from "../../shared/clock";
 // + composants de src/web/ui (bouton plein écran, texte…) : jamais de style en dur
 
 export function Phone({ pub, priv, sendInput }: MiniGameViewProps) {
@@ -235,10 +236,12 @@ export function Phone({ pub, priv, sendInput }: MiniGameViewProps) {
   }, [pub.go]);
 
   const done = priv?.time != null || priv?.early;
-  const onTap = () => {
+  const onTap = (e: { timeStamp: number }) => {
     if (done) return;
+    // Instant réel du toucher (event.timeStamp) : un téléphone lent à traiter l'événement n'est pas pénalisé.
+    const at = eventTime(e.timeStamp, performance.now());
     if (goAt.current === null) void sendInput({ early: true });           // faux départ
-    else void sendInput({ ms: performance.now() - goAt.current });        // réaction en ms
+    else void sendInput({ ms: at - goAt.current });                       // réaction en ms
   };
   // Rendu : grande zone tactile (onTap), "Attends…" tant que !pub.go, "GO !" ensuite,
   // puis le temps (priv.time) ou "Faux départ" (priv.early) une fois joué.
