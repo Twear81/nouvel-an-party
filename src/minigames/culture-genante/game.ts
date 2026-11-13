@@ -5,7 +5,7 @@
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
 import { tieRanks } from "../../shared/ranking";
-import { endWhenAllDone, progressOf, shuffle } from "../helpers";
+import { endWhenAllDone, progressOf, shuffle, themeSchema } from "../helpers";
 
 /** Plus grand nombre accepté pour une estimation (9 chiffres sur le pavé). */
 export const MAX_ESTIMATION = 999_999_999;
@@ -37,6 +37,8 @@ const questionSchema = z
     unite: z.string().max(20).optional(),
     /** Phrase affichée avec la bonne réponse, à la révélation. */
     commentaire: z.string().optional(),
+    /** Thème facultatif : le tirage évite de rejouer un thème déjà vu (ex : "histoire"). */
+    theme: themeSchema,
     /** Durée de la question en secondes (sinon `duree_question`). */
     duree: z.number().positive().optional(),
     /** Accroche propre à cette question (sinon tirée au hasard dans `accroches`). */
@@ -180,6 +182,7 @@ export default defineMiniGame<Cfg, Item, State>({
   name: (cfg) => cfg.nom,
   description: (cfg) => cfg.description,
   items: (cfg) => cfg.questions,
+  itemInfo: (item) => ({ theme: item.theme }),
   // Les étapes enchaînent leurs propres chronos (ctx.countdown) : pas de chrono global.
   roundSeconds: () => null,
   estimateSeconds: (cfg) => cfg.duree_accroche + cfg.duree_bascule + cfg.duree_question + cfg.temps_resultats,

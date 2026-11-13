@@ -9,7 +9,7 @@ import { ConfigError, loadConfig } from "./config";
 import { GameEngine } from "./engine/engine";
 import { lanIps, loadOrCreateCert, pickIp } from "./network";
 import { flags, isCompiled, paths } from "./paths";
-import { filePersistence } from "./persistence";
+import { fileDejaVu, filePersistence } from "./persistence";
 import { attachSockets, createBroadcaster } from "./socket";
 import { handleHttp } from "./static/serve";
 import { setSoundVolume } from "./static/sons";
@@ -46,6 +46,7 @@ async function main() {
     joinUrl,
     onChange: broadcast,
     persistence: filePersistence(paths.data),
+    dejaVu: fileDejaVu(paths.data),
   });
   attachSockets(io, engine, { hostIps: ips });
 

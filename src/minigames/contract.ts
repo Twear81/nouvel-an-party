@@ -59,6 +59,15 @@ export interface MiniGame<Cfg = any, Item = any, State = any> {
   description: (cfg: Cfg) => string;
   /** Liste des manches possibles. Le moteur en tire au hasard. */
   items: (cfg: Cfg) => Item[];
+  /**
+   * Optionnel : décrit un élément pour la mémoire « déjà vu » du moteur (data/deja-vu.json), qui évite de rejouer
+   * d'une partie à l'autre les mêmes éléments. Par défaut un élément est identifié par une empreinte de son contenu
+   * (JSON trié) : corriger une question dans le yaml la rend neuve.
+   * - `keys` : pour un élément composite (ex : un lot de mots), les clés à mémoriser (une par mot…) ; un élément est
+   *   d'autant moins prioritaire qu'il contient de clés déjà vues ;
+   * - `theme` : thème de l'élément ; le tirage évite un thème déjà rencontré (partie en cours et précédentes).
+   */
+  itemInfo?: (item: Item) => { keys?: string[]; theme?: string };
   /** Durée du chrono en secondes. null = pas de chrono automatique : le jeu gère ses étapes avec ctx.countdown / ctx.end. */
   roundSeconds: (cfg: Cfg, item: Item) => number | null;
   /** Estimation (s) du jeu + lecture des résultats. Le moteur y ajoute l'intro. */

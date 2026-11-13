@@ -36,6 +36,8 @@ export interface FakeGameOptions {
   noProgress?: boolean;
   /** Fait du jeu un interlude : « une fois toutes les N manches normales ». */
   interlude?: number;
+  /** Décrit les éléments pour la mémoire « déjà vu » (clés composites, thème). */
+  itemInfo?: (item: string) => { keys?: string[]; theme?: string };
   /** Ferme un univers après les résultats de cette manche. */
   changeSkinAfter?: boolean;
 }
@@ -52,6 +54,7 @@ export function makeFakeGame(opts: FakeGameOptions = {}) {
     id,
     configSchema: z.any(),
     changeSkinAfter: opts.changeSkinAfter,
+    itemInfo: opts.itemInfo,
     interlude: opts.interlude === undefined ? undefined : () => opts.interlude!,
     name: () => `Jeu ${id}`,
     description: () => `Description ${id}`,

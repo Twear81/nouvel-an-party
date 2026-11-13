@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { interludeCounts } from "../../src/shared/interlude";
 import { buildCatalog, buildPlan, defaultSetup, sanitizeSetup } from "../../src/server/engine/planner";
 import type { CatalogEntry, Setup } from "../../src/shared/types";
+import { emptyDejaVu, markPlayed } from "../../src/server/engine/deja-vu";
 import { makeFakeGame } from "./helpers/fake-game";
 import { seededRng } from "./helpers/rng";
 
@@ -305,5 +306,128 @@ describe("interludeCounts (estimation du lobby)", () => {
     expect(interludeCounts(14, src).s).toBe(2);
     expect(interludeCounts(40, src).s).toBe(3);
     expect(interludeCounts(40, [{ ...src[0]!, enabled: false }]).s).toBe(0);
+  });
+});
+
+// ───────────── Mémoire « déjà vu » ─────────────
+describe("buildPlan : éléments neufs d'abord (deja-vu)", () => {
+  const items = (plan: { item: unknown }[]) => plan.map((r) => r.item as string);
+  const played = (game: ReturnType<typeof makeFakeGame>, list: string[], data = emptyDejaVu()) => {
+    for (const item of list) markPlayed(data, game.game, item);
+    return data;
+  };
+
+  it("sans historique : même comportement qu'avant (sans doublon, bon nombre)", () => {
+    const a = makeFakeGame({ id: "a", items: 6 });
+    const plan = buildPlan([a.loaded], { counts: { a: 4 } }, "melange", seededRng(1));
+    expect(new Set(items(plan)).size).toBe(4);
+  });
+
+  it("les éléments neufs passent avant les déjà joués", () => {
+    const a = makeFakeGame({ id: "a", items: 6 });
+    const data = played(a, ["a-0", "a-1", "a-2"]);
+    for (let seed = 1; seed <= 20; seed++) {
+      const plan = buildPlan([a.loaded], { counts: { a: 3 } }, "melange", seededRng(seed), data);
+      expect(items(plan).sort()).toEqual(["a-3", "a-4", "a-5"]);
+    }
+  });
+
+  it("stock neuf épuisé : on complète avec les plus anciennement vus", () => {
+    const a = makeFakeGame({ id: "a", items: 5 });
+    const data = played(a, ["a-3", "a-0", "a-4", "a-1"]); // a-2 neuf ; ancienneté : a-3 < a-0 < a-4 < a-1
+    for (let seed = 1; seed <= 10; seed++) {
+      const plan = buildPlan([a.loaded], { counts: { a: 3 } }, "melange", seededRng(seed), data);
+      expect(items(plan).sort()).toEqual(["a-0", "a-2", "a-3"]);
+    }
+  });
+
+  it("ne bloque jamais : tout est déjà vu, la partie est quand même complète", () => {
+    const a = makeFakeGame({ id: "a", items: 3 });
+    const data = played(a, ["a-0", "a-1", "a-2"]);
+    expect(buildPlan([a.loaded], { counts: { a: 3 } }, "melange", seededRng(2), data)).toHaveLength(3);
+  });
+
+  it("évite un thème déjà vu (parties précédentes) et déjà pris dans la partie", () => {
+    const theme = (i: string) => ({ theme: i.endsWith("0") || i.endsWith("1") ? "cinema" : i.endsWith("2") || i.endsWith("3") ? "sport" : "cuisine" });
+    const a = makeFakeGame({ id: "a", items: 6, itemInfo: theme });
+    const data = emptyDejaVu();
+    data.themes.cinema = 5; // thème vu avant
+    for (let seed = 1; seed <= 20; seed++) {
+      const plan = buildPlan([a.loaded], { counts: { a: 2 } }, "melange", seededRng(seed), data);
+      const themes = items(plan).map((i) => theme(i).theme);
+      expect(themes).not.toContain("cinema");
+      expect(new Set(themes).size).toBe(2); // sport + cuisine, pas deux fois le même
+    }
+  });
+
+  it("la fraîcheur prime sur le thème", () => {
+    const a = makeFakeGame({ id: "a", items: 3, itemInfo: () => ({ theme: "meme" }) });
+    const data = played(a, ["a-0"]);
+    const plan = buildPlan([a.loaded], { counts: { a: 2 } }, "melange", seededRng(3), data);
+    expect(items(plan).sort()).toEqual(["a-1", "a-2"]);
+  });
+
+  it("composite (keys) : un lot est d'autant moins prioritaire qu'il contient de mots déjà vus", () => {
+    const words: Record<string, string[]> = { x: ["a", "b"], y: ["c", "d"], z: ["e", "f"] };
+    const g = makeFakeGame({ id: "g", items: ["x", "y", "z"], itemInfo: (l) => ({ keys: words[l]! }) });
+    const data = emptyDejaVu();
+    markPlayed(data, g.game, "x"); // a et b vus
+    data.items.g!.c = 99; // un seul mot de y déjà vu (ailleurs)
+    for (let seed = 1; seed <= 10; seed++) {
+      const plan = buildPlan([g.loaded], { counts: { g: 3 } }, "melange", seededRng(seed), data);
+      expect(items(plan)).toHaveLength(3);
+      expect(items(plan)[0]).toBe("z"); // aucun mot vu : en premier
+    }
+    // Aucun lot n'est neuf à part z ; y (1 mot vu) passe avant x (2 mots vus).
+    expect(items(buildPlan([g.loaded], { counts: { g: 2 } }, "melange", seededRng(4), data)).sort()).toEqual(["y", "z"]);
+  });
+
+  it("interludes : même règle de fraîcheur", () => {
+    const n = makeFakeGame({ id: "n", items: 30 });
+    const s = makeFakeGame({ id: "s", items: 4, interlude: 2 });
+    const data = played(s, ["s-0", "s-1"]);
+    const plan = buildPlan([n.loaded, s.loaded], { counts: { n: 4, s: 1 } }, "melange", seededRng(5), data);
+    const surprises = items(plan.filter((r) => r.interlude));
+    expect(surprises.length).toBeGreaterThan(0);
+    for (const item of surprises) expect(["s-2", "s-3"]).toContain(item);
+  });
+
+  it("la 1re manche n'est pas du jeu qui a fini la partie précédente", () => {
+    const a = makeFakeGame({ id: "a", items: 4 });
+    const b = makeFakeGame({ id: "b", items: 4 });
+    const data = emptyDejaVu();
+    data.lastGameId = "a";
+    for (let seed = 1; seed <= 30; seed++) {
+      const plan = buildPlan([a.loaded, b.loaded], { counts: { a: 3, b: 3 } }, "melange", seededRng(seed), data);
+      expect(plan[0]!.gameId).toBe("b");
+      for (let i = 1; i < plan.length; i++) expect(plan[i]!.gameId).not.toBe(plan[i - 1]!.gameId);
+    }
+  });
+
+  it("1re manche : on garde le jeu précédent si c'est le seul moyen d'éviter une répétition ensuite", () => {
+    const a = makeFakeGame({ id: "a", items: 5 });
+    const b = makeFakeGame({ id: "b", items: 5 });
+    const data = emptyDejaVu();
+    data.lastGameId = "a";
+    const plan = buildPlan([a.loaded, b.loaded], { counts: { a: 3, b: 2 } }, "melange", seededRng(1), data);
+    expect(plan.map((r) => r.gameId)).toEqual(["a", "b", "a", "b", "a"]);
+  });
+
+  it("un seul jeu : pas de blocage même s'il a fini la partie précédente", () => {
+    const a = makeFakeGame({ id: "a", items: 3 });
+    const data = emptyDejaVu();
+    data.lastGameId = "a";
+    expect(buildPlan([a.loaded], { counts: { a: 2 } }, "melange", seededRng(1), data)).toHaveLength(2);
+  });
+});
+
+describe("buildCatalog : éléments neufs", () => {
+  it("compte les neufs (plafonnés par manches_max) quand un historique est fourni", () => {
+    const a = makeFakeGame({ id: "a", items: 6 });
+    const data = emptyDejaVu();
+    markPlayed(data, a.game, "a-0");
+    markPlayed(data, a.game, "a-1");
+    expect(buildCatalog([a.loaded], 4, data)[0]!.fresh).toBe(4);
+    expect(buildCatalog([{ ...a.loaded, maxRounds: 3 }], 4, data)[0]!.fresh).toBe(3);
   });
 });

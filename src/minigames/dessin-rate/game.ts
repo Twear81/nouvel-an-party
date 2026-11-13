@@ -139,6 +139,8 @@ export default defineMiniGame<Cfg, Item, State>({
   name: (cfg) => cfg.nom,
   description: (cfg) => cfg.description,
   items: lots,
+  // Un lot regroupe plusieurs mots : la clé utile est chaque mot (un lot est moins prioritaire s'il en contient de déjà vus).
+  itemInfo: (item) => ({ keys: item.mots.map((m) => `${item.difficulte}:${m}`) }),
   roundSeconds: () => null,
   // Estimation à 7 joueurs : dessin + galerie + vote (souvent écourté) + révélation et lecture des résultats.
   estimateSeconds: (cfg) => cfg.duree_dessin + 7 * cfg.duree_galerie + cfg.duree_vote * 0.75 + cfg.temps_resultats,

@@ -15,7 +15,7 @@ tests/unit/<id>.test.ts        tests de la logique
 
 ## 2. game.ts : le contrat `MiniGame<Cfg, Item, State>`
 - `Cfg` : contenu validé du yaml. `Item` : un élément tirable (une question…). `State` : l'état interne d'une manche, jamais envoyé tel quel.
-- Le moteur tire `Item` au hasard parmi `items()`, une fois par manche.
+- Le moteur tire `Item` parmi `items()`, une fois par manche : les éléments **jamais joués** d'abord, au hasard, puis les plus anciennement joués (mémoire `data/deja-vu.json`, voir `itemInfo`).
 
 | Membre | Rôle |
 |---|---|
@@ -23,6 +23,7 @@ tests/unit/<id>.test.ts        tests de la logique
 | `configSchema` | schéma **zod** du yaml (valeurs par défaut avec `.default()`, messages d'erreur clairs). Les champs `actif` et `manches_max` (plafond de manches, entier ≥ 1) sont gérés par le moteur, ne les déclarez pas |
 | `name(cfg)`, `description(cfg)` | titre et phrase d'explication affichés à l'annonce |
 | `items(cfg)` | liste des manches possibles |
+| `itemInfo?(item)` | optionnel : `{ keys?, theme? }` pour la mémoire « déjà vu ». Par défaut un élément est identifié par une empreinte de son contenu (JSON trié) : corriger un texte dans le yaml le rend neuf. `keys` : pour un élément composite, les clés à mémoriser (ex. Dessin raté : un lot = plusieurs mots, une clé par mot ; un lot est d'autant moins prioritaire qu'il contient de mots déjà vus). `theme` : thème de l'élément (champ yaml facultatif `theme:`, chaîne) ; le tirage évite un thème déjà vu dans la partie en cours et dans les précédentes, mais la fraîcheur prime. Pour offrir `theme:` : ajouter `theme: themeSchema` (helpers) au schéma de la question, le recopier dans l'`Item` et déclarer `itemInfo: (item) => ({ theme: item.theme })` |
 | `roundSeconds(cfg, item)` | durée du chrono en secondes, ou `null` si la manche se termine seule (via `ctx.end()`) |
 | `estimateSeconds(cfg)` | durée estimée (jeu + résultats) pour le calcul de durée de soirée ; l'intro est ajoutée par le moteur |
 | `start(item, ctx)` | début de manche (pendant l'intro) : renvoie le `State` initial. Ne démarrez pas de timer de jeu ici |

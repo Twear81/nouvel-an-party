@@ -55,10 +55,24 @@ Créé automatiquement à côté de l'exe. Ne pas y toucher pendant la partie.
 | Contenu | Rôle |
 |---|---|
 | `save.json` | sauvegarde de la partie, réécrite à chaque étape. Après un crash ou un redémarrage, la TV propose de **reprendre** |
+| `deja-vu.json` | mémoire des questions, objets et mots déjà joués (voir ci-dessous) |
 | `certs/` | certificat HTTPS auto-signé (nécessaire pour garder l'écran du téléphone allumé). Les téléphones affichent un avertissement la première fois : il faut accepter |
 
+### Questions neuves : `deja-vu.json`
+Chaque manche qui démarre est notée dans `data/deja-vu.json` (avec un numéro d'ordre). Une 2e ou 3e partie (retour au lobby puis nouveau lancement, ou redémarrage de l'exe) tire d'abord les questions, objets et mots **jamais joués**, puis, si le stock est épuisé, les plus anciennement joués : une partie n'est jamais bloquée. Le lobby affiche pour chaque jeu le nombre d'éléments neufs restants (« 14 neuves »). La première manche d'une nouvelle partie n'est pas du même jeu que la dernière de la précédente quand c'est possible.
+
+- Un élément est reconnu à son contenu : corriger le texte d'une question dans le yaml la rend neuve.
+- **Remise à zéro : supprimer `data/deja-vu.json`** (c'est la seule). Fichier absent ou illisible : tout est neuf. `save.json` n'est pas concerné.
+- `theme:` (facultatif) : dans les questions de Culture gênante, Ceci ou Cela, Le bon prix, et, en écriture objet (`texte:`), de Qui est le plus, Tier list et Comme les autres, on peut ajouter un thème en une chaîne (`theme: cinema`). Le tirage évite, tant que possible, un thème déjà rencontré (dans la partie et dans les précédentes), sans jamais passer devant un élément neuf. Les questions écrites en simple chaîne restent valides (sans thème).
+
+```yaml
+questions:
+  - texte: "Qui est le plus susceptible de rater son train ?"
+    theme: voyage
+```
+
 ### Repartir de zéro
-Fermez `NouvelAn.exe`, supprimez le dossier `data/`, relancez. Les joueurs et scores sont effacés. Le certificat est régénéré (les téléphones devront accepter à nouveau l'avertissement). Pour ne réinitialiser que la partie en gardant le certificat, supprimez seulement `save.json`.
+Fermez `NouvelAn.exe`, supprimez le dossier `data/`, relancez. Les joueurs et scores sont effacés. Le certificat est régénéré (les téléphones devront accepter à nouveau l'avertissement). Pour ne réinitialiser que la partie en gardant le certificat, supprimez seulement `save.json`. Supprimer le dossier `data/` remet aussi à zéro la mémoire des questions déjà vues.
 
 Une ancienne sauvegarde avec un portrait photo reste utilisable : le portrait devient l'avatar Renard ; le pseudo,
 le cadre, la couleur, le score et le jeton sont conservés. Un ancien dossier `photos/` n'est plus utilisé ni servi par
