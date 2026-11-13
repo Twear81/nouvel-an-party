@@ -21,7 +21,7 @@ export interface Env {
 
 export interface Scene {
   id: string;
-  section: "composants" | "chrono" | "ecrans" | "jeux";
+  section: "composants" | "chrono" | "ecrans" | "transitions" | "jeux";
   /** Regroupement dans le menu (un mini-jeu, par exemple). */
   groupe?: string;
   titre: string;
