@@ -358,6 +358,8 @@ La musique est pilotée par `sound.setAmbiance(actif)` dans `useGlobalSfx` (`set
 mais ne joue rien au montage. Il faut un geste dans la page courante. Le moteur garde une seule boucle, annule un
 décodage encore en cours si l’on quitte l’ambiance, applique les fondus et le ducking (volume à 25 % pendant les jingles,
 roulements, montées de tension et applaudissements). Plusieurs sons superposés gardent la baisse jusqu’à la dernière fin.
+Les fondus utilisent `cancelAndHoldAtTime` quand disponible ; sinon le moteur garde le volume courant avec
+`cancelScheduledValues` puis `setValueAtTime`, pour les navigateurs sans cette méthode.
 Pause et bouton muet arrêtent la boucle en fondu ; retour au lobby / reprise après geste la relancent. Les sons
 ponctuels continuent à passer par les hooks existants. Le roulement dure exactement 2 s pour conserver les vitesses
 et les chronologies des révélations. Simon utilise un piano échantillonné do4, transposé en mi4, sol4 et do5 (tempérament égal).
