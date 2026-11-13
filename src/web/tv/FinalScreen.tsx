@@ -47,10 +47,13 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   // Sons : la fanfare joue à la révélation du 1er (plus à l'arrivée sur l'écran) ; une étoile = un tintement à l'arrivée.
   const base = reveal ? reveal.startedAt + (reveal.pausedMs ?? 0) : null;
   const sfx = useMemo(() => {
-    const list: { à: number; son: "ceremonie.etoile" | "carte.pose" | "final.tambour" | "final.fanfare" | "applaudissements" | "ceremonie.tic"; options?: { rate?: number; volume?: number } }[] = [];
+    const list: { à: number; son: "ceremonie.etoile" | "carte.pose" | "final.tambour" | "final.fanfare" | "applaudissements" | "ceremonie.tic" | "final.compteur"; options?: { rate?: number; volume?: number } }[] = [];
     for (const b of timeline.beats) {
       if (b.kind === "roulement") list.push({ à: b.startMs / 1000, son: "final.tambour" }, { à: (b.startMs + 2300 * k) / 1000, son: "final.tambour" });
       if (b.kind === "joueur" || b.kind === "premier") {
+        // Le score défile : un tic par palier, serrés au début puis espacés (même ralenti que CountUp), de plus en plus aigus.
+        const ticks = 16, countS = (FINAL_TIMING.countMs * k) / 1000;
+        for (let i = 0; i < ticks; i++) list.push({ à: b.countAtMs! / 1000 + countS * (1 - Math.sqrt(1 - i / ticks)), son: "final.compteur", options: { rate: 1 + (i / ticks) * 0.6 } });
         b.starAtMs?.forEach((s, j) => list.push({ à: (s + FINAL_TIMING.starMs * k * 0.72) / 1000, son: "ceremonie.etoile", options: { rate: 1 + j * 0.12 } }));
         if (b.kind === "joueur") list.push({ à: b.settleAtMs! / 1000, son: "carte.pose" });
         else list.push({ à: b.settleAtMs! / 1000, son: "final.fanfare" }, { à: (b.settleAtMs! + 500 * k) / 1000, son: "applaudissements" });
@@ -112,7 +115,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                 className="font-display text-ink" style={{ fontSize: "7rem", lineHeight: 1 }}>?</motion.span>
             ) : (
               <motion.div data-testid="podium-1" initial={{ scale: 0.2, opacity: 0, rotate: -12 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 140, damping: 11 }}
-                className="relative flex flex-col items-center">
+                className="relative z-[4] flex flex-col items-center">
                 <PlayerAvatar profile={winner.profile} size="lg" crowned crownDelay={0.35 * Math.max(k, 0.05)} />
                 <div className="absolute top-full mt-3 flex flex-col items-center gap-1">
                   <span className="cer-chip !max-w-[22rem] !text-3xl">{winner.profile.name}</span>

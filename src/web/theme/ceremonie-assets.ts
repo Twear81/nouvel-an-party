@@ -89,7 +89,7 @@ export const HONOR_BOARD = {
   topPct: 29,
   heightPct: 70,
   /** Zone de velours sous la couronne de laurier (mesurée sur `tableau-honneur.png`). */
-  inner: { left: 0.1, right: 0.1, top: 0.215, bottom: 0.1 },
+  inner: { left: 0.105, right: 0.14, top: 0.215, bottom: 0.1 },
   /** Nombre de lignes réservées (huit joueurs au plus). */
   rows: 8,
 } as const;

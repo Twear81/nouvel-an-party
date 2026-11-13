@@ -48,6 +48,7 @@ export const SONS = {
   "ceremonie.etoile": { fichier: "points.ogg", volume: 0.6, variation: 10 },
   "ceremonie.gagnant": { fichier: "bravo.ogg", volume: 0.7 },
   "final.tambour": { fichier: "roulement.ogg", volume: 0.7 },
+  "final.compteur": { fichier: "tic.ogg", volume: 0.3 },
   "transition.entree": { fichier: "whoosh-entree.ogg", volume: 0.4 },
   "transition.sortie": { fichier: "whoosh-sortie.ogg", volume: 0.4 },
   "applaudissements": { fichier: "applaudissements.ogg", volume: 0.6 },

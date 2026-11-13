@@ -44,6 +44,7 @@ Déroulé d'une manche
 Fin de partie et scènes
     final.fanfare         fanfare du classement final (au moment où le 1er est révélé)
     final.tambour         roulement de tambour avant le 1er (rejoué en boucle pendant l'attente)
+    final.compteur        tic du score qui défile au classement final (rejoué de plus en plus aigu)
     ceremonie.souvenir    un souvenir se pose dans la pièce
     ceremonie.enveloppe   l'enveloppe d'un bonus glisse jusqu'au centre
     ceremonie.tic         tic de la machine à sous et du projecteur
