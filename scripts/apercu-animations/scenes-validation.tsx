@@ -58,7 +58,7 @@ function SceneCadres({ env }: { env: Env }) {
               <div className="grid grid-cols-5 gap-x-10 gap-y-12">
                 {FRAMES.map((cadre) => (
                   <Button key={cadre.id} variant={profil.frame === cadre.id ? "primary" : "secondary"} data-testid={`ga-cadre-${cadre.id}`} aria-pressed={profil.frame === cadre.id}
-                    className="flex min-w-0 flex-col items-center gap-5 !py-8" onClick={() => { setProfil((p) => ({ ...p, frame: cadre.id })); setEditeur(false); }}>
+                    className="ga-cadre flex min-w-0 flex-col items-center gap-5 !py-8" onClick={() => { setProfil((p) => ({ ...p, frame: cadre.id })); setEditeur(false); }}>
                     <PlayerAvatar profile={{ ...profil, frame: cadre.id }} size="lg" />
                     <span className="text-center text-2xl">{cadre.label}</span>
                     <span data-ui="rarity-tag" data-rarity={cadre.rarity} className="summon-tag">{cadre.rarity}</span>
