@@ -17,7 +17,7 @@ export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot
   const countingDown = midnight?.phase === "countdown";
   const lobbyOnly = phase === "lobby";
 
-  const togglePause = useCallback(() => void (paused ? actions.resume() : actions.pause()).catch(() => {}), [paused, actions]);
+  const togglePause = useCallback(() => void (paused || midnight?.phase === "celebrate" ? actions.resume() : actions.pause()).catch(() => {}), [paused, midnight?.phase, actions]);
   const skip = useCallback(() => void actions.skip().catch(() => {}), [actions]);
 
   useEffect(() => {

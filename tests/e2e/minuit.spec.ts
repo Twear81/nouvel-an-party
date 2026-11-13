@@ -62,4 +62,18 @@ test.describe("Minuit", () => {
       await expect(a!.t("phone-lobby-ready")).toBeVisible();
     });
   });
+
+  test.describe("lobby, reprise manuelle", () => {
+    test.use({ serverOptions: { minuit: { dans: 15, compteARebours: 6, repriseAuto: 0 } } });
+
+    test("Continuer ferme la célébration même sans manche mise en pause", async ({ party }) => {
+      await party.addPhones("Alice");
+      await expect(party.tv.getByTestId("midnight")).toHaveAttribute("data-state", "celebrate", { timeout: 25_000 });
+      await expect(party.tv.getByTestId("host-pause")).toContainText("Continuer");
+      await party.tv.getByTestId("host-pause").click();
+      await expect(party.tv.getByTestId("midnight")).toHaveCount(0);
+      await expect(party.phones[0]!.t("midnight")).toHaveCount(0);
+      await expect(party.tv.getByTestId("tv-lobby")).toBeVisible();
+    });
+  });
 });
