@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- assiette -->
+  <ellipse cx="64" cy="104" rx="56" ry="12" fill="#e9eef6"/>
+  <ellipse cx="64" cy="102" rx="46" ry="8" fill="#ffffff"/>
+  <!-- part : face avant -->
+  <path d="M22 54 L96 54 L96 100 L22 100Z" fill="#f3e3b8"/>
+  <rect x="22" y="54" width="74" height="9" fill="#f6efd9"/>
+  <rect x="22" y="63" width="74" height="9" fill="#7a4a2b"/>
+  <rect x="22" y="72" width="74" height="12" fill="#fbf4df"/>
+  <rect x="22" y="84" width="74" height="8" fill="#6a3f23"/>
+  <rect x="22" y="92" width="74" height="8" fill="#fbf4df"/>
+  <!-- côté droit -->
+  <path d="M96 54 L112 44 L112 90 L96 100Z" fill="#d9c79b"/>
+  <path d="M96 63 L112 53 L112 61 L96 72Z" fill="#5a331b"/>
+  <path d="M96 84 L112 74 L112 82 L96 92Z" fill="#4e2c17"/>
+  <!-- dessus saupoudré de cacao -->
+  <path d="M22 54 L38 44 L112 44 L96 54Z" fill="#8a5632"/>
+  <path d="M28 52 L42 46 L108 46 L92 53Z" fill="#74451f"/>
+  <g fill="#4a2a14"><circle cx="48" cy="49" r="1.6"/><circle cx="66" cy="47.5" r="1.6"/><circle cx="84" cy="49" r="1.6"/><circle cx="76" cy="51" r="1.2"/><circle cx="58" cy="51" r="1.2"/></g>
+  <!-- brillance des biscuits -->
+  <rect x="26" y="65" width="26" height="2" rx="1" fill="#a76b3f" opacity=".7"/>
+  <rect x="26" y="86" width="20" height="2" rx="1" fill="#8c5530" opacity=".7"/>
+  <!-- feuille de menthe -->
+  <path d="M60 44 C60 32 72 28 82 30 C82 40 72 46 60 44Z" fill="#4fa83d"/>
+  <path d="M62 43 C68 38 74 34 80 31" stroke="#3a7f2e" stroke-width="1.6" fill="none"/>
+</svg>

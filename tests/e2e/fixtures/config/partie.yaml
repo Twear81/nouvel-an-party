@@ -7,3 +7,8 @@ port_http: 3000
 port_https: 3443
 ip: "127.0.0.1"
 ouvrir_navigateur: false
+
+# Pas de compte à rebours de minuit pendant les tests (sauf tests/e2e/minuit.spec.ts qui le réécrit).
+minuit:
+  actif: false
+  uniquement_nouvel_an: false # les tests dédiés répètent à la date courante

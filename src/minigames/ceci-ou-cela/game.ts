@@ -4,7 +4,7 @@
 //  - sans {joueur} : on gagne si on est dans le camp majoritaire (égalité : tout le monde gagne).
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
-import { fillPlayer, endWhenAllDone, progressOf } from "../helpers";
+import { fillPlayer, endWhenAllDone, progressOf, themeSchema } from "../helpers";
 
 const choicesSchema = z.tuple([z.string().min(1), z.string().min(1)]);
 
@@ -24,7 +24,7 @@ const configSchema = z.object({
     .array(
       z.union([
         z.string().min(1),
-        z.object({ texte: z.string().min(1), choix: choicesSchema.optional(), duree: z.number().positive().optional() }),
+        z.object({ texte: z.string().min(1), choix: choicesSchema.optional(), duree: z.number().positive().optional(), theme: themeSchema }),
       ]),
     )
     .min(1, "Ajoute au moins une question"),
@@ -32,7 +32,7 @@ const configSchema = z.object({
 
 type Cfg = z.infer<typeof configSchema>;
 type Choice = 0 | 1;
-type Item = { text: string; choices: [string, string]; duration?: number };
+type Item = { text: string; choices: [string, string]; duration?: number; theme?: string };
 interface State {
   question: string;
   choices: [string, string];
@@ -76,8 +76,9 @@ export default defineMiniGame<Cfg, Item, State>({
     cfg.questions.map((q) =>
       typeof q === "string"
         ? { text: q, choices: cfg.choix_par_defaut }
-        : { text: q.texte, choices: q.choix ?? cfg.choix_par_defaut, duration: q.duree },
+        : { text: q.texte, choices: q.choix ?? cfg.choix_par_defaut, duration: q.duree, theme: q.theme },
     ),
+  itemInfo: (item) => ({ theme: item.theme }),
   roundSeconds: (cfg, item) => item.duration ?? cfg.duree,
   estimateSeconds: (cfg) => cfg.duree + cfg.temps_resultats,
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- feuilles -->
+  <path d="M64 118 C30 118 10 96 12 72 C28 80 40 78 48 72 C40 92 52 108 64 118Z" fill="#4fa83d"/>
+  <path d="M64 118 C98 118 118 96 116 72 C100 80 88 78 80 72 C88 92 76 108 64 118Z" fill="#3f9334"/>
+  <path d="M64 120 C48 112 40 96 44 76 L84 76 C88 96 80 112 64 120Z" fill="#69c256"/>
+  <path d="M64 118 L64 84" stroke="#3f9334" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- fleurettes -->
+  <g fill="#f4ecd6">
+    <circle cx="38" cy="58" r="18"/><circle cx="90" cy="58" r="18"/><circle cx="64" cy="34" r="22"/>
+    <circle cx="52" cy="56" r="20"/><circle cx="78" cy="56" r="20"/><circle cx="64" cy="66" r="18"/>
+    <circle cx="28" cy="70" r="12"/><circle cx="100" cy="70" r="12"/>
+  </g>
+  <g fill="#e2d4b0">
+    <circle cx="30" cy="66" r="7"/><circle cx="46" cy="72" r="8"/><circle cx="64" cy="76" r="8"/><circle cx="82" cy="72" r="8"/><circle cx="98" cy="66" r="7"/>
+    <circle cx="50" cy="44" r="6"/><circle cx="78" cy="44" r="6"/><circle cx="64" cy="54" r="6"/>
+  </g>
+  <g fill="#fffaf0">
+    <circle cx="58" cy="26" r="7"/><circle cx="74" cy="30" r="6"/><circle cx="36" cy="50" r="6"/><circle cx="92" cy="50" r="6"/><circle cx="56" cy="46" r="5"/><circle cx="76" cy="58" r="5"/>
+  </g>
+</svg>

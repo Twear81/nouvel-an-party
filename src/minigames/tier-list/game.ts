@@ -22,7 +22,7 @@ const configSchema = z.object({
 });
 
 type Cfg = z.infer<typeof configSchema>;
-type Item = { text: string; duration?: number };
+type Item = { text: string; duration?: number; theme?: string };
 interface State {
   question: string;
   /** votant → (invité noté → index d'étage, 0 = le plus haut) */
@@ -78,6 +78,7 @@ export default defineMiniGame<Cfg, Item, State>({
   name: (cfg) => cfg.nom,
   description: (cfg) => cfg.description,
   items: (cfg) => cfg.questions.map(normalizeQuestion),
+  itemInfo: (item) => ({ theme: item.theme }),
   roundSeconds: (cfg, item) => item.duration ?? cfg.duree,
   estimateSeconds: (cfg) => cfg.duree + cfg.temps_resultats,
 

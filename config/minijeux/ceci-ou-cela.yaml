@@ -43,45 +43,31 @@ points:
 questions:
   # --- Dilemmes à deux réponses (majorité) ---
   - texte: "Plutôt…"
-    choix: [Mer, Montagne]
-  - texte: "Pour trinquer à minuit :"
-    choix: [Champagne, Mojito]
-  - texte: "Le réveillon idéal :"
-    choix: [À la maison, En boîte]
-  - texte: "Plutôt…"
-    choix: [Lève-tôt, Couche-tard]
-  - texte: "Les voeux de minuit :"
-    choix: [Sincères, Pour rire]
-  - texte: "Pour le dessert :"
-    choix: [Bûche, Galette]
-  - texte: "Plutôt…"
     choix: [Chat, Chien]
-  - texte: "En soirée, on préfère :"
-    choix: [Danser, Discuter]
-  - texte: "Plutôt…"
-    choix: [Sucré, Salé]
-  - texte: "Pour une soirée pyjama :"
-    choix: [Film, Jeux de société]
-  - texte: "Pour 2027, il vaut mieux :"
-    choix: [Planifier, Improviser]
+  - texte: "À 2 h du matin, tu es plutôt :"
+    choix: [Au lit, Dernier debout]
+    theme: soiree
+  - texte: "Le chien monte sur le canapé :"
+    choix: [Autorisé, Interdit]
+    theme: animaux
+  - texte: "Un ami arrive avec une coupe de cheveux ratée :"
+    choix: [Je lui dis, Je me tais]
+    theme: amitie
+  - texte: "Quelqu'un te spoile la fin de ta série :"
+    choix: [Pardonnable, Impardonnable]
+    theme: amitie
+  - texte: "Tu partirais vivre un an au Japon sans parler un mot de japonais ?"
+    choix: [Demain, Jamais]
+    theme: voyage
   # --- Oui / Non (majorité) ---
   - "L'ananas sur la pizza ?"
-  - "Tu as déjà embrassé quelqu'un à minuit ?"
   - "Tu tiendras ta résolution jusqu'à février ?"
   - "Tu serais capable de chanter au karaoké ce soir ?"
   # --- Mode {joueur} : on devine sa réponse ---
-  - texte: "Pour {joueur}, le meilleur moment du réveillon :"
-    choix: [Le repas, Minuit]
-  - texte: "{joueur} préfère plutôt…"
-    choix: [Mer, Montagne]
-  - texte: "{joueur} est plutôt…"
-    choix: [Lève-tôt, Couche-tard]
-  - texte: "{joueur} boirait plutôt…"
-    choix: [Champagne, Bière]
-  - texte: "Pour {joueur}, la meilleure part :"
-    choix: [Bûche, Galette]
-  - "Est-ce que {joueur} aime l'ananas sur la pizza ?"
-  - "Est-ce que {joueur} a déjà pleuré devant un film de Noël ?"
-  - "Est-ce que {joueur} fait des résolutions chaque année ?"
+  - texte: "Est-ce que {joueur} a déjà pleuré devant un anime, un dessin animé ou un k-drama ?"
+    theme: emotions
   - "Est-ce que {joueur} chante sous la douche ?"
   - "Est-ce que {joueur} a déjà raté un train ou un avion ?"
+  - texte: "Dernière part de tiramisu, personne n'ose. {joueur}…"
+    choix: [La prend, La laisse]
+    theme: bouffe

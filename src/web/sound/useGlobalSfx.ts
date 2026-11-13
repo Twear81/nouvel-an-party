@@ -7,7 +7,7 @@ import { serverNow } from "../net/socket";
 import { revealSecondsOf } from "../net/useReveal";
 import { useSkin } from "../theme/skin";
 import { play, sound } from "./engine";
-import { ambianceActive, CHRONO_INITIAL, chronoStep, diffSnapshots, pointsSoundAt, type ChronoState } from "./events";
+import { ambianceActive, CHRONO_INITIAL, chronoStep, diffSnapshots, MIDNIGHT_SFX_INITIAL, midnightStep, pointsSoundAt, type ChronoState, type MidnightSfxState } from "./events";
 import { useSfxAt } from "./hooks";
 
 export function useGlobalSfx(snapshot: GameSnapshot | null) {
@@ -57,6 +57,24 @@ export function useGlobalSfx(snapshot: GameSnapshot | null) {
     const id = setInterval(tick, 100);
     return () => clearInterval(id);
   }, [playing, roundIndex]);
+
+  // Minuit : un tic par seconde sur les 10 dernières, la fête à zéro (calés sur la même heure serveur que l'affichage).
+  const midnightTarget = snapshot?.midnight?.targetAt ?? null;
+  useEffect(() => {
+    if (midnightTarget === null) return;
+    let state: MidnightSfxState = MIDNIGHT_SFX_INITIAL;
+    const tick = () => {
+      const step = midnightStep(state, midnightTarget - serverNow());
+      state = step.state;
+      if (step.call) {
+        play(step.call.nom, step.call.options);
+        if (step.call.nom === "minuit.fete") setTimeout(() => play("applaudissements", { volume: 0.6, ignorePause: true }), 400);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 100);
+    return () => clearInterval(id);
+  }, [midnightTarget]);
 
   // Fin de la révélation des résultats : « points gagnés », calé sur la même durée que l'animation.
   const results = snapshot?.phase === "results" ? snapshot.round : null;

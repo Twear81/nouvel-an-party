@@ -12,8 +12,12 @@ export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot
   const soundState = useSoundState();
   const { phase, paused } = snapshot;
   const inGame = phase === "transition" || phase === "intro" || phase === "playing" || phase === "results";
+  // Minuit : la partie est figée sous le compte à rebours ; seul « Reprendre » (célébration) est utile, au lobby comme à l'écran final.
+  const midnight = snapshot.midnight;
+  const countingDown = midnight?.phase === "countdown";
+  const lobbyOnly = phase === "lobby";
 
-  const togglePause = useCallback(() => void (paused ? actions.resume() : actions.pause()).catch(() => {}), [paused, actions]);
+  const togglePause = useCallback(() => void (paused || midnight?.phase === "celebrate" ? actions.resume() : actions.pause()).catch(() => {}), [paused, midnight?.phase, actions]);
   const skip = useCallback(() => void actions.skip().catch(() => {}), [actions]);
 
   useEffect(() => {
@@ -31,17 +35,23 @@ export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot
   return (
     <>
       <div data-testid="host-bar" data-ui="host-bar" className={`z-50 flex items-center justify-end gap-3 px-10 pb-3 pt-1 ${overlay ? "absolute inset-x-0 bottom-0" : "relative shrink-0"}`}>
-        {inGame && (
+        {midnight?.phase === "celebrate" && !inGame && (
+          <Button data-ui="host-button" data-testid="host-pause" variant="primary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={togglePause}>
+            <PlayIcon />
+            Continuer
+          </Button>
+        )}
+        {inGame && !countingDown && (
           <>
             <Button data-ui="host-button" data-testid="host-pause" variant={paused ? "primary" : "secondary"} size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={togglePause}>
               {paused ? <PlayIcon /> : <PauseIcon />}
               {paused ? "Reprendre" : "Pause"}
             </Button>
-            <Button data-ui="host-button" data-testid="host-skip" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={skip}>
+            {!midnight && <Button data-ui="host-button" data-testid="host-skip" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={skip}>
               <SkipIcon />
               Passer
-            </Button>
-            {phase === "playing" && (
+            </Button>}
+            {phase === "playing" && !midnight && (
               <Button data-ui="host-button" data-testid="host-addtime" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={() => void actions.addTime(10).catch(() => {})}>
                 <ClockIcon />
                 +10 s
@@ -49,13 +59,13 @@ export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot
             )}
           </>
         )}
-        <Button data-ui="host-button" data-testid="host-sound" data-sound={soundState} aria-label="Son" variant="secondary" size="sm" className="ml-3 flex items-center !px-4 !py-1.5" onClick={() => sound.toggleMuted()}>
+        {!lobbyOnly && <Button data-ui="host-button" data-testid="host-sound" data-sound={soundState} aria-label="Son" variant="secondary" size="sm" className="ml-3 flex items-center !px-4 !py-1.5" onClick={() => sound.toggleMuted()}>
           {soundState === "on" ? <SpeakerIcon /> : <SpeakerOffIcon />}
-        </Button>
-        <Button data-ui="host-button" data-testid="host-lobby" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={() => setConfirmLobby(true)}>
+        </Button>}
+        {!lobbyOnly && <Button data-ui="host-button" data-testid="host-lobby" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={() => setConfirmLobby(true)}>
           <HomeIcon />
           Lobby
-        </Button>
+        </Button>}
       </div>
       {confirmLobby && (
         <ConfirmDialog

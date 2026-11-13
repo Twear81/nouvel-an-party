@@ -10,6 +10,8 @@ ils emploient les classes Tailwind issues du thème (`bg-surface`, `text-accent`
 | Couleurs, polices, rayons, ombres, dégradés, animations | `src/web/theme/theme.css` (bloc `@theme static`) |
 | Cadres d'avatar (tracés SVG et décor CSS) | `src/web/ui/AvatarFrame.tsx` + `src/web/theme/theme.css` (section « Avatars », classes `.frame-*`) |
 | Liste des avatars, cadres proposés, couleurs de profil | `src/web/theme/profile-options.ts` |
+| Formes des confettis (tournesol, chou-fleur, boule de cristal, balle de ping-pong, patte…) | `src/web/theme/confetti-shapes.ts` |
+| Boules de cristal du lobby, Shenron, bandes de cinéma de la pause, couleurs des temps intermédiaires | `theme.css` (`--color-dragonball*`, `--color-shenron*`, `--color-cinema*`, `--color-split-*`), `src/web/theme/assets/shenron.svg` |
 | Fonts embarquées | `src/web/main.tsx` (imports `@fontsource…`) + `--font-*` dans `theme.css` |
 
 ### Palette
@@ -34,11 +36,30 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 
 ### Avatars, cadres, couleurs
 - `AVATARS` : ajouter `{ id, label, emoji }`. L'`id` est enregistré dans le profil : ne pas renommer un id existant en cours de soirée.
-  Pour utiliser des images à la place des emoji, adapter `PlayerAvatar.tsx` (une seule branche à changer).
-- `FRAMES` : ajouter `{ id, label, className }` puis écrire la classe `.frame-<nom>` dans `theme.css`
+  Vérifier que l'emoji existe dans Twemoji 15 (police embarquée : un emoji plus récent s'afficherait en carré).
+  **Avatar à image** (ce qui n'a pas d'emoji : chou-fleur, tiramisu, boule à 4 étoiles) : déposer un SVG statique carré
+  (viewBox 128, sans animation) dans `src/web/theme/assets/avatars/`, le déclarer dans `src/web/theme/avatar-images.ts`
+  (clé = id) et mettre `image: true` sur l'entrée de `AVATARS` ; `emoji` reste obligatoire (repli des textes et de la
+  signature Overwatch). `PlayerAvatar` affiche l'image à la place de l'emoji (même encombrement) : choix, aperçus,
+  TV et skins en profitent. Les images sont dans un module à part pour que les tests (qui importent `profile-options.ts`) ne chargent pas de SVG.
+- `FRAMES` : ajouter `{ id, label, className, rarity }` puis écrire la classe `.frame-<nom>` dans `theme.css`
   (`--p` = couleur du joueur ; traits SVG `avatar-frame-outer` / `avatar-frame-inner`, coordonnées sur 100).
   Le skin choisit la silhouette via les jetons `--avatar-*` : voir [le contrat des avatars](skins.md#avatars-et-cadres--contrat-commun).
   Ne pas redessiner le portrait dans le profil : les choix et aperçus réutilisent `PlayerAvatar`.
+  Un cadre à ornements (flammes, pétales, sceaux) les déclare dans `Decor` d'`AvatarFrame.tsx` : ils sont posés le long du
+  contour de chaque forme (cercle, carré, hexagone) et colorés par des variables `--frame-*` que chaque skin peut régler
+  (voir [skins.md](skins.md#avatars-et-cadres--contrat-commun)). Ces ornements sont fixes : l'invocation anime ses calques CSS
+  en `transform` / `opacity`, sans redessiner le SVG du portrait.
+- **Invocation (gacha)** : le téléphone ne propose pas de liste de cadres. `FrameSummon` (`src/web/ui/FrameSummon.tsx`)
+  tire un cadre : « Invoquer » puis « Relancer », animation d'environ 1,5 s (lumière et carte, couleur par rareté), puis le
+  cadre apparaît sur l'avatar. Rareté de chaque cadre = champ `rarity` de `FRAMES` (`R` : aucun, pointillés, double ;
+  `SR` : or, néon, Bleu Karmine, pétales de tournesol ; `SSR` : étincelles, Aura Super Saiyan, Sceau du Geass). Chances
+  `RARITY_RATES` = 60 % R, 30 % SR, 10 % SSR (puis cadre au hasard dans la rareté) ; étoiles `RARITY_STARS` (3 / 4 / 5).
+  Les couleurs de rareté sont `--rarity-r|sr|ssr` dans `theme.css`. Le tirage utilise `Math.random` côté téléphone (choix de
+  profil, validé par le schéma côté serveur) ; vibration courte au SR/SSR sur Android.
+  **Tests** : `localStorage["summon-force"] = "<id du cadre>"` impose le prochain tirage ; l'E2E utilise
+  `summonFrame(page, id)` (`tests/e2e/helpers/party.ts`). `data-testid` : `frame-summon` (`data-phase` = idle | summoning | done),
+  `frame-summon-button`, `frame-result` (`data-frame`, `data-rarity`), `frame-name`. `frame-summon` porte aussi `data-frame`.
 - `COLORS` : liste de couleurs hex.
 
 ## Où est chaque écran
@@ -46,7 +67,8 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 | Écran | Fichier |
 |---|---|
 | Routage TV (phases, pause, bande du maître) | `src/web/tv/TvApp.tsx` |
-| TV lobby (QR, joueurs avec bouton « retirer », réglage des manches) | `src/web/tv/Lobby.tsx` |
+| Minuit : compte à rebours + « Bonne année » (TV et téléphones, thème de base) et feu d'artifice | `src/web/ui/Midnight.tsx`, `src/web/ui/Fireworks.tsx` (keyframes `firework-spark` dans `theme.css`) |
+| TV lobby (QR, joueurs avec bouton « retirer », 7 boules de cristal, réglage des manches) | `src/web/tv/Lobby.tsx`, `src/web/ui/DragonBalls.tsx` |
 | TV annonce de manche | `src/web/tv/IntroScreen.tsx` |
 | Pièce : ouverture, changement d'univers et sortie | `src/web/ui/RoomTransition.tsx`, `src/web/ui/RoomSignature.tsx`, `src/web/theme/room.css`, `src/shared/transitions.ts` |
 | TV manche en cours (en-tête + chrono) ; un jeu interlude s'affiche en plein écran, sans cadre | `src/web/tv/PlayingScreen.tsx` |
@@ -54,7 +76,7 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 | TV classement final (révélation, podium, confettis) | `src/web/tv/FinalScreen.tsx` |
 | Contrôles du maître du jeu (Pause, Passer, +10 s, Lobby : bande fine toujours visible en bas à droite) | `src/web/tv/HostBar.tsx` |
 | Routage téléphone + lobby/intro/résultats/final | `src/web/phone/PhoneApp.tsx` |
-| Création / édition du profil | `src/web/phone/ProfileEditor.tsx` |
+| Création / édition du profil (avatar, couleur, invocation du cadre) | `src/web/phone/ProfileEditor.tsx`, `src/web/ui/FrameSummon.tsx` |
 | Mini-jeu « Qui est le plus… ? » | `src/minigames/qui-est-le-plus/views.tsx` |
 | Mini-jeu « Ceci ou Cela » (deux réponses face à face, camps en résultats) | `src/minigames/ceci-ou-cela/views.tsx` |
 | Mini-jeu « Culture gênante » (interlude : une scène par fichier, `Accroche`, `Bascule`, `Question`, `Reveal`, `Phone`) | `src/minigames/culture-genante/` |
@@ -82,6 +104,17 @@ de base + 6 skins), 3 ou 8 joueurs (pseudos de 16 caractères), taille du télé
 l'audio). Un lien `#scene=jeu/imposteur/vote&skin=dofus&n=8` ouvre une scène précise. La pause fige l'horloge et les
 animations CSS ; les ressorts `motion` finissent leur course (utiliser le curseur pour examiner un instant).
 
+Liens de revue à ajouter à l’adresse de `captures/animations/index.html` (fonctionnent aussi sans recharger le fichier) :
+
+- `#scene=ecrans/minuit&n=8&tel=360x640` : 15 secondes jusqu’au passage au 1er janvier 2027, puis « Bonne année », sur la
+  vraie TV et un téléphone de 360 × 640. Le curseur permet de revoir les dernières secondes ; Continuer reprend le lobby.
+  Cet aperçu reprend le thème de base, comme le déclenchement réel de minuit.
+- `#scene=ecrans/cadres&n=8&tel=360x640` : les dix cadres réels, sélectionnables, puis le vrai composant d’invocation et
+  l’éditeur complet du profil sur téléphone. Les tirages se relancent librement ; Habillage permet de comparer les six skins.
+- `#scene=ecrans/clins-doeil&n=8` : temps intermédiaires, pause « À suivre… » et tirs de confettis personnalisés de 32 px.
+- `#scene=ecrans/lobby&n=8&tel=360x640` : le lobby commence à deux invités ; Faire arriver un joueur allume les boules.
+  La septième lance Shenron, la huitième ajoute la boule bonus. Rejouer recommence à deux.
+
 Les manches de démonstration sont **jouées par la vraie logique du jeu** (`game.ts` dans le faux contexte de
 `tests/unit/helpers/minigame-ctx.ts`, config réelle de `config/minijeux/`) : elles restent justes si le jeu change.
 Pour ajouter un mini-jeu : une entrée dans `DEMOS` (`scripts/apercu-animations/demos.ts`) = des étapes cumulatives
@@ -95,7 +128,7 @@ Pour ajouter un mini-jeu : une entrée dans `DEMOS` (`scripts/apercu-animations/
 - `DuelGauge` : jauge bilatérale (deux camps qui poussent l'un vers l'autre, OUI / NON) : `left` et `right` de 0 à 1, gauche `good`, droite `bad`. Marqueurs `duel-gauge`, `duel-gauge-left`, `duel-gauge-right`, `duel-gauge-mid`.
 - `Button` : variantes `primary`, `secondary`, `danger`, `ghost`, `good`, `bad` ; tailles `sm` à `xl`, et `hero` (géant, remplit la place : STOP du compte à rebours). Tout bouton d'action d'un mini-jeu (Valider, Voir mon mot, STOP) passe par lui.
 - Éléments propres à un jeu mais habillables : `tool` (outil de dessin, `data-kind` `pen` / `width` / `action`, `data-selected`) dans une `toolbar` ; `tier-row` / `tier-label` (`data-tier`) ; `pad` (pastille de Simon) et `hub` (disque central). Les couleurs de contenu (feutres, étages, pastilles de Simon) ne se redéfinissent pas dans un skin.
-- `Countdown` (secondes depuis la deadline serveur ; structure selon le skin : cœur, hexagone, anneau, tableau, pièce ; barre compacte sur téléphone ; `--p` = part restante), `Backdrop` (fond étoilé par défaut, redessiné par chaque skin ; calques `backdrop-layer`), `Stage` (cadres TV 16:9 / téléphone, bandeau « Reconnexion… », overlay Pause), `fireConfetti`.
+- `Countdown` (secondes depuis la deadline serveur ; structure selon le skin : cœur, hexagone, anneau, tableau, pièce ; barre compacte sur téléphone ; `--p` = part restante), `Backdrop` (fond étoilé par défaut, redessiné par chaque skin ; calques `backdrop-layer`), `Stage` (cadres TV 16:9 / téléphone, bandeau « Reconnexion… », overlay Pause, `PauseZoom`), `fireConfetti`, `DragonBalls` / `Shenron`, `SplitTime` (voir « Clins d'œil aux invités »).
 - `AnsweredRoster` + `AnsweredCount` : barre TV « qui a répondu » (avatars grisés puis ✓, pseudo tronqué, taille selon le nombre de joueurs ; `data-testid` `tv-answered` / `tv-answered-count`, variantes par props : badge, halo, barre de progression, ton « serious »).
 - `SelectedBadge` : pastille ✓ animée sur le choix enregistré (tons `ink` / `accent` / `good` / `serious`, tailles `sm` / `md` / `lg`, position par `className`).
 - `NumPad` : pavé numérique du téléphone (virgule optionnelle, touches sans effet grisées, ton `serious`) ; la logique de saisie (`pressKey`) reste dans le mini-jeu.
@@ -104,6 +137,13 @@ Pour ajouter un mini-jeu : une entrée dans `DEMOS` (`scripts/apercu-animations/
 - **Vie et feedbacks** (`Pop.tsx`, `haptique.ts`) : `Pop` (`value` : petit rebond à chaque changement, `appear` : rebond à l'apparition, `scale`), `CountUp` (`value`, `duration`, `prefix` : nombre qui défile depuis 0), `FlyingPoints` (`value`, `delay` : « +N » fantôme qui jaillit et s'envole, dans un parent `relative`, ne pas le mettre dans un élément lu par les E2E), `WaitingDots` (trois points qui rebondissent : attente), `WatchingEyes` (👀 « regarde la TV »), `useChanged(valeur)` (vrai quand une valeur du snapshot vient de changer, jamais au montage : base de tout effet « ça vient d'arriver » qui ne doit pas se rejouer au rechargement), `haptique(ms)` (vibration Android, ignorée ailleurs ; déjà appelée par `Button` et `Choice`). Tout en `transform` / `opacity`.
 - Feedbacks intégrés : `Button` s'enfonce au toucher (ressort) et fait un pop quand il passe de grisé à actif ; `Choice` fait un pop à la sélection et `SelectedBadge` arrive en tournant ; `AnsweredRoster` saute avec un anneau d'éclat quand un joueur répond ; `ResultBar` et `DuelGauge` glissent (`translateX`, jamais `width`) ; `Panel` entre en fondu (`animate-rise`, classe de thème) ; `Countdown` fait battre le **chiffre seul** (`Digits`, marqueur `countdown-digits`, amplitude ≤ 1,15, tremblement à 3-2-1) dans sa boîte fixe : ne jamais animer la boîte du chrono. Classes de thème : `animate-rise`, `animate-breathe`. `prefers-reduced-motion` reste ignoré (voir `docs/skins.md`).
 Un mini-jeu ne doit utiliser que ces composants + les classes du thème.
+
+## Clins d'œil aux invités (TV)
+Jamais liés à un pseudo (le jeu ne sait pas qui est qui) : ils vivent dans le thème et se retirent sans toucher aux mini-jeux.
+- **Lobby, les 7 boules de cristal** (`DragonBalls`, `src/web/ui/DragonBalls.tsx`) : une boule s'allume par joueur prêt (profil validé et connecté ; `data-testid="dragon-balls"`, `data-lit="<n>"`, chaque boule `dragon-ball-<1..8>` avec `data-lit`). Une 8e boule « bonus » apparaît au 8e joueur. L'état vient du snapshot ; l'éclat d'allumage ne se rejoue jamais au rechargement. À 7 joueurs prêts, `Shenron` traverse le décor une fois (`src/web/theme/assets/shenron.svg`, `transform` seulement) et le bouton `start-game` affiche « Faire un vœu » (même bouton, mêmes règles). Pour changer de clin d'œil : retoucher les couleurs `--color-dragonball*` / remplacer `shenron.svg`, ou remplacer `DragonBalls` dans `Lobby.tsx` (il ne reçoit qu'un nombre).
+- **Pause en cliffhanger de K-drama** (`PausedOverlay` + `PauseZoom`, `src/web/ui/Stage.tsx`) : l'écran de jeu reste en place sous un voile, zoome en 3 à-coups (`transform: scale`), deux bandes de cinéma se ferment et « À suivre… » s'affiche. Sur la TV, `data-ui="paused-cliffhanger"` : **volontairement indépendant des skins** (couleurs `--color-cinema` / `--color-cinema-ink`), donc lisible partout. Le téléphone garde son « PAUSE » (`data-ui="paused"`). Son : `pause` (accord de piano `pause-piano.wav`, synthétisé ; déposer `pause.mp3` dans `config/medias/sons/` pour un vrai piano).
+- **Confettis maison** (`fireConfetti`, `src/web/ui/confetti.ts`) : formes peintes une fois dans un canvas, listées dans `src/web/theme/confetti-shapes.ts` (`CONFETTI_SHAPES` : ajouter / retirer une ligne ; `CONFETTI_CUSTOM_SHARE` = part des formes maison face aux carrés / cercles / étoiles ; `CONFETTI_SCALAR` = taille des formes maison, tirées à part). Même API (`fireConfetti("small" | "big")`), mêmes quantités de particules.
+- **Temps intermédiaires façon Trackmania** (`SplitTime`, `src/web/ui/SplitTime.tsx`) : `ms` du joueur + `bestMs` de la manche ; le meilleur affiche son temps, les autres leur retard « +0,42 » (rouge `--color-split-behind`), un temps en avance s'affiche « −0,42 » (bleu `--color-split-ahead`), avec un flash à l'apparition. `data-split="ahead|behind"`, `data-gap-ms`. Utilisé par les résultats du Compte à rebours (classement de droite, `cabr-split-<id>`).
 
 ## Dimensions
 - TV : la page est dessinée en 1920×1080, `1rem` = 16 px à cette taille et tout s'adapte à la fenêtre (`html[data-app="tv"]` dans `theme.css`).

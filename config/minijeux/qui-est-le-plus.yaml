@@ -30,7 +30,7 @@ points:
 # Mettez les questions entre guillemets si elles contiennent ": " ou " #".
 # Maximum conseillé : 25 questions (les manches sont tirées au hasard parmi elles).
 questions:
-  - "Qui est le plus gourmand ?"
+  - "Qui finirait le plat entier en disant « j'en reprends juste un peu » ?"
   - "Qui sera le premier à s'endormir ce soir ?"
   - "Qui sera le dernier debout ce soir ?"
   - "Qui va pleurer en faisant les voeux de minuit ?"
@@ -39,8 +39,6 @@ questions:
   - "Qui est le plus susceptible d'embrasser n'importe qui à minuit ?"
   - "Qui va ouvrir le champagne en arrosant tout le monde ?"
   - "Qui est le plus susceptible d'arriver en retard à son propre mariage ?"
-  - "Qui a le pire sens de l'orientation ?"
-  - "Qui serait le plus mauvais en cuisine ?"
   - "Qui répond « j'arrive dans 5 minutes » en étant encore chez lui ?"
   - "Qui est le plus drôle quand il a bu ?"
   - "Qui danse le plus mal ?"
@@ -52,9 +50,14 @@ questions:
   - "Qui serait le premier à paniquer dans un film d'horreur ?"
   - "Qui est le plus susceptible de manger les restes à 4h du matin ?"
   - "Qui gagnerait au loto et disparaîtrait sans prévenir ?"
-  - texte: "Qui serait le premier à survivre sur une île déserte ?"
-    duree: 40
-  - texte: "Qui mérite le titre de meilleur ami de l'année ?"
-    duree: 40
   - texte: "Qui sera la plus grande surprise de 2027 ?"
     duree: 40
+  - "Qui lance « on se fait un truc un de ces quatre » sans jamais rien organiser ?"
+  - texte: "Qui serait le plus insupportable avec 1 million d'euros ?"
+    theme: argent
+  - texte: "Qui mourrait en premier dans un k-drama, d'une maladie mystérieuse au dernier épisode ?"
+    theme: fiction
+  - texte: "Qui a déjà dépensé le plus d'argent dans un jeu « gratuit » ?"
+    theme: jeu-video
+  - texte: "Qui a le plus de captures d'écran « pour avis » dans son téléphone ?"
+    theme: telephone

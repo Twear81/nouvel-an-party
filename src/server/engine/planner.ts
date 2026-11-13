@@ -4,6 +4,7 @@ import { interludeCounts } from "../../shared/interlude";
 import type { CatalogEntry, Setup } from "../../shared/types";
 import type { MiniGame } from "../../minigames/contract";
 import { SKINS, type SkinId } from "../../shared/skins";
+import { countFresh, emptyDejaVu, pickFresh, type DejaVuData } from "./deja-vu";
 
 export interface LoadedGame {
   game: MiniGame;
@@ -34,14 +35,17 @@ function availableRounds(game: MiniGame, cfg: unknown, maxRounds: number | undef
   return Math.min(game.items(cfg).length, maxRounds ?? Infinity);
 }
 
-export function buildCatalog(games: LoadedGame[], introSeconds: number): CatalogEntry[] {
+/** `history` : si fourni, chaque entrée indique le nombre d'éléments neufs (`fresh`, plafonné comme `available`). */
+export function buildCatalog(games: LoadedGame[], introSeconds: number, history?: DejaVuData): CatalogEntry[] {
   return games.map(({ game, cfg, maxRounds }) => {
     const every = interludeEvery(game, cfg);
+    const available = availableRounds(game, cfg, maxRounds);
     return {
       id: game.id,
       name: game.name(cfg),
       description: game.description(cfg),
-      available: availableRounds(game, cfg, maxRounds),
+      available,
+      ...(history ? { fresh: Math.min(available, countFresh(history, game, game.items(cfg))) } : {}),
       // Un interlude n'a pas d'annonce : pas d'intro à compter.
       secondsPerRound: Math.round(game.estimateSeconds(cfg) + (every === null ? introSeconds : 0)),
       ...(every === null ? {} : { interlude: every }),
@@ -96,14 +100,19 @@ function canFinishWithoutRepeat(pools: { items: unknown[] }[], pick: { items: un
 }
 
 /**
- * Tire les manches au hasard (sans doublon) puis les ordonne :
- * - "melange" : on évite deux fois de suite le même mini-jeu quand c'est possible
+ * Tire les manches (sans doublon) puis les ordonne :
+ * - éléments : les jamais joués d'abord (au hasard), puis les plus anciennement joués (`history`, voir deja-vu.ts) ;
+ *   on évite un thème déjà rencontré tant que possible ; on ne manque jamais d'éléments
+ * - "melange" : on évite deux fois de suite le même mini-jeu quand c'est possible, et de commencer par le jeu
+ *   de la dernière manche de la partie précédente (`history.lastGameId`)
  * - "groupe"  : toutes les manches d'un mini-jeu à la suite
  */
-export function buildPlan(games: LoadedGame[], setup: Setup, order: "melange" | "groupe", rng: () => number): PlannedRound[] {
+export function buildPlan(games: LoadedGame[], setup: Setup, order: "melange" | "groupe", rng: () => number, history: DejaVuData = emptyDejaVu()): PlannedRound[] {
   const interludes = games.filter(({ game, cfg }) => interludeEvery(game, cfg) !== null);
   const normal = games.filter((g) => !interludes.includes(g));
-  return insertInterludes(buildNormalPlan(normal, setup, order, rng), interludes, setup, rng).map((round) => {
+  const usedThemes = new Set<string>();
+  const normalPlan = buildNormalPlan(normal, setup, order, rng, history, usedThemes);
+  return insertInterludes(normalPlan, interludes, setup, rng, history, usedThemes).map((round) => {
     const game = games.find((g) => g.game.id === round.gameId)!.game;
     return game.changeSkinAfter ? { ...round, changeSkinAfter: true } : round;
   });
@@ -137,7 +146,7 @@ export function assignRoundSkins(plan: PlannedRound[], firstOrder: readonly Skin
  * - aucune manche normale mais un interlude activé : le plan est une seule manche interlude (voir `interludeCounts`).
  * Indépendant de l'ordre "melange" / "groupe" : on compte en manches normales.
  */
-function insertInterludes(normalPlan: PlannedRound[], games: LoadedGame[], setup: Setup, rng: () => number): PlannedRound[] {
+function insertInterludes(normalPlan: PlannedRound[], games: LoadedGame[], setup: Setup, rng: () => number, history: DejaVuData, usedThemes: Set<string>): PlannedRound[] {
   if (games.length === 0) return normalPlan;
   const sources = games.map(({ game, cfg, maxRounds }) => ({
     id: game.id,
@@ -153,7 +162,7 @@ function insertInterludes(normalPlan: PlannedRound[], games: LoadedGame[], setup
   for (const { game, cfg } of games) {
     const want = counts[game.id] ?? 0;
     if (want === 0) continue;
-    const items = shuffle(game.items(cfg), rng).slice(0, want);
+    const items = pickFresh(history, game, game.items(cfg), usedThemes, rng, want);
     if (n === 0) {
       gaps.set(0, { gameId: game.id, item: items[0], interlude: true });
       continue;
@@ -181,15 +190,20 @@ function insertInterludes(normalPlan: PlannedRound[], games: LoadedGame[], setup
   return out;
 }
 
-function buildNormalPlan(games: LoadedGame[], setup: Setup, order: "melange" | "groupe", rng: () => number): PlannedRound[] {
+function buildNormalPlan(games: LoadedGame[], setup: Setup, order: "melange" | "groupe", rng: () => number, history: DejaVuData, usedThemes: Set<string>): PlannedRound[] {
   const pools = games
     .map(({ game, cfg, maxRounds }) => ({
       gameId: game.id,
-      items: shuffle(game.items(cfg), rng).slice(0, Math.min(setup.counts[game.id] ?? 0, maxRounds ?? Infinity)),
+      // Du plus prioritaire au moins prioritaire ; `pop()` dépile par la fin, d'où `reverse()`.
+      items: pickFresh(history, game, game.items(cfg), usedThemes, rng, Math.min(setup.counts[game.id] ?? 0, maxRounds ?? Infinity)).reverse(),
     }))
     .filter((p) => p.items.length > 0);
 
-  if (order === "groupe") return pools.flatMap((p) => p.items.map((item) => ({ gameId: p.gameId, item })));
+  if (order === "groupe") {
+    // Le jeu qui a fini la partie précédente passe en dernier (s'il y en a d'autres).
+    const ordered = [...pools.filter((p) => p.gameId !== history.lastGameId), ...pools.filter((p) => p.gameId === history.lastGameId)];
+    return ordered.flatMap((p) => p.items.map((item) => ({ gameId: p.gameId, item })));
+  }
 
   const plan: PlannedRound[] = [];
   let last: string | null = null;
@@ -200,6 +214,13 @@ function buildNormalPlan(games: LoadedGame[], setup: Setup, order: "melange" | "
     // après lesquels il reste possible d'enchaîner le reste sans répétition.
     const safe = choices.filter((p) => canFinishWithoutRepeat(pools, p));
     if (safe.length) choices = safe;
+    if (plan.length === 0 && history.lastGameId !== undefined) {
+      // 1re manche : pas le jeu qui a fini la partie précédente, sauf si c'est la seule façon d'éviter une répétition plus loin.
+      const all = pools.filter((p) => p.items.length);
+      const base = all.filter((p) => canFinishWithoutRepeat(pools, p));
+      const others = (base.length ? base : all).filter((p) => p.gameId !== history.lastGameId);
+      if (others.length) choices = others;
+    }
     // Plus un mini-jeu a de manches restantes, plus il a de chances d'être choisi.
     const weight = choices.reduce((s, p) => s + p.items.length, 0);
     let r = rng() * weight;

@@ -50,7 +50,9 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   TV et téléphones partagent la cadence de `src/shared/final-reveal.ts` via `useFinalReveal` : les téléphones
   gardent « Regarde la TV ! » jusqu'à la fin de l'entrée du dernier portrait révélé. Un rechargement de la TV
   ou d'un téléphone reprend au bon moment au lieu de relancer le classement. Il s'agit d'une synchronisation
-  d'affichage : les scores cumulés restent publics, comme pendant les manches. Le final terminé conserve le
+  d'affichage : les scores cumulés restent publics, comme pendant les manches. Pause et Passer
+  s'appliquent aussi au classement, via `finalRevealElapsed` ; les souvenirs déjà révélés restent dans
+  `finalReveal.souvenirs` pour conserver le décor. Le final terminé conserve le
   comportement de sauvegarde existant : après un redémarrage serveur, retour au lobby avec les profils et scores.
   Un nouvel invité arrivé pendant le podium reste spectateur. La première synchronisation d'horloge précède
   l'inscription réseau des écrans, pour éviter qu'une horloge locale en avance dévoile les rangs au rechargement.
@@ -64,6 +66,34 @@ le moteur joue la scène vers l'univers suivant avant la prochaine manche. Si c'
 il joue directement la sortie ; Culture gênante ne change jamais d'univers au milieu de sa question.
 
 Le décor, la chronologie et les futurs souvenirs de fin sont décrits dans [mise-en-scene.md](mise-en-scene.md).
+
+## Minuit
+Brique générique du moteur (`engine.ts`, section « Minuit » ; réglée par `minuit:` dans `partie.yaml`, voir
+[configuration.md](configuration.md#minuit)). `snapshot.midnight` vaut `null` toute la soirée, puis
+`{ targetAt, phase: "countdown" | "celebrate", year }` pendant minuit ; la TV et les téléphones affichent alors
+`MidnightOverlay` (`src/web/ui/Midnight.tsx`) par-dessus tout, calé sur `targetAt` avec `serverNow()`.
+- **Déclenchement** : par défaut (`uniquement_nouvel_an: true`), le moteur vise le **prochain 1er janvier** à `heure`
+  (heure locale du PC, `clock.now()` donc testable avec `FakeClock`). Le compte à rebours démarre à
+  `targetAt - duree_compte_a_rebours`, donc le 31 décembre pour l'heure habituelle `00:00`. Un serveur lancé
+  *dans* la fenêtre affiche le temps restant ; lancé *après* minuit, il attend l'année suivante. Le mode répétition
+  (`uniquement_nouvel_an: false`) vise aujourd'hui ou demain, une seule occurrence par nuit. Un minuteur de veille
+  revérifie au plus toutes les 30 s.
+- **Pause** : réutilise la pause existante (`pause()`), donc `TimerGroup` fige chronos de manche et scènes de
+  transition, `input()` est refusé. Pendant le classement final, son départ (`finalReveal.startedAt`)
+  est décalé de la durée de minuit pour reprendre où il en était. Au lobby, seul l'affichage change. Pendant minuit : Passer, +10 s et l'avance automatique des résultats (« Continuer ») sont
+  ignorés ; l'hôte peut toujours revenir au lobby. Le skin est forcé à `null` (thème de base, bleu).
+- **Fin** : pendant `countdown`, Reprendre est ignoré ; pendant `celebrate`, le clic de l'hôte (même bouton que la
+  pause) ou `reprise_auto` secondes après minuit relance. Si **c'est minuit qui a mis en pause**
+  (`pausedByMidnight`), la partie repart là où elle en était. Si l'hôte avait **déjà** mis en pause avant, la
+  reprise automatique la respecte (la partie reste en pause, c'est lui qui reprend) ; son clic lève la pause.
+  Avec `reprise_auto: 0` seul l'hôte relance.
+- **Sauvegarde** : `save.json` porte `midnight: { targetAt }` tant que minuit est en cours (pas écrit au lobby si
+  une partie interrompue y attend sa reprise). Après un crash, le compte à rebours se retrouve par le calcul de
+  l'heure ; une célébration est reprise si moins de `max(reprise_auto, 60 s)` se sont écoulées depuis minuit, et la
+  partie reprise (`resumeSave`) se fige aussitôt dessous. En mode annuel, un ancien `targetAt` quotidien qui ne tombe
+  pas le 1er janvier est ignoré ; une célébration du Nouvel An sauvegardée reste reprenable.
+- **Sons** (TV) : `minuit.tic` (une fois par seconde sur les 10 dernières) et `minuit.fete` (+ applaudissements) via
+  `useGlobalSfx`, fonction pure `midnightStep` dans `src/web/sound/events.ts`.
 
 ## Mini-jeux (`src/minigames/<id>/`)
 
@@ -89,6 +119,7 @@ joueurs connectés (`allConnectedDone`, `helpers.ts`), un téléphone planté ne
 ## Reconnexion & crash
 - Le téléphone garde un jeton dans `localStorage` → il retrouve son joueur à la reconnexion.
 - `data/save.json` est réécrit à chaque étape → au redémarrage du serveur, la TV propose de reprendre.
+- `data/deja-vu.json` (`src/server/engine/deja-vu.ts`) mémorise, par mini-jeu, les éléments déjà joués (empreinte du contenu, ou `itemInfo.keys`) avec un numéro d'ordre, écrit au **début** de chaque manche (une manche interrompue compte comme vue ; un plan abandonné ne brûle rien). `buildPlan` en tire les neufs d'abord puis les plus anciens, et évite les thèmes déjà vus ; le catalogue envoie `fresh` au lobby. Fichier absent ou corrompu : tout est neuf.
 - Une scène sauvegarde sa destination, ses participants, sa progression et un horodatage de contrôle. Sa reprise
   garde le temps écoulé (y compris l'arrêt du serveur hors pause) ou reste figée si elle était en pause.
   Une scène déjà achevée mène directement à sa destination ; aucun résultat ni point n'est recalculé.

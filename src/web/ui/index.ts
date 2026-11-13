@@ -3,6 +3,7 @@ export * from "./Button";
 export * from "./Countdown";
 export * from "./Panel";
 export * from "./PlayerAvatar";
+export * from "./FrameSummon";
 export * from "./Stage";
 export * from "./confetti";
 export * from "./ConfirmDialog";
@@ -21,4 +22,8 @@ export { useSfx, useSfxOnChange, useSfxAt, useSfxTimeline, useSoundState } from 
 export { play as playSfx, type PlayOptions } from "../sound/engine";
 export { NOMS_SONS, type NomSon } from "../theme/sons/catalogue";
 export * from "./Pop";
+export * from "./Fireworks";
+export * from "./Midnight";
 export * from "./haptique";
+export * from "./SplitTime";
+export * from "./DragonBalls";

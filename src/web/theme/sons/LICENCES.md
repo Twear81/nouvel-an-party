@@ -89,3 +89,7 @@ limite les réexports à ces trois sons ; les autres fichiers embarqués restent
 48 kHz, stéréo, Ogg Vorbis 128 kbit/s ; impacts / jingles −15 à −16 LUFS, sons fréquents −23 à −28 LUFS,
 pics limités à −2 dBTP avant encodage. Pour les sons de moins de 400 ms, mesure sur fenêtre complétée par du silence.
 Les volumes du catalogue s’ajoutent à cette normalisation. Aucun son Kenney ne reste dans ce dossier.
+
+## Sons synthétisés
+
+`pause-piano.wav` (accord de piano de la pause) et `boule-allumee.wav` (carillon des boules de cristal du lobby) sont synthétisés par synthèse additive (script Python maison, sans échantillon tiers) : aucun droit externe. Remplaçables par un vrai piano / carillon via `config/medias/sons/` (`pause.mp3`, `lobby.boule.mp3`).

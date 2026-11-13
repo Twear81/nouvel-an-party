@@ -42,15 +42,18 @@ export function startGraceOnce(
   return true;
 }
 
+/** Thème facultatif d'une question : le tirage évite de rejouer un thème déjà vu (voir `MiniGame.itemInfo`). */
+export const themeSchema = z.string().trim().min(1).optional();
+
 /** Une question peut s'écrire en texte simple, ou en objet pour surcharger la durée. */
 export const questionSchema = z.union([
   z.string().min(1),
-  z.object({ texte: z.string().min(1), duree: z.number().positive().optional() }),
+  z.object({ texte: z.string().min(1), duree: z.number().positive().optional(), theme: themeSchema }),
 ]);
 export type QuestionEntry = z.infer<typeof questionSchema>;
 
-export function normalizeQuestion(q: QuestionEntry): { text: string; duration?: number } {
-  return typeof q === "string" ? { text: q } : { text: q.texte, duration: q.duree };
+export function normalizeQuestion(q: QuestionEntry): { text: string; duration?: number; theme?: string } {
+  return typeof q === "string" ? { text: q } : { text: q.texte, duration: q.duree, theme: q.theme };
 }
 
 /** Le texte contient-il le joker {joueur} ? */

@@ -42,28 +42,29 @@ points:
 # Maximum conseillé : 25 consignes (les manches sont tirées au hasard parmi elles).
 # Astuce : une bonne consigne a une réponse évidente que plusieurs personnes auront en tête.
 questions:
-  - "Cite un truc qu'on trouve dans un frigo."
   - "Une résolution classique du 1er janvier."
   - "Une chanson qu'on entend dans toutes les soirées."
   - "Un prénom de chien."
-  - "Un pays où partir en vacances."
+  - "Un pays où tu n'irais jamais en vacances."
   - "Un plat de réveillon."
-  - "Une boisson qu'on boit à minuit."
-  - "Un truc qu'on trouve dans une trousse."
   - "Un fruit."
   - "Une couleur."
-  - "Un animal de la ferme."
   - "Un super-héros."
   - "Un film de Noël."
   - "Un métier que tout enfant rêve de faire."
-  - "Un sport d'hiver."
-  - "Un cadeau qu'on aime recevoir."
-  - "Une ville française."
   - "Un légume qu'on n'aime pas."
   - "Un truc qu'on oublie souvent chez soi."
   - "Un personnage de dessin animé."
-  - "Un cocktail."
-  - "Un accessoire de fête."
   - "Un truc qu'on dit à minuit."
-  - "Une marque de voiture."
-  - "Un instrument de musique."
+  - texte: "Un mot qu'on crie quand on se fait mal."
+    theme: reflexes
+  - texte: "La pire excuse pour arriver en retard."
+    theme: excuses
+  - texte: "Ce qu'on finit toujours par acheter dans un jeu gratuit."
+    theme: jeu-video
+  - texte: "Ce qu'on mange à 4 h du matin en rentrant."
+    theme: bouffe
+  - texte: "Un dessert qu'on ne refuse jamais."
+    theme: bouffe
+  - texte: "Le pire cadeau de Noël."
+    theme: noel

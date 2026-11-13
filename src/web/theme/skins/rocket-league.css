@@ -342,3 +342,12 @@ html[data-skin="rocket-league"] [data-ui="backdrop-layer"][data-layer="3"] { ani
 @keyframes rl-open { from { opacity: 0; transform: translateY(0.6rem); } to { opacity: 1; transform: none; } }
 @keyframes rl-halo { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 @keyframes rl-sweep { from { transform: translateX(0); } to { transform: translateX(400%); } }
+
+/* Cadres à identité (saiyan, karmine, tournesol, geass) : teintes du skin ; les formes viennent d'AvatarFrame */
+html[data-skin="rocket-league"] {
+  --frame-saiyan-flame: #ff9a1f; --frame-saiyan-edge: #ff5a00; --frame-saiyan-core: #ffe9a8;
+  --frame-karmine: #2d8bff; --frame-karmine-light: #e8f3ff;
+  --frame-petal: #ffd557; --frame-petal-back: #ff8b25; --frame-petal-edge: #9b4b08;
+  --frame-geass: #f0203c; --frame-geass-glow: #ff7088; --frame-geass-dark: #520917;
+  --frame-glow: 1;
+}

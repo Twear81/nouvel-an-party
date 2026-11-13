@@ -426,3 +426,8 @@ html[data-skin="plague-tale"] [data-ui="choice"]:not(:disabled):hover { border-c
 html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-ring"],
 html[data-skin="plague-tale"] [data-ui="countdown"][data-low="true"] [data-ui="countdown-fill"] { animation: plague-low 1s ease-in-out infinite; }
 
+
+/* Cadres à identité (saiyan, karmine, tournesol, geass) : teintes du skin ; les formes viennent d'AvatarFrame */
+html[data-skin="plague-tale"] {
+  --frame-saiyan-flame: #d9a441; --frame-saiyan-edge: #5a3a10; --frame-saiyan-core: #f3dfa8; --frame-karmine: #4a6fa8; --frame-karmine-light: #c9d6ea; --frame-petal: #d9b84a; --frame-petal-back: #a67a1e; --frame-petal-edge: #3b2a10; --frame-geass: #8e1b2a; --frame-geass-glow: #c05060; --frame-geass-dark: #240508; --frame-glow: 0.5;
+}

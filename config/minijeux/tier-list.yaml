@@ -44,21 +44,24 @@ questions:
   - "Qui est le meilleur au karaoké ?"
   - "Qui est le meilleur public pour une blague nulle ?"
   - "Qui est le meilleur pour garder un secret ?"
-  - "Qui est le meilleur pour remonter le moral ?"
-  - "Qui est le meilleur pour organiser un voyage ?"
-  - "Qui est le meilleur pour retenir les anniversaires ?"
-  - "Qui est le meilleur joueur de société ?"
   - "Qui est le meilleur perdant ?"
-  - "Qui est le meilleur pour mettre l'ambiance ?"
-  - "Qui est le meilleur pour improviser un discours ?"
-  - "Qui est le meilleur pour réparer n'importe quoi ?"
-  - "Qui est le meilleur pour se réveiller tôt ?"
   - "Qui est le meilleur pour tenir l'alcool ?"
   - "Qui est le meilleur menteur ?"
   - "Qui est le meilleur pour s'habiller ?"
   - "Qui est le meilleur à Mario Kart ?"
-  - "Qui est le meilleur pour écouter ?"
   - "Qui est le meilleur coloc ?"
   - "Qui est le meilleur pour faire la fête jusqu'au bout ?"
-  - texte: "Qui est le meilleur ami de toute la bande ?"
+  - texte: "Qui serait là à 3 h du matin si ça va mal ?"
     duree: 75
+  - texte: "À qui prêterais-tu 500 € sans reçu ?"
+    theme: argent
+  - texte: "Qui survit le plus longtemps dans un film d'horreur ?"
+    theme: fiction
+  - texte: "Qui ferait le meilleur président de la République ?"
+    theme: vie
+  - texte: "Qui ferait le meilleur méchant de film Disney ?"
+    theme: fiction
+  - texte: "Qui se débrouillerait le mieux perdu à Tokyo, sans téléphone ?"
+    theme: voyage
+  - texte: "Qui contesterait un point au ping-pong jusqu'à la nuit ?"
+    theme: jeu

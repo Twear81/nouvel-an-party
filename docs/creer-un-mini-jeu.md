@@ -15,7 +15,7 @@ tests/unit/<id>.test.ts        tests de la logique
 
 ## 2. game.ts : le contrat `MiniGame<Cfg, Item, State>`
 - `Cfg` : contenu validé du yaml. `Item` : un élément tirable (une question…). `State` : l'état interne d'une manche, jamais envoyé tel quel.
-- Le moteur tire `Item` au hasard parmi `items()`, une fois par manche.
+- Le moteur tire `Item` parmi `items()`, une fois par manche : les éléments **jamais joués** d'abord, au hasard, puis les plus anciennement joués (mémoire `data/deja-vu.json`, voir `itemInfo`).
 
 | Membre | Rôle |
 |---|---|
@@ -23,6 +23,7 @@ tests/unit/<id>.test.ts        tests de la logique
 | `configSchema` | schéma **zod** du yaml (valeurs par défaut avec `.default()`, messages d'erreur clairs). Les champs `actif` et `manches_max` (plafond de manches, entier ≥ 1) sont gérés par le moteur, ne les déclarez pas |
 | `name(cfg)`, `description(cfg)` | titre et phrase d'explication affichés à l'annonce |
 | `items(cfg)` | liste des manches possibles |
+| `itemInfo?(item)` | optionnel : `{ keys?, theme? }` pour la mémoire « déjà vu ». Par défaut un élément est identifié par une empreinte de son contenu (JSON trié) : corriger un texte dans le yaml le rend neuf. `keys` : pour un élément composite, les clés à mémoriser (ex. Dessin raté : un lot = plusieurs mots, une clé par mot ; un lot est d'autant moins prioritaire qu'il contient de mots déjà vus). `theme` : thème de l'élément (champ yaml facultatif `theme:`, chaîne) ; le tirage évite un thème déjà vu dans la partie en cours et dans les précédentes, mais la fraîcheur prime. Pour offrir `theme:` : ajouter `theme: themeSchema` (helpers) au schéma de la question, le recopier dans l'`Item` et déclarer `itemInfo: (item) => ({ theme: item.theme })` |
 | `roundSeconds(cfg, item)` | durée du chrono en secondes, ou `null` si la manche se termine seule (via `ctx.end()`) |
 | `estimateSeconds(cfg)` | durée estimée (jeu + résultats) pour le calcul de durée de soirée ; l'intro est ajoutée par le moteur |
 | `start(item, ctx)` | début de manche (pendant l'intro) : renvoie le `State` initial. Ne démarrez pas de timer de jeu ici |
@@ -337,10 +338,12 @@ volume/hauteur réglables, séquences réelles, skins).
 | `lobby.musique` | jazz à l’accueil, ambiance originale du skin pendant les manches ; changement en fondu |
 | `tension`, `applaudissements`, `echec.trombone` | riser de 2 s, public après verdict, chute au trombone |
 | `joueur.rejoint`, `joueur.quitte`, `partie.lancement` | lobby, lancement de la partie |
+| `lobby.boule`, `lobby.shenron` | boule de cristal allumée (un joueur prêt), Shenron à la septième |
 | `manche.intro` | annonce d'une manche |
 | `reponse.recue`, `reponse.toutes` | une réponse de plus (hauteur montante), tout le monde a répondu |
 | `chrono.tic`, `chrono.fin`, `temps.ajoute` | 5 dernières secondes, zéro, « +10 s » de l'hôte |
-| `pause`, `reprise` | pause de l'hôte |
+| `minuit.tic`, `minuit.fete` | 10 dernières secondes avant minuit, minuit sonne (voir [ARCHITECTURE](ARCHITECTURE.md#minuit)) |
+| `pause`, `reprise` | pause de l'hôte (accord de piano « À suivre… ») |
 | `resultats.arrivee`, `points.gagnes` | arrivée des résultats, fin de la révélation (`revealSeconds`) |
 | `final.fanfare` | phase finale |
 | `transition.entree`, `transition.sortie` | scènes de changement d'univers |
@@ -355,6 +358,8 @@ La musique est pilotée par `sound.setAmbiance(actif)` dans `useGlobalSfx` (`set
 mais ne joue rien au montage. Il faut un geste dans la page courante. Le moteur garde une seule boucle, annule un
 décodage encore en cours si l’on quitte l’ambiance, applique les fondus et le ducking (volume à 25 % pendant les jingles,
 roulements, montées de tension et applaudissements). Plusieurs sons superposés gardent la baisse jusqu’à la dernière fin.
+Les fondus utilisent `cancelAndHoldAtTime` quand disponible ; sinon le moteur garde le volume courant avec
+`cancelScheduledValues` puis `setValueAtTime`, pour les navigateurs sans cette méthode.
 Pause et bouton muet arrêtent la boucle en fondu ; retour au lobby / reprise après geste la relancent. Les sons
 ponctuels continuent à passer par les hooks existants. Le roulement dure exactement 2 s pour conserver les vitesses
 et les chronologies des révélations. Simon utilise un piano échantillonné do4, transposé en mi4, sol4 et do5 (tempérament égal).
