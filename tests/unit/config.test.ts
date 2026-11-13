@@ -84,8 +84,16 @@ describe("loadConfig", () => {
       ip: "auto",
       ouvrir_navigateur: true,
       volume_sons: 0.8,
+      minuit: { actif: true, heure: "00:00", duree_compte_a_rebours: 60, reprise_auto: 120 },
     });
     expect(games).toHaveLength(2);
+  });
+
+  it("minuit : valeurs partielles complétées, heure invalide refusée", () => {
+    const ok = tmpConfig({ "partie.yaml": "minuit:\n  heure: \"23:59:30\"\n  reprise_auto: 0\n", "minijeux/ceci-ou-cela.yaml": CECI });
+    expect(loadConfig(ok).settings.minuit).toEqual({ actif: true, heure: "23:59:30", duree_compte_a_rebours: 60, reprise_auto: 0 });
+    const bad = tmpConfig({ "partie.yaml": "minuit:\n  heure: \"minuit\"\n", "minijeux/ceci-ou-cela.yaml": CECI });
+    expect(() => loadConfig(bad)).toThrow("minuit.heure");
   });
 
   it("partie.yaml vide : défauts également", () => {

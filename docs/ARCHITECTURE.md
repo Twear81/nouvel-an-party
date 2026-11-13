@@ -65,6 +65,32 @@ il joue directement la sortie ; Culture gênante ne change jamais d'univers au m
 
 Le décor, la chronologie et les futurs souvenirs de fin sont décrits dans [mise-en-scene.md](mise-en-scene.md).
 
+## Minuit
+Brique générique du moteur (`engine.ts`, section « Minuit » ; réglée par `minuit:` dans `partie.yaml`, voir
+[configuration.md](configuration.md#minuit)). `snapshot.midnight` vaut `null` toute la soirée, puis
+`{ targetAt, phase: "countdown" | "celebrate", year }` pendant minuit ; la TV et les téléphones affichent alors
+`MidnightOverlay` (`src/web/ui/Midnight.tsx`) par-dessus tout, calé sur `targetAt` avec `serverNow()`.
+- **Déclenchement** : le moteur vise la **prochaine occurrence** de `heure` (heure locale du PC, `clock.now()` donc
+  testable avec `FakeClock`) et démarre le compte à rebours à `heure - duree_compte_a_rebours`. Un serveur lancé
+  *dans* la fenêtre affiche le temps restant ; lancé *après* minuit il ne déclenche rien avant la nuit suivante
+  (donc une seule fois par nuit). Un minuteur de veille revérifie au plus toutes les 30 s.
+- **Pause** : réutilise la pause existante (`pause()`), donc `TimerGroup` fige chronos de manche et scènes de
+  transition, `input()` est refusé. Au lobby et à l'écran final il n'y a rien à figer (seul l'affichage change) ; la
+  révélation finale, animée depuis son départ serveur, est décalée de la durée de minuit à la fin pour reprendre où
+  elle en était. Pendant minuit : Passer, +10 s et l'avance automatique des résultats (« Continuer ») sont
+  ignorés ; l'hôte peut toujours revenir au lobby. Le skin est forcé à `null` (thème de base, bleu).
+- **Fin** : pendant `countdown`, Reprendre est ignoré ; pendant `celebrate`, le clic de l'hôte (même bouton que la
+  pause) ou `reprise_auto` secondes après minuit relance. Si **c'est minuit qui a mis en pause**
+  (`pausedByMidnight`), la partie repart là où elle en était. Si l'hôte avait **déjà** mis en pause avant, la
+  reprise automatique la respecte (la partie reste en pause, c'est lui qui reprend) ; son clic lève la pause.
+  Avec `reprise_auto: 0` seul l'hôte relance.
+- **Sauvegarde** : `save.json` porte `midnight: { targetAt }` tant que minuit est en cours (pas écrit au lobby si
+  une partie interrompue y attend sa reprise). Après un crash, le compte à rebours se retrouve par le calcul de
+  l'heure ; une célébration est reprise si moins de `max(reprise_auto, 60 s)` se sont écoulées depuis minuit, et la
+  partie reprise (`resumeSave`) se fige aussitôt dessous.
+- **Sons** (TV) : `minuit.tic` (une fois par seconde sur les 10 dernières) et `minuit.fete` (+ applaudissements) via
+  `useGlobalSfx`, fonction pure `midnightStep` dans `src/web/sound/events.ts`.
+
 ## Mini-jeux (`src/minigames/<id>/`)
 
 | Fichier | Rôle |

@@ -119,6 +119,14 @@
    lui-même, --beat = amplitude) ; à 3-2-1, il tremble en plus. */
 @keyframes countdown-beat { 0% { transform: scale(var(--beat, 1.15)); } 45%, 100% { transform: scale(1); } }
 @keyframes countdown-beat-shake { 0% { transform: scale(var(--beat, 1.15)) rotate(-4deg); } 20% { transform: scale(var(--beat, 1.15)) rotate(4deg); } 40% { transform: scale(1.04) rotate(-2deg); } 60%, 100% { transform: scale(1) rotate(0); } }
+/* Feu d'artifice (Fireworks) : une étincelle part du centre de sa gerbe, ralentit, retombe un peu et s'éteint ; le reste de la
+   période elle est invisible (la gerbe suivante repart). Seulement transform + opacity. */
+@keyframes firework-spark {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0; }
+  3% { opacity: 1; }
+  28% { transform: translate3d(var(--dx), var(--dy), 0) scale(1); opacity: 1; }
+  58%, 100% { transform: translate3d(calc(var(--dx) * 1.08), calc(var(--dy) + 6rem), 0) scale(0.3); opacity: 0; }
+}
 @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 /* Panneau d'alerte « cheap » : le ⚠️ se dandine, le 👉 pointe, le cadre respire (doux, pas de stroboscope). */
 @keyframes wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }

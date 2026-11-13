@@ -32,6 +32,8 @@ Déroulé d'une manche
     reponse.toutes        tout le monde a répondu
     chrono.tic            une seconde des 5 dernières (de plus en plus aigu)
     chrono.fin            le chrono arrive à zéro
+    minuit.tic            une seconde des 10 dernières avant minuit (de plus en plus aigu)
+    minuit.fete           minuit sonne, « Bonne année ! » (fanfare ; déposer ici un son plus festif si vous en avez un)
     temps.ajoute          l'hôte ajoute du temps (+10 s)
     pause                 pause
     reprise               reprise

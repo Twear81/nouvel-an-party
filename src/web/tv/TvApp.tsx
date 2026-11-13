@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useGame } from "../net/useGame";
 import { SkinProvider } from "../theme/skin";
 import { useGlobalSfx } from "../sound/useGlobalSfx";
-import { PausedOverlay, ReconnectBanner, RoomTransition, roomReference, SoundBadge, TvStage } from "../ui";
+import { MidnightOverlay, PausedOverlay, ReconnectBanner, RoomTransition, roomReference, SoundBadge, TvStage } from "../ui";
 import { FinalScreen } from "./FinalScreen";
 import { HostBar } from "./HostBar";
 import { IntroScreen } from "./IntroScreen";
@@ -73,9 +73,10 @@ export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
           {screen}
         </motion.div>
       </AnimatePresence>}
-      {host && snapshot.phase !== "lobby" && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || (snapshot.phase === "playing" && !!round?.interlude)} />}
+      {host && (snapshot.phase !== "lobby" || snapshot.midnight) && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || (snapshot.phase === "playing" && !!round?.interlude)} />}
       <SoundBadge visible={snapshot.phase === "lobby"} />
       <PausedOverlay show={snapshot.paused} big />
+      {snapshot.midnight && <MidnightOverlay midnight={snapshot.midnight} />}
       <ReconnectBanner show={!connected} />
     </TvStage>
   );

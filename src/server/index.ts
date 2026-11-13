@@ -42,6 +42,9 @@ async function main() {
       targetMinutes: settings.duree_cible_minutes,
       order: settings.ordre,
       introSeconds: settings.intro_secondes,
+      midnight: settings.minuit.actif
+        ? { time: settings.minuit.heure, countdownSeconds: settings.minuit.duree_compte_a_rebours, autoResumeSeconds: settings.minuit.reprise_auto }
+        : undefined,
     },
     joinUrl,
     onChange: broadcast,

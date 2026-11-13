@@ -869,3 +869,206 @@ describe("skins", () => {
     expect(engine.snapshot(null).skin).toBe(expected[0]!);
   });
 });
+
+// ───────────────────────────── Minuit ─────────────────────────────
+describe("minuit : compte à rebours et pause automatique", () => {
+  const at = (h: number, m: number, s = 0, day = 31, month = 11) => new Date(month === 11 ? 2026 : 2027, month, day, h, m, s).getTime();
+  const S = 1000;
+  const cfg = { time: "00:00", countdownSeconds: 60, autoResumeSeconds: 120 };
+  const midnightEngine = (start: number, o: Parameters<typeof createTestEngine>[0] = {}, midnight: Partial<typeof cfg> = {}) =>
+    createTestEngine({ ...o, clock: o.clock ?? new FakeClock(start), settings: { midnight: { ...cfg, ...midnight }, ...o.settings } });
+  const snap = (t: { engine: GameEngine }) => t.engine.snapshot(null);
+
+  it("se déclenche à heure - durée, dans le lobby aussi, puis célèbre et s'efface (reprise auto)", () => {
+    const t = midnightEngine(at(23, 58));
+    expect(snap(t).midnight).toBeNull();
+    t.clock.advance(59 * S);
+    expect(snap(t).midnight).toBeNull();
+    t.clock.advance(1 * S);
+    expect(snap(t).midnight).toEqual({ targetAt: at(0, 0, 0, 1, 0), phase: "countdown", year: 2027 });
+    expect(snap(t).paused).toBe(false); // rien à mettre en pause au lobby
+    t.clock.advance(60 * S - 1);
+    expect(snap(t).midnight?.phase).toBe("countdown");
+    t.clock.advance(1);
+    expect(snap(t).midnight?.phase).toBe("celebrate");
+    t.clock.advance(120 * S - 1);
+    expect(snap(t).midnight?.phase).toBe("celebrate");
+    t.clock.advance(1);
+    expect(snap(t).midnight).toBeNull();
+  });
+
+  it("ne se déclenche qu'une fois par nuit", () => {
+    const t = midnightEngine(at(23, 58));
+    t.clock.advance(5 * 60 * S);
+    expect(snap(t).midnight).toBeNull();
+    t.clock.advance(60 * 60 * S);
+    expect(snap(t).midnight).toBeNull();
+    t.clock.advance((22 * 3600 + 56 * 60) * S); // la nuit suivante, 23:59:00 : de nouveau possible
+    expect(snap(t).midnight).not.toBeNull();
+  });
+
+  it("un serveur lancé après minuit ne déclenche rien ; lancé dans la fenêtre il affiche le temps restant", () => {
+    const late = midnightEngine(at(0, 0, 10, 1, 0));
+    expect(snap(late).midnight).toBeNull();
+    late.clock.advance(3600 * S);
+    expect(snap(late).midnight).toBeNull();
+    const inside = midnightEngine(at(23, 59, 40));
+    expect(snap(inside).midnight).toMatchObject({ phase: "countdown", targetAt: at(0, 0, 0, 1, 0) });
+  });
+
+  it("désactivé sans réglage : aucun minuteur, aucun état", () => {
+    const t = createTestEngine({ clock: new FakeClock(at(23, 59, 30)) });
+    expect(snap(t).midnight).toBeNull();
+    expect(t.clock.pendingCount).toBe(0);
+  });
+
+  it("met la manche en pause (chrono figé), la reprise automatique relance avec le temps restant", () => {
+    const t = midnightEngine(at(23, 58, 55));
+    startRounds(t.engine);
+    t.clock.advance(T.intro); // 23:58:59, jeu lancé, fin du chrono à 23:59:09
+    t.clock.advance(1 * S);
+    expect(snap(t)).toMatchObject({ phase: "playing", paused: true, skin: null });
+    expect(snap(t).round).toMatchObject({ deadline: null, pausedRemainingMs: 9000 });
+    t.clock.advance(60 * S + 60 * S);
+    expect(snap(t)).toMatchObject({ phase: "playing", paused: true });
+    expect(snap(t).round!.pausedRemainingMs).toBe(9000);
+    expect(() => t.engine.input(t.ids[0]!, {})).toThrow(GameError);
+    t.clock.advance(60 * S); // 120 s après minuit
+    expect(snap(t)).toMatchObject({ phase: "playing", paused: false, midnight: null });
+    expect(snap(t).round!.deadline).toBe(t.clock.now() + 9000);
+    t.clock.advance(9000);
+    expect(snap(t).phase).toBe("results");
+  });
+
+  it("met aussi en pause une scène de transition et la relance au bon endroit", () => {
+    const t = midnightEngine(at(23, 58, 58));
+    t.engine.start(); // scène d'ouverture de 9 s
+    t.clock.advance(2 * S);
+    expect(snap(t)).toMatchObject({ phase: "transition", paused: true });
+    t.clock.advance(179 * S);
+    expect(snap(t)).toMatchObject({ phase: "transition", paused: true });
+    t.clock.advance(1 * S); // reprise auto : il reste 7 s de scène
+    expect(snap(t)).toMatchObject({ phase: "transition", paused: false, midnight: null });
+    t.clock.advance(6999);
+    expect(snap(t).phase).toBe("transition");
+    t.clock.advance(1);
+    expect(snap(t).phase).toBe("intro");
+  });
+
+  it("pendant minuit : Passer, +10 s et les réponses sont ignorés, Reprendre n'agit pas avant la célébration", () => {
+    const t = midnightEngine(at(23, 58, 55));
+    startRounds(t.engine);
+    t.clock.advance(5 * S);
+    t.engine.skip();
+    t.engine.addTime(10);
+    t.engine.resume();
+    expect(snap(t)).toMatchObject({ phase: "playing", paused: true, midnight: { phase: "countdown" } });
+    expect(snap(t).round!.pausedRemainingMs).toBe(9000);
+  });
+
+  it("l'hôte relance la partie en cliquant Reprendre pendant la célébration", () => {
+    const t = midnightEngine(at(23, 58, 55));
+    startRounds(t.engine);
+    t.clock.advance(65 * S);
+    expect(snap(t).midnight?.phase).toBe("celebrate");
+    t.engine.resume();
+    expect(snap(t)).toMatchObject({ phase: "playing", paused: false, midnight: null });
+    expect(snap(t).round!.deadline).toBe(t.clock.now() + 9000);
+    t.clock.advance(10 * 60 * S);
+    expect(snap(t).phase).not.toBe("lobby");
+  });
+
+  it("reprise_auto = 0 : seul l'hôte relance", () => {
+    const t = midnightEngine(at(23, 59, 30), {}, { autoResumeSeconds: 0 });
+    t.clock.advance(3600 * S);
+    expect(snap(t).midnight?.phase).toBe("celebrate");
+    t.engine.resume();
+    expect(snap(t).midnight).toBeNull();
+  });
+
+  it("pause de l'hôte posée avant minuit : la reprise auto la respecte, le bouton Reprendre la lève", () => {
+    const t = midnightEngine(at(23, 58, 55));
+    startRounds(t.engine);
+    t.clock.advance(T.intro);
+    t.engine.pause();
+    t.clock.advance(181 * S);
+    expect(snap(t)).toMatchObject({ phase: "playing", paused: true, midnight: null });
+    const u = midnightEngine(at(23, 58, 55));
+    startRounds(u.engine);
+    u.clock.advance(T.intro);
+    u.engine.pause();
+    u.clock.advance(65 * S);
+    u.engine.resume();
+    expect(snap(u)).toMatchObject({ paused: false, midnight: null });
+  });
+
+  it("une manche en résultats n'avance pas pendant minuit, même si tout le monde clique Continuer", () => {
+    const t = midnightEngine(at(23, 58, 40));
+    startRounds(t.engine);
+    t.clock.advance(T.intro + T.round); // résultats à 23:58:54
+    expect(snap(t).phase).toBe("results");
+    t.clock.advance(6 * S);
+    expect(snap(t)).toMatchObject({ phase: "results", midnight: { phase: "countdown" }, paused: true });
+    for (const id of t.ids) t.engine.continue(id);
+    expect(snap(t).phase).toBe("results");
+    t.clock.advance(180 * S);
+    expect(snap(t)).toMatchObject({ phase: "intro", midnight: null }); // tous avaient cliqué : on avance à la fin de minuit
+  });
+
+  it("écran final : la révélation reprend où elle en était", () => {
+    const t = midnightEngine(at(23, 40));
+    startRounds(t.engine);
+    for (let i = 0; i < 20 && snap(t).phase !== "final"; i++) t.engine.skip();
+    expect(snap(t).phase).toBe("final");
+    const startedAt = snap(t).finalReveal!.startedAt;
+    t.clock.advance(19 * 60 * S); // 23:59:00
+    expect(snap(t).midnight?.phase).toBe("countdown");
+    t.clock.advance(180 * S);
+    expect(snap(t).midnight).toBeNull();
+    expect(snap(t).finalReveal!.startedAt).toBe(startedAt + 180 * S);
+  });
+
+  it("sauvegarde : une célébration en cours est retrouvée après un crash, pas une ancienne", () => {
+    const persistence = new MemoryPersistence();
+    const a = midnightEngine(at(23, 58, 55), { persistence });
+    startRounds(a.engine);
+    a.clock.advance(70 * S);
+    expect(persistence.data?.midnight).toEqual({ targetAt: at(0, 0, 0, 1, 0) });
+    a.clock.advance(20 * S); // redémarrage 20 s plus tard, même horloge
+    const b = midnightEngine(0, { persistence, clock: a.clock });
+    expect(snap(b)).toMatchObject({ phase: "lobby", midnight: { phase: "celebrate" } });
+    expect(snap(b).resumable).not.toBeNull();
+    b.engine.resumeSave(); // la partie reprise reste figée sous l'écran de minuit
+    expect(snap(b)).toMatchObject({ paused: true, midnight: { phase: "celebrate" } });
+    b.engine.resume();
+    expect(snap(b)).toMatchObject({ paused: false, midnight: null });
+    // trop tard : la célébration n'est pas ressuscitée
+    const old = new MemoryPersistence();
+    old.data = { ...persistence.data!, midnight: { targetAt: at(0, 0, 0, 1, 0) } };
+    const c = midnightEngine(at(0, 10, 0, 1, 0), { persistence: old });
+    expect(snap(c).midnight).toBeNull();
+  });
+
+  it("un compte à rebours au lobby n'écrase pas la partie interrompue qui attend sa reprise", () => {
+    const persistence = new MemoryPersistence();
+    const a = createTestEngine({ persistence });
+    startRounds(a.engine);
+    a.clock.advance(T.intro);
+    const saved = structuredClone(persistence.data);
+    const writes: unknown[] = [];
+    const b = midnightEngine(at(23, 59, 30), { players: 0, persistence: { load: () => saved, save: (d) => void writes.push(d) } });
+    expect(snap(b).midnight).toMatchObject({ phase: "countdown" });
+    expect(snap(b).resumable).not.toBeNull();
+    expect(writes).toHaveLength(0);
+  });
+
+  it("l'hôte peut revenir au lobby pendant minuit sans rien casser", () => {
+    const t = midnightEngine(at(23, 58, 55));
+    startRounds(t.engine);
+    t.clock.advance(65 * S);
+    t.engine.backToLobby();
+    expect(snap(t)).toMatchObject({ phase: "lobby", paused: false, midnight: { phase: "celebrate" } });
+    t.engine.resume();
+    expect(snap(t).midnight).toBeNull();
+  });
+});

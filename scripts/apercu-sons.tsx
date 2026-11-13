@@ -31,6 +31,8 @@ const QUAND: Record<NomSon, string> = {
   "reponse.toutes": "Tout le monde a répondu (juste après le dernier pop).",
   "chrono.tic": "Chacune des 5 dernières secondes d'un chrono, de plus en plus aigu.",
   "chrono.fin": "Le chrono arrive à zéro (buzzer de jeu télé).",
+  "minuit.tic": "Chacune des 10 dernières secondes avant minuit, de plus en plus aigu.",
+  "minuit.fete": "Minuit sonne : « Bonne année ! » (fanfare, feu d'artifice).",
   "temps.ajoute": "L'hôte clique « +10 s ».",
   "pause": "L'hôte met la partie en pause.",
   "reprise": "L'hôte reprend la partie.",
@@ -55,7 +57,7 @@ const QUAND: Record<NomSon, string> = {
 const GROUPES: { titre: string; noms: NomSon[] }[] = [
   { titre: "Partie et lobby", noms: ["lobby.musique", "joueur.rejoint", "joueur.quitte", "partie.lancement"] },
   { titre: "Manche", noms: ["manche.intro", "reponse.recue", "reponse.toutes", "temps.ajoute", "pause", "reprise"] },
-  { titre: "Chrono", noms: ["chrono.tic", "chrono.fin"] },
+  { titre: "Chrono", noms: ["chrono.tic", "chrono.fin", "minuit.tic", "minuit.fete"] },
   { titre: "Résultats", noms: ["resultats.arrivee", "roulement", "tension", "applaudissements", "echec.trombone", "points.gagnes", "final.fanfare"] },
   { titre: "Transitions", noms: ["transition.entree", "transition.sortie"] },
   { titre: "Interface et verdicts", noms: ["ui.clic", "bonne.reponse", "mauvaise.reponse"] },
