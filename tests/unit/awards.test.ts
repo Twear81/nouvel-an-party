@@ -31,9 +31,13 @@ describe("catégories de cérémonie", () => {
     expect(candidates.find((c) => c.id === "roi-manches")?.winners).toEqual(["a"]);
   });
   it("compare les avis seulement lorsque les deux joueurs ont répondu ; le Duo gagne à deux", () => {
-    const c = awardCandidates([round({ a: 0, b: 0, c: 0 }, { opinions: [{ a: "oui", b: "non", c: "oui" }, { a: "0", b: "1" }] })], ["a", "b", "c"], seededRng(1)).find((c) => c.id === "duo-improbable")!;
-    expect(c.winners).toHaveLength(2);
+    const c = awardCandidates([round({ a: 0, b: 0, c: 0 }, { opinions: [{ a: "oui", b: "non", c: "oui" }, { a: "0", b: "1" }, { a: "x", b: "y", c: "x" }, { a: "1", b: "2" }] })], ["a", "b", "c"], seededRng(1)).find((c) => c.id === "duo-improbable")!;
+    expect(c.winners).toEqual(["a", "b"]);
     expect(c.statLabel).toContain("désaccord");
+  });
+  it("ignore une paire avec moins de 3 avis communs", () => {
+    const c = awardCandidates([round({ a: 0, b: 0 }, { opinions: [{ a: "oui", b: "non" }, { a: "0", b: "1" }] })], ["a", "b"], seededRng(1));
+    expect(c.find((c) => c.id === "duo-improbable")).toBeUndefined();
   });
   it("ne donne le talent incompris qu'aux auteurs de dessins non vides et retient le moins voté", () => {
     const strokes = [{ c: 0, w: 0, p: [0, 0, 50, 50] }];

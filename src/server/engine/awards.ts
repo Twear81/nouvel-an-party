@@ -88,7 +88,8 @@ export function awardCandidates(history: RoundSummary[], playerIds: PlayerId[], 
   for (let i = 0; i < playerIds.length; i++) for (let j = i + 1; j < playerIds.length; j++) {
     const a = playerIds[i]!, b = playerIds[j]!;
     const shared = history.flatMap((r) => r.opinions ?? []).filter((o) => a in o && b in o);
-    if (shared.length) pairs.push({ winners: [a, b], agrees: shared.filter((o) => o[a] === o[b]).length, shared: shared.length });
+    // Au moins 3 avis communs : un seul désaccord ne fait pas un « duo improbable ».
+    if (shared.length >= 3) pairs.push({ winners: [a, b], agrees: shared.filter((o) => o[a] === o[b]).length, shared: shared.length });
   }
   if (pairs.length) {
     const minimum = Math.min(...pairs.map((p) => p.agrees / p.shared));
