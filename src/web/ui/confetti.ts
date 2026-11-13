@@ -50,13 +50,16 @@ export function fireConfetti(power: "small" | "big" = "small", keepLeft = false)
     shoot(base, { particleCount: 60, spread: 70, origin: { y: 0.7 } });
     return;
   }
-  const end = Date.now() + 2500;
+  // Allégé (TV de salon) : jets latéraux une image sur deux, peu de particules à la fois, gerbe centrale réduite.
+  const end = Date.now() + 1800;
   let tick = 0;
   const frame = () => {
-    // Formes maison une image sur quatre seulement dans les jets latéraux.
-    const withCustom = tick++ % 4 === 0;
-    if (!keepLeft) void confetti({ ...base, particleCount: 6, angle: 60, spread: 60, origin: { x: 0, y: 0.8 } });
-    void confetti({ ...base, particleCount: 6, angle: 120, spread: 60, origin: { x: 1, y: 0.8 } });
+    const t = tick++;
+    if (t % 2 === 1) { if (Date.now() < end) requestAnimationFrame(frame); return; }
+    // Formes maison un jet sur quatre seulement.
+    const withCustom = t % 8 === 0;
+    if (!keepLeft) void confetti({ ...base, particleCount: 3, angle: 60, spread: 60, origin: { x: 0, y: 0.8 } });
+    void confetti({ ...base, particleCount: 3, angle: 120, spread: 60, origin: { x: 1, y: 0.8 } });
     const custom = paintShapes();
     if (withCustom && custom.length) {
       if (!keepLeft) void confetti({ ...base, particleCount: 1, angle: 60, spread: 60, origin: { x: 0, y: 0.8 }, shapes: custom, scalar: CONFETTI_SCALAR });
@@ -66,6 +69,6 @@ export function fireConfetti(power: "small" | "big" = "small", keepLeft = false)
   };
   frame();
   shoot(base, keepLeft
-    ? { particleCount: 130, spread: 70, startVelocity: 45, origin: { x: 0.66, y: 0.5 } }
-    : { particleCount: 160, spread: 110, startVelocity: 45, origin: { y: 0.5 } });
+    ? { particleCount: 80, spread: 70, startVelocity: 45, origin: { x: 0.66, y: 0.5 } }
+    : { particleCount: 100, spread: 110, startVelocity: 45, origin: { y: 0.5 } });
 }

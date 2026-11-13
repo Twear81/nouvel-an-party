@@ -117,8 +117,8 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
         <FrameSummon profile={profile} onFrame={setFrame} onBusy={setSummoning} />
       </div>
 
-      {/* Toujours visible : collé en bas de la zone qui défile. */}
-      <div className="sticky bottom-0 -mx-1 mt-auto space-y-1 bg-gradient-to-t from-bg from-70% to-transparent px-1 pb-2 pt-5">
+      {/* Toujours visible : collé en bas de la zone qui défile, au-dessus de la carte du cadre (z-10) quand elle passe dessous. */}
+      <div className="sticky bottom-0 z-20 -mx-1 mt-auto space-y-1 bg-gradient-to-t from-bg from-70% to-transparent px-1 pb-2 pt-5">
         {error && <p className="text-center text-sm font-semibold text-bad">{error}</p>}
         <div className="flex items-center gap-2">
           {onCancel && (

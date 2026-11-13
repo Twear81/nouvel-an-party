@@ -42,6 +42,9 @@ const readMuted = (): boolean => {
   }
 };
 
+/** Longues pistes : décodées seulement quand on les joue (ou annoncées par `prechargerMusique`), jamais d'avance en bloc. */
+const MUSIQUES = new Set<NomSon>(["lobby.musique", "final.musique", "final.premier"]);
+
 export class SoundEngine {
   private mediasPrets = false;
   private ambiance = false;
@@ -52,6 +55,8 @@ export class SoundEngine {
   private musiqueVersion = 0;
   private musiqueEnChargement: string | null = null;
   private musiqueBaisseJusqua = 0;
+  /** Décodage de la musique en cours (prioritaire sur le décodage anticipé des bruitages). */
+  private musiqueEnCours: Promise<unknown> | null = null;
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private files: string[] = [];
@@ -153,8 +158,10 @@ export class SoundEngine {
   private afterUnlock() {
     this.emit();
     this.syncMusique();
-    // Décodage anticipé : le premier son joué ne doit pas attendre.
-    for (const s of allSounds(this.skin, this.files).values()) void this.getBuffer(s);
+    // Décodage anticipé, UN par UN : en parallèle, la musique (décodée d'abord par syncMusique) attendait derrière
+    // tous les bruitages, plus de 10 s sur une machine lente (Firefox en CI).
+    const reste = [...allSounds(this.skin, this.files)].filter(([nom]) => !MUSIQUES.has(nom)).map(([, s]) => s);
+    void reste.reduce<Promise<unknown>>((chaine, s) => chaine.then(() => this.getBuffer(s)), this.musiqueEnCours ?? Promise.resolve());
   }
 
   // ── Réglages
@@ -194,6 +201,12 @@ export class SoundEngine {
     this.syncMusique();
   }
 
+  /** Décode d'avance une musique qui va bientôt démarrer (elle partira alors sans délai, calée sur l'écran). */
+  prechargerMusique(nom: NomSon) {
+    const def = resolveSound(nom, this.skin, this.files);
+    if (def) void this.getBuffer(def);
+  }
+
   /** Musique de fond d'un écran ; `null` rend la main à l'ambiance (fondu croisé dans les deux cas). */
   setMusiqueScene(nom: NomSon | null) {
     if (this.musiqueScene === nom) return;
@@ -228,7 +241,9 @@ export class SoundEngine {
     if (this.musiqueEnChargement === def.url) return;
     const version = ++this.musiqueVersion;
     this.musiqueEnChargement = def.url;
-    void this.getBuffer(def).then((buffer) => {
+    const decodage = this.getBuffer(def);
+    this.musiqueEnCours = decodage;
+    void decodage.then((buffer) => {
       if (version !== this.musiqueVersion) return;
       this.musiqueEnChargement = null;
       if (!buffer || !this.ctx || !this.master) return;

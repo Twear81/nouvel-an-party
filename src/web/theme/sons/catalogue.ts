@@ -84,3 +84,9 @@ export const isNomSon = (v: string): v is NomSon => Object.prototype.hasOwnPrope
 export const SONS_PAR_SKIN: Partial<Record<SkinId, Partial<Record<NomSon, SonDef>>>> = Object.fromEntries(
   ambiances.map(({ skin, fichier, volume }) => [skin, { "lobby.musique": { fichier, volume } }]),
 );
+
+/**
+ * Instant (s) où le refrain de `final.premier` démarre dans le fichier livré (« All I Do Is Win » : blanc à 16,5 s, refrain à 18 s).
+ * Les confettis du classement final partent à ce moment-là. À ajuster si l'organisateur remplace le morceau.
+ */
+export const REFRAIN_FINAL_PREMIER_S = 18;
