@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
 import { tieRanks } from "../../shared/ranking";
-import { endWhenAllDone, progressOf } from "../helpers";
+import { endWhenAllDone, progressOf, themeSchema } from "../helpers";
 import { MAX_CENTS } from "./amount";
 
 const objetSchema = z.object({
@@ -17,6 +17,8 @@ const objetSchema = z.object({
     .refine((f) => !f.includes("..") && !/^([a-z]+:|[\\/])/i.test(f), "Nom de fichier du dossier config/medias, sans chemin complet")
     .optional(),
   emoji: z.string().min(1).optional(),
+  /** Thème facultatif : le tirage évite de rejouer un thème déjà vu (ex : "cuisine"). */
+  theme: themeSchema,
   /** Indice affiché sous le nom (contenance, taille, année…). */
   details: z.string().optional(),
   duree: z.number().positive().optional(),
@@ -95,6 +97,7 @@ export default defineMiniGame<Cfg, Item, State>({
   name: (cfg) => cfg.nom,
   description: (cfg) => cfg.description,
   items: (cfg) => cfg.objets,
+  itemInfo: (item) => ({ theme: item.theme }),
   roundSeconds: (cfg, item) => item.duree ?? cfg.duree,
   estimateSeconds: (cfg) => cfg.duree + cfg.temps_resultats,
 

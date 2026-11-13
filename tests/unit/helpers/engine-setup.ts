@@ -1,5 +1,6 @@
 // Fabrique un moteur prêt à jouer : horloge simulée, N joueurs avec profil, mini-jeu factice.
 import { GameEngine, type EngineSettings, type Persistence, type SaveData } from "../../../src/server/engine/engine";
+import type { DejaVuStore } from "../../../src/server/engine/deja-vu";
 import type { LoadedGame } from "../../../src/server/engine/planner";
 import { FakeClock } from "./fake-clock";
 import { makeFakeGame, type FakeGameOptions } from "./fake-game";
@@ -32,6 +33,7 @@ export interface TestEngineOptions {
   games?: LoadedGame[];
   settings?: Partial<EngineSettings>;
   persistence?: Persistence;
+  dejaVu?: DejaVuStore;
   clock?: FakeClock;
   seed?: number;
 }
@@ -49,6 +51,7 @@ export function createTestEngine(o: TestEngineOptions = {}) {
     rng: seededRng(o.seed ?? 42),
     onChange: () => void changes.count++,
     persistence: o.persistence,
+    dejaVu: o.dejaVu,
   });
   if (!o.games) engine.setSetup({ counts: { [fake.game.id]: o.rounds ?? 2 } });
   const players = addPlayers(engine, o.players ?? 3);

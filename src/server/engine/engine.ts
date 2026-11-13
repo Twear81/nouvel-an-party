@@ -12,8 +12,9 @@ import { profileSchema } from "../../shared/schemas";
 import { shuffle } from "../../shared/shuffle";
 import { SKINS, isSkinId, type SkinId } from "../../shared/skins";
 import { TRANSITION_TIMING, transitionElapsed, type TransitionInfo, type TransitionKind } from "../../shared/transitions";
-import type { GameSnapshot, Phase, PlayerId, Profile, PublicPlayer, RoundInfo, Setup } from "../../shared/types";
+import type { CatalogEntry, GameSnapshot, Phase, PlayerId, Profile, PublicPlayer, RoundInfo, Setup } from "../../shared/types";
 import { realClock, TimerGroup, type Clock } from "./clock";
+import { emptyDejaVu, markPlayed, sanitizeDejaVu, type DejaVuData, type DejaVuStore } from "./deja-vu";
 import { assignRoundSkins, buildCatalog, buildPlan, defaultSetup, sanitizeSetup, type LoadedGame, type PlannedRound } from "./planner";
 
 export class GameError extends Error {}
@@ -59,6 +60,8 @@ export interface EngineOptions {
   /** Appelé après chaque changement d'état (le serveur rediffuse les snapshots). */
   onChange?: () => void;
   persistence?: Persistence;
+  /** Mémoire des éléments déjà joués (data/deja-vu.json). Absente : mémoire seulement le temps du processus. */
+  dejaVu?: DejaVuStore;
 }
 
 interface PlayerRecord {
@@ -105,14 +108,22 @@ export class GameEngine {
   private readonly games: Map<string, LoadedGame>;
   private readonly clock: Clock;
   private readonly rng: () => number;
-  readonly catalog;
+  /** Recalculé quand la mémoire « déjà vu » change (nombre d'éléments neufs). */
+  catalog: CatalogEntry[];
+  private dejaVu: DejaVuData;
 
   constructor(private opts: EngineOptions) {
     this.games = new Map(opts.games.map((g) => [g.game.id, g]));
     this.clock = opts.clock ?? realClock;
     this.rng = opts.rng ?? Math.random;
     this.skinOrder = shuffle([...SKINS], this.rng);
-    this.catalog = buildCatalog(opts.games, opts.settings.introSeconds);
+    this.dejaVu = emptyDejaVu();
+    try {
+      this.dejaVu = sanitizeDejaVu(opts.dejaVu?.load());
+    } catch {
+      // illisible : tout est neuf
+    }
+    this.catalog = buildCatalog(opts.games, opts.settings.introSeconds, this.dejaVu);
     this.setup = defaultSetup(this.catalog, opts.settings.targetMinutes);
     this.restoreFromSave();
   }
@@ -174,7 +185,7 @@ export class GameEngine {
   start() {
     if (this.phase !== "lobby") throw new GameError("La partie a déjà commencé");
     if (![...this.players.values()].some((p) => p.profile)) throw new GameError("Aucun joueur prêt");
-    const plan = buildPlan(this.opts.games, this.setup, this.opts.settings.order, this.rng);
+    const plan = buildPlan(this.opts.games, this.setup, this.opts.settings.order, this.rng, this.dejaVu);
     if (plan.length === 0) throw new GameError("Choisis au moins une manche");
     for (const p of this.players.values()) p.score = 0;
     this.plan = assignRoundSkins(plan, this.skinOrder, this.rng);
@@ -386,6 +397,7 @@ export class GameEngine {
 
     const planned = this.plan[this.roundIndex]!;
     const loaded = this.games.get(planned.gameId)!;
+    this.rememberItem(loaded, planned.item);
     const timers = new TimerGroup(this.clock);
     const round: CurrentRound = {
       loaded,
@@ -610,6 +622,20 @@ export class GameEngine {
   }
 
   // ───────────────────────────── Sauvegarde ─────────────────────────────
+
+  /**
+   * Mémorise un élément au DÉBUT de sa manche : les invités l'ont vu même si la manche est interrompue, et un plan
+   * abandonné (retour au lobby sans jouer) ne « brûle » rien. Un souci d'écriture ne bloque jamais la partie.
+   */
+  private rememberItem(loaded: LoadedGame, item: unknown) {
+    markPlayed(this.dejaVu, loaded.game, item);
+    this.catalog = buildCatalog(this.opts.games, this.opts.settings.introSeconds, this.dejaVu);
+    try {
+      this.opts.dejaVu?.save(this.dejaVu);
+    } catch (e) {
+      console.error("Écriture de deja-vu.json impossible", e);
+    }
+  }
 
   private save() {
     this.opts.persistence?.save({

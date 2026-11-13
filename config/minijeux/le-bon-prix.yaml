@@ -46,10 +46,6 @@ points:
 # Prix indicatifs France 2026 : changez-les à votre goût !
 objets:
   - { nom: "Une baguette tradition", prix: 1.40, emoji: "🥖", details: "Chez le boulanger du coin" }
-  - { nom: "Un expresso au comptoir", prix: 2.00, emoji: "☕", details: "Au zinc du café, en province" }
-  - { nom: "Une boîte de 6 œufs bio", prix: 3.30, emoji: "🥚", details: "Plein air, supermarché" }
-  - { nom: "Un pot de Nutella", prix: 4.90, emoji: "🍫", details: "Le grand pot de 750 g" }
-  - { nom: "Une pizza surgelée", prix: 4.50, emoji: "🍕", details: "Marque nationale, 4 fromages" }
   - { nom: "Une place de cinéma", prix: 12.50, emoji: "🎬", details: "Tarif plein, séance du soir, en ville" }
   - { nom: "Un ticket de métro parisien", prix: 2.50, emoji: "🚇", details: "Le ticket à l'unité" }
   - { nom: "Un Big Mac", prix: 6.20, emoji: "🍔", details: "Le sandwich seul, sans le menu" }
@@ -58,14 +54,17 @@ objets:
   - { nom: "Une bûche de Noël de pâtissier", prix: 42, emoji: "🎂", details: "Pour 6 personnes" }
   - { nom: "Un jeu de Monopoly", prix: 32, emoji: "🎲", details: "Édition classique" }
   - { nom: "Un sapin de Noël naturel", prix: 55, emoji: "🎄", details: "Nordmann de 1,50 m" }
-  - { nom: "Un ticket pour la Tour Eiffel", prix: 36.10, emoji: "🗼", details: "Accès au sommet, par l'ascenseur, adulte" }
-  - { nom: "Une entrée à Disneyland Paris", prix: 94, emoji: "🏰", details: "Un jour, un parc, plein tarif" }
+  - { nom: "Un ticket pour la Tour Eiffel", prix: 36.70, emoji: "🗼", details: "Billet adulte, ascenseur jusqu'au sommet, tarif 2026" }
+  - { nom: "Un billet Disneyland Paris pour le 31 décembre 2026", prix: 150, emoji: "🏰", details: "1 jour, 1 parc, adulte : le jour le plus cher de l'année" }
   - { nom: "Une paire de Converse", prix: 80, emoji: "👟", details: "Chuck Taylor All Star montantes" }
-  - { nom: "Une console PlayStation 5", prix: 480, emoji: "🎮", details: "Modèle standard avec lecteur" }
-  - { nom: "Un iPhone", prix: 969, emoji: "📱", details: "Dernier modèle de base, 128 Go" }
+  - { nom: "Une console PlayStation 5", prix: 649.99, emoji: "🎮", details: "Modèle standard avec lecteur, prix conseillé 2026" }
+  - { nom: "Un iPhone 17", prix: 969, emoji: "📱", details: "256 Go, prix Apple" }
   - { nom: "Un MacBook Air", prix: 1199, emoji: "💻", details: "13 pouces, 256 Go" }
-  - { nom: "Une montre de luxe d'entrée de gamme", prix: 6500, emoji: "⌚", details: "Une grande marque suisse" }
   - { nom: "Un aller-retour Paris – New York", prix: 620, emoji: "✈️", details: "En classe éco, en basse saison" }
   - { nom: "Un kilo de truffe noire", prix: 1100, emoji: "🍄", details: "Truffe du Périgord" }
-  - { nom: "Un vélo électrique", prix: 1800, emoji: "🚲", details: "Vélo de ville, milieu de gamme" }
   - { nom: "Une Twingo neuve", prix: 20000, emoji: "🚗", details: "Citadine électrique, entrée de gamme", duree: 40 }
+  - { nom: "Une Nintendo Switch 2", prix: 499.99, emoji: "🎮", details: "Console seule, prix conseillé depuis septembre 2026", theme: jeu-video }
+  - { nom: "Le plus gros pack de gemmes d'un jeu gacha", prix: 99.99, emoji: "💎", details: "6 480 cristaux dans Genshin Impact, environ 40 tirages", theme: jeu-video }
+  - { nom: "Un bol de ramen dans une chaîne au Japon", prix: 6, emoji: "🍜", details: "Environ 1 000 yens, à Tokyo", theme: voyage }
+  - { nom: "Une séance chez l'ostéopathe", prix: 60, emoji: "🦴", details: "Tarif moyen en France, non remboursé", theme: sante }
+  - { nom: "1 000 litres d'eau du robinet", prix: 4.3, emoji: "🚰", details: "Eau et assainissement, prix moyen en France", theme: argent }

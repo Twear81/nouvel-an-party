@@ -36,6 +36,8 @@ export interface CatalogEntry {
   name: string;
   description: string;
   available: number; // nombre max de manches (ex : nombre de questions dans le fichier)
+  /** Parmi `available`, combien d'éléments n'ont encore jamais été joués (data/deja-vu.json). Info pour l'hôte. */
+  fresh?: number;
   secondsPerRound: number; // estimation d'une manche complète (intro + jeu + résultats)
   /**
    * Présent seulement pour un jeu « interlude » : il surgit environ une fois toutes les N manches normales

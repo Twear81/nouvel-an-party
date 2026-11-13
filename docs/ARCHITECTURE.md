@@ -89,6 +89,7 @@ joueurs connectés (`allConnectedDone`, `helpers.ts`), un téléphone planté ne
 ## Reconnexion & crash
 - Le téléphone garde un jeton dans `localStorage` → il retrouve son joueur à la reconnexion.
 - `data/save.json` est réécrit à chaque étape → au redémarrage du serveur, la TV propose de reprendre.
+- `data/deja-vu.json` (`src/server/engine/deja-vu.ts`) mémorise, par mini-jeu, les éléments déjà joués (empreinte du contenu, ou `itemInfo.keys`) avec un numéro d'ordre, écrit au **début** de chaque manche (une manche interrompue compte comme vue ; un plan abandonné ne brûle rien). `buildPlan` en tire les neufs d'abord puis les plus anciens, et évite les thèmes déjà vus ; le catalogue envoie `fresh` au lobby. Fichier absent ou corrompu : tout est neuf.
 - Une scène sauvegarde sa destination, ses participants, sa progression et un horodatage de contrôle. Sa reprise
   garde le temps écoulé (y compris l'arrêt du serveur hors pause) ou reste figée si elle était en pause.
   Une scène déjà achevée mène directement à sa destination ; aucun résultat ni point n'est recalculé.

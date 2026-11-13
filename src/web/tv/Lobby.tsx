@@ -196,7 +196,14 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
             }
             return (
               <div key={g.id} data-testid={`setup-row-${g.id}`} className="flex items-center gap-3">
-                <div className={nameClass} title={g.name}>{g.name}</div>
+                <div className="min-w-0 flex-1">
+                  <div className={nameClass} title={g.name}>{g.name}</div>
+                  {g.fresh !== undefined && (
+                    <div data-testid={`setup-fresh-${g.id}`} data-fresh={g.fresh} className="text-sm text-ink-muted">
+                      {g.fresh} {g.fresh > 1 ? "neuves" : "neuve"}
+                    </div>
+                  )}
+                </div>
                 <Button data-testid={`setup-dec-${g.id}`} variant="secondary" size="sm" disabled={!host || count <= 0} onClick={() => setCount(g.id, count - 1, g.available)} aria-label="Moins">
                   −
                 </Button>

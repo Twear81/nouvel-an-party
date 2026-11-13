@@ -42,11 +42,11 @@ Sous `mots:`, trois listes, un mot ou une expression par ligne, commençant par 
 **Une liste doit avoir au moins 8 mots pour être jouée** (8 joueurs, 8 mots différents). Avec 16 mots ou plus, la difficulté revient sur plusieurs manches : une manche par tranche de 8 mots (30 mots = 3 manches), sans jamais répéter un mot. Une liste de moins de 8 mots est ignorée ; au moins une liste doit être complète.
 
 **Comment classer un mot** : l'idée est que, dans une même liste, tous les mots soient aussi durs à dessiner les uns que les autres.
-- **Facile** : un objet concret qu'on reconnaît en 3 traits (« Une banane », « Un sapin de Noël », « Une montre »).
-- **Moyen** : une action ou une scène, un personnage qui fait quelque chose (« Un chat qui fait du ski », « Un bonhomme de neige qui fond »). Il faut deux idées à dessiner.
-- **Difficile** : un concept, une émotion, une expression, qui n'a pas de forme (« La gueule de bois », « Le réveil du 1er janvier », « La flemme »). C'est là que les dessins sont les plus ratés, donc les plus drôles.
+- **Facile** : un objet simple qu'on reconnaît en 3 traits (« Une banane », « Un chou-fleur », « Une montre »).
+- **Moyen** : un objet ou un animal qui fait une chose simple (« Un chat qui fait du ski », « Un bonhomme de neige qui fond »).
+- **Difficile** : une chose concrète, mais compliquée à dessiner (« Un ornithorynque », « Un château fort », « La tour Eiffel »). Jamais une action ni une idée abstraite (« La flemme », « Le dimanche soir ») : en 20 secondes, on ne les dessine pas.
 
-Test rapide : « peut-on le dessiner sans écrire de lettres ? » Un objet seul : facile. Un objet qui fait quelque chose : moyen. Il faut expliquer pour que ça se comprenne : difficile. Évitez de mélanger des niveaux dans la même liste : celui qui tire « Une banane » aurait un avantage sur « La flemme ».
+Test rapide : « peut-on le dessiner sans écrire de lettres ? » Un objet simple : facile. Un objet ou un animal qui fait une chose simple : moyen. Une chose concrète mais riche en détails : difficile. Une action ou une idée abstraite n'a sa place dans aucune liste. Évitez de mélanger des niveaux dans la même liste : celui qui tire « Une banane » aurait un avantage sur « Un yéti ».
 
 Exemple :
 
@@ -59,7 +59,7 @@ mots:
   moyen:
     - "Un chat qui fait du ski"
   difficile:
-    - "La gueule de bois"
+    - "Un château fort"
 ```
 
 ## Pièges YAML
