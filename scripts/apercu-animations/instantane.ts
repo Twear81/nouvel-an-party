@@ -27,7 +27,7 @@ export function catalogueDeLaGalerie(): CatalogEntry[] {
 export function snapshotDeBase(phase: Phase, o: Pick<OptionsInstantane, "joueurs" | "skin" | "paused">): GameSnapshot {
   const catalog = catalogueDeLaGalerie();
   return {
-    title: "Soirée du Nouvel An", phase, paused: o.paused, finalReveal: null, transition: null, players: o.joueurs, round: null,
+    title: "Soirée du Nouvel An", phase, paused: o.paused, finalReveal: null, ceremony: null, transition: null, players: o.joueurs, round: null,
     continued: [], catalog, setup: { counts: Object.fromEntries(catalog.map((g) => [g.id, g.interlude ? 1 : 2])) },
     resumable: null, joinUrl: "https://192.168.1.20:3443/", skin: o.skin, me: null,
   };

@@ -2,6 +2,7 @@
 // Le moteur (src/server/engine) gère chrono, phases, points cumulés, reconnexions :
 // un mini-jeu ne s'occupe que de SA manche.
 import type { z } from "zod";
+import type { Keepsake, RoundStats } from "../shared/ceremony";
 import type { PlayerId, PublicPlayer } from "../shared/types";
 
 /** Outils fournis par le moteur à un mini-jeu pendant une manche. */
@@ -44,6 +45,21 @@ export interface RoundOutcome {
   results: unknown;
   /** Points gagnés pendant la manche. Les joueurs absents gagnent 0. */
   scores: Record<PlayerId, number>;
+  /**
+   * Facultatif : statistiques par joueur de la manche, pour les bonus de la cérémonie finale.
+   * Catalogue partagé (`RoundStats`), tout facultatif, nombres finis ≥ 0. Le moteur valide et borne.
+   */
+  stats?: Record<PlayerId, RoundStats>;
+  /**
+   * Facultatif : une table par question/situation, valeur = choix opaque (même valeur = même avis).
+   * Alimente « Duo improbable ».
+   */
+  opinions?: Record<PlayerId, string>[];
+  /**
+   * Facultatif : souvenirs candidats (dessin, objet, post-it), bornés ; `score` = intérêt à les revoir.
+   * Le moteur en garde quelques-uns (≤ 24 Ko chacun, sinon ignoré) et la cérémonie en pose 2-3 dans la pièce.
+   */
+  keepsakes?: Keepsake[];
 }
 
 /**

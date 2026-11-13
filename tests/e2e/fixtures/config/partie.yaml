@@ -7,3 +7,6 @@ port_http: 3000
 port_https: 3443
 ip: "127.0.0.1"
 ouvrir_navigateur: false
+
+# Les parcours de manches historiques se terminent directement au podium.
+outro: { actif: false }

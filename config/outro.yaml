@@ -1,0 +1,32 @@
+# Textes et activation des bonus de fin de partie.
+# Une catégorie n'est tirée que si les données nécessaires existent dans la partie.
+# titre, phrase et emoji sont remplaçables ; actif: false retire la catégorie de la roulette.
+categories:
+  duo-improbable:
+    actif: true
+    emoji: "🧲"
+    titre: Duo improbable
+    phrase: Ont passé une heure ensemble sans partager une seule opinion.
+  merci-travaux:
+    actif: true
+    emoji: "🏗️"
+    titre: Merci pour les travaux
+    phrase: Sans fondations, aucun podium.
+  talent-incompris:
+    actif: true
+    emoji: "🎨"
+    titre: Le talent incompris
+    phrase: Le public n'était pas prêt.
+  craquage-dos:
+    actif: true
+    emoji: "🦴"
+    titre: Le craquage de dos
+    phrase: Un petit crac et tout se remet en place.
+  roi-manches: { actif: true }
+  manche-de-sa-vie: { actif: true }
+  escargot: { actif: true }
+  chou-fleur: { actif: true }
+  k-style: { actif: true }
+  indecis: { actif: true }
+  geass: { actif: true }
+  cuillere-tiramisu: { actif: true }

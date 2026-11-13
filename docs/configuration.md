@@ -63,3 +63,27 @@ Fermez `NouvelAn.exe`, supprimez le dossier `data/`, relancez. Les joueurs et sc
 Une ancienne sauvegarde avec un portrait photo reste utilisable : le portrait devient l'avatar Renard ; le pseudo,
 le cadre, la couleur, le score et le jeton sont conservés. Un ancien dossier `photos/` n'est plus utilisé ni servi par
 l'application ; ses fichiers ne sont pas supprimés automatiquement.
+
+## Souvenirs et bonus de fin (`outro`)
+
+Après la sortie de la TV, la cérémonie rappelle jusqu'à trois souvenirs de la partie et tire quatre bonus,
+puis démarre le classement final. Les commandes Pause et Passer s'appliquent à chaque étape.
+
+```yaml
+outro:
+  actif: true
+  bonus: 4
+  points_bonus: auto
+```
+
+`actif: false` rejoint directement le classement. `bonus` va de 0 à 12. `points_bonus` accepte un entier ≥ 0
+ou `auto` : 37,5 % du gain moyen du gagnant d'une manche, arrondi au multiple de 10 le plus proche, minimum 10.
+Les quatre bonus représentent donc environ une manche et demie. Chaque gagnant reçoit ce montant, y compris
+les deux membres du Duo improbable et tous les ex æquo d'une catégorie. Le tirage sans remise favorise légèrement
+les poursuivants et la variété. Un écart supérieur au total des bonus possibles protège mathématiquement le leader.
+
+`config/outro.yaml` permet de changer `titre`, `phrase`, `emoji` ou `actif` pour chaque catégorie connue.
+Une catégorie sans données ne passe jamais dans la roulette. Le fichier absent garde les textes par défaut ;
+un identifiant inconnu est signalé au démarrage. Il est inclus dans le dossier portable de la même manière
+que les questions. Les points sont appliqués une seule fois, à la fin de la cérémonie ; un crash reprend le
+même tirage et le même instant, y compris une pause en cours.

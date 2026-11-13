@@ -11,6 +11,7 @@ import { useRevealed } from "../net/useReveal";
 import { useFinalReveal } from "../net/useFinalReveal";
 import { SkinProvider } from "../theme/skin";
 import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, Panel, PhoneStage, PlayerAvatar, Pop, ReconnectBanner, WaitingDots, WatchingEyes } from "../ui";
+import { CeremonyPhone } from "./CeremonyPhone";
 import { ProfileEditor } from "./ProfileEditor";
 import { useWakeLock } from "./useWakeLock";
 
@@ -111,6 +112,8 @@ export function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
     case "results":
       if (!round) return null;
       return <ResultsPhone snapshot={snapshot} round={round} me={me} actions={actions} />;
+    case "ceremony":
+      return <CeremonyPhone snapshot={snapshot} />;
     case "final": {
       if (!finalReveal.done) {
         return (

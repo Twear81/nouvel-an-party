@@ -21,3 +21,9 @@ port_http: 3000
 port_https: 3443
 ip: auto            # ou une IP forcée, ex "192.168.1.42", si le QR code pointe sur la mauvaise
 ouvrir_navigateur: true
+
+# Souvenirs et bonus avant le classement final. Les textes sont dans config/outro.yaml.
+outro:
+  actif: true
+  bonus: 4 # Nombre de catégories tirées sans remise (0 à 12).
+  points_bonus: auto # « auto » : 37,5 % du gain moyen d'une manche, ou un entier ≥ 0.

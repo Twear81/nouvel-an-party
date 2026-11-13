@@ -11,7 +11,7 @@ export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot
   const [confirmLobby, setConfirmLobby] = useState(false);
   const soundState = useSoundState();
   const { phase, paused } = snapshot;
-  const inGame = phase === "transition" || phase === "intro" || phase === "playing" || phase === "results";
+  const inGame = phase === "final" || phase === "ceremony" || phase === "transition" || phase === "intro" || phase === "playing" || phase === "results";
 
   const togglePause = useCallback(() => void (paused ? actions.resume() : actions.pause()).catch(() => {}), [paused, actions]);
   const skip = useCallback(() => void actions.skip().catch(() => {}), [actions]);

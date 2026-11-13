@@ -5,9 +5,13 @@
 // Une frontière d'univers ferme ses résultats par une scène, avant la manche suivante.
 // Une manche « interlude » saute uniquement son annonce de manche, jamais l'ouverture de la partie.
 import { randomBytes, randomUUID } from "node:crypto";
-import type { RoundContext } from "../../minigames/contract";
+import type { RoundContext, RoundOutcome } from "../../minigames/contract";
+import { ceremonyElapsed, ceremonyTimeline, ceremonyStepAt, revealedAwards, revealedSouvenirs, type CeremonyInfo, type Keepsake, type RoundSummary } from "../../shared/ceremony";
+import { DEFAULT_AWARD_CATEGORIES, type AwardCategoryContent } from "../outro-content";
+import { drawAwards, chooseSouvenirs, type OutroSettings } from "./awards";
+import { pruneKeepsakes, sanitizeHistory, sanitizeStats, sanitizeOpinions, sanitizeKeepsakes } from "./history";
 import { activeNow } from "../../shared/clock";
-import type { FinalRevealInfo } from "../../shared/final-reveal";
+import { finalRevealElapsed, finalRevealTimeline, type FinalRevealInfo } from "../../shared/final-reveal";
 import { profileSchema } from "../../shared/schemas";
 import { shuffle } from "../../shared/shuffle";
 import { SKINS, isSkinId, type SkinId } from "../../shared/skins";
@@ -29,6 +33,7 @@ export interface EngineSettings {
   targetMinutes: number;
   order: "melange" | "groupe";
   introSeconds: number;
+  outro?: OutroSettings;
 }
 
 /** Ce qui est écrit dans data/save.json pour survivre à un crash du PC. */
@@ -40,6 +45,8 @@ export interface SaveData {
   roundIndex: number;
   phase: Phase;
   finalReveal?: FinalRevealInfo | null;
+  history?: RoundSummary[];
+  ceremony?: CeremonyInfo | null;
   transition?: SavedTransition | null;
   /** Ordre des skins de la partie (absent des anciennes sauvegardes : un nouvel ordre est tiré). */
   skinOrder?: SkinId[];
@@ -59,6 +66,9 @@ export interface EngineOptions {
   /** Appelé après chaque changement d'état (le serveur rediffuse les snapshots). */
   onChange?: () => void;
   persistence?: Persistence;
+  awardCategories?: AwardCategoryContent[];
+  /** Durées réduites pour les parcours E2E, 1 en soirée. */
+  ceremonyTimeScale?: number;
 }
 
 interface PlayerRecord {
@@ -92,6 +102,9 @@ export class GameEngine {
   private paused = false;
   private finalReveal: FinalRevealInfo | null = null;
   private transition: TransitionInfo | null = null;
+  private history: RoundSummary[] = [];
+  private ceremony: CeremonyInfo | null = null;
+  private ceremonyTimers: TimerGroup | null = null;
   private transitionTimers: TimerGroup | null = null;
   private plan: PlannedRound[] = [];
   private roundIndex = -1;
@@ -177,6 +190,8 @@ export class GameEngine {
     const plan = buildPlan(this.opts.games, this.setup, this.opts.settings.order, this.rng);
     if (plan.length === 0) throw new GameError("Choisis au moins une manche");
     for (const p of this.players.values()) p.score = 0;
+    this.history = [];
+    this.ceremony = null;
     this.plan = assignRoundSkins(plan, this.skinOrder, this.rng);
     this.roundIndex = -1;
     this.resumable = null;
@@ -194,7 +209,11 @@ export class GameEngine {
     });
     if (!this.plan.every((r) => isSkinId(r.skin))) this.plan = assignRoundSkins(this.plan, this.skinOrder, this.rng);
     this.resumable = null;
-    if (save.phase === "transition" && validSavedTransition(save.transition)) {
+    this.history = sanitizeHistory(save.history);
+    if (save.phase === "ceremony" && validSavedCeremony(save.ceremony)) {
+      this.roundIndex = save.roundIndex;
+      this.beginCeremony(save.ceremony.playerIds, structuredClone(save.ceremony));
+    } else if (save.phase === "transition" && validSavedTransition(save.transition)) {
       this.roundIndex = save.roundIndex;
       const scene = save.transition;
       const elapsed = scene.elapsedMs + (scene.paused ? 0 : Math.max(0, this.clock.now() - scene.checkpointAt));
@@ -209,13 +228,34 @@ export class GameEngine {
 
   /** Bouton "Passer" : fait avancer la phase en cours. */
   skip() {
-    if (this.phase === "transition") this.finishTransition();
+    if (this.phase === "final" && this.finalReveal) {
+      const info = this.finalReveal;
+      const elapsed = finalRevealElapsed(info, this.clock.now());
+      const timeline = finalRevealTimeline(info.playerIds.length);
+      const next = [...timeline.steps, timeline.durationMs].find((at) => at > elapsed);
+      if (next !== undefined) info.startedAt -= next - elapsed;
+      this.save(); this.changed();
+    } else if (this.phase === "ceremony") this.skipCeremony();
+    else if (this.phase === "transition") this.finishTransition();
     else if (this.phase === "intro") this.beginPlaying();
     else if (this.phase === "playing") this.endRound();
     else if (this.phase === "results") this.advanceAfterResults();
   }
 
   pause() {
+    if (this.phase === "final" && this.finalReveal && !this.paused) {
+      this.paused = true;
+      this.finalReveal.pausedSince = this.clock.now();
+      this.save(); this.changed(); return;
+    }
+    if (this.ceremony && !this.paused) {
+      this.paused = true;
+      this.ceremony.pausedSince = this.clock.now();
+      this.ceremonyTimers?.pause();
+      this.save();
+      this.changed();
+      return;
+    }
     if (this.transition && !this.paused) {
       this.paused = true;
       this.transition.pausedSince = this.clock.now();
@@ -232,6 +272,21 @@ export class GameEngine {
   }
 
   resume() {
+    if (this.phase === "final" && this.finalReveal && this.paused) {
+      this.paused = false;
+      this.finalReveal.pausedMs = (this.finalReveal.pausedMs ?? 0) + this.clock.now() - this.finalReveal.pausedSince!;
+      this.finalReveal.pausedSince = null;
+      this.save(); this.changed(); return;
+    }
+    if (this.ceremony && this.paused) {
+      this.paused = false;
+      this.ceremony.pausedMs += this.clock.now() - this.ceremony.pausedSince!;
+      this.ceremony.pausedSince = null;
+      this.ceremonyTimers?.resume();
+      this.save();
+      this.changed();
+      return;
+    }
     if (this.transition && this.paused) {
       this.paused = false;
       this.transition.pausedMs += this.clock.now() - this.transition.pausedSince!;
@@ -262,6 +317,10 @@ export class GameEngine {
 
   /** Retour au lobby : on garde les joueurs, on remet les scores à zéro. */
   backToLobby() {
+    this.ceremonyTimers?.clear();
+    this.ceremonyTimers = null;
+    this.ceremony = null;
+    this.history = [];
     this.transitionTimers?.clear();
     this.transitionTimers = null;
     this.transition = null;
@@ -358,11 +417,97 @@ export class GameEngine {
     this.transition = null;
     this.paused = false;
     if (scene.kind === "closing") {
-      this.phase = "final";
-      this.finalReveal = { startedAt: this.clock.now(), playerIds: scene.playerIds };
+      if (this.opts.settings.outro?.active) this.beginCeremony(scene.playerIds);
+      else this.beginFinal(scene.playerIds);
+    } else this.nextRound();
+  }
+
+  private beginFinal(playerIds: PlayerId[], souvenirs: Keepsake[] = []) {
+    this.phase = "final";
+    this.paused = false;
+    this.finalReveal = { startedAt: this.clock.now(), playerIds, ...(souvenirs.length ? { souvenirs } : {}) };
+    this.save();
+    this.changed();
+  }
+
+  private beginCeremony(playerIds: PlayerId[], restored?: CeremonyInfo) {
+    this.current?.timers.clear();
+    this.current = null;
+    this.phase = "ceremony";
+    const scoresBefore = Object.fromEntries(playerIds.map((id) => [id, this.players.get(id)?.score ?? 0]));
+    const categories = this.opts.awardCategories ?? DEFAULT_AWARD_CATEGORIES;
+    const configuredScale = this.opts.ceremonyTimeScale ?? 1;
+    this.ceremony = restored ?? {
+      startedAt: this.clock.now(), playerIds, scoresBefore,
+      souvenirs: chooseSouvenirs(this.history),
+      awards: drawAwards(this.history, scoresBefore, this.opts.settings.outro!, this.rng, categories),
+      categories: Object.fromEntries(categories.map((c) => [c.id, { title: c.titre, emoji: c.emoji }])),
+      timeScale: Number.isFinite(configuredScale) && configuredScale > 0 ? Math.max(0.01, configuredScale) : 1,
+      pausedMs: 0, pausedSince: null,
+    };
+    this.paused = this.ceremony.pausedSince !== null;
+    this.scheduleCeremony();
+  }
+
+  /** Un timer par frontière : les téléphones reçoivent le préfixe révélé même sans action réseau. */
+  private scheduleCeremony() {
+    this.ceremonyTimers?.clear();
+    const info = this.ceremony;
+    if (!info) return;
+    const elapsed = ceremonyElapsed(info, this.clock.now());
+    const { steps, durationMs } = ceremonyTimeline(info.souvenirs, info.awards, info.timeScale);
+    if (elapsed >= durationMs) { this.finishCeremony(); return; }
+    const timers = new TimerGroup(this.clock);
+    this.ceremonyTimers = timers;
+    if (this.paused) timers.pause();
+    for (const step of steps) if (step.startMs > elapsed) timers.add(step.startMs - elapsed, () => {
+      if (this.ceremony !== info) return;
       this.save();
       this.changed();
-    } else this.nextRound();
+    });
+    timers.add(durationMs - elapsed, () => this.finishCeremony());
+    this.save();
+    this.changed();
+  }
+
+  private skipCeremony() {
+    const info = this.ceremony;
+    if (!info) return;
+    const elapsed = ceremonyElapsed(info, this.clock.now());
+    const { steps } = ceremonyTimeline(info.souvenirs, info.awards, info.timeScale);
+    const next = steps.find((s) => s.startMs > elapsed);
+    if (!next) { this.finishCeremony(); return; }
+    // Décaler l'origine conserve une chronologie unique, y compris en pause et au rechargement.
+    info.startedAt -= next.startMs - elapsed;
+    this.scheduleCeremony();
+  }
+
+  private finishCeremony() {
+    const info = this.ceremony;
+    if (!info) return;
+    this.ceremonyTimers?.clear();
+    this.ceremonyTimers = null;
+    const finalScores = { ...info.scoresBefore };
+    for (const award of info.awards) for (const id of award.winners) finalScores[id] = (finalScores[id] ?? 0) + award.points;
+    // Affectation depuis les scores initiaux, jamais d'addition rejouable après un crash.
+    for (const id of info.playerIds) { const p = this.players.get(id); if (p) p.score = finalScores[id] ?? p.score; }
+    this.ceremony = null;
+    this.beginFinal(info.playerIds, info.souvenirs);
+  }
+
+  private ceremonyView(viewer: PlayerId | null): CeremonyInfo | null {
+    const info = this.ceremony;
+    if (!info) return null;
+    const elapsed = ceremonyElapsed(info, this.clock.now());
+    const { steps } = ceremonyTimeline(info.souvenirs, info.awards, info.timeScale);
+    const step = ceremonyStepAt(steps, elapsed);
+    if (viewer === null) return { ...info, step };
+    return {
+      ...info, step,
+      souvenirs: info.souvenirs.slice(0, revealedSouvenirs(steps, elapsed)),
+      awards: info.awards.slice(0, revealedAwards(steps, elapsed)),
+      categories: {},
+    };
   }
 
   private advanceAfterResults() {
@@ -484,8 +629,9 @@ export class GameEngine {
     c.timers.clear();
     c.mainTimer = null;
     this.paused = false;
+    let outcome: RoundOutcome | null = null;
     try {
-      const outcome = c.loaded.game.finish(c.state, c.ctx);
+      outcome = c.loaded.game.finish(c.state, c.ctx);
       c.results = outcome.results;
       c.deltas = {};
       for (const [id, pts] of Object.entries(outcome.scores)) {
@@ -499,6 +645,18 @@ export class GameEngine {
       c.results = null;
       c.deltas = {};
     }
+    const participants = c.ctx.players.map((p) => p.id);
+    const ids = new Set(participants);
+    // Les métadonnées sont facultatives : une donnée défectueuse ne doit pas jeter les points de la manche.
+    const stats = safe(() => sanitizeStats(outcome?.stats, ids));
+    const opinions = safe(() => sanitizeOpinions(outcome?.opinions, ids));
+    const keepsakes = safe(() => sanitizeKeepsakes(outcome?.keepsakes, ids));
+    const ranked = this.publicPlayers().filter((p) => p.profile).sort((a, b) => b.score - a.score);
+    this.history = pruneKeepsakes([...this.history, {
+      gameId: c.loaded.game.id, participants, deltas: c.deltas ?? {},
+      standingsAfter: ranked.map((p) => p.id), scoresAfter: Object.fromEntries(ranked.map((p) => [p.id, p.score])),
+      ...(stats ? { stats } : {}), ...(opinions ? { opinions } : {}), ...(keepsakes ? { keepsakes } : {}),
+    }]).slice(-200);
     c.resultsAt = this.clock.now();
     this.phase = "results";
     this.save();
@@ -578,6 +736,7 @@ export class GameEngine {
       phase: this.phase,
       paused: this.paused,
       finalReveal: this.finalReveal,
+      ceremony: this.ceremonyView(viewer),
       transition: this.transition ? { ...this.transition, playerIds: [...this.transition.playerIds] } : null,
       players: this.publicPlayers(),
       round,
@@ -605,7 +764,7 @@ export class GameEngine {
       const scene = this.transition;
       return transitionElapsed(scene, this.clock.now()) >= TRANSITION_TIMING[scene.kind].swapAtMs ? scene.toSkin : scene.fromSkin;
     }
-    if (this.phase === "lobby" || this.phase === "final") return null;
+    if (this.phase === "lobby" || this.phase === "ceremony" || this.phase === "final") return null;
     return this.plan[this.roundIndex]?.skin ?? this.skinOrder[0]!;
   }
 
@@ -619,6 +778,8 @@ export class GameEngine {
       plan: this.plan,
       roundIndex: this.roundIndex,
       phase: this.phase,
+      history: this.history,
+      ceremony: this.ceremony,
       skinOrder: this.skinOrder,
       finalReveal: this.finalReveal,
       transition: this.transition ? {
@@ -642,7 +803,7 @@ export class GameEngine {
       this.players.set(p.id, { ...p, profile: parsed?.success ? parsed.data : null, sockets: 0 });
     }
     if (save.setup) this.setup = sanitizeSetup(save.setup, this.catalog);
-    const inProgress = save.phase === "transition" || save.phase === "intro" || save.phase === "playing" || save.phase === "results";
+    const inProgress = save.phase === "ceremony" || save.phase === "transition" || save.phase === "intro" || save.phase === "playing" || save.phase === "results";
     if (inProgress && save.plan.length > 0) this.resumable = save;
   }
 
@@ -687,4 +848,16 @@ function validSavedTransition(scene: SavedTransition | null | undefined): scene 
   if (scene.toSkin !== null && !isSkinId(scene.toSkin)) return false;
   return Number.isFinite(scene.elapsedMs) && Number.isFinite(scene.checkpointAt) && typeof scene.paused === "boolean"
     && Array.isArray(scene.playerIds) && scene.playerIds.every((id) => typeof id === "string");
+}
+
+/** Une sauvegarde incomplète ne doit pas bloquer le retour au lobby. */
+function validSavedCeremony(info: CeremonyInfo | null | undefined): info is CeremonyInfo {
+  return !!info && Number.isFinite(info.startedAt) && Number.isFinite(info.pausedMs)
+    && (info.pausedSince === null || Number.isFinite(info.pausedSince))
+    && Number.isFinite(info.timeScale) && info.timeScale > 0
+    && Array.isArray(info.playerIds) && info.playerIds.every((id) => typeof id === "string")
+    && !!info.scoresBefore && Object.values(info.scoresBefore).every(Number.isFinite)
+    && Array.isArray(info.souvenirs) && info.souvenirs.length <= 3
+    && Array.isArray(info.awards) && info.awards.length <= 12 && info.awards.every((a) => a && typeof a.id === "string"
+      && Number.isFinite(a.points) && a.points >= 0 && Array.isArray(a.winners) && a.winners.every((id) => info.playerIds.includes(id)));
 }
