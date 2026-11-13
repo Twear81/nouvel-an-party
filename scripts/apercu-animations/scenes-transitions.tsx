@@ -22,6 +22,8 @@ const abonnes = new Set<() => void>();
 const choisirOrigine = (s: SkinId | null) => { origine = s; abonnes.forEach((f) => f()); };
 const useOrigine = () => useSyncExternalStore((f) => (abonnes.add(f), () => abonnes.delete(f)), () => origine);
 
+/** Écrans toujours en thème de base, quel que soit l'habillage choisi : lobby, cérémonie, classement final, minuit. */
+const THEME_DE_BASE = new Set(["ecrans/lobby", "ecrans/ceremonie", "ecrans/final", "ecrans/minuit"]);
 const KIND: Record<string, TransitionKind> = { "transitions/ouverture": "opening", "transitions/univers": "skin", "transitions/sortie": "closing" };
 
 /** Univers avant et après la scène, selon l'habillage choisi dans la barre du haut. */
@@ -49,7 +51,8 @@ export function useSkinDeLaPage(sceneId: string, skin: SkinId | null): SkinId | 
   const kind = KIND[sceneId];
   const depuis = useOrigine();
   const ms = useEcoule(kind !== undefined);
-  if (sceneId === "ecrans/minuit") return null; // minuit se déclenche toujours sur le thème de base
+  // Début et fin de partie toujours en thème de base (docs/skins.md) ; minuit aussi.
+  if (THEME_DE_BASE.has(sceneId)) return null;
   if (!kind) return skin;
   const { from, to } = extremites(kind, skin, depuis);
   return ms >= TRANSITION_TIMING[kind].swapAtMs ? to : from;

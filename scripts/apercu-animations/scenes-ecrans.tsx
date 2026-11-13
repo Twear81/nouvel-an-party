@@ -16,7 +16,7 @@ import type { Env, Scene } from "./types";
 function SceneLobby({ env }: { env: Env }) {
   const [nb, setNb] = useState(Math.min(2, env.joueurs.length));
   const joueurs = useMemo(() => env.joueurs.slice(0, nb).map((p) => ({ ...p, score: 0 })), [env.joueurs, nb]);
-  const snapshot = useMemo(() => snapshotDeBase("lobby", { joueurs, skin: env.skin, paused: env.pause }), [joueurs, env.skin, env.pause]);
+  const snapshot = useMemo(() => snapshotDeBase("lobby", { joueurs, skin: null, paused: env.pause }), [joueurs, env.pause]);
   const { definirDuree } = env;
   useEffect(() => definirDuree(null), [definirDuree]);
   return (
@@ -44,7 +44,7 @@ function SceneFinal({ env }: { env: Env }) {
   const stars = { [joueurs[Math.min(5, joueurs.length - 1)]!.id]: [120, 120], [joueurs[1]!.id]: [120] }; // le 6e (ou le dernier à 3 joueurs)
   const duree = finalRevealTimeline(ranking.map((id) => stars[id]?.length ?? 0)).durationMs + 3000;
   const snapshot = useMemo<GameSnapshot>(() => ({
-    ...snapshotDeBase("final", { joueurs, skin: env.skin, paused: env.pause }),
+    ...snapshotDeBase("final", { joueurs, skin: null, paused: env.pause }),
     finalReveal: { startedAt: T0, playerIds: ranking, ranking, stars },
   }), [joueurs, env.skin, env.pause]);
   const { definirDuree, depart } = env;

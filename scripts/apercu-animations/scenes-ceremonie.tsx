@@ -70,7 +70,7 @@ function SceneCeremonie({ env }: { env: Env }) {
   const joueurs = useMemo(() => env.joueurs.map((p, i) => ({ ...p, score: 1000 - i * 90 })), [env.joueurs]);
   const info = useMemo(() => infoDemo(joueurs), [joueurs]);
   const duree = ceremonyTimeline(info.souvenirs, info.awards, info.timeScale).durationMs + 1500;
-  const snapshot = useMemo<GameSnapshot>(() => ({ ...snapshotDeBase("ceremony", { joueurs, skin: env.skin, paused: env.pause }), ceremony: info }),
+  const snapshot = useMemo<GameSnapshot>(() => ({ ...snapshotDeBase("ceremony", { joueurs, skin: null, paused: env.pause }), ceremony: info }),
     [joueurs, info, env.skin, env.pause]);
   const revelés = useBonusRevelés(info);
   const { definirDuree } = env;
