@@ -30,28 +30,39 @@ function paintShapes(): Shape[] {
   return customShapes;
 }
 
-/** Mélange de formes d'un tir : génériques + maison, dans la proportion `CONFETTI_CUSTOM_SHARE`. */
-function shapeMix(): { shapes?: Shape[]; scalar: number } {
+/**
+ * Tir mixte : les formes génériques gardent leur taille d'origine (scalar 1) ; les formes maison partent dans un tir
+ * séparé, plus gros, avec seulement `CONFETTI_CUSTOM_SHARE` des particules (sinon elles masquent l'écran).
+ */
+function shoot(base: confetti.Options, opts: confetti.Options & { particleCount: number }) {
   const custom = paintShapes();
-  if (custom.length === 0) return { scalar: 1 };
-  const generic: Shape[] = ["square", "circle", "star"];
-  const reps = Math.max(1, Math.round(((CONFETTI_CUSTOM_SHARE / (1 - CONFETTI_CUSTOM_SHARE)) * generic.length) / custom.length));
-  return { shapes: [...generic, ...Array.from({ length: reps }, () => custom).flat()], scalar: CONFETTI_SCALAR };
+  const share = custom.length ? CONFETTI_CUSTOM_SHARE : 0;
+  const customCount = Math.round(opts.particleCount * share);
+  void confetti({ ...base, ...opts, particleCount: opts.particleCount - customCount });
+  if (customCount > 0) void confetti({ ...base, ...opts, particleCount: customCount, shapes: custom, scalar: CONFETTI_SCALAR });
 }
 
 export function fireConfetti(power: "small" | "big" = "small") {
   const colors = ["--color-accent", "--color-accent-strong", "--color-hot", "--color-cool", "--color-ink"].map(token).filter(Boolean);
-  const base = { colors, zIndex: 60, disableForReducedMotion: true, ...shapeMix() };
+  const base = { colors, zIndex: 60, disableForReducedMotion: true };
   if (power === "small") {
-    void confetti({ ...base, particleCount: 60, spread: 70, origin: { y: 0.7 } });
+    shoot(base, { particleCount: 60, spread: 70, origin: { y: 0.7 } });
     return;
   }
   const end = Date.now() + 2500;
+  let tick = 0;
   const frame = () => {
+    // Formes maison une image sur quatre seulement dans les jets latéraux.
+    const withCustom = tick++ % 4 === 0;
     void confetti({ ...base, particleCount: 6, angle: 60, spread: 60, origin: { x: 0, y: 0.8 } });
     void confetti({ ...base, particleCount: 6, angle: 120, spread: 60, origin: { x: 1, y: 0.8 } });
+    const custom = paintShapes();
+    if (withCustom && custom.length) {
+      void confetti({ ...base, particleCount: 1, angle: 60, spread: 60, origin: { x: 0, y: 0.8 }, shapes: custom, scalar: CONFETTI_SCALAR });
+      void confetti({ ...base, particleCount: 1, angle: 120, spread: 60, origin: { x: 1, y: 0.8 }, shapes: custom, scalar: CONFETTI_SCALAR });
+    }
     if (Date.now() < end) requestAnimationFrame(frame);
   };
   frame();
-  void confetti({ ...base, particleCount: 160, spread: 110, startVelocity: 45, origin: { y: 0.5 } });
+  shoot(base, { particleCount: 160, spread: 110, startVelocity: 45, origin: { y: 0.5 } });
 }

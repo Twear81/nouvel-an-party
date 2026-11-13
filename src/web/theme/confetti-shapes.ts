@@ -4,10 +4,10 @@
 
 /** Côté du canvas d'une forme, en pixels (affichée à `CONFETTI_SIZE / CONFETTI_SCALAR` px : net même sur la TV). */
 export const CONFETTI_SIZE = 56;
-/** Échelle globale passée à canvas-confetti : une forme apparaît à ≈ 31 px, les formes génériques grossissent d'autant. */
-export const CONFETTI_SCALAR = 1.8;
-/** Part des particules qui prennent une forme maison (le reste garde les formes génériques carré / cercle / étoile). */
-export const CONFETTI_CUSTOM_SHARE = 0.55;
+/** Échelle globale passée à canvas-confetti : appliquée aux seules formes maison (tir séparé) ; les formes génériques gardent leur taille. */
+export const CONFETTI_SCALAR = 1.6;
+/** Part des particules qui prennent une forme maison (le reste garde les formes génériques, à leur taille d'origine). */
+export const CONFETTI_CUSTOM_SHARE = 0.2;
 
 export type DrawShape = (ctx: OffscreenCanvasRenderingContext2D, s: number) => void;
 type Ctx = OffscreenCanvasRenderingContext2D;
