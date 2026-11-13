@@ -30,8 +30,8 @@ export function HonorBoard({ rows, avatarLayoutId, children }: {
       style={{ top: `${topPct}%`, height: `${heightPct}%`, aspectRatio: String(CEREMONIE_ASPECT["tableau-honneur"]), [side]: `${marginPct}%` }}>
       {image ? <img src={image} alt="" draggable={false} className="absolute inset-0 h-full w-full" /> : <div aria-hidden className="cer-board-fallback" />}
       <div className="cer-board-rows" style={{ left: `${inner.left * 100}%`, right: `${inner.right * 100}%`, top: `${inner.top * 100}%`, bottom: `${inner.bottom * 100}%` }}>
-        {rows.map((r) => (
-          <div key={r.id} data-testid={r.filled ? `rank-${r.rank}` : `rank-slot-${r.rank}`} data-filled={r.filled} data-rank={r.rank} data-ui={r.filled ? "score-row" : undefined}
+        {rows.map((r, position) => (
+          <div key={r.id} data-testid={r.filled ? `rank-${position + 1}` : `rank-slot-${position + 1}`} data-filled={r.filled} data-rank={r.rank} data-ui={r.filled ? "score-row" : undefined}
             data-highlight="false" className="cer-board-row" style={{ flexBasis: `${100 / slots}%`, flexGrow: 0 }}>
             <span className="cer-board-rank">{r.rank}</span>
             {r.filled ? (

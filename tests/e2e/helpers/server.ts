@@ -105,7 +105,7 @@ export async function createServer(opts: ServerOptions = {}): Promise<TestServer
       logs = "";
       const p = spawn("bun", ["src/server/index.ts", "--config", configDir, "--data", dataDir, "--no-open"], {
         cwd: ROOT,
-        env: { ...process.env, PARTY_HTTP_PORT: String(httpPort), PARTY_HTTPS_PORT: String(httpsPort), PARTY_CEREMONY_TIME_SCALE: String(opts.ceremonyTimeScale ?? 0.03), PARTY_FINAL_TIME_SCALE: String(opts.finalTimeScale ?? 0.5) },
+        env: { ...process.env, PARTY_HTTP_PORT: String(httpPort), PARTY_HTTPS_PORT: String(httpsPort), PARTY_CEREMONY_TIME_SCALE: String(opts.ceremonyTimeScale ?? 0.03), PARTY_FINAL_TIME_SCALE: String(opts.finalTimeScale ?? 0.25) },
         stdio: ["ignore", "pipe", "pipe"],
       });
       proc = p;

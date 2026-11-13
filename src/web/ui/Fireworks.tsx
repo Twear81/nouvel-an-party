@@ -46,7 +46,7 @@ export function Fireworks({ size = "tv", fit }: { size?: "tv" | "phone"; fit?: {
   const bursts = useMemo(() => (fit ? buildBursts(fit.count, fit.sparks, fit.reach, fit.seed) : size === "tv" ? buildBursts(7, 22, 20) : buildBursts(5, 14, 8)), [size, fit?.count, fit?.sparks, fit?.reach, fit?.seed]); // eslint-disable-line react-hooks/exhaustive-deps
   const unit = fit ? fit.unit : size === "tv" ? 1 : 0.6; // taille d'une étincelle
   return (
-    <div data-testid="fireworks" data-ui="fireworks" aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div data-testid="fireworks" data-ui="fireworks" data-clip="voulu" aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {bursts.map((b, i) => (
         <div key={i} className="absolute" style={{ left: `${b.x}%`, top: `${b.y}%` }}>
           {b.sparks.map((s, k) => (
