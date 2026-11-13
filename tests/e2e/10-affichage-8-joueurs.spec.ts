@@ -23,6 +23,12 @@ test.describe("8 joueurs", () => {
       await expect(tv.getByTestId(`kick-${p.id}`)).toBeVisible();
     }
     await expect(tv.getByTestId("start-game")).toBeInViewport({ ratio: 1 });
+    // Clin d'œil Dragon Ball : 8 joueurs prêts = 7 boules allumées + la boule bonus, le bouton devient « Faire un vœu ».
+    await expect(tv.getByTestId("dragon-balls")).toHaveAttribute("data-lit", "8");
+    await expect(tv.getByTestId("dragon-ball-8")).toBeVisible();
+    await expect(tv.getByTestId("start-game")).toContainText("Faire un vœu");
+    // Shenron traverse le décor une seule fois (il déborde par conception : on attend qu'il soit passé avant de mesurer).
+    await expect(tv.getByTestId("shenron")).toHaveCount(0, { timeout: 15_000 });
     expect(await party.clippedIn("tv-lobby")).toEqual([]);
     await tv.screenshot({ path: test.info().outputPath("lobby-8.png") });
     // Aucune carte ne chevauche une autre.

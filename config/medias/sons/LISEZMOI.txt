@@ -25,6 +25,8 @@ Lobby
     lobby.musique         jazz à l’accueil, ambiance originale de chaque skin pendant la partie
     joueur.rejoint        un joueur rejoint
     joueur.quitte         un joueur quitte ou se déconnecte
+    lobby.boule           une boule de cristal s'allume (un joueur est prêt)
+    lobby.shenron         Shenron apparaît (7 joueurs prêts)
     partie.lancement      la partie démarre
 Déroulé d'une manche
     manche.intro          annonce d'une manche
@@ -33,7 +35,7 @@ Déroulé d'une manche
     chrono.tic            une seconde des 5 dernières (de plus en plus aigu)
     chrono.fin            le chrono arrive à zéro
     temps.ajoute          l'hôte ajoute du temps (+10 s)
-    pause                 pause
+    pause                 pause (accord de piano de fin d'épisode)
     reprise               reprise
     resultats.arrivee     les résultats arrivent
     points.gagnes         fin de la révélation, les points sont gagnés

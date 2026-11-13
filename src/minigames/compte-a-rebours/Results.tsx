@@ -2,7 +2,7 @@
 // du plus éloigné au plus proche ; le dernier à tomber (le plus proche) gagne. Le classement se remplit en même temps.
 import { motion } from "motion/react";
 import { useEffect } from "react";
-import { fireConfetti, Panel, PlayerAvatar, useSfxTimeline } from "../../web/ui";
+import { fireConfetti, Panel, PlayerAvatar, SplitTime, useSfxTimeline } from "../../web/ui";
 import type { MiniGameViewProps } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 import { AXIS_W_REM, LABEL_W_REM, LANE_REM, layoutLanes, STEM_OFFSET_REM } from "./layout";
@@ -72,6 +72,7 @@ export const TvResults = ({ results, playerById, round }: Props) => {
   const ticks: number[] = [];
   for (let t = -Math.floor(range / step) * step; t <= range; t += step) ticks.push(t);
   const byRank = [...results.ranking].sort((a, b) => a.rank - b.rank || Math.abs(a.signedMs) - Math.abs(b.signedMs));
+  const bestMs = Math.min(...results.ranking.map((e) => Math.abs(e.signedMs)));
   const at = (id: string) => landAt(order.findIndex((e) => e.playerId === id), n);
 
   return (
@@ -145,7 +146,8 @@ export const TvResults = ({ results, playerById, round }: Props) => {
             <span className={`w-9 text-center font-num text-3xl ${e.rank === 1 ? "text-accent" : "text-ink-muted"}`}>{e.rank}</span>
             <PlayerAvatar profile={playerById(e.playerId)?.profile ?? null} size="sm" />
             <span className="min-w-0 flex-1 truncate text-2xl font-bold">{playerById(e.playerId)?.profile?.name}</span>
-            <span className={`font-num text-3xl ${QUALITY_TEXT[quality(e.signedMs)]}`}>{fmtSigned(e.signedMs)}</span>
+            {/* Façon Trackmania : le meilleur affiche son écart à la cible, les autres leur retard sur lui (le sens, trop tôt / trop tard, se lit sur l'axe). */}
+            <SplitTime data-testid={`cabr-split-${e.playerId}`} ms={Math.abs(e.signedMs)} bestMs={bestMs} delay={at(e.playerId) + 0.5} className="text-3xl" />
           </motion.div>
         ))}
         {results.missed.map((m) => (

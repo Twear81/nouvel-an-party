@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useGame } from "../net/useGame";
 import { SkinProvider } from "../theme/skin";
 import { useGlobalSfx } from "../sound/useGlobalSfx";
-import { PausedOverlay, ReconnectBanner, RoomTransition, roomReference, SoundBadge, TvStage } from "../ui";
+import { PausedOverlay, PauseZoom, ReconnectBanner, RoomTransition, roomReference, SoundBadge, TvStage } from "../ui";
 import { FinalScreen } from "./FinalScreen";
 import { HostBar } from "./HostBar";
 import { IntroScreen } from "./IntroScreen";
@@ -61,7 +61,7 @@ export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
 
   return (
     <TvStage phase={snapshot.phase}>
-      {snapshot.phase === "transition" ? screen : <AnimatePresence mode="wait">
+      {snapshot.phase === "transition" ? screen : <PauseZoom paused={snapshot.paused}><AnimatePresence mode="wait">
         <motion.div
           key={`${snapshot.phase}-${round?.index ?? ""}`}
           className="flex min-h-0 flex-1 flex-col"
@@ -72,7 +72,7 @@ export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
         >
           {screen}
         </motion.div>
-      </AnimatePresence>}
+      </AnimatePresence></PauseZoom>}
       {host && snapshot.phase !== "lobby" && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || (snapshot.phase === "playing" && !!round?.interlude)} />}
       <SoundBadge visible={snapshot.phase === "lobby"} />
       <PausedOverlay show={snapshot.paused} big />

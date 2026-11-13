@@ -22,3 +22,5 @@ export { play as playSfx, type PlayOptions } from "../sound/engine";
 export { NOMS_SONS, type NomSon } from "../theme/sons/catalogue";
 export * from "./Pop";
 export * from "./haptique";
+export * from "./SplitTime";
+export * from "./DragonBalls";

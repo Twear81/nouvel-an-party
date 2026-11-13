@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { interludeCounts } from "../../shared/interlude";
 import type { GameSnapshot } from "../../shared/types";
 import type { GameActions } from "../net/useGame";
-import { Button, CloseIcon, ConfirmDialog, Panel, PlayerAvatar, Pop, type AvatarSize } from "../ui";
+import { Button, CloseIcon, ConfirmDialog, DRAGON_BALLS, DragonBalls, Panel, PlayerAvatar, Pop, Shenron, useSfx, useSfxOnChange, type AvatarSize } from "../ui";
 
 export function formatDuration(seconds: number): string {
   const min = Math.round(seconds / 60);
@@ -78,6 +78,20 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   const totalSeconds = catalog.reduce((n, g) => n + roundsOf(g) * g.secondsPerRound, 0);
   const ready = players.filter((p) => p.profile && p.connected).length;
 
+  // Clin d'œil Dragon Ball : une boule s'allume par joueur prêt (état lu dans le snapshot) ; à la septième, Shenron traverse
+  // le décor une fois (effet passager déclenché par le passage à 7, jamais rejoué au rechargement).
+  const sfx = useSfx();
+  const [shenronFlying, setShenronFlying] = useState(false);
+  const previousReady = useRef(ready);
+  useEffect(() => {
+    if (previousReady.current < DRAGON_BALLS && ready >= DRAGON_BALLS) {
+      setShenronFlying(true);
+      sfx("lobby.shenron");
+    }
+    previousReady.current = ready;
+  }, [ready, sfx]);
+  useSfxOnChange(ready, (avant, apres) => (apres > avant ? "lobby.boule" : null));
+
   const setCount = (id: string, value: number, max: number) => {
     const counts = { ...latestSetup.current.counts, [id]: Math.max(0, Math.min(max, value)) };
     latestSetup.current = { counts };
@@ -98,7 +112,8 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
   const tileWidth = players.length <= 3 ? "w-[17rem]" : "w-[14rem]";
 
   return (
-    <div data-testid="tv-lobby" className="flex min-h-0 flex-1 flex-col gap-5 px-tv-gutter py-8">
+    <div data-testid="tv-lobby" className="relative isolate flex min-h-0 flex-1 flex-col gap-5 px-tv-gutter py-8">
+      {shenronFlying && <Shenron onDone={() => setShenronFlying(false)} />}
       <div className="flex min-h-0 flex-1 gap-10">
         {/* Inscription */}
         <div className="flex min-h-0 w-[26rem] shrink-0 flex-col items-center gap-4 text-center">
@@ -110,8 +125,9 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
 
         {/* Joueurs */}
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <div className="flex items-baseline justify-between">
+          <div className="flex items-center justify-between gap-4">
             <h2 className="font-display text-4xl text-ink">Les invités</h2>
+            <DragonBalls lit={ready} />
             <span className="text-2xl text-ink-muted">
               {ready} prêt{ready > 1 ? "s" : ""} · {players.length} connecté{players.length > 1 ? "s" : ""}
             </span>
@@ -228,7 +244,7 @@ export function Lobby({ snapshot, host, actions }: { snapshot: GameSnapshot; hos
                 />
               )}
               <Button data-testid="start-game" size="lg" className="relative" disabled={blocked !== null} onClick={() => void actions.start().catch((e: Error) => setError(e.message))}>
-                Lancer la partie
+                {ready >= DRAGON_BALLS ? "Faire un vœu" : "Lancer la partie"}
               </Button>
             </div>
           </div>
