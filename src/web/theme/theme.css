@@ -62,6 +62,18 @@
   --color-qr-dark: #061233;
   --color-qr-light: #fff8e8;
 
+  /* ── Clins d'œil (contenu fixe, ne change pas avec le skin) : boules de cristal du lobby, temps intermédiaires, bandes de cinéma */
+  --color-dragonball: #ff9d1c;
+  --color-dragonball-light: #ffd98a;
+  --color-dragonball-deep: #b84f00;
+  --color-dragonball-star: #d4161c;
+  --color-shenron: #2fbf6a;
+  --color-shenron-deep: #12623a;
+  --color-split-ahead: #3a8bff;
+  --color-split-behind: #ff3b4e;
+  --color-cinema: #000;
+  --color-cinema-ink: #fff;
+
   /* ── Ombre portée des objets posés sur le décor (vitrine du Bon Prix…) : noire en thème de base, teintée par le skin */
   --color-shade: rgb(0 0 0 / 0.55);
 

@@ -19,6 +19,9 @@ export const SONS = {
   "lobby.musique": { fichier: "lobby.ogg", volume: 0.32 },
   "joueur.rejoint": { fichier: "rejoint.ogg", volume: 0.5, variation: 20 },
   "joueur.quitte": { fichier: "quitte.ogg", volume: 0.4, variation: 20 },
+  // Lobby, clin d'œil Dragon Ball : une boule s'allume par joueur prêt ; Shenron apparaît à la septième
+  "lobby.boule": { fichier: "boule-allumee.wav", volume: 0.5, variation: 12 },
+  "lobby.shenron": { fichier: "boum.ogg", volume: 0.7 },
   "partie.lancement": { fichier: "lancement.ogg", volume: 0.6 },
   // Déroulé d'une manche
   "manche.intro": { fichier: "intro.ogg", volume: 0.6 },
@@ -30,7 +33,8 @@ export const SONS = {
   "minuit.tic": { fichier: "tic.ogg", volume: 0.6 },
   "minuit.fete": { fichier: "fanfare.ogg", volume: 0.9 },
   "temps.ajoute": { fichier: "temps-ajoute.ogg", volume: 0.45 },
-  "pause": { fichier: "pause.ogg", volume: 0.4 },
+  // Pause « cliffhanger de K-drama » : accord de piano dramatique (synthétisé ; déposer pause.mp3 pour un vrai piano)
+  "pause": { fichier: "pause-piano.wav", volume: 0.55 },
   "reprise": { fichier: "reprise.ogg", volume: 0.4 },
   "resultats.arrivee": { fichier: "resultats.ogg", volume: 0.6 },
   "points.gagnes": { fichier: "points.ogg", volume: 0.5, variation: 15 },

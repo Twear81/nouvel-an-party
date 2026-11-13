@@ -338,11 +338,12 @@ volume/hauteur réglables, séquences réelles, skins).
 | `lobby.musique` | jazz à l’accueil, ambiance originale du skin pendant les manches ; changement en fondu |
 | `tension`, `applaudissements`, `echec.trombone` | riser de 2 s, public après verdict, chute au trombone |
 | `joueur.rejoint`, `joueur.quitte`, `partie.lancement` | lobby, lancement de la partie |
+| `lobby.boule`, `lobby.shenron` | boule de cristal allumée (un joueur prêt), Shenron à la septième |
 | `manche.intro` | annonce d'une manche |
 | `reponse.recue`, `reponse.toutes` | une réponse de plus (hauteur montante), tout le monde a répondu |
 | `chrono.tic`, `chrono.fin`, `temps.ajoute` | 5 dernières secondes, zéro, « +10 s » de l'hôte |
 | `minuit.tic`, `minuit.fete` | 10 dernières secondes avant minuit, minuit sonne (voir [ARCHITECTURE](ARCHITECTURE.md#minuit)) |
-| `pause`, `reprise` | pause de l'hôte |
+| `pause`, `reprise` | pause de l'hôte (accord de piano « À suivre… ») |
 | `resultats.arrivee`, `points.gagnes` | arrivée des résultats, fin de la révélation (`revealSeconds`) |
 | `final.fanfare` | phase finale |
 | `transition.entree`, `transition.sortie` | scènes de changement d'univers |

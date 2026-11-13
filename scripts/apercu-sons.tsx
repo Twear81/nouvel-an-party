@@ -25,6 +25,8 @@ const QUAND: Record<NomSon, string> = {
   "echec.trombone": "Trombone acoustique : l’imposteur s’en sort (chute amicale).",
   "joueur.rejoint": "Lobby : un invité rejoint la partie (hauteur légèrement variable).",
   "joueur.quitte": "Lobby : un invité part ou se déconnecte.",
+  "lobby.boule": "Lobby : une boule de cristal s'allume (un invité a validé son profil).",
+  "lobby.shenron": "Lobby : la septième boule s'allume, Shenron traverse l'écran.",
   "partie.lancement": "L'hôte lance la partie (lobby vers intro).",
   "manche.intro": "Annonce d'une manche (écran d'intro de chaque mini-jeu).",
   "reponse.recue": "Un joueur vient de répondre ; la hauteur monte à chaque réponse (popRate).",
@@ -34,7 +36,7 @@ const QUAND: Record<NomSon, string> = {
   "minuit.tic": "Chacune des 10 dernières secondes avant minuit, de plus en plus aigu.",
   "minuit.fete": "Minuit sonne : « Bonne année ! » (fanfare, feu d'artifice).",
   "temps.ajoute": "L'hôte clique « +10 s ».",
-  "pause": "L'hôte met la partie en pause.",
+  "pause": "L'hôte met la partie en pause (accord de piano de fin d'épisode, « À suivre… »).",
   "reprise": "L'hôte reprend la partie.",
   "resultats.arrivee": "L'écran de résultats d'une manche s'affiche.",
   "points.gagnes": "Fin de la révélation d'une manche, quand des points sont gagnés (aussi certaines révélations de mini-jeux).",
@@ -55,7 +57,7 @@ const QUAND: Record<NomSon, string> = {
 };
 
 const GROUPES: { titre: string; noms: NomSon[] }[] = [
-  { titre: "Partie et lobby", noms: ["lobby.musique", "joueur.rejoint", "joueur.quitte", "partie.lancement"] },
+  { titre: "Partie et lobby", noms: ["lobby.musique", "joueur.rejoint", "joueur.quitte", "lobby.boule", "lobby.shenron", "partie.lancement"] },
   { titre: "Manche", noms: ["manche.intro", "reponse.recue", "reponse.toutes", "temps.ajoute", "pause", "reprise"] },
   { titre: "Chrono", noms: ["chrono.tic", "chrono.fin", "minuit.tic", "minuit.fete"] },
   { titre: "Résultats", noms: ["resultats.arrivee", "roulement", "tension", "applaudissements", "echec.trombone", "points.gagnes", "final.fanfare"] },

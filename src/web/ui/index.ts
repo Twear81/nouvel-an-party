@@ -24,3 +24,5 @@ export * from "./Pop";
 export * from "./Fireworks";
 export * from "./Midnight";
 export * from "./haptique";
+export * from "./SplitTime";
+export * from "./DragonBalls";
