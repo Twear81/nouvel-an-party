@@ -58,7 +58,7 @@ export const ANCHORS = {
   frame: { center: px(411, 203), width: 200 / ROOM_W },
   /** Plateau de la table basse en verre : la cloche du Bon Prix (posée par le bas) et le journal (à plat). */
   bell: { bottom: px(790, 752), width: 128 / ROOM_W },
-  journal: { center: px(905, 748), width: 96 / ROOM_W, tilt: -7 },
+  journal: { center: px(706, 746), width: 100 / ROOM_W, tilt: 8 },
   /** Cheminée : le podium se pose sur le sol devant, centré sur le foyer. */
   podium: { bottom: px(752, 756), width: 560 / ROOM_W },
   /** Jukebox : centre de son halo et rayon (fraction de la largeur). */

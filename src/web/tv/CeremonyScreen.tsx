@@ -108,7 +108,8 @@ function CeremonyBody({ info, players }: { info: CeremonyInfo; players: PublicPl
 
   // Étoiles : une par bonus déjà révélé (le bonus en cours est posé pendant l'étape « gagnant »).
   const starsOf = (id: string) => info.awards.slice(0, awardsRevealed).map((a, i) => ({ a, i })).filter(({ a }) => a.winners.includes(id));
-  const winnerIds = step.kind === "gagnant" || step.kind === "projecteur" ? award?.winners ?? [] : [];
+  // Allumés seulement à la révélation : pendant que le projecteur cherche, tous les portraits sont grisés pareil (pas de spoil).
+  const winnerIds = step.kind === "gagnant" ? award?.winners ?? [] : [];
 
   return (
     <div className="relative min-h-0 flex-1">
@@ -133,7 +134,7 @@ function CeremonyBody({ info, players }: { info: CeremonyInfo; players: PublicPl
             <motion.div key={p.id} data-testid={`ceremony-player-${p.id}`} data-label={seatLabelSide(s.angle)} data-dim={bonus && !lit} data-lit={lit} data-hidden={zoomedIn}
               className="cer-person" initial={{ x: `${s.x * 100}cqw`, y: `${s.y * 100}cqh`, opacity: 0 }}
               animate={{ x: `${s.x * 100}cqw`, y: `${s.y * 100}cqh`, opacity: zoomedIn ? 0 : bonus && !lit ? 0.5 : 1 }}
-              transition={{ x: { type: "spring", stiffness: 70, damping: 15 }, y: { type: "spring", stiffness: 70, damping: 15 }, opacity: { duration: 0.5 } }}>
+              transition={{ x: { type: "spring", stiffness: 70, damping: 15 }, y: { type: "spring", stiffness: 70, damping: 15 }, opacity: { duration: 0.5, delay: !zoomedIn && souvenir ? Math.max(0.05, 1.1 * k) : 0 } }}>
               <motion.div className="room-visitor" animate={isWinnerNow ? { y: [0, -56, 0, -22, 0, -8, 0], scale: [1, 1.22, 1, 1.1, 1, 1.04, 1] } : { y: 0, scale: 1 }}
                 transition={{ duration: isWinnerNow ? Math.max(0.1, 1.4 * k) : 0.2, delay: isWinnerNow ? 0.2 * k : 0, times: isWinnerNow ? [0, 0.22, 0.45, 0.62, 0.78, 0.9, 1] : undefined }}>
                 <div className="room-portrait"><PlayerAvatar profile={p.profile} size="lg" /></div>

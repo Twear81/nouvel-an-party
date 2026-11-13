@@ -88,11 +88,11 @@ export function JournalSouvenir({ keepsake, active, phase, seconds }: { keepsake
   const { center, width, tilt } = ANCHORS.journal;
   const rest = width / PAPER_BIG;
   const toCenter = { x: `${(0.5 - center.x) * 100}cqw`, y: `${(0.5 - center.y) * 100}cqh` };
-  const resting = { x: "0cqw", y: "0cqh", scale: rest, rotate: tilt, rotateX: 52, opacity: 1 };
+  const resting = { x: "0cqw", y: "0cqh", scale: rest, rotate: tilt, rotateX: 58, opacity: 1 };
   const reading = { ...toCenter, scale: 1, rotate: -3, rotateX: 0, opacity: 1 };
   return (
     <Anchored at={center} width={PAPER_BIG} anchor="center" data-testid="souvenir-journal">
-      <motion.div data-phase={phase} style={{ transformPerspective: 900, willChange: "transform" }}
+      <motion.div data-phase={phase} style={{ transformPerspective: 2400, willChange: "transform" }}
         initial={active ? { ...toCenter, scale: 0.04, rotate: 900, rotateX: 0, opacity: 0 } : resting}
         animate={phase === 0 ? reading : resting}
         transition={phase === 0
