@@ -97,6 +97,11 @@ test("l’ambiance suit chaque univers et continue entre le jeu et les résultat
       await tv.getByTestId("host-skip").click();
       await expect(tv.getByTestId("tv-final")).toBeVisible();
       expect((await pistes()).length).toBe(nombre); // pas de reprise du jazz pendant la sortie
+      // Classement final : musique d'avant-combat pendant la révélation, puis celle du 1er.
+      const musiques = () => tv.evaluate(() => (window.__sfx ?? []).filter((s) => s.nom === "final.musique" || s.nom === "final.premier").map((s) => s.nom));
+      await expect.poll(musiques).toEqual(["final.musique"]);
+      await expect(tv.getByTestId("tv-final")).toHaveAttribute("data-stage", "done", { timeout: 60_000 });
+      await expect.poll(musiques).toEqual(["final.musique", "final.premier"]);
     } else if (interlude) {
       await expect(tv.getByTestId("tv-transition")).toHaveAttribute("data-kind", "skin");
       // La bascule serveur au milieu de la scène change aussi la piste, sans attendre la prochaine intro.

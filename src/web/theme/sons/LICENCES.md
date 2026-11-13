@@ -26,6 +26,17 @@ Ces deux bandes originales commerciales restent propriétaires, comme l’album 
 d’une copie publique ne constitue pas une licence de redistribution. L’extrait de Plague Tale est le
 fichier de 60 s fourni par le lecteur public du compositeur, et non l’album commercial de Bandcamp.
 
+## Musiques du classement final
+
+Demandées nommément par l’organisateur le 13 novembre 2026, pour la version locale de sa soirée privée. Audio des
+chaînes officielles des artistes, découpé, normalisé à −14 LUFS (fondu de sortie de 1,5 s pour la boucle) puis exporté
+en Vorbis q4, stéréo 44,1 kHz. Aucun droit de redistribution ou d’exploitation publique n’est revendiqué.
+
+| Fichier | Source et auteur | Extrait | Droits |
+|---|---|---|---|
+| `final-musique.ogg` | [Yuki Hayashi — chaîne officielle](https://www.youtube.com/watch?v=QwACoXnNcwg) | `You Say Run` (My Hero Academia), 0 à 122 s | Propriétaire — Yuki Hayashi / TOHO animation |
+| `final-premier.ogg` | [DJ Khaled — chaîne officielle](https://www.youtube.com/watch?v=xN9ZXjUiQm0) | `All I Do Is Win`, 0 à 80 s | Propriétaire — DJ Khaled / We The Best, Universal Motown |
+
 ## Bruitages et musique d’accueil
 
 Crédits : **« Oculus Audio Pack 01 » — Oculus VR, LLC, © 2015**, sous [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

@@ -67,9 +67,9 @@ describe("résolution des sons", () => {
 });
 
 describe("musiques du classement final", () => {
-  it("rien n'est livré : silence tant que l'organisateur n'a pas déposé ses fichiers, mp3 compris", () => {
-    expect(resolveSound("final.musique", null, [], fakeUrl)).toBeNull();
-    expect(resolveSound("final.premier", null, [], fakeUrl)).toBeNull();
+  it("livrées avec le jeu, remplaçables par un fichier de l'organisateur (mp3 compris)", () => {
+    expect(resolveSound("final.musique", null, [], fakeUrl)?.url).toBe("/assets/final-musique.ogg");
+    expect(resolveSound("final.premier", null, [], fakeUrl)?.url).toBe("/assets/final-premier.ogg");
     expect(resolveSound("final.musique", null, ["final.musique.mp3"], fakeUrl)?.url).toBe("/medias/sons/final.musique.mp3");
     expect(resolveSound("final.premier", null, ["final.premier.mp3"], fakeUrl)?.url).toBe("/medias/sons/final.premier.mp3");
   });
