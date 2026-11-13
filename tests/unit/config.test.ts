@@ -85,16 +85,23 @@ describe("loadConfig", () => {
       ip: "auto",
       ouvrir_navigateur: true,
       volume_sons: 0.8,
-      minuit: { actif: true, heure: "00:00", duree_compte_a_rebours: 60, reprise_auto: 120 },
+      minuit: { actif: true, uniquement_nouvel_an: true, heure: "00:00", duree_compte_a_rebours: 60, reprise_auto: 120 },
     });
     expect(games).toHaveLength(2);
   });
 
   it("minuit : valeurs partielles complétées, heure invalide refusée", () => {
     const ok = tmpConfig({ "partie.yaml": "minuit:\n  heure: \"23:59:30\"\n  reprise_auto: 0\n", "minijeux/ceci-ou-cela.yaml": CECI });
-    expect(loadConfig(ok).settings.minuit).toEqual({ actif: true, heure: "23:59:30", duree_compte_a_rebours: 60, reprise_auto: 0 });
+    expect(loadConfig(ok).settings.minuit).toEqual({ actif: true, uniquement_nouvel_an: true, heure: "23:59:30", duree_compte_a_rebours: 60, reprise_auto: 0 });
     const bad = tmpConfig({ "partie.yaml": "minuit:\n  heure: \"minuit\"\n", "minijeux/ceci-ou-cela.yaml": CECI });
     expect(() => loadConfig(bad)).toThrow("minuit.heure");
+  });
+
+  it("minuit : le mode répétition est explicite et le booléen est validé", () => {
+    const rehearsal = tmpConfig({ "partie.yaml": "minuit:\n  uniquement_nouvel_an: false\n", "minijeux/ceci-ou-cela.yaml": CECI });
+    expect(loadConfig(rehearsal).settings.minuit.uniquement_nouvel_an).toBe(false);
+    const bad = tmpConfig({ "partie.yaml": "minuit:\n  uniquement_nouvel_an: demain\n", "minijeux/ceci-ou-cela.yaml": CECI });
+    expect(() => loadConfig(bad)).toThrow("minuit.uniquement_nouvel_an");
   });
 
   it("partie.yaml vide : défauts également", () => {

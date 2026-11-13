@@ -43,7 +43,7 @@ async function main() {
       order: settings.ordre,
       introSeconds: settings.intro_secondes,
       midnight: settings.minuit.actif
-        ? { time: settings.minuit.heure, countdownSeconds: settings.minuit.duree_compte_a_rebours, autoResumeSeconds: settings.minuit.reprise_auto }
+        ? { time: settings.minuit.heure, newYearOnly: settings.minuit.uniquement_nouvel_an, countdownSeconds: settings.minuit.duree_compte_a_rebours, autoResumeSeconds: settings.minuit.reprise_auto }
         : undefined,
       outro: { active: settings.outro.actif, bonus: settings.outro.bonus, pointsBonus: settings.outro.points_bonus },
     },

@@ -18,9 +18,10 @@ volume_sons: 0.8
 
 # Minuit : à l'approche de l'heure choisie, la partie se met en pause toute seule et la TV et les téléphones affichent
 # un grand compte à rebours, puis « Bonne année ! » avec feu d'artifice. L'hôte relance la partie avec « Reprendre »
-# (barre en bas de la TV). Lancé après minuit, le serveur ne déclenche rien avant la nuit suivante.
+# (barre en bas de la TV). Par défaut, réservé au passage au 1er janvier ; lancé après minuit, aucun rattrapage.
 minuit:
   actif: true                     # false = pas de compte à rebours
+  uniquement_nouvel_an: true       # seulement le 1er janvier ; false pour répéter à une autre date
   heure: "00:00"                  # heure LOCALE du PC qui fait tourner le jeu, "HH:MM" (ou "HH:MM:SS") ; vérifier l'horloge du PC !
   duree_compte_a_rebours: 60      # secondes avant minuit où la partie se met en pause et le compte à rebours démarre (3 à 600)
   reprise_auto: 120               # secondes après minuit avant la reprise automatique ; 0 = seulement quand l'hôte clique
