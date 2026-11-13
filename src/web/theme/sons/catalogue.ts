@@ -26,6 +26,9 @@ export const SONS = {
   "reponse.toutes": { fichier: "complet.ogg", volume: 0.5 },
   "chrono.tic": { fichier: "tic.ogg", volume: 0.45 },
   "chrono.fin": { fichier: "gong.ogg", volume: 0.7 },
+  // Minuit : un tic par seconde sur les 10 dernières (réutilise tic.ogg), fanfare à zéro (réutilise fanfare.ogg).
+  "minuit.tic": { fichier: "tic.ogg", volume: 0.6 },
+  "minuit.fete": { fichier: "fanfare.ogg", volume: 0.9 },
   "temps.ajoute": { fichier: "temps-ajoute.ogg", volume: 0.45 },
   "pause": { fichier: "pause.ogg", volume: 0.4 },
   "reprise": { fichier: "reprise.ogg", volume: 0.4 },

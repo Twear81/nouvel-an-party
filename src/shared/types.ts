@@ -4,6 +4,7 @@
 import type { SkinId } from "./skins";
 import type { FinalRevealInfo } from "./final-reveal";
 import type { TransitionInfo } from "./transitions";
+import type { MidnightInfo } from "./midnight";
 
 export type PlayerId = string;
 
@@ -93,6 +94,8 @@ export interface GameSnapshot {
   paused: boolean;
   /** Départ serveur de la révélation finale ; null pendant les manches et au lobby. */
   finalReveal: FinalRevealInfo | null;
+  /** Compte à rebours de minuit (puis célébration) ; null le reste de la soirée. La partie est alors en pause (docs/ARCHITECTURE.md). */
+  midnight: MidnightInfo | null;
   /** Scène synchronisée de la pièce ; aucune manche n'est démarrée pendant cette phase. */
   transition: TransitionInfo | null;
   players: PublicPlayer[];

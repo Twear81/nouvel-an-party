@@ -113,7 +113,7 @@ const round = (over: Partial<RoundInfo> = {}): RoundInfo => ({
   deltas: null, resultsAt: null, pausedMs: 0, pausedSince: null, ...over,
 });
 const snap = (over: Partial<GameSnapshot> = {}): GameSnapshot => ({
-  title: "T", phase: "lobby", paused: false, finalReveal: null, transition: null, players: [], round: null, continued: [],
+  title: "T", phase: "lobby", paused: false, finalReveal: null, midnight: null, transition: null, players: [], round: null, continued: [],
   catalog: [], setup: { counts: {} }, resumable: null, joinUrl: "", skin: null, me: null, ...over,
 });
 const names = (calls: { nom: string }[]) => calls.map((c) => c.nom);

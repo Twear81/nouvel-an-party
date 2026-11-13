@@ -10,7 +10,7 @@ import { useGame, type GameActions } from "../net/useGame";
 import { useRevealed } from "../net/useReveal";
 import { useFinalReveal } from "../net/useFinalReveal";
 import { SkinProvider } from "../theme/skin";
-import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, Panel, PhoneStage, PlayerAvatar, Pop, ReconnectBanner, WaitingDots, WatchingEyes } from "../ui";
+import { Button, Countdown, fireConfetti, MidnightOverlay, ordinal, PausedOverlay, Panel, PhoneStage, PlayerAvatar, Pop, ReconnectBanner, WaitingDots, WatchingEyes } from "../ui";
 import { ProfileEditor } from "./ProfileEditor";
 import { useWakeLock } from "./useWakeLock";
 
@@ -44,6 +44,7 @@ export function PhoneApp() {
       <PhoneStage phase={snapshot?.phase}>
         {body}
         <PausedOverlay show={!!snapshot?.paused} />
+        {snapshot?.midnight && <MidnightOverlay midnight={snapshot.midnight} size="phone" />}
         <ReconnectBanner show={!connected} />
       </PhoneStage>
     </SkinProvider>

@@ -8,6 +8,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import type { RoundContext } from "../../minigames/contract";
 import { activeNow } from "../../shared/clock";
 import type { FinalRevealInfo } from "../../shared/final-reveal";
+import { midnightYear, nextOccurrence, type MidnightInfo } from "../../shared/midnight";
 import { profileSchema } from "../../shared/schemas";
 import { shuffle } from "../../shared/shuffle";
 import { SKINS, isSkinId, type SkinId } from "../../shared/skins";
@@ -29,6 +30,24 @@ export interface EngineSettings {
   targetMinutes: number;
   order: "melange" | "groupe";
   introSeconds: number;
+  /** Compte à rebours de minuit ; absent = désactivé. */
+  midnight?: MidnightSettings;
+}
+
+export interface MidnightSettings {
+  /** Heure locale du PC, « HH:MM » ou « HH:MM:SS ». */
+  time: string;
+  /** Durée du compte à rebours affiché avant l'heure (s). */
+  countdownSeconds: number;
+  /** Reprise automatique après minuit (s) ; 0 = seulement quand l'hôte clique. */
+  autoResumeSeconds: number;
+}
+
+/** Minuit en cours (compte à rebours puis célébration). */
+interface MidnightState extends MidnightInfo {
+  /** Vrai si c'est minuit qui a mis la partie en pause : seule la reprise automatique la relance alors. */
+  pausedByMidnight: boolean;
+  beganAt: number;
 }
 
 /** Ce qui est écrit dans data/save.json pour survivre à un crash du PC. */
@@ -43,6 +62,8 @@ export interface SaveData {
   transition?: SavedTransition | null;
   /** Ordre des skins de la partie (absent des anciennes sauvegardes : un nouvel ordre est tiré). */
   skinOrder?: SkinId[];
+  /** Minuit en cours au moment de la sauvegarde (reprise de la célébration après un crash). */
+  midnight?: { targetAt: number } | null;
 }
 
 export interface Persistence {
@@ -101,6 +122,9 @@ export class GameEngine {
   private continued = new Set<PlayerId>();
   private setup: Setup;
   private resumable: SaveData | null = null;
+  private midnight: MidnightState | null = null;
+  private midnightTimer: unknown = null;
+  private savedMidnight: { targetAt: number } | null = null;
 
   private readonly games: Map<string, LoadedGame>;
   private readonly clock: Clock;
@@ -115,6 +139,7 @@ export class GameEngine {
     this.catalog = buildCatalog(opts.games, opts.settings.introSeconds);
     this.setup = defaultSetup(this.catalog, opts.settings.targetMinutes);
     this.restoreFromSave();
+    this.initMidnight();
   }
 
   // ───────────────────────────── Joueurs ─────────────────────────────
@@ -181,6 +206,7 @@ export class GameEngine {
     this.roundIndex = -1;
     this.resumable = null;
     this.beginTransition("opening", null, this.plan[0]!.skin!);
+    this.freezeForMidnight();
   }
 
   /** Reprend la partie sauvegardée (après un crash ou une fermeture). */
@@ -205,10 +231,12 @@ export class GameEngine {
       if (save.phase === "results") this.advanceAfterResults();
       else this.nextRound();
     }
+    this.freezeForMidnight();
   }
 
   /** Bouton "Passer" : fait avancer la phase en cours. */
   skip() {
+    if (this.midnight) return;
     if (this.phase === "transition") this.finishTransition();
     else if (this.phase === "intro") this.beginPlaying();
     else if (this.phase === "playing") this.endRound();
@@ -231,7 +259,19 @@ export class GameEngine {
     this.changed();
   }
 
+  /**
+   * Pendant minuit la partie reste en pause : l'hôte ne peut la relancer qu'une fois la célébration commencée
+   * (il relance alors même une pause qu'il avait posée lui-même avant minuit).
+   */
   resume() {
+    if (this.midnight) {
+      if (this.midnight.phase === "celebrate") this.endMidnight(true);
+      return;
+    }
+    this.resumeNow();
+  }
+
+  private resumeNow() {
     if (this.transition && this.paused) {
       this.paused = false;
       this.transition.pausedMs += this.clock.now() - this.transition.pausedSince!;
@@ -253,6 +293,7 @@ export class GameEngine {
 
   addTime(seconds: number) {
     const c = this.current;
+    if (this.midnight) return;
     if (this.phase !== "playing" || !c || c.mainTimer === null) return;
     const delta = Math.max(-600, Math.min(600, seconds)) * 1000;
     c.timers.shift(c.mainTimer, delta);
@@ -269,6 +310,7 @@ export class GameEngine {
     this.current = null;
     this.phase = "lobby";
     this.paused = false;
+    if (this.midnight) this.midnight.pausedByMidnight = false;
     this.finalReveal = null;
     this.plan = [];
     this.skinOrder = shuffle([...SKINS], this.rng);
@@ -532,7 +574,7 @@ export class GameEngine {
   }
 
   private checkAllContinued() {
-    if (this.phase !== "results") return;
+    if (this.phase !== "results" || this.midnight) return;
     const waiting = [...this.players.values()].filter((p) => p.profile && p.sockets > 0);
     if (waiting.length > 0 && waiting.every((p) => this.continued.has(p.id))) this.advanceAfterResults();
   }
@@ -578,6 +620,7 @@ export class GameEngine {
       phase: this.phase,
       paused: this.paused,
       finalReveal: this.finalReveal,
+      midnight: this.midnight ? { targetAt: this.midnight.targetAt, phase: this.midnight.phase, year: this.midnight.year } : null,
       transition: this.transition ? { ...this.transition, playerIds: [...this.transition.playerIds] } : null,
       players: this.publicPlayers(),
       round,
@@ -601,6 +644,7 @@ export class GameEngine {
 
   /** Le lobby et le final reviennent au thème de base ; une scène couvre chaque bascule. */
   private currentSkin(): SkinId | null {
+    if (this.midnight) return null; // minuit : toujours le thème de base
     if (this.transition) {
       const scene = this.transition;
       return transitionElapsed(scene, this.clock.now()) >= TRANSITION_TIMING[scene.kind].swapAtMs ? scene.toSkin : scene.fromSkin;
@@ -620,6 +664,7 @@ export class GameEngine {
       roundIndex: this.roundIndex,
       phase: this.phase,
       skinOrder: this.skinOrder,
+      midnight: this.midnight ? { targetAt: this.midnight.targetAt } : null,
       finalReveal: this.finalReveal,
       transition: this.transition ? {
         ...this.transition,
@@ -644,6 +689,116 @@ export class GameEngine {
     if (save.setup) this.setup = sanitizeSetup(save.setup, this.catalog);
     const inProgress = save.phase === "transition" || save.phase === "intro" || save.phase === "playing" || save.phase === "results";
     if (inProgress && save.plan.length > 0) this.resumable = save;
+    if (typeof save.midnight?.targetAt === "number") this.savedMidnight = { targetAt: save.midnight.targetAt };
+  }
+
+  // ───────────────────────────── Minuit ─────────────────────────────
+  // Générique : à `heure - duree`, la partie se met en pause (même mécanisme que la pause de l'hôte) et les écrans
+  // affichent le compte à rebours ; à l'heure, phase « celebrate » ; l'hôte (Reprendre) ou `reprise_auto` relance.
+  // Règle de déclenchement : on vise la PROCHAINE occurrence de l'heure ; le compte à rebours démarre dès qu'on est dans
+  // sa fenêtre (un serveur lancé 20 s avant minuit affiche 0:20). Lancé après minuit, rien ne se passe avant la nuit suivante.
+  // Après un crash, la célébration en cours est reprise tant que `max(reprise_auto, 60 s)` ne s'est pas écoulé.
+
+  private initMidnight() {
+    const cfg = this.opts.settings.midnight;
+    if (!cfg) return;
+    const saved = this.savedMidnight;
+    this.savedMidnight = null;
+    const now = this.clock.now();
+    if (saved && now < saved.targetAt + Math.max(cfg.autoResumeSeconds, 60) * 1000) {
+      this.beginMidnight(saved.targetAt);
+      return;
+    }
+    this.checkMidnightStart();
+  }
+
+  private checkMidnightStart() {
+    const cfg = this.opts.settings.midnight;
+    if (!cfg || this.midnight) return;
+    const now = this.clock.now();
+    const targetAt = nextOccurrence(now, cfg.time);
+    if (now >= targetAt - cfg.countdownSeconds * 1000) this.beginMidnight(targetAt);
+    else this.scheduleMidnight();
+  }
+
+  private beginMidnight(targetAt: number) {
+    const now = this.clock.now();
+    this.midnight = {
+      targetAt,
+      phase: now < targetAt ? "countdown" : "celebrate",
+      year: midnightYear(targetAt),
+      pausedByMidnight: false,
+      beganAt: now,
+    };
+    this.freezeForMidnight();
+    this.scheduleMidnight();
+    this.saveMidnight();
+    this.changed();
+  }
+
+  /** Met en pause ce qui tourne ; si l'hôte avait déjà mis en pause, on ne touche à rien (il reprendra lui-même). */
+  private freezeForMidnight() {
+    const m = this.midnight;
+    if (!m || this.paused || !(this.current || this.transition)) return;
+    this.pause();
+    m.pausedByMidnight = true;
+  }
+
+  private scheduleMidnight() {
+    const cfg = this.opts.settings.midnight;
+    if (this.midnightTimer !== null) this.clock.clearTimeout(this.midnightTimer);
+    this.midnightTimer = null;
+    if (!cfg) return;
+    const now = this.clock.now();
+    const m = this.midnight;
+    let delay: number;
+    if (!m) {
+      // En attente : on revérifie au plus toutes les 30 s (veille du PC, changement d'heure).
+      delay = Math.min(30_000, nextOccurrence(now, cfg.time) - cfg.countdownSeconds * 1000 - now);
+    } else if (m.phase === "countdown") delay = m.targetAt - now;
+    else if (cfg.autoResumeSeconds > 0) delay = m.targetAt + cfg.autoResumeSeconds * 1000 - now;
+    else return;
+    this.midnightTimer = this.clock.setTimeout(() => this.midnightTick(), Math.max(1, delay));
+  }
+
+  private midnightTick() {
+    this.midnightTimer = null;
+    const cfg = this.opts.settings.midnight;
+    const m = this.midnight;
+    if (!cfg) return;
+    if (!m) return this.checkMidnightStart();
+    const now = this.clock.now();
+    if (m.phase === "countdown") {
+      if (now >= m.targetAt) {
+        m.phase = "celebrate";
+        this.saveMidnight();
+        this.changed();
+      }
+    } else if (cfg.autoResumeSeconds > 0 && now >= m.targetAt + cfg.autoResumeSeconds * 1000) {
+      this.endMidnight(false);
+      return;
+    }
+    this.scheduleMidnight();
+  }
+
+  /** Fin de la célébration. `byHost` : l'hôte a cliqué, on relance même une pause qu'il avait posée avant minuit. */
+  private endMidnight(byHost: boolean) {
+    const m = this.midnight;
+    if (!m) return;
+    this.midnight = null;
+    // La révélation finale est animée depuis son départ serveur : on le décale de la durée de minuit pour qu'elle reprenne où elle en était.
+    if (this.phase === "final" && this.finalReveal) this.finalReveal = { ...this.finalReveal, startedAt: this.finalReveal.startedAt + (this.clock.now() - m.beganAt) };
+    if (this.paused && (byHost || m.pausedByMidnight)) this.resumeNow();
+    this.scheduleMidnight();
+    this.saveMidnight();
+    this.checkAllContinued();
+    this.changed();
+  }
+
+  /** Sauvegarde sans écraser une partie interrompue qui attend sa reprise au lobby. */
+  private saveMidnight() {
+    if (this.phase === "lobby" && this.resumable) return;
+    this.save();
   }
 
   private mustPlayer(id: PlayerId) {

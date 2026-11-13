@@ -23,7 +23,9 @@ export function diffSnapshots(prev: GameSnapshot | null, next: GameSnapshot): Sf
   if (!prev) return [];
   const out: SfxCall[] = [];
 
-  if (!prev.paused && next.paused) out.push({ nom: "pause", options: { ignorePause: true } });
+  // Minuit met la partie en pause lui-même : le « clic » de pause serait de trop sous le compte à rebours.
+  const midnightStarts = !prev.midnight && !!next.midnight;
+  if (!prev.paused && next.paused && !midnightStarts) out.push({ nom: "pause", options: { ignorePause: true } });
   if (prev.paused && !next.paused) out.push({ nom: "reprise" });
 
   if (prev.phase === "lobby" && next.phase === "lobby") {
@@ -80,4 +82,22 @@ export function chronoStep(state: ChronoState, remainingMs: number | null): { st
   if (sec === 0) return { state: { last: 0, ended: true }, call: state.ended ? null : { nom: "chrono.fin" } };
   const call = sec <= 5 ? { nom: "chrono.tic" as const, options: { rate: 1 + (5 - sec) * 0.12 } } : null;
   return { state: { last: sec, ended: false }, call };
+}
+
+// ── Minuit : un tic par seconde sur les 10 dernières, la fête à zéro. Seuls les changements observés comptent
+// (une TV rechargée pendant la célébration ne rejoue pas la fanfare).
+export const MIDNIGHT_TICKS = 10;
+export interface MidnightSfxState {
+  last: number | null;
+}
+export const MIDNIGHT_SFX_INITIAL: MidnightSfxState = { last: null };
+
+export function midnightStep(state: MidnightSfxState, remainingMs: number | null): { state: MidnightSfxState; call: SfxCall | null } {
+  if (remainingMs === null) return { state: MIDNIGHT_SFX_INITIAL, call: null };
+  const sec = Math.ceil(Math.max(0, remainingMs) / 1000);
+  if (state.last === null || sec > state.last) return { state: { last: sec }, call: null };
+  if (sec === state.last) return { state, call: null };
+  if (sec === 0) return { state: { last: 0 }, call: { nom: "minuit.fete", options: { ignorePause: true } } };
+  if (sec <= MIDNIGHT_TICKS) return { state: { last: sec }, call: { nom: "minuit.tic", options: { rate: 1 + (MIDNIGHT_TICKS - sec) * 0.05, ignorePause: true } } };
+  return { state: { last: sec }, call: null };
 }

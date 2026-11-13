@@ -340,6 +340,7 @@ volume/hauteur réglables, séquences réelles, skins).
 | `manche.intro` | annonce d'une manche |
 | `reponse.recue`, `reponse.toutes` | une réponse de plus (hauteur montante), tout le monde a répondu |
 | `chrono.tic`, `chrono.fin`, `temps.ajoute` | 5 dernières secondes, zéro, « +10 s » de l'hôte |
+| `minuit.tic`, `minuit.fete` | 10 dernières secondes avant minuit, minuit sonne (voir [ARCHITECTURE](ARCHITECTURE.md#minuit)) |
 | `pause`, `reprise` | pause de l'hôte |
 | `resultats.arrivee`, `points.gagnes` | arrivée des résultats, fin de la révélation (`revealSeconds`) |
 | `final.fanfare` | phase finale |

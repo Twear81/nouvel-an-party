@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
 import { z } from "zod";
+import { parseClockTime } from "../shared/midnight";
 import { serverGames } from "../minigames/registry.server";
 import type { LoadedGame } from "./engine/planner";
 
@@ -19,6 +20,15 @@ export const settingsSchema = z.object({
   ouvrir_navigateur: z.boolean().default(true),
   /** Volume général des sons de la TV (0 = muet, 1 = plein). */
   volume_sons: z.number().min(0).max(1).default(0.8),
+  /** Compte à rebours de minuit : la partie se met en pause toute seule (docs/configuration.md). */
+  minuit: z.object({
+    actif: z.boolean().default(true),
+    /** Heure locale du PC serveur, « HH:MM » ou « HH:MM:SS ». */
+    heure: z.string().refine((v) => parseClockTime(v) !== null, "attendu « HH:MM » (ex. \"00:00\")").default("00:00"),
+    duree_compte_a_rebours: z.number().int().min(3).max(600).default(60),
+    /** Secondes après minuit avant la reprise automatique ; 0 = seulement quand l'hôte clique. */
+    reprise_auto: z.number().int().nonnegative().default(120),
+  }).default({ actif: true, heure: "00:00", duree_compte_a_rebours: 60, reprise_auto: 120 }),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 

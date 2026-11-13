@@ -313,7 +313,7 @@ export class SoundEngine {
       source.onended = () => gain.disconnect();
       source.start();
       // Les jingles prennent la place de la musique ; les petits clics ne font pas pomper le mixage.
-      if (["partie.lancement", "manche.intro", "resultats.arrivee", "final.fanfare", "boum", "roulement", "tension", "applaudissements"].includes(nom)) this.duckMusique(buffer.duration / source.playbackRate.value);
+      if (["partie.lancement", "manche.intro", "resultats.arrivee", "final.fanfare", "boum", "roulement", "tension", "applaudissements", "minuit.fete"].includes(nom)) this.duckMusique(buffer.duration / source.playbackRate.value);
     });
   }
 }
