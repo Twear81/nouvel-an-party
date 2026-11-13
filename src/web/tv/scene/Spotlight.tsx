@@ -38,7 +38,7 @@ export function Spotlight({ seats, path, seconds, partner }: { seats: { x: numbe
         </motion.div>
       </motion.div>
       {partner !== undefined && seats[partner] && (
-        <motion.div data-testid="spotlight-partner" className="absolute inset-0 pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: seconds, duration: 0.4 }}>
+        <motion.div data-testid="spotlight-partner" className="absolute inset-0 pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: still ? 0.15 : seconds, duration: 0.4 }}>
           <div className="cer-beam" style={{ ...beamBox, transform: `translate(${at(seats[partner]!).x}, ${at(seats[partner]!).y})` }}>{beamImage()}</div>
         </motion.div>
       )}

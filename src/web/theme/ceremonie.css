@@ -127,7 +127,7 @@
 .cer-paper[data-painted="false"] .cer-paper-photo { border: .25cqw solid #2a1d12; background: color-mix(in srgb, #2a1d12 8%, transparent); }
 
 /* Cuillère à tiramisu et étoile du talent */
-.cer-spoon { position: relative; will-change: transform; }
+.cer-spoon { will-change: transform; } /* pas de `position` ici : ce CSS hors couche écraserait la classe `absolute` */
 .cer-spoon-fallback { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 100%; height: 100%; }
 .cer-spoon-base { width: 70%; height: 14%; border-radius: .4rem; background: linear-gradient(180deg, #e9e6ee, #8d8a99); box-shadow: 0 .4rem .8rem var(--color-shade); }
 

@@ -286,8 +286,8 @@ function Winner({ info, award, players, winnerIds, cues, length }: { info: Cerem
           )}
         </motion.div>
       )}
-      <motion.div data-testid="ceremony-winners" initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.max(0.05, length * 0.1 / 1000), type: "spring", stiffness: 110, damping: 14 }}
-        className="absolute inset-x-0 bottom-[6%] flex flex-col items-center gap-3 text-center">
+      <motion.div data-testid="ceremony-winners" initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.max(0.05, length * 0.1 / 1000), type: "spring", stiffness: 110, damping: 14 }}
+        className="absolute inset-x-0 top-[14%] flex flex-col items-center gap-3 text-center">
         <p className="cer-title font-display text-7xl text-ink">{names}</p>
         <p className="cer-title text-4xl font-bold text-accent-strong">{award.statLabel}</p>
       </motion.div>
