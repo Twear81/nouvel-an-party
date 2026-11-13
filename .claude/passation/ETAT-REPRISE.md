@@ -40,3 +40,11 @@
   (carte centrale du final, tableau d'honneur), étiquette du 1er devant les avatars du podium.
 - Typecheck, 654 unitaires, E2E ceremonie + 03-partie-complete verts. En attente : validation de l'organisateur puis commit ;
   docs `mise-en-scene.md` / `changer-le-design.md` ; confettis qui couvrent le tableau d'honneur (à décider).
+
+## Mise à jour (session suivante)
+- Commits : 7672a48 finitions, f8bf7c4 E2E du final, f1cd4ff cuillère/duo/nom du gagnant, 561ec12 carte du podium.
+- Suite E2E complète : 135 verts ; `06-controles-hote` « raccourcis clavier » a échoué une fois sous charge (27/27 isolé) :
+  sans doute la manche de 8 s qui finit avant la pause, comme le test voisin (passé à `duree: 60`).
+- Outro relue en capture sous Chromium et WebKit (8 joueurs, 16 caractères) : conforme au brief.
+- Reste : validation de l'organisateur, suppression de `.claude/passation/`, ordre de fusion (outro-v2 contient soiree-socle),
+  finitions de l'étape 5 de PASSATION (sons, Shenron, thèmes de contenu, option date de minuit) qui demandent ses choix.
