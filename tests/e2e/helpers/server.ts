@@ -59,7 +59,7 @@ function prepareConfig(tmp: string, opts: ServerOptions): string {
     const f = path.join(dir, file);
     writeFileSync(f, readFileSync(f, "utf8").replace(new RegExp(`^${key}:.*$`, "m"), `${key}: ${value}`));
   };
-  if (opts.minuit || opts.outro !== undefined) {
+  if (opts.minuit) {
     const file = path.join(dir, "partie.yaml");
     const settings = YAML.parse(readFileSync(file, "utf8"));
     if (opts.minuit) {
@@ -69,7 +69,6 @@ function prepareConfig(tmp: string, opts: ServerOptions): string {
       settings.minuit = { ...settings.minuit, actif: true, heure: `${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`,
         duree_compte_a_rebours: m.compteARebours ?? 12, reprise_auto: m.repriseAuto ?? 0 };
     }
-    if (opts.outro !== undefined) settings.outro = { ...settings.outro, actif: opts.outro };
     writeFileSync(file, YAML.stringify(settings));
   }
   if (opts.introSeconds !== undefined) patch("partie.yaml", "intro_secondes", opts.introSeconds);

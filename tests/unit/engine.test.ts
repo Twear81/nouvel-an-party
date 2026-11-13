@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test";
 import { SKINS } from "../../src/shared/skins";
 import { activeNow } from "../../src/shared/clock";
-import { finalRevealElapsed } from "../../src/shared/final-reveal";
 import { GameEngine, GameError } from "../../src/server/engine/engine";
 import { createTestEngine, MemoryPersistence, validProfile, startRounds } from "./helpers/engine-setup";
 import { FakeClock } from "./helpers/fake-clock";
@@ -1024,14 +1023,9 @@ describe("minuit : compte à rebours et pause automatique", () => {
     const startedAt = snap(t).finalReveal!.startedAt;
     t.clock.advance(19 * 60 * S); // 23:59:00
     expect(snap(t).midnight?.phase).toBe("countdown");
-    const frozenElapsed = finalRevealElapsed(snap(t).finalReveal!, t.clock.now());
     t.clock.advance(180 * S);
     expect(snap(t).midnight).toBeNull();
-    expect(snap(t).finalReveal!.startedAt).toBe(startedAt);
-    expect(snap(t).finalReveal!.pausedMs).toBe(180 * S);
-    expect(finalRevealElapsed(snap(t).finalReveal!, t.clock.now())).toBe(frozenElapsed);
-    t.clock.advance(S);
-    expect(finalRevealElapsed(snap(t).finalReveal!, t.clock.now())).toBe(frozenElapsed + S);
+    expect(snap(t).finalReveal!.startedAt).toBe(startedAt + 180 * S);
   });
 
   it("sauvegarde : une célébration en cours est retrouvée après un crash, pas une ancienne", () => {

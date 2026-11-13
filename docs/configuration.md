@@ -37,7 +37,7 @@ Ces scènes utilisent les durées partagées du thème et se pilotent aussi avec
 Le soir du 31 décembre, un peu avant `minuit.heure`, la partie se met **en pause toute seule** : chronos figés, et la TV comme les
 téléphones affichent un grand compte à rebours (mm:ss, puis les 10 dernières secondes une à une), puis « Bonne année 2027 ! »
 avec feu d'artifice, confettis et fanfare. La barre de l'hôte reste utilisable : **Reprendre** relance la partie exactement
-où elle en était (ou **Continuer** au lobby). La cérémonie et le classement final restent également figés pendant minuit. Sans clic, la reprise est
+où elle en était (ou **Continuer** au lobby). Le classement final reste également figé pendant minuit. Sans clic, la reprise est
 automatique `reprise_auto` secondes après minuit.
 - Vérifier l'horloge du PC (heure et fuseau) : c'est elle qui décide.
 - Par défaut (`uniquement_nouvel_an: true`), le compte à rebours vise le **prochain 1er janvier**, à l'heure locale configurée.

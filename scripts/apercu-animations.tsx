@@ -14,6 +14,7 @@ import type { TaillePhone } from "./apercu-animations/panneaux";
 import { SCENES_COMPOSANTS } from "./apercu-animations/scenes-composants";
 import { SCENES_CHRONO, SCENES_ECRANS } from "./apercu-animations/scenes-ecrans";
 import { scenesDesJeux } from "./apercu-animations/scenes-jeux";
+import { SCENES_VALIDATION } from "./apercu-animations/scenes-validation";
 import type { Env, Scene } from "./apercu-animations/types";
 
 // Le moteur de sons interroge le serveur de médias de l'organisateur ; ici il n'y en a pas : réponse vide, sans requête réseau.
@@ -23,7 +24,7 @@ window.fetch = ((entree: RequestInfo | URL, init?: RequestInit) => {
   return url.startsWith("/medias") ? Promise.resolve(new Response(null, { status: 404 })) : fetchReel(entree, init);
 }) as typeof fetch;
 
-const SCENES: Scene[] = [...SCENES_COMPOSANTS, ...SCENES_CHRONO, ...SCENES_ECRANS, ...scenesDesJeux()];
+const SCENES: Scene[] = [...SCENES_COMPOSANTS, ...SCENES_CHRONO, ...SCENES_ECRANS, ...SCENES_VALIDATION, ...scenesDesJeux()];
 const SECTIONS: { id: Scene["section"]; titre: string }[] = [
   { id: "composants", titre: "Composants" },
   { id: "chrono", titre: "Chrono" },
@@ -103,6 +104,21 @@ function Galerie() {
     history.replaceState(null, "", `#scene=${sceneId}${skin ? `&skin=${skin}` : ""}&n=${nombre}&tel=${taillePhone}`);
   }, [sceneId, skin, nombre, taillePhone]);
 
+  // Les liens de revue et les boutons précédent/suivant fonctionnent sans recharger le fichier autonome.
+  useEffect(() => {
+    const suivreAdresse = () => {
+      const adresse = lireAdresse();
+      setSceneId(adresse.scene);
+      setSkin(adresse.skin);
+      setNombre(adresse.nombre);
+      setTaillePhone(adresse.tel);
+      setDuree(null);
+      demarrer(0, true);
+    };
+    window.addEventListener("hashchange", suivreAdresse);
+    return () => window.removeEventListener("hashchange", suivreAdresse);
+  }, [demarrer]);
+
   const fini = duree !== null && ecoule >= duree;
   useEffect(() => {
     const id = setInterval(() => {
@@ -140,7 +156,7 @@ function Galerie() {
 
   const statut = fini ? "complete" : lecture ? "playing" : "paused";
   return (
-    <SkinProvider skin={skin}>
+    <SkinProvider skin={sceneId === "ecrans/minuit" ? null : skin}>
       <div className="ga" data-testid="animation-gallery" data-scene={sceneId} data-status={statut} data-section={scene.section}>
         <nav className="ga-menu" aria-label="Scènes">
           <div className="ga-titre">Galerie des animations</div>

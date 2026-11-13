@@ -57,6 +57,10 @@ body { background: var(--ga-fond); overflow: hidden; }
 .ga-disposition-tv { flex: 0 0 auto; }
 .ga-disposition-tels { display: flex; flex-direction: column; gap: 12px; }
 .ga-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .8rem; }
+.ga-actions a { align-self: center; color: var(--ga-accent); text-decoration: underline; }
+.ga-note { align-self: center; color: var(--ga-discret); font-size: .85rem; }
+/* La casquette des boutons Mario ne fait pas partie du cadre : dans cette planche en colonnes, elle ajoutait une ligne. */
+html[data-skin="mario-odyssey"] [data-ui="button"].ga-cadre[data-variant="primary"]::before { content: none; }
 
 .ga-tv { position: relative; overflow: hidden; border-radius: .5rem; background: #000; box-shadow: 0 0 0 1px var(--ga-ligne); }
 .ga-tv-box { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; isolation: isolate; }

@@ -79,8 +79,8 @@ Brique générique du moteur (`engine.ts`, section « Minuit » ; réglée par `
   (`uniquement_nouvel_an: false`) vise aujourd'hui ou demain, une seule occurrence par nuit. Un minuteur de veille
   revérifie au plus toutes les 30 s.
 - **Pause** : réutilise la pause existante (`pause()`), donc `TimerGroup` fige chronos de manche et scènes de
-  transition, `input()` est refusé. La cérémonie et la révélation finale utilisent la même pause : leur horloge active reste figée,
-  sans ajouter deux fois la durée de minuit à la reprise. Au lobby, seul l'affichage change. Pendant minuit : Passer, +10 s et l'avance automatique des résultats (« Continuer ») sont
+  transition, `input()` est refusé. Pendant le classement final, son départ (`finalReveal.startedAt`)
+  est décalé de la durée de minuit pour reprendre où il en était. Au lobby, seul l'affichage change. Pendant minuit : Passer, +10 s et l'avance automatique des résultats (« Continuer ») sont
   ignorés ; l'hôte peut toujours revenir au lobby. Le skin est forcé à `null` (thème de base, bleu).
 - **Fin** : pendant `countdown`, Reprendre est ignoré ; pendant `celebrate`, le clic de l'hôte (même bouton que la
   pause) ou `reprise_auto` secondes après minuit relance. Si **c'est minuit qui a mis en pause**
