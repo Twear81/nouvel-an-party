@@ -84,65 +84,45 @@ questions:
   - texte: "Quelle est la capitale de l'Australie ?"
     reponses: ["Canberra", "Sydney"]
     commentaire: "Sydney est la plus grande ville, mais la capitale, c'est Canberra."
-  - texte: "Quelle est la capitale du Brésil ?"
-    reponses: ["Brasília", "Rio de Janeiro", "São Paulo"]
-  - texte: "Quelle est la capitale de la Suisse ?"
-    reponses: ["Berne", "Genève", "Zurich"]
-  - texte: "Quelle est la capitale du Canada ?"
-    reponses: ["Ottawa", "Toronto", "Montréal"]
-  - texte: "Quelle est la capitale de la Turquie ?"
-    reponses: ["Ankara", "Istanbul"]
-  - texte: "Quelle est la capitale de la Nouvelle-Zélande ?"
-    reponses: ["Wellington", "Auckland"]
   - texte: "Quel est le plus grand pays d'Afrique par sa superficie ?"
     reponses: ["L'Algérie", "RD Congo", "Le Nigeria", "L'Égypte"]
-  - texte: "Quel est le plus petit pays du monde ?"
-    reponses: ["Le Vatican", "Monaco", "Saint-Marin"]
   - texte: "Quel pays est le plus peuplé du monde aujourd'hui ?"
     reponses: ["L'Inde", "La Chine", "Les États-Unis"]
     commentaire: "L'Inde a dépassé la Chine en 2023."
-  - texte: "Quel est le plus long fleuve de France ?"
-    reponses: ["La Loire", "La Seine", "Le Rhône", "La Garonne"]
-  - texte: "Quel est le plus grand désert chaud du monde ?"
-    reponses: ["Le Sahara", "Le Gobi", "Le Kalahari"]
-  - texte: "Quelle est la plus grande planète du système solaire ?"
-    reponses: ["Jupiter", "Saturne"]
-  - texte: "Quel est le symbole chimique de l'or ?"
-    reponses: ["Au", "Ag", "Or"]
-    commentaire: "Au, comme aurum, « or » en latin. Ag, c'est l'argent."
-  - texte: "Qui a peint La Joconde ?"
-    reponses: ["Léonard de Vinci", "Michel-Ange", "Raphaël"]
-  - texte: "Qui a écrit « Les Misérables » ?"
-    reponses: ["Victor Hugo", "Émile Zola", "Alexandre Dumas", "Honoré de Balzac"]
-  - texte: "Quel gaz les plantes absorbent-elles pour la photosynthèse ?"
-    reponses: ["Le dioxyde de carbone", "L'oxygène", "L'azote"]
-  - texte: "Quel est l'animal terrestre le plus rapide ?"
-    reponses: ["Le guépard", "Le lion", "L'antilope"]
-  - texte: "Combien de temps met la lumière du Soleil pour arriver jusqu'à la Terre ?"
-    reponses: ["8 minutes", "8 secondes", "8 heures"]
-  - texte: "Quelle est la monnaie du Japon ?"
-    reponses: ["Le yen", "Le yuan", "Le won"]
   - texte: "Quel animal dort le plus ?"
     reponses: ["Le koala", "Le paresseux", "Le chat", "Toi, le 1er janvier"]
     commentaire: "Environ 20 heures par jour pour le koala. Toi, ça va dépendre de ce soir."
+  - texte: "Quel animal fait des crottes en forme de cube ?"
+    reponses: ["Le wombat", "Le koala", "Le capybara", "Le paresseux"]
+    commentaire: "Le wombat : ça évite que ses crottes roulent, il les utilise pour marquer son territoire."
+    theme: animaux
+  - texte: "Quel oiseau reconnaît un visage humain et transmet sa rancune à ses petits ?"
+    reponses: ["Le corbeau", "Le pigeon", "Le perroquet", "Ta belle-mère"]
+    commentaire: "Les corvidés reconnaissent les visages, et leurs petits héritent des rancunes. Soyez gentils avec eux."
+    theme: animaux
+  - texte: "Lequel de ces aliments est toxique pour un chien ?"
+    reponses: ["Le raisin", "La carotte", "Le concombre", "La pomme sans pépins"]
+    commentaire: "Le raisin : même quelques grains peuvent lui abîmer les reins. Le chocolat, vous le saviez déjà."
+    theme: animaux
 
   # --- Estimations ---
-  - texte: "En quelle année l'homme a-t-il marché sur la Lune pour la première fois ?"
-    estimation: 1969
-  - texte: "En quelle année la Révolution française a-t-elle commencé ?"
-    estimation: 1789
-  - texte: "Combien d'os compte le corps d'un adulte ?"
-    estimation: 206
-  - texte: "Combien de dents a un adulte, dents de sagesse comprises ?"
-    estimation: 32
-  - texte: "Combien de pays compte l'Union européenne aujourd'hui ?"
-    estimation: 27
-  - texte: "Quelle est l'altitude de l'Everest, en mètres ?"
-    estimation: 8849
-    unite: "m"
   - texte: "Combien de planètes compte le système solaire ?"
     estimation: 8
     commentaire: "Pluton n'est plus une planète depuis 2006."
+  - texte: "Combien de fois par jour un adulte pète-t-il en moyenne ?"
+    estimation: 14
+    unite: "fois"
+    commentaire: "Entre 10 et 20. Vous en avez forcément retenu un ce soir."
+    theme: corps
+  - texte: "Quel pourcentage du corps adulte est de l'eau ?"
+    estimation: 60
+    unite: "%"
+    commentaire: "Environ 60 %. Ce soir, plutôt 40 % d'eau et 20 % de champagne."
+    theme: corps
+  - texte: "En quelle année a démarré le manga Dragon Ball ?"
+    estimation: 1984
+    commentaire: "Goku a plus de 40 ans de carrière et n'a toujours pas de fiche de paie."
+    theme: manga
 
   # --- Réponses problématiques, humour noir (jamais sur une personne ou un groupe : sur la situation, et sur vous) ---
   - texte: "Quel animal tue le plus d'humains chaque année ?"
@@ -150,16 +130,14 @@ questions:
     commentaire: "Le moustique, très loin devant. Tonton est en embuscade."
   - texte: "Quelle est la première cause de mortalité dans le monde ?"
     reponses: ["Les maladies du cœur", "Les requins", "Les accidents de trottinette", "Le gluten"]
-  - texte: "Combien de temps un humain peut-il survivre sans boire ?"
-    reponses: ["Environ 3 jours", "Environ 3 semaines", "Environ 3 heures"]
-    commentaire: "Une règle célèbre : 3 minutes sans air, 3 jours sans eau, 3 semaines sans manger."
   - texte: "Combien de temps vit en moyenne un hamster ?"
     reponses: ["2 à 3 ans", "8 ans", "15 ans"]
     commentaire: "Prends-en soin, c'est court."
   - texte: "Quelle est l'espérance de vie à la naissance en France, en années ?"
     estimation: 83
     unite: "ans"
-    commentaire: "Un peu plus de 80 ans pour les hommes, un peu moins de 86 pour les femmes."
+    commentaire: "Environ 80 ans pour les hommes, 86 pour les femmes. Messieurs, finissez votre verre."
+    theme: sante
   - texte: "Combien d'humains vivent sur Terre, en milliards ?"
     estimation: 8
     unite: "milliards"
