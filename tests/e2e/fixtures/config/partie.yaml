@@ -11,3 +11,5 @@ ouvrir_navigateur: false
 # Pas de compte à rebours de minuit pendant les tests (sauf tests/e2e/minuit.spec.ts qui le réécrit).
 minuit:
   actif: false
+# Les parcours de manches historiques se terminent directement au podium.
+outro: { actif: false }

@@ -6,9 +6,15 @@ import YAML from "yaml";
 import { z } from "zod";
 import { parseClockTime } from "../shared/midnight";
 import { serverGames } from "../minigames/registry.server";
+import { loadOutroContent, type AwardCategoryContent } from "./outro-content";
 import type { LoadedGame } from "./engine/planner";
 
 export const settingsSchema = z.object({
+  outro: z.object({
+    actif: z.boolean().default(true),
+    bonus: z.number().int().min(0).max(12).default(4),
+    points_bonus: z.union([z.literal("auto"), z.number().int().min(0).max(100000)]).default("auto"),
+  }).default({ actif: true, bonus: 4, points_bonus: "auto" }),
   titre: z.string().default("Soirée du Nouvel An"),
   duree_cible_minutes: z.number().positive().default(60),
   ordre: z.enum(["melange", "groupe"]).default("melange"),
@@ -51,12 +57,13 @@ function validate<T>(schema: z.ZodType<T>, data: unknown, file: string): T {
   throw new ConfigError(`${file}\n${lines.join("\n")}`);
 }
 
-export function loadConfig(configDir: string): { settings: Settings; games: LoadedGame[] } {
+export function loadConfig(configDir: string): { settings: Settings; games: LoadedGame[]; awardCategories: AwardCategoryContent[] } {
   const settingsFile = path.join(configDir, "partie.yaml");
   const settings = validate(settingsSchema, existsSync(settingsFile) ? readYaml(settingsFile) : {}, settingsFile);
 
   const games: LoadedGame[] = [];
-  const errors: string[] = [];
+  const outro = loadOutroContent(configDir);
+  const errors: string[] = [...outro.errors];
   for (const game of serverGames) {
     const file = path.join(configDir, "minijeux", `${game.id}.yaml`);
     if (!existsSync(file)) {
@@ -76,5 +83,5 @@ export function loadConfig(configDir: string): { settings: Settings; games: Load
     }
   }
   if (errors.length) throw new ConfigError(errors.join("\n\n"));
-  return { settings, games };
+  return { settings, games, awardCategories: outro.categories };
 }

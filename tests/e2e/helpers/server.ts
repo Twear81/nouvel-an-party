@@ -11,6 +11,9 @@ const FIXTURE_CONFIG = path.join(ROOT, "tests/e2e/fixtures/config");
 export interface ServerOptions {
   /** Durée de l'annonce de manche (s). Défaut du fixture : 1. */
   introSeconds?: number;
+  /** Active la cérémonie dans les tests dédiés (courte par défaut). */
+  outro?: boolean;
+  ceremonyTimeScale?: number;
   /** Durée du chrono de chaque mini-jeu (s). Défaut du fixture : 8. */
   duree?: number;
   /** Utilise le vrai dossier config/ (tous les mini-jeux, plafonds compris) avec seulement partie.yaml de test. Pour les captures. */
@@ -70,6 +73,10 @@ function prepareConfig(tmp: string, opts: ServerOptions): string {
   if (opts.duree !== undefined) {
     for (const f of readdirSync(path.join(dir, "minijeux"))) if (f.endsWith(".yaml")) patch(`minijeux/${f}`, "duree", opts.duree);
   }
+  if (opts.outro !== undefined) {
+    const f = path.join(dir, "partie.yaml");
+    writeFileSync(f, readFileSync(f, "utf8").replace(/^outro:.*$/m, `outro: { actif: ${opts.outro} }`));
+  }
   return dir;
 }
 
@@ -94,7 +101,7 @@ export async function createServer(opts: ServerOptions = {}): Promise<TestServer
       logs = "";
       const p = spawn("bun", ["src/server/index.ts", "--config", configDir, "--data", dataDir, "--no-open"], {
         cwd: ROOT,
-        env: { ...process.env, PARTY_HTTP_PORT: String(httpPort), PARTY_HTTPS_PORT: String(httpsPort) },
+        env: { ...process.env, PARTY_HTTP_PORT: String(httpPort), PARTY_HTTPS_PORT: String(httpsPort), PARTY_CEREMONY_TIME_SCALE: String(opts.ceremonyTimeScale ?? 0.03) },
         stdio: ["ignore", "pipe", "pipe"],
       });
       proc = p;

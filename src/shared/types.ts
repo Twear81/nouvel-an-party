@@ -5,6 +5,7 @@ import type { SkinId } from "./skins";
 import type { FinalRevealInfo } from "./final-reveal";
 import type { TransitionInfo } from "./transitions";
 import type { MidnightInfo } from "./midnight";
+import type { CeremonyInfo } from "./ceremony";
 
 export type PlayerId = string;
 
@@ -26,10 +27,11 @@ export interface PublicPlayer {
 
 /**
  * Déroulé d'une partie :
- * lobby → transition d'ouverture → (intro → playing → results) × N manches → transition de sortie → final.
+ * lobby → transition d'ouverture → (intro → playing → results) × N manches → transition de sortie → ceremony → final
+ * (`ceremony` est sautée si `outro.actif: false`).
  * Une frontière d'univers insère aussi une transition après ses résultats.
  */
-export type Phase = "lobby" | "transition" | "intro" | "playing" | "results" | "final";
+export type Phase = "lobby" | "transition" | "intro" | "playing" | "results" | "ceremony" | "final";
 
 /** Un mini-jeu tel que présenté sur l'écran de configuration de la partie. */
 export interface CatalogEntry {
@@ -100,6 +102,11 @@ export interface GameSnapshot {
   midnight: MidnightInfo | null;
   /** Scène synchronisée de la pièce ; aucune manche n'est démarrée pendant cette phase. */
   transition: TransitionInfo | null;
+  /**
+   * Cérémonie de fin (phase `ceremony`). La TV reçoit tout ; un téléphone ne reçoit que les souvenirs et bonus
+   * déjà révélés selon l'horloge serveur (rien de ce qui reste à découvrir).
+   */
+  ceremony: CeremonyInfo | null;
   players: PublicPlayer[];
   round: RoundInfo | null;
   /** Joueurs ayant cliqué sur "Continuer" pendant les résultats. */

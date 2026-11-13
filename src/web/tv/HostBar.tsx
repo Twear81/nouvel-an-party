@@ -11,7 +11,7 @@ export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot
   const [confirmLobby, setConfirmLobby] = useState(false);
   const soundState = useSoundState();
   const { phase, paused } = snapshot;
-  const inGame = phase === "transition" || phase === "intro" || phase === "playing" || phase === "results";
+  const inGame = phase === "final" || phase === "ceremony" || phase === "transition" || phase === "intro" || phase === "playing" || phase === "results";
   // Minuit : la partie est figée sous le compte à rebours ; seul « Reprendre » (célébration) est utile, au lobby comme à l'écran final.
   const midnight = snapshot.midnight;
   const countingDown = midnight?.phase === "countdown";

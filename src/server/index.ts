@@ -15,7 +15,7 @@ import { handleHttp } from "./static/serve";
 import { setSoundVolume } from "./static/sons";
 
 async function main() {
-  const { settings, games } = loadConfig(paths.config);
+  const { settings, games, awardCategories } = loadConfig(paths.config);
   const httpPort = Number(process.env.PARTY_HTTP_PORT ?? settings.port_http);
   const httpsPort = Number(process.env.PARTY_HTTPS_PORT ?? settings.port_https);
   // En dev, les téléphones passent par Vite (port différent) : voir scripts/dev.ts.
@@ -45,8 +45,11 @@ async function main() {
       midnight: settings.minuit.actif
         ? { time: settings.minuit.heure, countdownSeconds: settings.minuit.duree_compte_a_rebours, autoResumeSeconds: settings.minuit.reprise_auto }
         : undefined,
+      outro: { active: settings.outro.actif, bonus: settings.outro.bonus, pointsBonus: settings.outro.points_bonus },
     },
     joinUrl,
+    awardCategories,
+    ceremonyTimeScale: Number(process.env.PARTY_CEREMONY_TIME_SCALE ?? 1),
     onChange: broadcast,
     persistence: filePersistence(paths.data),
     dejaVu: fileDejaVu(paths.data),

@@ -4,6 +4,7 @@ import { useGame } from "../net/useGame";
 import { SkinProvider } from "../theme/skin";
 import { useGlobalSfx } from "../sound/useGlobalSfx";
 import { MidnightOverlay, PausedOverlay, PauseZoom, ReconnectBanner, RoomTransition, roomReference, SoundBadge, TvStage } from "../ui";
+import { CeremonyScreen } from "./CeremonyScreen";
 import { FinalScreen } from "./FinalScreen";
 import { HostBar } from "./HostBar";
 import { IntroScreen } from "./IntroScreen";
@@ -53,6 +54,9 @@ export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
       break;
     case "results":
       screen = round && <ResultsScreen snapshot={snapshot} round={round} />;
+      break;
+    case "ceremony":
+      screen = <CeremonyScreen snapshot={snapshot} />;
       break;
     case "final":
       screen = <FinalScreen snapshot={snapshot} />;
