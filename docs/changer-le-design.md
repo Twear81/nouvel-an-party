@@ -105,6 +105,17 @@ de base + 6 skins), 3 ou 8 joueurs (pseudos de 16 caractères), taille du télé
 l'audio). Un lien `#scene=jeu/imposteur/vote&skin=dofus&n=8` ouvre une scène précise. La pause fige l'horloge et les
 animations CSS ; les ressorts `motion` finissent leur course (utiliser le curseur pour examiner un instant).
 
+Liens de revue à ajouter à l’adresse de `captures/animations/index.html` (fonctionnent aussi sans recharger le fichier) :
+
+- `#scene=ecrans/minuit&n=8&tel=360x640` : 15 secondes jusqu’au passage au 1er janvier 2027, puis « Bonne année », sur la
+  vraie TV et un téléphone de 360 × 640. Le curseur permet de revoir les dernières secondes ; Continuer reprend le lobby.
+  Cet aperçu reprend le thème de base, comme le déclenchement réel de minuit.
+- `#scene=ecrans/cadres&n=8&tel=360x640` : les dix cadres réels, sélectionnables, puis le vrai composant d’invocation et
+  l’éditeur complet du profil sur téléphone. Les tirages se relancent librement ; Habillage permet de comparer les six skins.
+- `#scene=ecrans/clins-doeil&n=8` : temps intermédiaires, pause « À suivre… » et tirs de confettis personnalisés de 32 px.
+- `#scene=ecrans/lobby&n=8&tel=360x640` : le lobby commence à deux invités ; Faire arriver un joueur allume les boules.
+  La septième lance Shenron, la huitième ajoute la boule bonus. Rejouer recommence à deux.
+
 Les manches de démonstration sont **jouées par la vraie logique du jeu** (`game.ts` dans le faux contexte de
 `tests/unit/helpers/minigame-ctx.ts`, config réelle de `config/minijeux/`) : elles restent justes si le jeu change.
 Pour ajouter un mini-jeu : une entrée dans `DEMOS` (`scripts/apercu-animations/demos.ts`) = des étapes cumulatives

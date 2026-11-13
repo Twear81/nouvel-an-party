@@ -7,7 +7,7 @@ import { SkinContext } from "../../src/web/theme/skin";
 import { PhoneScreen } from "../../src/web/phone/PhoneApp";
 import { TvScreens } from "../../src/web/tv/TvApp";
 import type { GameActions } from "../../src/web/net/useGame";
-import { PausedOverlay, PhoneStage, TvStage } from "../../src/web/ui";
+import { MidnightOverlay, PausedOverlay, PhoneStage, TvStage } from "../../src/web/ui";
 
 /** Largeur disponible (px) d'un élément, mise à jour quand la fenêtre change. */
 export function useLargeur<T extends HTMLElement>(): [React.RefObject<T | null>, number] {
@@ -46,13 +46,15 @@ const DIMENSIONS: Record<TaillePhone, [number, number]> = { "390x844": [390, 844
 export const echellePhone = 0.55;
 
 /** Un téléphone : `PhoneScreen` réel dans son cadre portrait. */
-export function PhonePane({ snapshot, joueurId, actions, taille, etiquette, echelle = echellePhone }: {
+export function PhonePane({ snapshot, joueurId, actions, taille, etiquette, echelle = echellePhone, children }: {
   snapshot: GameSnapshot;
   joueurId: PlayerId;
   actions: GameActions;
   taille: TaillePhone;
   etiquette: string;
   echelle?: number;
+  /** Par exemple, l'éditeur réel du profil, qui se trouve au-dessus de PhoneScreen dans l'application. */
+  children?: ReactNode;
 }) {
   const [l, h] = DIMENSIONS[taille];
   const moi = snapshot.players.find((p) => p.id === joueurId);
@@ -62,8 +64,9 @@ export function PhonePane({ snapshot, joueurId, actions, taille, etiquette, eche
         <div className="ga-phone-box" style={{ width: l, height: h, transform: `scale(${echelle})` }}>
           {moi && (
             <PhoneStage phase={snapshot.phase}>
-              <PhoneScreen snapshot={snapshot} me={moi} actions={actions} onEdit={() => {}} />
+              {children ?? <PhoneScreen snapshot={snapshot} me={moi} actions={actions} onEdit={() => {}} />}
               <PausedOverlay show={snapshot.paused} />
+              {snapshot.midnight && <MidnightOverlay midnight={snapshot.midnight} size="phone" />}
             </PhoneStage>
           )}
         </div>
