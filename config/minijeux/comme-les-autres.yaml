@@ -42,20 +42,34 @@ points:
 # Maximum conseillé : 25 consignes (les manches sont tirées au hasard parmi elles).
 # Astuce : une bonne consigne a une réponse évidente que plusieurs personnes auront en tête.
 questions:
-  - "Une résolution classique du 1er janvier."
-  - "Une chanson qu'on entend dans toutes les soirées."
-  - "Un prénom de chien."
-  - "Un pays où tu n'irais jamais en vacances."
-  - "Un plat de réveillon."
-  - "Un fruit."
-  - "Une couleur."
-  - "Un super-héros."
-  - "Un film de Noël."
-  - "Un métier que tout enfant rêve de faire."
-  - "Un légume qu'on n'aime pas."
-  - "Un truc qu'on oublie souvent chez soi."
-  - "Un personnage de dessin animé."
-  - "Un truc qu'on dit à minuit."
+  - texte: "Une résolution classique du 1er janvier."
+    theme: vie
+  - texte: "Une chanson qu'on entend dans toutes les soirées."
+    theme: musique
+  - texte: "Un prénom de chien."
+    theme: animaux
+  - texte: "Un pays où tu n'irais jamais en vacances."
+    theme: voyage
+  - texte: "Un plat de réveillon."
+    theme: noel
+  - texte: "Un fruit."
+    theme: bouffe
+  - texte: "Une couleur."
+    theme: vie
+  - texte: "Un super-héros."
+    theme: fiction
+  - texte: "Un film de Noël."
+    theme: noel
+  - texte: "Un métier que tout enfant rêve de faire."
+    theme: vie
+  - texte: "Un légume qu'on n'aime pas."
+    theme: bouffe
+  - texte: "Un truc qu'on oublie souvent chez soi."
+    theme: vie
+  - texte: "Un personnage de dessin animé."
+    theme: fiction
+  - texte: "Un truc qu'on dit à minuit."
+    theme: soiree
   - texte: "Un mot qu'on crie quand on se fait mal."
     theme: reflexes
   - texte: "La pire excuse pour arriver en retard."

@@ -58,6 +58,8 @@ objets:
 
 Si le fichier est introuvable, l'emoji (ou 🎁) s'affiche à la place.
 
+Chaque objet peut avoir un `theme:` facultatif (ex. `theme: bouffe`) : le tirage évite d'enchaîner deux objets du même thème.
+
 ## Conseils
 - Les objets de la vie de tous les jours (baguette, ticket de métro) font de super manches : tout le monde croit savoir… et se trompe.
 - Mélangez les ordres de grandeur (1 €, 40 €, 1 000 €, 20 000 €).

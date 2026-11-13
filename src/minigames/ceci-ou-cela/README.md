@@ -63,6 +63,7 @@ Notes :
 - `{joueur}` peut apparaître plusieurs fois dans la même question (toujours le même invité).
 - Les réponses sont de **gros boutons** : 14 caractères maximum conseillés (« Champagne », « Lève-tôt »).
 - Pour changer les réponses de toutes les questions simples (ex. « Vrai » / « Faux »), modifiez `choix_par_defaut`.
+- Chaque question peut avoir un `theme:` facultatif (ex. `theme: bouffe`) : le tirage évite d'enchaîner deux questions du même thème.
 
 ## Conseils
 - Gardez les questions **courtes** : elles s'affichent en grand sur la TV.

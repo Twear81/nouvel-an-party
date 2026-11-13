@@ -43,6 +43,8 @@ questions:
 
 Il n'y a pas de `{joueur}` ici : la question parle de « qui », les invités sont les réponses possibles.
 
+Chaque question peut avoir un `theme:` facultatif (ex. `theme: bouffe`) : le tirage évite d'enchaîner deux questions du même thème.
+
 ### Exemples de questions personnelles
 ```yaml
   - "Qui a mis le feu à la cuisine de Paul en 2019 ?"
