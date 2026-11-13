@@ -23,7 +23,7 @@ const choisirOrigine = (s: SkinId | null) => { origine = s; abonnes.forEach((f) 
 const useOrigine = () => useSyncExternalStore((f) => (abonnes.add(f), () => abonnes.delete(f)), () => origine);
 
 /** Écrans toujours en thème de base, quel que soit l'habillage choisi : lobby, cérémonie, classement final, minuit. */
-const THEME_DE_BASE = new Set(["ecrans/lobby", "ecrans/ceremonie", "ecrans/final", "ecrans/minuit"]);
+const THEME_DE_BASE = new Set(["ecrans/lobby", "ecrans/profil", "ecrans/ceremonie", "ecrans/final", "ecrans/minuit"]);
 const KIND: Record<string, TransitionKind> = { "transitions/ouverture": "opening", "transitions/univers": "skin", "transitions/sortie": "closing" };
 
 /** Univers avant et après la scène, selon l'habillage choisi dans la barre du haut. */

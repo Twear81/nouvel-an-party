@@ -107,6 +107,8 @@ animations CSS ; les ressorts `motion` finissent leur course (utiliser le curseu
 
 Liens de revue à ajouter à l’adresse de `captures/animations/index.html` (fonctionnent aussi sans recharger le fichier) :
 
+- `#scene=ecrans/profil&n=8&tel=360x640` : la personnalisation d'un joueur sur le vrai éditeur (pseudo, avatar, couleur, cadre),
+  puis le lobby du téléphone et « Modifier » ; la TV montre son arrivée dans le lobby. « Recommencer à zéro » relance la création.
 - `#scene=transitions/univers&skin=dofus&n=8` : la scène de changement d'univers vers l'habillage choisi en haut ; le menu
   « Depuis » règle l'univers de départ (le skin de la page bascule à mi-parcours, comme en partie). Aussi `transitions/ouverture`
   (lobby → pièce → premier univers) et `transitions/sortie` (retour dans la pièce avant la cérémonie).
