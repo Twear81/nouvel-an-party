@@ -389,3 +389,19 @@ Les types sont dans `src/shared/ceremony.ts`. Aucun appel moteur n'est nécessai
 Le moteur ignore les valeurs invalides, conserve au plus trois souvenirs généraux par jeu et un dessin incompris
 par auteur (le moins voté, puis le plus récent), et borne l'historique à 200 manches. L'historique est sauvegardé
 avec les points, jamais envoyé aux téléphones. La cérémonie ne leur transmet que les bonus déjà révélés à la TV.
+
+### Données de cérémonie fournies par les jeux existants
+
+| Jeux | Données gardées après la manche |
+|---|---|
+| Qui est le plus | Désignations reçues, cible du vote, changements de cible |
+| Ceci ou cela, Split the room, Tier list | Avis par question ou invité, changements réels de réponse |
+| Comme les autres | Groupes de réponses réellement partagées, tolérance aux fautes comprise |
+| Dessin raté | Votes et dessins non vides ; œuvre la plus votée et copie allégée des œuvres incomprises |
+| Simon, Pierre-feuille-ciseaux | Appuis acceptés pendant le jeu |
+| Compte à rebours | Un appui par arrêt accepté ; la durée volontaire n'est pas un réflexe |
+| Le Bon Prix | Objet, prix réel et écart moyen des estimations |
+| Culture gênante | Réaction QCM mesurée sur le téléphone, appui et erreur la plus partagée pour le post-it |
+
+Les absents ne reçoivent jamais d'avis ou de réaction inventés. Aucun de ces champs ne rejoint `publicView` :
+ils passent uniquement par `finish`, puis par l'historique validé du moteur.

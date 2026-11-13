@@ -57,6 +57,7 @@ export type Step = "draw" | "pick" | "reveal" | "advance" | "done";
 export const TIMINGS = { draw: 5000, reveal: 4500, revealFinal: 6500, advance: 2800, champion: 4000 };
 
 interface State {
+  actions: Map<string, number>;
   item: Item;
   bracket: Bracket;
   step: Step;
@@ -193,7 +194,7 @@ export default defineMiniGame<Cfg, Item, State>({
       playerIds(ctx),
       ctx.rng,
     );
-    return { item, bracket, step: "draw", round: 0, throwNo: 0, active: new Set(), picks: new Map(), last: new Map() };
+    return { actions: new Map(), item, bracket, step: "draw", round: 0, throwNo: 0, active: new Set(), picks: new Map(), last: new Map() };
   },
 
   onPlay(s, ctx) {
@@ -267,6 +268,7 @@ export default defineMiniGame<Cfg, Item, State>({
     if (!isChoice(choice) || s.picks.has(playerId)) return;
     const duel = pendingDuels(s.bracket, s.round).find(({ index, duel: d }) => s.active.has(index) && (d.a === playerId || d.b === playerId));
     if (!duel) return;
+    s.actions.set(playerId, (s.actions.get(playerId) ?? 0) + 1);
     s.picks.set(playerId, choice);
     checkAllPicked(s, ctx);
   },
@@ -308,6 +310,6 @@ export default defineMiniGame<Cfg, Item, State>({
       champion: championOf(s.bracket),
       reached: reachedRounds(s.bracket),
     };
-    return { results, scores: tournamentScores(s.bracket, ctx.cfg.points.vainqueur, ctx.cfg.points.suivants) };
+    return { results, scores: tournamentScores(s.bracket, ctx.cfg.points.vainqueur, ctx.cfg.points.suivants), stats: Object.fromEntries([...s.actions].map(([id, actions]) => [id, { actions }])) };
   },
 });

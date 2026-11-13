@@ -287,6 +287,13 @@ export default defineMiniGame<Cfg, Item, State>({
       right: answers.filter((a) => a.correct).length,
       total: ctx.players.length,
     };
-    return { results, scores };
+    const wrong = new Map<number, number>();
+    for (const a of answers) if (a.choice !== null && !a.correct) wrong.set(a.choice, (wrong.get(a.choice) ?? 0) + 1);
+    const mostWrong = [...wrong].sort((a, b) => b[1] - a[1])[0];
+    return { results, scores,
+      stats: Object.fromEntries(answers.map((a) => [a.playerId, { actions: 1, ...(a.ms === null ? {} : { reactionMs: [a.ms] }) }])),
+      keepsakes: mostWrong ? [{ kind: "post-it" as const, text: state.item.texte,
+        detail: `${state.choices[mostWrong[0]]} — ${mostWrong[1]}/${answers.length} réponses`, score: mostWrong[1] / answers.length }] : [],
+    };
   },
 });

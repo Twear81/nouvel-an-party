@@ -52,6 +52,7 @@ type Stage = "wait" | "show" | "play" | "between" | "over";
 type OutReason = "wrong" | "time";
 
 interface State {
+  actions: Map<string, number>;
   item: Item;
   seq: number[];
   stage: Stage;
@@ -213,6 +214,7 @@ const game = defineMiniGame<Cfg, Item, State>({
       progress: new Map(),
       done: new Set(),
       stepsDone: new Map(),
+      actions: new Map(),
       out: [],
       show: null,
       winners: [],
@@ -228,6 +230,7 @@ const game = defineMiniGame<Cfg, Item, State>({
     if (typeof pad !== "number" || !Number.isInteger(pad) || pad < 0 || pad >= PADS) return;
     if (state.stage !== "play" || !state.alive.has(playerId) || state.done.has(playerId)) return;
 
+    state.actions.set(playerId, (state.actions.get(playerId) ?? 0) + 1);
     const index = state.progress.get(playerId) ?? 0;
     if (state.seq[index] !== pad) {
       eliminate(state, playerId, "wrong");
@@ -311,7 +314,7 @@ const game = defineMiniGame<Cfg, Item, State>({
       if (pts > 0) scores[r.playerId] = pts;
     }
     const results: Results = { rows, length: state.seq.length };
-    return { results, scores };
+    return { results, scores, stats: Object.fromEntries([...state.actions].map(([id, actions]) => [id, { actions }])) };
   },
 });
 

@@ -192,6 +192,8 @@ export default defineMiniGame<Cfg, Item, State>({
     });
     const silentIds = playerIds(ctx).filter((id) => !state.answers.has(id));
     const results: Results = { question: state.question, groups, silentIds };
-    return { results, scores };
+    return { results, scores,
+      opinions: groups.map((group) => Object.fromEntries([...state.answers.keys()].map((id) => [id, group.playerIds.includes(id) ? "oui" : `autre:${id}`]))),
+    };
   },
 });

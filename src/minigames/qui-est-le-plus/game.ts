@@ -22,6 +22,7 @@ const configSchema = z.object({
 type Cfg = z.infer<typeof configSchema>;
 type Item = { text: string; duration?: number; theme?: string };
 interface State {
+  answerChanges: Map<string, number>;
   question: string;
   votes: Map<string, string>; // votant → personne choisie
 }
@@ -57,12 +58,13 @@ export default defineMiniGame<Cfg, Item, State>({
   roundSeconds: (cfg, item) => item.duration ?? cfg.duree,
   estimateSeconds: (cfg) => cfg.duree + cfg.temps_resultats,
 
-  start: (item) => ({ question: item.text, votes: new Map() }),
+  start: (item) => ({ question: item.text, votes: new Map(), answerChanges: new Map() }),
 
   input(state, playerId, payload, ctx) {
     const target = (payload as { target?: unknown })?.target;
     if (typeof target !== "string" || !ctx.players.some((p) => p.id === target)) return;
     if (!ctx.cfg.vote_pour_soi && target === playerId) return;
+    if (state.votes.has(playerId) && state.votes.get(playerId) !== target) state.answerChanges.set(playerId, (state.answerChanges.get(playerId) ?? 0) + 1);
     state.votes.set(playerId, target); // on peut changer d'avis tant que la manche n'est pas finie
     checkAllVoted(state, ctx);
   },
@@ -99,6 +101,9 @@ export default defineMiniGame<Cfg, Item, State>({
       .sort((a, b) => b.votes - a.votes);
 
     const results: Results = { question: state.question, tally, winners };
-    return { results, scores };
+    return { results, scores,
+      opinions: [Object.fromEntries(state.votes)],
+      stats: Object.fromEntries(ctx.players.map(({ id }) => [id, { designations: counts[id] ?? 0, answerChanges: state.answerChanges.get(id) ?? 0 }]))
+    };
   },
 });

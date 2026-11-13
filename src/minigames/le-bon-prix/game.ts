@@ -150,6 +150,10 @@ export default defineMiniGame<Cfg, Item, State>({
       ranking,
       missingIds: ctx.players.filter((p) => !state.guesses.has(p.id)).map((p) => p.id),
     };
-    return { results, scores };
+    return { results, scores,
+      keepsakes: ranking.length ? [{ kind: "objet" as const, emoji: emoji ?? "🎁", label: nom,
+        detail: `${(state.priceCents / 100).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`,
+        score: ranking.reduce((sum, guess) => sum + guess.gap, 0) / ranking.length }] : [],
+    };
   },
 });

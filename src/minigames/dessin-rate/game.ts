@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { defineMiniGame, type RoundContext } from "../contract";
 import { argmaxAll, endWhenAllDone, playerIds, progressOf, shuffle } from "../helpers";
-import { cleanStrokes, DIFFICULTIES, isBlank, type Difficulty, type Stroke } from "./shared";
+import { cleanStrokes, souvenirStrokes, DIFFICULTIES, isBlank, type Difficulty, type Stroke } from "./shared";
 
 /** Un mot est tiré dans une liste de 8 mots minimum : en dessous, la difficulté n'est pas jouée. */
 export const MIN_WORDS = 8;
@@ -221,7 +221,13 @@ export default defineMiniGame<Cfg, Item, State>({
       if (n > 0) scores[id] = n * ctx.cfg.points.par_vote + (winners.includes(id) ? ctx.cfg.points.gagnant : 0);
     }
     const results: Results = { difficulty: state.difficulty, cards, winners, voted: state.votes.size > 0 };
-    return { results, scores };
+    return { results, scores,
+      stats: Object.fromEntries(cards.map((card) => [card.playerId, { drawingVotes: card.votes, drawings: 1 }])),
+      keepsakes: cards.flatMap((card) => {
+        const drawing = { kind: "dessin" as const, playerId: card.playerId, label: card.word.slice(0, 60), strokes: souvenirStrokes(card.strokes), score: card.votes };
+        return [{ ...drawing, tag: "incompris" as const }, ...(winners.includes(card.playerId) && card.votes > 0 ? [{ ...drawing, tag: "meilleur" as const }] : [])];
+      }),
+    };
   },
 });
 
