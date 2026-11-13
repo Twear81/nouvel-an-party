@@ -37,7 +37,7 @@ Ces scènes utilisent les durées partagées du thème et se pilotent aussi avec
 Le soir du 31 décembre, un peu avant `minuit.heure`, la partie se met **en pause toute seule** : chronos figés, et la TV comme les
 téléphones affichent un grand compte à rebours (mm:ss, puis les 10 dernières secondes une à une), puis « Bonne année 2027 ! »
 avec feu d'artifice, confettis et fanfare. La barre de l'hôte reste utilisable : **Reprendre** relance la partie exactement
-où elle en était (ou **Continuer** au lobby). Le classement final reste également figé pendant minuit. Sans clic, la reprise est
+où elle en était (ou **Continuer** au lobby). La cérémonie et le classement final restent également figés pendant minuit. Sans clic, la reprise est
 automatique `reprise_auto` secondes après minuit.
 - Vérifier l'horloge du PC (heure et fuseau) : c'est elle qui décide.
 - Par défaut (`uniquement_nouvel_an: true`), le compte à rebours vise le **prochain 1er janvier**, à l'heure locale configurée.
@@ -105,3 +105,27 @@ Fermez `NouvelAn.exe`, supprimez le dossier `data/`, relancez. Les joueurs et sc
 Une ancienne sauvegarde avec un portrait photo reste utilisable : le portrait devient l'avatar Renard ; le pseudo,
 le cadre, la couleur, le score et le jeton sont conservés. Un ancien dossier `photos/` n'est plus utilisé ni servi par
 l'application ; ses fichiers ne sont pas supprimés automatiquement.
+
+## Souvenirs et bonus de fin (`outro`)
+
+Après la sortie de la TV, la cérémonie rappelle jusqu'à trois souvenirs de la partie et tire quatre bonus,
+puis démarre le classement final. Les commandes Pause et Passer s'appliquent à chaque étape.
+
+```yaml
+outro:
+  actif: true
+  bonus: 4
+  points_bonus: auto
+```
+
+`actif: false` rejoint directement le classement. `bonus` va de 0 à 12. `points_bonus` accepte un entier ≥ 0
+ou `auto` : 37,5 % du gain moyen du gagnant d'une manche, arrondi au multiple de 10 le plus proche, minimum 10.
+Les quatre bonus représentent donc environ une manche et demie. Chaque gagnant reçoit ce montant, y compris
+les deux membres du Duo improbable et tous les ex æquo d'une catégorie. Le tirage sans remise favorise légèrement
+les poursuivants et la variété. Un écart supérieur au total des bonus possibles protège mathématiquement le leader.
+
+`config/outro.yaml` permet de changer `titre`, `phrase`, `emoji` ou `actif` pour chaque catégorie connue.
+Une catégorie sans données ne passe jamais dans la roulette. Le fichier absent garde les textes par défaut ;
+un identifiant inconnu est signalé au démarrage. Il est inclus dans le dossier portable de la même manière
+que les questions. Les points sont appliqués une seule fois, à la fin de la cérémonie ; un crash reprend le
+même tirage et le même instant, y compris une pause en cours.

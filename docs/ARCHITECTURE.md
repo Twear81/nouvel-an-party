@@ -28,7 +28,7 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   `changeSkinAfter`. Culture gênante ferme un univers ; voir [skins.md](skins.md#rotation).
 
 ## Déroulé
-`lobby → transition d'ouverture → (intro → playing → results) × N → transition de sortie → final`
+`lobby → transition d'ouverture → (intro → playing → results) × N → transition de sortie → ceremony → final`
 - **lobby** : les joueurs rejoignent et créent leur profil ; la TV règle le nombre de manches par mini-jeu.
 - **transition** : scène de la pièce, avec `snapshot.transition` ; `round` vaut `null` et aucun mini-jeu n'est lancé.
   L'ouverture dure 9 s, le changement d'univers 4 s, la sortie 2,4 s. Les durées et l'instant de bascule du skin
@@ -46,6 +46,16 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   "Continuer" apparaissent ; on avance quand tous les joueurs connectés ont cliqué (la TV peut forcer avec "Passer").
   Avant la fin de l'animation les téléphones affichent « Regarde la TV » pour ne rien spoiler. Tous les écrans
   comptent depuis `round.resultsAt` (heure serveur) : un téléphone qui recharge en pleine révélation est resynchronisé.
+- **ceremony** : souvenirs et bonus, facultative (`outro.actif`). L'historique des manches garde les gains,
+  classements, statistiques, avis et souvenirs bornés (`src/shared/ceremony.ts`). Il est sauvegardé une fois avec les
+  points de chaque manche, remis à zéro au démarrage/retour lobby. `awards.ts` calcule les catégories éligibles et
+  tire sans remise avec le RNG injecté. Le tirage et `scoresBefore` sont sauvegardés dès l'entrée ; une reprise
+  ne tire rien de nouveau. `ceremonyTimeline` donne les mêmes étapes au serveur et à la TV ; un `TimerGroup`
+  rediffuse à chaque frontière. Pause et Passer conservent cette origine commune. Le snapshot téléphone ne reçoit
+  que les souvenirs posés et les bonus dont le gagnant est révélé ; les catégories futures restent côté TV.
+  Les scores cumulés restent ceux d'avant les bonus pendant toute la cérémonie. À sa fin, une affectation depuis
+  `scoresBefore` applique les bonus une seule fois, puis lance la révélation finale. Une arrivée tardive ne change
+  ni les participants, ni le tirage. Sans cérémonie, la sortie mène directement au final.
 - **final** : classement. `snapshot.finalReveal` fixe le départ serveur et les participants de la cérémonie.
   TV et téléphones partagent la cadence de `src/shared/final-reveal.ts` via `useFinalReveal` : les téléphones
   gardent « Regarde la TV ! » jusqu'à la fin de l'entrée du dernier portrait révélé. Un rechargement de la TV
@@ -79,8 +89,8 @@ Brique générique du moteur (`engine.ts`, section « Minuit » ; réglée par `
   (`uniquement_nouvel_an: false`) vise aujourd'hui ou demain, une seule occurrence par nuit. Un minuteur de veille
   revérifie au plus toutes les 30 s.
 - **Pause** : réutilise la pause existante (`pause()`), donc `TimerGroup` fige chronos de manche et scènes de
-  transition, `input()` est refusé. Pendant le classement final, son départ (`finalReveal.startedAt`)
-  est décalé de la durée de minuit pour reprendre où il en était. Au lobby, seul l'affichage change. Pendant minuit : Passer, +10 s et l'avance automatique des résultats (« Continuer ») sont
+  transition, `input()` est refusé. La cérémonie et la révélation finale utilisent la même pause : leur horloge active reste figée,
+  sans ajouter deux fois la durée de minuit à la reprise. Au lobby, seul l'affichage change. Pendant minuit : Passer, +10 s et l'avance automatique des résultats (« Continuer ») sont
   ignorés ; l'hôte peut toujours revenir au lobby. Le skin est forcé à `null` (thème de base, bleu).
 - **Fin** : pendant `countdown`, Reprendre est ignoré ; pendant `celebrate`, le clic de l'hôte (même bouton que la
   pause) ou `reprise_auto` secondes après minuit relance. Si **c'est minuit qui a mis en pause**

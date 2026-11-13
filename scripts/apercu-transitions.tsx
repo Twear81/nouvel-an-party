@@ -51,7 +51,7 @@ function Galerie() {
   const skin = elapsed >= TRANSITION_TIMING.skin.swapAtMs ? scene.toSkin : scene.fromSkin;
   const snapshot = useMemo<GameSnapshot>(() => ({
     title: "Galerie des transitions", phase: "transition", paused: scene.pausedSince !== null,
-    finalReveal: null, midnight: null, transition: scene, players: INVITES, round: null, continued: [], catalog: [],
+    finalReveal: null, midnight: null, ceremony: null, transition: scene, players: INVITES, round: null, continued: [], catalog: [],
     setup: { counts: {} }, resumable: null, joinUrl: "", skin, me: null,
   }), [scene, skin]);
 

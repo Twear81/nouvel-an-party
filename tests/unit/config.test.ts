@@ -75,6 +75,7 @@ describe("loadConfig", () => {
     const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": CECI, "minijeux/qui-est-le-plus.yaml": QUI });
     const { settings, games } = loadConfig(dir);
     expect(settings).toEqual({
+      outro: { actif: true, bonus: 4, points_bonus: "auto" },
       titre: "Soirée du Nouvel An",
       duree_cible_minutes: 60,
       ordre: "melange",
@@ -185,5 +186,20 @@ describe("loadConfig : erreurs lisibles", () => {
   it("question vide refusée, avec son index", () => {
     const dir = tmpConfig({ "minijeux/ceci-ou-cela.yaml": 'questions:\n  - ""\n' });
     expect(errorOf(() => loadConfig(dir)).message).toContain("questions.0");
+  });
+});
+
+describe("configuration de cérémonie", () => {
+  it("lit outro et les textes de catégories", () => {
+    const config = loadConfig(tmpConfig({ "partie.yaml": "outro: { actif: true, bonus: 2, points_bonus: 60 }\n", "outro.yaml": "categories:\n  roi-manches:\n    titre: Notre champion\n  merci-travaux:\n    actif: false\n" }));
+    expect(config.settings.outro).toEqual({ actif: true, bonus: 2, points_bonus: 60 });
+    expect(config.awardCategories.find((c) => c.id === "roi-manches")?.titre).toBe("Notre champion");
+    expect(config.awardCategories.some((c) => c.id === "merci-travaux")).toBe(false);
+  });
+  it("signale les bornes invalides et les catégories inconnues avec le fichier", () => {
+    for (const raw of ["outro: { bonus: -1 }", "outro: { bonus: 13 }", "outro: { points_bonus: -10 }", "outro: { points_bonus: hasard }"]) {
+      expect(errorOf(() => loadConfig(tmpConfig({ "partie.yaml": raw }))).message).toContain("partie.yaml");
+    }
+    expect(errorOf(() => loadConfig(tmpConfig({ "outro.yaml": "categories: { inconnue: {} }" }))).message).toContain("outro.yaml");
   });
 });

@@ -12,6 +12,11 @@ const FIXTURE_CONFIG = path.join(ROOT, "tests/e2e/fixtures/config");
 export interface ServerOptions {
   /** Durée de l'annonce de manche (s). Défaut du fixture : 1. */
   introSeconds?: number;
+  /** Active la cérémonie dans les tests dédiés (courte par défaut). */
+  outro?: boolean;
+  ceremonyTimeScale?: number;
+  /** Facteur sur la durée du classement final (défaut du fixture : 0,5 ; 1 = durée réelle). */
+  finalTimeScale?: number;
   /** Durée du chrono de chaque mini-jeu (s). Défaut du fixture : 8. */
   duree?: number;
   /** Utilise le vrai dossier config/ (tous les mini-jeux, plafonds compris) avec seulement partie.yaml de test. Pour les captures. */
@@ -59,7 +64,7 @@ function prepareConfig(tmp: string, opts: ServerOptions): string {
     const f = path.join(dir, file);
     writeFileSync(f, readFileSync(f, "utf8").replace(new RegExp(`^${key}:.*$`, "m"), `${key}: ${value}`));
   };
-  if (opts.minuit) {
+  if (opts.minuit || opts.outro !== undefined) {
     const file = path.join(dir, "partie.yaml");
     const settings = YAML.parse(readFileSync(file, "utf8"));
     if (opts.minuit) {
@@ -69,6 +74,7 @@ function prepareConfig(tmp: string, opts: ServerOptions): string {
       settings.minuit = { ...settings.minuit, actif: true, heure: `${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`,
         duree_compte_a_rebours: m.compteARebours ?? 12, reprise_auto: m.repriseAuto ?? 0 };
     }
+    if (opts.outro !== undefined) settings.outro = { ...settings.outro, actif: opts.outro };
     writeFileSync(file, YAML.stringify(settings));
   }
   if (opts.introSeconds !== undefined) patch("partie.yaml", "intro_secondes", opts.introSeconds);
@@ -99,7 +105,7 @@ export async function createServer(opts: ServerOptions = {}): Promise<TestServer
       logs = "";
       const p = spawn("bun", ["src/server/index.ts", "--config", configDir, "--data", dataDir, "--no-open"], {
         cwd: ROOT,
-        env: { ...process.env, PARTY_HTTP_PORT: String(httpPort), PARTY_HTTPS_PORT: String(httpsPort) },
+        env: { ...process.env, PARTY_HTTP_PORT: String(httpPort), PARTY_HTTPS_PORT: String(httpsPort), PARTY_CEREMONY_TIME_SCALE: String(opts.ceremonyTimeScale ?? 0.03), PARTY_FINAL_TIME_SCALE: String(opts.finalTimeScale ?? 0.25) },
         stdio: ["ignore", "pipe", "pipe"],
       });
       proc = p;

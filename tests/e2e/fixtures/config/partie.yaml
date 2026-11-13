@@ -12,3 +12,5 @@ ouvrir_navigateur: false
 minuit:
   actif: false
   uniquement_nouvel_an: false # les tests dédiés répètent à la date courante
+# Les parcours de manches historiques se terminent directement au podium.
+outro: { actif: false }

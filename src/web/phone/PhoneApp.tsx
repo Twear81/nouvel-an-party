@@ -11,6 +11,7 @@ import { useRevealed } from "../net/useReveal";
 import { useFinalReveal } from "../net/useFinalReveal";
 import { SkinProvider } from "../theme/skin";
 import { Button, Countdown, fireConfetti, MidnightOverlay, ordinal, PausedOverlay, Panel, PhoneStage, PlayerAvatar, Pop, ReconnectBanner, WaitingDots, WatchingEyes } from "../ui";
+import { CeremonyPhone } from "./CeremonyPhone";
 import { ProfileEditor } from "./ProfileEditor";
 import { useWakeLock } from "./useWakeLock";
 
@@ -112,8 +113,14 @@ export function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
     case "results":
       if (!round) return null;
       return <ResultsPhone snapshot={snapshot} round={round} me={me} actions={actions} />;
+    case "ceremony":
+      return <CeremonyPhone snapshot={snapshot} />;
     case "final": {
-      if (!finalReveal.done) {
+      // Son rang n'apparaît qu'une fois sa conversion d'étoiles finie sur la TV ; un spectateur attend la fin.
+      const order = snapshot.finalReveal?.ranking ?? playersWithProfile(snapshot).filter((p) => snapshot.finalReveal?.playerIds.includes(p.id)).sort((a, b) => b.score - a.score).map((p) => p.id);
+      const myIndex = order.indexOf(me.id);
+      const myRankShown = myIndex >= 0 ? finalReveal.elapsed >= (finalReveal.timeline.revealedAtMs[myIndex] ?? Infinity) : finalReveal.done;
+      if (!myRankShown) {
         return (
           <Center testId="phone-final-wait">
             <WatchingEyes />

@@ -96,7 +96,8 @@ test.describe("8 joueurs", () => {
 
     // ── Classement final : podium + les 5 autres, avec suspense.
     await expect(tv.getByTestId("tv-final")).toBeVisible();
-    await expect(tv.getByTestId("podium-1")).toContainText(/\d+/, { timeout: 30_000 });
+    await expect(tv.getByTestId("tv-final")).toHaveAttribute("data-stage", "done", { timeout: 60_000 });
+    await expect(tv.getByTestId("podium-1")).toContainText(/\d+/);
     for (const n of [4, 5, 6, 7, 8]) await expect(tv.getByTestId(`rank-${n}`)).toBeVisible();
     for (const n of [1, 2, 3]) await expect(tv.getByTestId(`podium-${n}`)).toBeInViewport({ ratio: 1 });
     await tv.waitForTimeout(1500);

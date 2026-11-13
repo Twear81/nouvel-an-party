@@ -10,3 +10,6 @@ playwright-report/
 
 # Captures d'écran de revue des skins (locales)
 captures/
+
+# Notes de passation entre sessions IA (locales, jamais commitées)
+.claude/passation/

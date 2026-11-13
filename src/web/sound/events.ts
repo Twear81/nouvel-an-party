@@ -41,7 +41,7 @@ export function diffSnapshots(prev: GameSnapshot | null, next: GameSnapshot): Sf
     if (next.phase === "transition" && next.transition?.kind !== "opening") out.push({ nom: "transition.entree" });
     if (next.phase === "intro") out.push({ nom: "manche.intro" });
     if (next.phase === "results") out.push({ nom: "resultats.arrivee" });
-    if (next.phase === "final") out.push({ nom: "final.fanfare" });
+    // La fanfare du classement final joue à la révélation du 1er (FinalScreen), pas à l'arrivée sur l'écran.
   } else if (next.phase === "playing" && prev.round && next.round && prev.round.index === next.round.index) {
     const before = prev.round.progress;
     const after = next.round.progress;

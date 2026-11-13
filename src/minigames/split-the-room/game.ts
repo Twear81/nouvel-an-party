@@ -40,6 +40,7 @@ interface Sentence {
 }
 
 interface State {
+  answerChanges: Map<string, number>;
   start: string;
   step: Step;
   texts: Map<string, string>; // auteur → fin de phrase (non vide)
@@ -127,7 +128,7 @@ export default defineMiniGame<Cfg, Item, State>({
   roundSeconds: () => null,
   estimateSeconds: (cfg) => cfg.duree_ecriture * 0.7 + 7 * (cfg.duree_vote * 0.5 + cfg.duree_revelation) + cfg.temps_resultats,
 
-  start: (item) => ({ start: item, step: "write", texts: new Map(), graceStarted: false, sentences: [], index: 0, scores: {} }),
+  start: (item) => ({ start: item, step: "write", texts: new Map(), graceStarted: false, sentences: [], index: 0, scores: {}, answerChanges: new Map() }),
 
   onPlay(state, ctx) {
     ctx.countdown(ctx.cfg.duree_ecriture, () => startVoting(state, ctx));
@@ -150,6 +151,7 @@ export default defineMiniGame<Cfg, Item, State>({
       const sentence = state.sentences[state.index];
       if (!sentence || typeof p?.vote !== "boolean") return;
       if (playerId === sentence.authorId) return; // l'auteur ne vote pas
+      if (sentence.votes.has(playerId) && sentence.votes.get(playerId) !== p.vote) state.answerChanges.set(playerId, (state.answerChanges.get(playerId) ?? 0) + 1);
       sentence.votes.set(playerId, p.vote); // on peut changer d'avis jusqu'à la fin du chrono
       checkVoted(state, ctx);
     }
@@ -216,7 +218,10 @@ export default defineMiniGame<Cfg, Item, State>({
         return { authorId: s.authorId, text: s.text, ...c, gain: s.done ? s.gain : 0, played: s.done, best: s.done && best > 0 && s.gain === best };
       }),
     };
-    return { results, scores: state.scores };
+    return { results, scores: state.scores,
+      opinions: state.sentences.filter((sentence) => sentence.votes.size > 0).map((sentence) => Object.fromEntries([...sentence.votes].map(([id, vote]) => [id, String(vote)]))),
+      stats: Object.fromEntries([...state.answerChanges].map(([id, answerChanges]) => [id, { answerChanges }]))
+    };
   },
 });
 

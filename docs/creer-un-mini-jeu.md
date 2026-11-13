@@ -373,3 +373,37 @@ arrêtent l’ambiance pour laisser la place à la fanfare. Le ducking reprend l
 le nouveau morceau termine son décodage pendant un jingle. Sources et périmètre privé : [ambiances-musicales.md](ambiances-musicales.md).
 La planche permet de lancer / arrêter la vraie boucle du lobby et d’écouter cet accord. Les niveaux cibles, sources,
 licences et traitements sont documentés dans `src/web/theme/sons/LICENCES.md` et `provenance.json`.
+
+## Statistiques et souvenirs de cérémonie (facultatif)
+
+`finish()` peut compléter `{ results, scores }` avec `stats`, `opinions`, `keepsakes` sans changer les vues de la manche.
+Les types sont dans `src/shared/ceremony.ts`. Aucun appel moteur n'est nécessaire.
+
+- `stats[playerId]` accepte `reactionMs` (tableau, mesurés sur le téléphone), `actions`, `answerChanges`, `designations`,
+  `drawingVotes`, `drawings` (uniquement les dessins non vides). Tout est facultatif, fini et ≥ 0.
+- `opinions` contient une table `{ [playerId]: "choix opaque" }` par question. Deux valeurs identiques représentent
+  le même avis ; ne pas inventer de réponse pour un absent. Elles alimentent le Duo improbable.
+- `keepsakes` accepte un `dessin` (`tag: meilleur | incompris`, `playerId`, `label`, `strokes`, `score`), un `objet`
+  (`emoji`, `label`, `detail`, `score`) ou un `post-it` (`text`, `detail?`, `score`). Le score est l'intérêt du souvenir ;
+  pour un dessin incompris, c'est son nombre de votes (plus petit = moins compris). Les traits utilisent le format
+  validé du dessin, simplifié au besoin pour tenir dans 24 Ko UTF-8 par souvenir.
+
+Le moteur ignore les valeurs invalides, conserve au plus trois souvenirs généraux par jeu et un dessin incompris
+par auteur (le moins voté, puis le plus récent), et borne l'historique à 200 manches. L'historique est sauvegardé
+avec les points, jamais envoyé aux téléphones. La cérémonie ne leur transmet que les bonus déjà révélés à la TV.
+
+### Données de cérémonie fournies par les jeux existants
+
+| Jeux | Données gardées après la manche |
+|---|---|
+| Qui est le plus | Désignations reçues, cible du vote, changements de cible |
+| Ceci ou cela, Split the room, Tier list | Avis par question ou invité, changements réels de réponse |
+| Comme les autres | Groupes de réponses réellement partagées, tolérance aux fautes comprise |
+| Dessin raté | Votes et dessins non vides ; œuvre la plus votée et copie allégée des œuvres incomprises |
+| Simon, Pierre-feuille-ciseaux | Appuis acceptés pendant le jeu |
+| Compte à rebours | Un appui par arrêt accepté ; la durée volontaire n'est pas un réflexe |
+| Le Bon Prix | Objet, prix réel et écart moyen des estimations |
+| Culture gênante | Réaction QCM mesurée sur le téléphone, appui et erreur la plus partagée pour le post-it |
+
+Les absents ne reçoivent jamais d'avis ou de réaction inventés. Aucun de ces champs ne rejoint `publicView` :
+ils passent uniquement par `finish`, puis par l'historique validé du moteur.

@@ -1,0 +1,176 @@
+/* Cérémonie et classement final, dans la pièce de nuit. Seuls transform et opacity s'animent (docs/mise-en-scene.md#performance-des-scènes) ;
+   tout ce qui est ici est statique. Les « remplaçants » (.cer-*-fallback) tiennent la place des images peintes absentes
+   (src/web/theme/ceremonie-assets.ts) : même proportions, couleurs du thème. */
+
+.cer-room { --room-name-size: 1.5rem; }
+.cer-camera { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform; }
+.cer-anchored { position: absolute; }
+.cer-dim { position: absolute; inset: 0; background: var(--color-bg); opacity: 0; pointer-events: none; will-change: opacity; }
+/* Pas de pièce de nuit peinte : la pièce du jour sous un voile bleu nuit (fixe, jamais animé). */
+.cer-night-veil {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-bg) 78%, transparent), color-mix(in srgb, var(--color-bg-2) 62%, transparent));
+}
+/* Lumière du jukebox : dégradé radial dans un calque fixe, seule l'opacité change. */
+.cer-jukebox-halo {
+  position: absolute; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-accent-strong) 70%, transparent), color-mix(in srgb, var(--color-hot) 28%, transparent) 55%, transparent);
+  transition: opacity 1.2s ease-out;
+}
+
+/* Portraits autour de la table, repris de la scène de la pièce (.room-person) */
+.cer-person { position: absolute; left: 0; top: 0; width: var(--room-label-width); margin-left: calc(var(--room-label-width) / -2); will-change: transform; }
+.cer-person .room-visitor { opacity: 1; }
+.cer-person[data-lit="false"][data-dim="true"] { opacity: .55; }
+.cer-person { margin-top: calc(var(--room-avatar-size) / -2); }
+.cer-person[data-label="top"] .room-name { top: auto; bottom: calc(100% + var(--room-label-gap)); }
+.cer-person[data-label="left"] .room-name { top: 50%; right: calc(50% + var(--room-avatar-size) / 2 + var(--room-label-gap)); transform: translateY(-50%); }
+.cer-person[data-label="right"] .room-name { top: 50%; left: calc(50% + var(--room-avatar-size) / 2 + var(--room-label-gap)); transform: translateY(-50%); }
+.cer-rank-chip {
+  position: absolute; left: -.3rem; top: -.3rem; z-index: 3; min-width: 2.4rem; height: 2.4rem; padding: 0 .4rem; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center; background: var(--color-bg); color: var(--color-accent);
+  border: .15rem solid var(--color-accent); font-family: var(--font-num); font-size: 1.3rem; line-height: 1;
+}
+.cer-stars { position: absolute; right: -.9rem; top: -1.3rem; z-index: 3; display: flex; flex-direction: row-reverse; }
+.cer-stars > * + * { margin-right: -.9rem; }
+
+/* Étoile bonus : image peinte, sinon l'emoji */
+.cer-star { display: inline-block; line-height: 1; flex: none; }
+.cer-star-fallback { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+
+/* Enveloppe dorée scellée (dessinée ici : la peinture n'est pas nécessaire) */
+.cer-envelope { position: relative; width: 26rem; height: 17rem; perspective: 60rem; }
+.cer-envelope-back, .cer-envelope-front, .cer-envelope-flap { position: absolute; inset: 0; border-radius: .8rem; }
+.cer-envelope-back { background: linear-gradient(160deg, var(--color-accent-deep), color-mix(in srgb, var(--color-accent-deep) 60%, #000)); box-shadow: var(--shadow-card); }
+.cer-envelope-front {
+  background: linear-gradient(160deg, var(--color-accent-strong), var(--color-accent) 60%, var(--color-accent-deep));
+  clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
+  border-radius: .8rem;
+}
+.cer-envelope-flap {
+  bottom: auto; height: 56%; transform-origin: top center; backface-visibility: hidden;
+  background: linear-gradient(180deg, var(--color-accent-strong), var(--color-accent));
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  will-change: transform;
+}
+.cer-envelope-seal {
+  position: absolute; left: 50%; top: 52%; width: 5rem; height: 5rem; margin: -2.5rem 0 0 -2.5rem; border-radius: 50%; z-index: 4;
+  display: flex; align-items: center; justify-content: center; font-size: 2.6rem;
+  background: radial-gradient(circle at 35% 30%, var(--color-bad), var(--color-bad-deep)); color: var(--color-accent-strong);
+  box-shadow: 0 .3rem .8rem rgb(0 0 0 / .45);
+}
+
+/* Machine à sous de catégories */
+.cer-slot {
+  position: relative; width: 52rem; height: 30rem; overflow: hidden; border-radius: var(--radius-card);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-bg) 92%, transparent), color-mix(in srgb, var(--color-bg-2) 92%, transparent));
+  border: .35rem solid var(--color-accent); box-shadow: var(--shadow-glow), var(--shadow-card);
+}
+.cer-slot-strip { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+.cer-slot-row { height: 10rem; display: flex; align-items: center; justify-content: center; gap: 2rem; padding: 0 2rem; font-family: var(--font-display); font-size: 3.2rem; color: var(--color-ink); }
+.cer-slot-row > span:first-child { font-size: 5rem; line-height: 1; }
+.cer-slot-row > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cer-slot-window { position: absolute; left: 1rem; right: 1rem; top: 10rem; height: 10rem; border-radius: 1rem; border: .25rem solid var(--color-accent-strong); box-shadow: 0 0 2.5rem color-mix(in srgb, var(--color-accent) 55%, transparent); pointer-events: none; }
+.cer-slot-fade { position: absolute; left: 0; right: 0; height: 10rem; pointer-events: none; }
+.cer-slot-fade[data-side="top"] { top: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--color-bg) 70%, transparent), transparent); }
+.cer-slot-fade[data-side="bottom"] { bottom: 0; background: linear-gradient(0deg, color-mix(in srgb, var(--color-bg) 70%, transparent), transparent); }
+
+/* Carte de la catégorie tirée */
+.cer-card {
+  width: 54rem; padding: 3rem 3.5rem; text-align: center; border-radius: var(--radius-card);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-bg-3) 85%, #000), var(--color-bg-2));
+  border: .3rem solid var(--color-accent); box-shadow: var(--shadow-glow), var(--shadow-card);
+  backface-visibility: hidden;
+}
+
+/* Projecteur : faisceau peint (transform seulement), sinon un cône dégradé fixe */
+.cer-beam { position: absolute; top: 0; left: 0; pointer-events: none; will-change: transform; }
+.cer-beam-fallback {
+  width: 100%; height: 100%;
+  background: radial-gradient(ellipse 50% 7% at 50% 98%, color-mix(in srgb, var(--color-accent-strong) 80%, transparent), transparent 80%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-accent-strong) 55%, transparent), color-mix(in srgb, var(--color-accent-strong) 12%, transparent));
+  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+}
+
+/* Souvenirs */
+.cer-frame { position: relative; width: 100%; transform-origin: 50% 0; will-change: transform; }
+.cer-frame-art { position: absolute; background: var(--color-paper); overflow: hidden; }
+.cer-frame-fallback {
+  position: absolute; inset: 0; border-radius: .3rem; pointer-events: none;
+  border: .55rem solid var(--color-accent); outline: .15rem solid var(--color-accent-deep); outline-offset: -.5rem;
+  box-shadow: 0 .4rem .9rem var(--color-shade), inset 0 0 0 .35rem var(--color-paper);
+}
+.cer-bell { container-type: inline-size; position: relative; width: 100%; will-change: transform; }
+.cer-bell-fallback { position: absolute; inset: 0; }
+.cer-bell-dome {
+  position: absolute; left: 8%; right: 8%; top: 2%; height: 72%; border-radius: 50% 50% 4% 4% / 70% 70% 4% 4%;
+  background: linear-gradient(115deg, rgb(255 255 255 / .38), rgb(255 255 255 / .06) 35%, rgb(255 255 255 / .12));
+  border: .15rem solid rgb(255 255 255 / .45); border-bottom: none;
+}
+.cer-bell-base { position: absolute; left: 0; right: 0; bottom: 0; height: 24%; border-radius: 50%; background: linear-gradient(180deg, color-mix(in srgb, var(--color-accent-deep) 55%, #1a0f05), #1a0f05); box-shadow: 0 .3rem .6rem var(--color-shade); }
+/* La plaque est peinte sur la cloche (centre à 50 % / 86 %) : le prix s'écrit dessus, en brun sur le laiton. */
+.cer-bell-plaque { position: absolute; left: 50%; top: 86%; transform: translate(-50%, -50%); white-space: nowrap; color: var(--color-accent-ink); font-family: var(--font-num); line-height: 1; }
+.cer-bell-plaque[data-painted="false"] { padding: .1em .5em; border-radius: .25rem; background: linear-gradient(180deg, var(--color-accent-strong), var(--color-accent-deep)); }
+.cer-bell-object { position: absolute; left: 0; right: 0; top: 17%; height: 48%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* La Une du 1er janvier : le papier peint (journal.png) reçoit les textes écrits par le code, en fractions de l'image.
+   Sans image : papier et traits dessinés ici, aux mêmes endroits. */
+.cer-paper { container-type: inline-size; position: relative; width: 100%; aspect-ratio: 1000 / 1300; will-change: transform; color: #2a1d12; font-family: var(--font-serious); }
+.cer-paper > * { position: absolute; }
+.cer-paper-fallback { inset: 3% 3.5% 3%; background: linear-gradient(135deg, color-mix(in srgb, var(--color-paper) 92%, #7a5a22), var(--color-paper) 45%, color-mix(in srgb, var(--color-paper) 88%, #7a5a22)); box-shadow: 0 1rem 3rem rgb(0 0 0 / .6); }
+.cer-paper-mast { display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 900; font-size: 4.9cqw; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.cer-paper-headline { display: flex; flex-direction: column; justify-content: center; gap: 1.2cqw; font-weight: 900; font-size: 6.4cqw; line-height: 1.04; text-transform: uppercase; text-wrap: balance; text-align: center; }
+.cer-paper-choice { font-size: 5.2cqw; font-style: italic; font-weight: 800; text-transform: none; }
+.cer-paper-photo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6cqw; padding: 0 3cqw; }
+.cer-paper-caption { font-size: 3.6cqw; font-style: italic; line-height: 1.2; text-align: center; font-weight: 700; }
+.cer-paper[data-painted="false"] .cer-paper-mast { border-top: .35cqw solid #2a1d12; border-bottom: .15cqw solid #2a1d12; }
+.cer-paper[data-painted="false"] .cer-paper-photo { border: .25cqw solid #2a1d12; background: color-mix(in srgb, #2a1d12 8%, transparent); }
+
+/* Cuillère à tiramisu et étoile du talent */
+.cer-spoon { will-change: transform; } /* pas de `position` ici : ce CSS hors couche écraserait la classe `absolute` */
+.cer-spoon-fallback { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 100%; height: 100%; }
+.cer-spoon-base { width: 70%; height: 14%; border-radius: .4rem; background: linear-gradient(180deg, #e9e6ee, #8d8a99); box-shadow: 0 .4rem .8rem var(--color-shade); }
+
+/* Tableau d'honneur */
+.cer-board { position: absolute; will-change: transform; }
+.cer-board-fallback {
+  position: absolute; inset: 0; border-radius: 1.4rem;
+  background: radial-gradient(120% 90% at 50% 0%, var(--color-bg-3), var(--color-bg-2) 55%, var(--color-bg));
+  border: .6rem solid var(--color-accent); outline: .15rem solid var(--color-accent-deep); outline-offset: -1.1rem; box-shadow: var(--shadow-glow), var(--shadow-card);
+}
+.cer-board-title { position: absolute; left: 0; right: 0; text-align: center; font-family: var(--font-display); color: var(--color-accent); }
+.cer-board-rows { position: absolute; display: flex; flex-direction: column; }
+.cer-board-row { flex: 1 1 0; min-height: 0; display: flex; align-items: center; gap: .7rem; padding: 0 .6rem; border-bottom: .1rem solid color-mix(in srgb, var(--color-accent) 25%, transparent); }
+.cer-board-row[data-filled="false"] { opacity: .45; }
+.cer-board-rank { width: 2.4rem; text-align: center; flex: none; font-family: var(--font-num); font-size: 1.6rem; color: var(--color-accent); }
+.cer-board-name { min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 800; font-size: 1.4rem; }
+.cer-board-score { flex: none; font-family: var(--font-num); font-size: 1.5rem; color: var(--color-accent-strong); }
+
+/* Podium : image peinte, sinon trois blocs bleu nuit à liseré doré (mêmes proportions 1200 × 700) */
+.cer-podium { position: relative; width: 100%; aspect-ratio: 1200 / 700; will-change: transform; }
+.cer-podium-img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.cer-podium-fallback { position: absolute; inset: 0; }
+.cer-podium-block {
+  position: absolute; bottom: 0; width: 31%; border-radius: .5rem .5rem 0 0; display: flex; justify-content: center; padding-top: .5rem;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-bg-3) 80%, #000), var(--color-bg-2));
+  border: .25rem solid var(--color-accent); border-bottom: none; box-shadow: 0 0 1.4rem color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+.cer-podium-number { position: absolute; transform: translate(-50%, -50%); font-family: var(--font-display); font-size: 3.4rem; line-height: 1; color: var(--color-accent); text-shadow: 0 .2rem .4rem rgb(0 0 0 / .6); }
+.cer-podium-number[data-lit="true"] { color: var(--color-accent-strong); text-shadow: 0 0 1.4rem var(--color-accent); }
+.cer-podium-slot { position: absolute; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; z-index: 2; }
+.cer-chip {
+  max-width: 17rem; padding: .15rem .7rem; border-radius: .6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
+  background: color-mix(in srgb, var(--room-shadow, #090d19) 88%, transparent); color: var(--color-ink); font-weight: 800; font-size: 1.4rem; line-height: 1.4;
+}
+
+/* Écran de la télévision dessinée : le 1er y apparaît en grand */
+.cer-tv-screen {
+  position: absolute; display: flex; align-items: center; justify-content: center; overflow: visible; z-index: 3;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-hot) 70%, var(--color-bg-3)), var(--color-bg-2));
+  box-shadow: 0 0 2.5rem .6rem color-mix(in srgb, var(--color-cool) 55%, transparent);
+}
+/* Feu d'artifice des fenêtres : une boîte rectangulaire qui masque ce qui dépasse (jamais animée) */
+.cer-window { position: absolute; overflow: hidden; }
+
+/* Bandeau de titre : texte dans la pièce, sans fond plein */
+.cer-title { text-shadow: 0 .2rem 1.4rem rgb(0 0 0 / .85), 0 0 .5rem rgb(0 0 0 / .6); }

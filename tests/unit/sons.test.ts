@@ -113,7 +113,7 @@ const round = (over: Partial<RoundInfo> = {}): RoundInfo => ({
   deltas: null, resultsAt: null, pausedMs: 0, pausedSince: null, ...over,
 });
 const snap = (over: Partial<GameSnapshot> = {}): GameSnapshot => ({
-  title: "T", phase: "lobby", paused: false, finalReveal: null, midnight: null, transition: null, players: [], round: null, continued: [],
+  title: "T", phase: "lobby", paused: false, finalReveal: null, midnight: null, ceremony: null, transition: null, players: [], round: null, continued: [],
   catalog: [], setup: { counts: {} }, resumable: null, joinUrl: "", skin: null, me: null, ...over,
 });
 const names = (calls: { nom: string }[]) => calls.map((c) => c.nom);
@@ -146,7 +146,7 @@ describe("sons globaux : seulement sur changement", () => {
     expect(names(diffSnapshots(snap({ phase: "transition", transition: { kind: "opening" } as never }), snap({ phase: "intro", round: round() })))).toEqual(["transition.sortie", "manche.intro"]);
     expect(names(diffSnapshots(snap({ phase: "playing", round: round() }), snap({ phase: "results", round: round() })))).toEqual(["resultats.arrivee"]);
     expect(names(diffSnapshots(snap({ phase: "results", round: round() }), snap({ phase: "transition", transition: { kind: "skin" } as never })))).toEqual(["transition.entree"]);
-    expect(names(diffSnapshots(snap({ phase: "transition", transition: { kind: "closing" } as never }), snap({ phase: "final" })))).toEqual(["transition.sortie", "final.fanfare"]);
+    expect(names(diffSnapshots(snap({ phase: "transition", transition: { kind: "closing" } as never }), snap({ phase: "final" })))).toEqual(["transition.sortie"]);
   });
 
   it("chaque réponse reçue fait un pop de plus en plus aigu, la dernière ajoute la complétion", () => {

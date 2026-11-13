@@ -34,6 +34,7 @@ type Cfg = z.infer<typeof configSchema>;
 type Choice = 0 | 1;
 type Item = { text: string; choices: [string, string]; duration?: number; theme?: string };
 interface State {
+  answerChanges: Map<string, number>;
   question: string;
   choices: [string, string];
   targetId: string | null;
@@ -84,12 +85,13 @@ export default defineMiniGame<Cfg, Item, State>({
 
   start(item, ctx) {
     const { text, targetId } = fillPlayer(item.text, ctx.players, ctx.rng);
-    return { question: text, choices: item.choices, targetId, answers: new Map() };
+    return { question: text, choices: item.choices, targetId, answers: new Map(), answerChanges: new Map() };
   },
 
   input(state, playerId, payload, ctx) {
     const choice = (payload as { choice?: unknown })?.choice;
     if (choice !== 0 && choice !== 1) return;
+    if (state.answers.has(playerId) && state.answers.get(playerId) !== choice) state.answerChanges.set(playerId, (state.answerChanges.get(playerId) ?? 0) + 1);
     state.answers.set(playerId, choice);
     checkAllAnswered(state, ctx);
   },
@@ -131,6 +133,9 @@ export default defineMiniGame<Cfg, Item, State>({
     }
 
     const results: Results = { question: state.question, choices: state.choices, targetId: state.targetId, mode, picks, winner };
-    return { results, scores };
+    return { results, scores,
+      opinions: [Object.fromEntries([...state.answers].map(([id, choice]) => [id, String(choice)]))],
+      stats: Object.fromEntries([...state.answers.keys()].map((id) => [id, { answerChanges: state.answerChanges.get(id) ?? 0 }]))
+    };
   },
 });

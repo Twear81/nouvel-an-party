@@ -4,6 +4,7 @@ import { useGame } from "../net/useGame";
 import { SkinProvider } from "../theme/skin";
 import { useGlobalSfx } from "../sound/useGlobalSfx";
 import { MidnightOverlay, PausedOverlay, PauseZoom, ReconnectBanner, RoomTransition, roomReference, SoundBadge, TvStage } from "../ui";
+import { CeremonyScreen } from "./CeremonyScreen";
 import { FinalScreen } from "./FinalScreen";
 import { HostBar } from "./HostBar";
 import { IntroScreen } from "./IntroScreen";
@@ -54,6 +55,9 @@ export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
     case "results":
       screen = round && <ResultsScreen snapshot={snapshot} round={round} />;
       break;
+    case "ceremony":
+      screen = <CeremonyScreen snapshot={snapshot} />;
+      break;
     case "final":
       screen = <FinalScreen snapshot={snapshot} />;
       break;
@@ -73,7 +77,7 @@ export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
           {screen}
         </motion.div>
       </AnimatePresence></PauseZoom>}
-      {host && (snapshot.phase !== "lobby" || snapshot.midnight) && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || (snapshot.phase === "playing" && !!round?.interlude)} />}
+      {host && (snapshot.phase !== "lobby" || snapshot.midnight) && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || snapshot.phase === "ceremony" || snapshot.phase === "final" || (snapshot.phase === "playing" && !!round?.interlude)} />}
       <SoundBadge visible={snapshot.phase === "lobby"} />
       <PausedOverlay show={snapshot.paused} big />
       {snapshot.midnight && <MidnightOverlay midnight={snapshot.midnight} />}

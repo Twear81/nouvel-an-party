@@ -153,6 +153,7 @@ export default defineMiniGame<Cfg, Item, State>({
       ranking: ranked.map((r) => ({ ...r.item, rank: r.rank })),
       missed: ctx.players.filter((p) => !s.stops.has(p.id)).map((p) => ({ playerId: p.id })),
     };
-    return { results, scores };
+    // Le temps visé est volontaire : ce n'est pas une mesure de réflexe pour « L'escargot ».
+    return { results, scores, stats: Object.fromEntries([...s.stops.keys()].map((id) => [id, { actions: 1 }])) };
   },
 });

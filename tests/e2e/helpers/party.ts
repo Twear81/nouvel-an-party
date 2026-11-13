@@ -254,6 +254,7 @@ export class Party {
       for (const el of [root, ...root.querySelectorAll<HTMLElement>("*")] as HTMLElement[]) {
         const cs = getComputedStyle(el);
         if (cs.textOverflow === "ellipsis") continue;
+        if (el.dataset.clip === "voulu") continue; // découpage volontaire (ex. feu d'artifice limité aux fenêtres)
         const clipsY = cs.overflowY !== "visible" && el.scrollHeight > el.clientHeight + 2;
         const clipsX = cs.overflowX !== "visible" && el.scrollWidth > el.clientWidth + 2;
         if (clipsX || clipsY) out.push(`${el.tagName.toLowerCase()}.${String(el.className).slice(0, 60)} ${el.scrollWidth}x${el.scrollHeight} > ${el.clientWidth}x${el.clientHeight}`);

@@ -20,8 +20,8 @@ interface Spark { dx: number; dy: number; size: number; color: string }
 interface Burst { x: number; y: number; delay: number; sparks: Spark[] }
 
 /** Gerbes réparties dans le tiers haut de l'écran ; `reach` = rayon d'une gerbe en rem. */
-export function buildBursts(count: number, sparks: number, reach: number): Burst[] {
-  const rand = rng(2027);
+export function buildBursts(count: number, sparks: number, reach: number, seed = 2027): Burst[] {
+  const rand = rng(seed);
   return Array.from({ length: count }, (_, i) => {
     const power = reach * (0.7 + rand() * 0.5);
     const palette = [COLORS[i % COLORS.length]!, COLORS[(i + 2) % COLORS.length]!];
@@ -38,11 +38,15 @@ export function buildBursts(count: number, sparks: number, reach: number): Burst
   });
 }
 
-export function Fireworks({ size = "tv" }: { size?: "tv" | "phone" }) {
-  const bursts = useMemo(() => (size === "tv" ? buildBursts(7, 22, 20) : buildBursts(5, 14, 8)), [size]);
-  const unit = size === "tv" ? 1 : 0.6; // taille d'une étincelle
+/**
+ * `fit` : feu d'artifice ramené à une boîte plus petite que l'écran (ex. une fenêtre de la pièce) : `count` gerbes de `sparks`
+ * étincelles, de rayon `reach` rem, étincelles de taille `unit`. Le parent coupe ce qui dépasse (`overflow: hidden`).
+ */
+export function Fireworks({ size = "tv", fit }: { size?: "tv" | "phone"; fit?: { count: number; sparks: number; reach: number; unit: number; seed?: number } }) {
+  const bursts = useMemo(() => (fit ? buildBursts(fit.count, fit.sparks, fit.reach, fit.seed) : size === "tv" ? buildBursts(7, 22, 20) : buildBursts(5, 14, 8)), [size, fit?.count, fit?.sparks, fit?.reach, fit?.seed]); // eslint-disable-line react-hooks/exhaustive-deps
+  const unit = fit ? fit.unit : size === "tv" ? 1 : 0.6; // taille d'une étincelle
   return (
-    <div data-testid="fireworks" data-ui="fireworks" aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div data-testid="fireworks" data-ui="fireworks" data-clip="voulu" aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {bursts.map((b, i) => (
         <div key={i} className="absolute" style={{ left: `${b.x}%`, top: `${b.y}%` }}>
           {b.sparks.map((s, k) => (

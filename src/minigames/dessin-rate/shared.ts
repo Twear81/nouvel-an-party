@@ -53,3 +53,15 @@ export const isBlank = (strokes: Stroke[]) => strokes.length === 0;
 
 export type Difficulty = "facile" | "moyen" | "difficile";
 export const DIFFICULTIES: Difficulty[] = ["facile", "moyen", "difficile"];
+
+/** Copie allégée pour les souvenirs : conserve chaque trait et ses extrémités, au plus ~1 160 points. */
+export function souvenirStrokes(strokes: Stroke[]): Stroke[] {
+  const count = strokes.reduce((sum, stroke) => sum + stroke.p.length / 2, 0);
+  const stride = Math.max(1, Math.ceil(count / 1000));
+  return strokes.map(({ c, w, p }) => {
+    const points: number[] = [];
+    for (let i = 0; i < p.length; i += stride * 2) points.push(p[i]!, p[i + 1]!);
+    if ((p.length / 2 - 1) % stride !== 0) points.push(p[p.length - 2]!, p[p.length - 1]!);
+    return { c, w, p: points };
+  });
+}

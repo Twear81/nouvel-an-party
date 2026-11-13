@@ -24,6 +24,7 @@ const configSchema = z.object({
 type Cfg = z.infer<typeof configSchema>;
 type Item = { text: string; duration?: number; theme?: string };
 interface State {
+  answerChanges: Map<string, number>;
   question: string;
   /** votant → (invité noté → index d'étage, 0 = le plus haut) */
   ratings: Map<string, Map<string, number>>;
@@ -82,7 +83,7 @@ export default defineMiniGame<Cfg, Item, State>({
   roundSeconds: (cfg, item) => item.duration ?? cfg.duree,
   estimateSeconds: (cfg) => cfg.duree + cfg.temps_resultats,
 
-  start: (item) => ({ question: item.text, ratings: new Map() }),
+  start: (item) => ({ question: item.text, ratings: new Map(), answerChanges: new Map() }),
 
   input(state, playerId, payload, ctx) {
     const { target, tier } = (payload ?? {}) as { target?: unknown; tier?: unknown };
@@ -90,6 +91,7 @@ export default defineMiniGame<Cfg, Item, State>({
     if (typeof tier !== "number" || !Number.isInteger(tier) || tier < 0 || tier >= ctx.cfg.tiers.length) return;
     let mine = state.ratings.get(playerId);
     if (!mine) state.ratings.set(playerId, (mine = new Map()));
+    if (mine.has(target) && mine.get(target) !== tier) state.answerChanges.set(playerId, (state.answerChanges.get(playerId) ?? 0) + 1);
     mine.set(target, tier); // on peut changer d'avis tant que la manche n'est pas finie
     checkAllRated(state, ctx);
   },
@@ -148,6 +150,9 @@ export default defineMiniGame<Cfg, Item, State>({
       ratings,
       hits,
     };
-    return { results, scores };
+    return { results, scores,
+      opinions: ctx.players.map(({ id: target }) => Object.fromEntries([...state.ratings].filter(([, mine]) => mine.has(target)).map(([voter, mine]) => [voter, String(mine.get(target))]))),
+      stats: Object.fromEntries([...state.ratings.keys()].map((id) => [id, { answerChanges: state.answerChanges.get(id) ?? 0 }]))
+    };
   },
 });
