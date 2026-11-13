@@ -4,7 +4,7 @@
 
 Direction confirmée par l'organisateur, réalisée par lots. Le retrait GunZ/photos, l'attente pendant le final,
 l'ouverture de la pièce, les transitions après Culture gênante et la sortie avant le podium sont intégrés.
-Les statistiques, souvenirs de partie et la cérémonie finale enrichie restent à réaliser ; le moteur de sons (TV seulement) est livré,
+Les statistiques, souvenirs de partie et la cérémonie finale sont livrés (voir « La cérémonie et le classement final » ci-dessous) ; le moteur de sons (TV seulement) est livré,
 les sons propres aux skins et aux mini-jeux viennent ensuite. La rotation livrée est décrite dans [skins.md](skins.md).
 
 Le décor de la pièce a été validé par l'organisateur le **10 novembre 2026** :
@@ -168,9 +168,24 @@ ne démarre sous une scène. La sauvegarde garde progression, destination et un 
 un rechargement de page reprend la scène ; un redémarrage serveur retrouve sa destination sans rejouer les points.
 Les téléphones montrent uniquement l'attente pendant ces scènes. La logique propre aux mini-jeux reste intacte.
 
-La révélation finale actuelle dispose déjà d'un départ serveur commun, après la sortie de la TV. La future
-cérémonie avec statistiques et souvenirs prolongera cette chronologie, en gardant les rangs et les distinctions
-cachés sur les téléphones jusqu'au bon moment.
+La révélation finale part d'un départ serveur commun, après la sortie de la TV, et la cérémonie prolonge cette
+chronologie en gardant les rangs et les distinctions cachés sur les téléphones jusqu'au bon moment.
+
+### La cérémonie et le classement final
+
+Tout se passe dans `piece-nuit.png` (même cadrage que `piece-reference.png`), images dans `src/web/theme/assets/ceremonie/`,
+points d'ancrage en % de l'image regroupés dans `src/web/theme/ceremonie-assets.ts`.
+- **Chronologie** : `ceremonyTimeline` (`src/shared/ceremony.ts`) et `src/shared/final-reveal.ts`, constantes partagées serveur/écran
+  (invariant « pas de spoil »). La TV ne garde aucun état : elle déduit l'étape du temps écoulé.
+- **Souvenirs** (`src/web/tv/scene/Souvenirs.tsx`) : zoom caméra vers l'endroit, l'objet s'installe et reste dans le décor
+  (dessin le plus voté dans le cadre doré, objet du Bon Prix sous la cloche, « La Une du 1er janvier » sur la table).
+  Les portraits s'effacent pendant le zoom et l'arrivée du journal.
+- **Bonus** : enveloppe, machine à sous des catégories, carte, projecteur qui saute de portrait en portrait, puis une
+  **étoile** sur le portrait du gagnant. **Aucun score n'est affiché pendant la cérémonie.**
+- **Classement final** (`src/web/tv/FinalScreen.tsx`) : du dernier au 4e, score de base puis conversion des étoiles
+  (« ★ +120 »), rangement sur le tableau d'honneur ; podium, roulement, 1er couronné dans l'écran de la TV dessinée,
+  feu d'artifice dans les fenêtres, confettis tirés hors du tableau d'honneur (`fireConfetti("big", true)`).
+- **Téléphones** : « Regarde la TV » + carte de SON bonus quand il est révélé ; au final, son rang une fois révélé.
 
 ### Des souvenirs compacts
 

@@ -82,6 +82,8 @@ function CeremonyBody({ info, players }: { info: CeremonyInfo; players: PublicPl
     const zoomed = souvenir.kind === "post-it" ? cues >= 1 && cues < 3 : cues < 3;
     if (zoomed) camera = SOUVENIR_FOCUS[souvenir.kind];
   }
+  // Pendant le zoom sur un souvenir (et l'arrivée plein écran du journal), les invités s'effacent : zoomés avec la pièce, ils masqueraient l'objet.
+  const zoomedIn = camera !== WIDE || (!!souvenir && cues < 3);
   const dim = step.kind === "roulette" ? 0.6 : step.kind === "carte" ? 0.65 : step.kind === "projecteur" ? 0.62 : step.kind === "gagnant" ? 0.45 : 0;
 
   // Sons : calés sur la chronologie serveur (jamais rejoués après un rechargement tardif).
@@ -128,9 +130,9 @@ function CeremonyBody({ info, players }: { info: CeremonyInfo; players: PublicPl
           const isWinnerNow = step.kind === "gagnant" && lit;
           const stars = starsOf(p.id);
           return (
-            <motion.div key={p.id} data-testid={`ceremony-player-${p.id}`} data-label={seatLabelSide(s.angle)} data-dim={bonus && !lit} data-lit={lit}
+            <motion.div key={p.id} data-testid={`ceremony-player-${p.id}`} data-label={seatLabelSide(s.angle)} data-dim={bonus && !lit} data-lit={lit} data-hidden={zoomedIn}
               className="cer-person" initial={{ x: `${s.x * 100}cqw`, y: `${s.y * 100}cqh`, opacity: 0 }}
-              animate={{ x: `${s.x * 100}cqw`, y: `${s.y * 100}cqh`, opacity: bonus && !lit ? 0.5 : 1 }}
+              animate={{ x: `${s.x * 100}cqw`, y: `${s.y * 100}cqh`, opacity: zoomedIn ? 0 : bonus && !lit ? 0.5 : 1 }}
               transition={{ x: { type: "spring", stiffness: 70, damping: 15 }, y: { type: "spring", stiffness: 70, damping: 15 }, opacity: { duration: 0.5 } }}>
               <motion.div className="room-visitor" animate={isWinnerNow ? { y: [0, -56, 0, -22, 0, -8, 0], scale: [1, 1.22, 1, 1.1, 1, 1.04, 1] } : { y: 0, scale: 1 }}
                 transition={{ duration: isWinnerNow ? Math.max(0.1, 1.4 * k) : 0.2, delay: isWinnerNow ? 0.2 * k : 0, times: isWinnerNow ? [0, 0.22, 0.45, 0.62, 0.78, 0.9, 1] : undefined }}>

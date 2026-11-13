@@ -65,7 +65,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   useEffect(() => {
     if (!celebrating || fired.current) return;
     fired.current = true;
-    if (elapsed - first!.settleAtMs! < 1500) { fireConfetti("big"); setTimeout(() => fireConfetti("big"), 900 * Math.max(k, 0.1)); }
+    if (elapsed - first!.settleAtMs! < 1500) { fireConfetti("big", true); setTimeout(() => fireConfetti("big", true), 900 * Math.max(k, 0.1)); }
   }, [celebrating]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const rows: HonorRow[] = ranked.map((p, i) => ({ id: p.id, rank: rankLabel(i), profile: p.profile, score: p.score, filled: isRevealed(i) }));
@@ -190,7 +190,7 @@ function ConversionCard({ player, beat, elapsed, k, rank, shared }: { player: Ra
           </motion.div>
         )}
       </div>
-      <span className="cer-title max-w-full truncate font-display text-5xl text-ink">{player.profile.name}</span>
+      <span className="cer-title max-w-full truncate font-display text-4xl text-ink">{player.profile.name}</span>
       <div data-testid="final-card-score" className="cer-title font-num text-8xl text-accent-strong">
         {counting ? <CountUp value={shown} duration={Math.max(0.05, (phase === "count" ? FINAL_TIMING.countMs : FINAL_TIMING.starMs * 0.35) * k / 1000)} /> : "?"}
       </div>

@@ -142,9 +142,9 @@
 .cer-board-rows { position: absolute; display: flex; flex-direction: column; }
 .cer-board-row { flex: 1 1 0; min-height: 0; display: flex; align-items: center; gap: .7rem; padding: 0 .6rem; border-bottom: .1rem solid color-mix(in srgb, var(--color-accent) 25%, transparent); }
 .cer-board-row[data-filled="false"] { opacity: .45; }
-.cer-board-rank { width: 2.4rem; text-align: center; flex: none; font-family: var(--font-num); font-size: 1.8rem; color: var(--color-accent); }
-.cer-board-name { min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 800; font-size: 1.6rem; }
-.cer-board-score { flex: none; font-family: var(--font-num); font-size: 1.7rem; color: var(--color-accent-strong); }
+.cer-board-rank { width: 2.4rem; text-align: center; flex: none; font-family: var(--font-num); font-size: 1.6rem; color: var(--color-accent); }
+.cer-board-name { min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 800; font-size: 1.4rem; }
+.cer-board-score { flex: none; font-family: var(--font-num); font-size: 1.5rem; color: var(--color-accent-strong); }
 
 /* Podium : image peinte, sinon trois blocs bleu nuit à liseré doré (mêmes proportions 1200 × 700) */
 .cer-podium { position: relative; width: 100%; aspect-ratio: 1200 / 700; will-change: transform; }
@@ -165,7 +165,7 @@
 
 /* Écran de la télévision dessinée : le 1er y apparaît en grand */
 .cer-tv-screen {
-  position: absolute; display: flex; align-items: center; justify-content: center; overflow: visible;
+  position: absolute; display: flex; align-items: center; justify-content: center; overflow: visible; z-index: 3;
   background: radial-gradient(closest-side, color-mix(in srgb, var(--color-hot) 70%, var(--color-bg-3)), var(--color-bg-2));
   box-shadow: 0 0 2.5rem .6rem color-mix(in srgb, var(--color-cool) 55%, transparent);
 }

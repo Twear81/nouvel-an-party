@@ -73,7 +73,8 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 | Pièce : ouverture, changement d'univers et sortie | `src/web/ui/RoomTransition.tsx`, `src/web/ui/RoomSignature.tsx`, `src/web/theme/room.css`, `src/shared/transitions.ts` |
 | TV manche en cours (en-tête + chrono) ; un jeu interlude s'affiche en plein écran, sans cadre | `src/web/tv/PlayingScreen.tsx` |
 | TV résultats (points gagnés, « Continuer ») | `src/web/tv/ResultsScreen.tsx` |
-| TV classement final (révélation, podium, confettis) | `src/web/tv/FinalScreen.tsx` |
+| TV cérémonie (souvenirs, bonus, étoiles) | `src/web/tv/CeremonyScreen.tsx`, `src/web/tv/scene/`, `src/web/theme/ceremonie.css`, `src/web/theme/ceremonie-assets.ts` (images et points d'ancrage) |
+| TV classement final (conversion des étoiles, tableau d'honneur, podium, confettis) | `src/web/tv/FinalScreen.tsx`, `src/web/ui/HonorBoard.tsx`, `src/web/ui/Podium.tsx` |
 | Contrôles du maître du jeu (Pause, Passer, +10 s, Lobby : bande fine toujours visible en bas à droite) | `src/web/tv/HostBar.tsx` |
 | Routage téléphone + lobby/intro/résultats/final | `src/web/phone/PhoneApp.tsx` |
 | Création / édition du profil (avatar, couleur, invocation du cadre) | `src/web/phone/ProfileEditor.tsx`, `src/web/ui/FrameSummon.tsx` |
