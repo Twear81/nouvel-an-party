@@ -3,6 +3,7 @@ export * from "./Button";
 export * from "./Countdown";
 export * from "./Panel";
 export * from "./PlayerAvatar";
+export * from "./FrameSummon";
 export * from "./Stage";
 export * from "./confetti";
 export * from "./ConfirmDialog";

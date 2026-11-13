@@ -2,6 +2,7 @@
 import { motion } from "motion/react";
 import type { CSSProperties, ReactNode } from "react";
 import type { Profile } from "../../shared/types";
+import { avatarImage } from "../theme/avatar-images";
 import { avatarById, frameById } from "../theme/profile-options";
 import { AvatarFrame } from "./AvatarFrame";
 
@@ -17,6 +18,14 @@ interface Props {
   className?: string;
   crowned?: boolean;
   crownDelay?: number;
+}
+
+/** Portrait prédéfini : image locale si l'avatar en a une, sinon son emoji. */
+function AvatarPortrait({ id }: { id: string }) {
+  const avatar = avatarById(id);
+  const src = avatar.image ? avatarImage(avatar.id) : undefined;
+  if (src) return <img data-ui="avatar-image" src={src} alt="" draggable={false} className="avatar-portrait-image pointer-events-none select-none object-contain" />;
+  return <span className="select-none text-[5.4em] leading-none">{avatar.emoji}</span>;
 }
 
 export function PlayerAvatar({ profile, size = "md", dimmed, badge, crowned = false, crownDelay = 0.5, className = "" }: Props) {
@@ -38,10 +47,10 @@ export function PlayerAvatar({ profile, size = "md", dimmed, badge, crowned = fa
         {!profile ? (
           <span className="font-display text-[5em] text-bg/60">?</span>
         ) : (
-          <span className="select-none text-[5.4em] leading-none">{avatarById(profile.avatar.id).emoji}</span>
+          <AvatarPortrait id={profile.avatar.id} />
         )}
       </div>
-      <AvatarFrame className={frameById(profile?.frame ?? "none").className} />
+      <AvatarFrame frame={frameById(profile?.frame ?? "none").id} className={frameById(profile?.frame ?? "none").className} />
       {crowned && <motion.span aria-hidden data-ui="crown" className="avatar-crown"
         initial={{ y: -90, opacity: 0, rotate: -35, scale: 0.5 }} animate={{ y: 0, opacity: 1, rotate: -16, scale: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 11, delay: crownDelay }}>👑</motion.span>}

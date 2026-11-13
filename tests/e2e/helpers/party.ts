@@ -268,3 +268,28 @@ export class Party {
     await Promise.all(this.contexts.map((c) => c.close().catch(() => {})));
   }
 }
+
+/**
+ * Invoque un cadre précis sur l'éditeur de profil : le tirage est forcé (`localStorage["summon-force"]`) puis on attend
+ * la fin de l'animation. Renvoie quand le cadre est appliqué à l'aperçu.
+ */
+export async function summonFrame(page: Page, frameId: string) {
+  const previous = await page.evaluate((id) => {
+    const old = localStorage.getItem("summon-force");
+    localStorage.setItem("summon-force", id);
+    return old;
+  }, frameId);
+  try {
+    await page.getByTestId("frame-summon-button").scrollIntoViewIfNeeded();
+    await page.getByTestId("frame-summon-button").click();
+    await expect(page.getByTestId("frame-summon")).toHaveAttribute("data-phase", "summoning");
+    await expect(page.getByTestId("frame-summon")).toHaveAttribute("data-phase", "done", { timeout: 10_000 });
+    await expect(page.getByTestId("frame-result")).toHaveAttribute("data-frame", frameId);
+    await expect(page.getByTestId("profile-preview").locator('[data-ui="avatar"]')).toHaveAttribute("data-frame", frameId);
+  } finally {
+    await page.evaluate((old) => {
+      if (old === null) localStorage.removeItem("summon-force");
+      else localStorage.setItem("summon-force", old);
+    }, previous);
+  }
+}

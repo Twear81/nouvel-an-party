@@ -21,7 +21,7 @@ par l'organisateur**. La galerie permet de les examiner séparément.
   téléphones et sauvegarde. La rotation par tranches de manches et son rideau ont été remplacés.
 - Cadres de jeu, choix, résultats, classements, chronos et animations propres aux skins ; thème de base bleu Karmine
   Corp. Le mode sérieux de Culture gênante garde sa rupture sombre, avec des textes et accents éclaircis.
-- Avatars : portraits prédéfinis et aperçus du profil réutilisent le même composant ; six cadres SVG qui suivent la silhouette
+- Avatars : portraits prédéfinis et aperçus du profil réutilisent le même composant ; dix cadres SVG qui suivent la silhouette
   du skin. Les identifiants de profil restent inchangés. Voir le contrat dans [skins.md](skins.md#avatars-et-cadres--contrat-commun).
 - Croix de retrait unies : rouge vif Overwatch, rouge sombre LoL ; chrono Overwatch centré dans le bandeau et chiffres
   recentrés dans l'hexagone. Les bandes des cartes de camp restent distinctes des boutons d'action.
@@ -30,6 +30,15 @@ par l'organisateur**. La galerie permet de les examiner séparément.
 
 Le **10 novembre 2026**, GunZ et les portraits photo ont été retirés, avec leurs composants, API et dépendances
 spécifiques. La maquette active suit les six skins restants. Les anciennes captures restent des preuves historiques.
+
+## Invocation et clins d'œil (13 novembre 2026)
+
+Sept avatars rejoignent le catalogue : corbeau, tournesol, chou-fleur, tiramisu, ping-pong, voiture de course et boule à
+quatre étoiles. Chou-fleur, tiramisu et boule utilisent des SVG statiques locaux ; les autres emploient la police Twemoji embarquée.
+Quatre cadres suivent la silhouette et la palette des six univers. Le téléphone les obtient par invocation R / SR / SSR,
+avec relance libre et « Aucun » parmi les tirages R. Les ornements SVG restent fixes ; la carte et la lumière de l'invocation
+animent des calques CSS. Les E2E du profil produisent une planche des dix cadres par thème et des captures à 360×640 ;
+la validation de ce nouveau lot reste à effectuer.
 
 ## Validation locale du chantier initial (avant ce retrait)
 - Les captures de revue couvrent les sept skins, le lobby à huit joueurs, le profil, les manches, les résultats,

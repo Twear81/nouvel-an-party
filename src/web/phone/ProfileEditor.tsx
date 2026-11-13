@@ -3,8 +3,8 @@ import { useRef, useState } from "react";
 import { NAME_MAX } from "../../shared/schemas";
 import type { Profile } from "../../shared/types";
 import type { GameActions } from "../net/useGame";
-import { AVATARS, COLORS, FRAMES, randomDefaults } from "../theme/profile-options";
-import { Button, PlayerAvatar } from "../ui";
+import { AVATARS, COLORS, randomDefaults } from "../theme/profile-options";
+import { Button, FrameSummon, PlayerAvatar } from "../ui";
 
 interface Props {
   initial: Profile | null;
@@ -25,6 +25,7 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
   const [color, setColor] = useState(initial?.color ?? defaults.color);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [summoning, setSummoning] = useState(false);
 
   const profile: Profile = { name: name.trim(), avatar, frame, color };
   const submit = async () => {
@@ -44,7 +45,7 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!busy && profile.name) void submit();
+        if (!busy && !summoning && profile.name) void submit();
       }}
       // Tout défile (même l'en-tête) pour que le bouton, collé en bas, reste visible sur les très petits écrans.
       className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
@@ -96,26 +97,6 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
           })}
         </div>
 
-        <SectionTitle>Cadre</SectionTitle>
-        <div data-testid="profile-frames" className="grid grid-cols-3 gap-3">
-          {FRAMES.map((f) => (
-            <button
-              type="button"
-              key={f.id}
-              data-testid="frame-option"
-              data-ui="frame-option"
-              data-selected={frame === f.id}
-              aria-label={f.label}
-              aria-pressed={frame === f.id}
-              onClick={() => setFrame(f.id)}
-              className={`flex flex-col items-center gap-1 rounded-btn p-1 ${frame === f.id ? "bg-accent/25 ring-2 ring-accent" : "bg-surface"}`}
-            >
-              <PlayerAvatar profile={{ ...profile, frame: f.id }} size="sm" />
-              <span className="text-xs font-bold text-ink-muted">{f.label}</span>
-            </button>
-          ))}
-        </div>
-
         <SectionTitle>Couleur</SectionTitle>
         <div className="grid grid-cols-6 gap-3 px-1">
           {COLORS.map((c) => (
@@ -131,6 +112,9 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
             />
           ))}
         </div>
+
+        <SectionTitle>Cadre</SectionTitle>
+        <FrameSummon profile={profile} onFrame={setFrame} onBusy={setSummoning} />
       </div>
 
       {/* Toujours visible : collé en bas de la zone qui défile. */}
@@ -142,8 +126,8 @@ export function ProfileEditor({ initial, actions, onDone, onCancel }: Props) {
               Annuler
             </Button>
           )}
-          <Button type="submit" data-testid="profile-submit" size="md" className="min-w-0 flex-1 !px-2 !text-base" disabled={busy || !name.trim()}>
-            {!name.trim() ? "Choisis un pseudo" : initial ? "Enregistrer" : "C'est parti !"}
+          <Button type="submit" data-testid="profile-submit" size="md" className="min-w-0 flex-1 !px-2 !text-base" disabled={busy || summoning || !name.trim()}>
+            {!name.trim() ? "Choisis un pseudo" : summoning ? "Invocation…" : initial ? "Enregistrer" : "C'est parti !"}
           </Button>
         </div>
       </div>

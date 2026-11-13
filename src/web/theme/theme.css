@@ -232,6 +232,7 @@ html[data-skin] [data-ui="round-game-name"] { display: none; }
 [data-ui="avatar-face"] { clip-path: var(--avatar-clip); }
 [data-ui="avatar-option"] { position: relative; }
 [data-ui="avatar-option"] > [data-ui="avatar"] { pointer-events: none; }
+.avatar-portrait-image { width: 5.2em; height: 5.2em; }
 [data-ui="avatar-frame"] { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; fill: none; stroke-linejoin: round; }
 [data-avatar-shape="circle"] { display: var(--avatar-circle); }
 [data-avatar-shape="square"] { display: var(--avatar-square); }
@@ -248,6 +249,94 @@ html[data-skin] [data-ui="round-game-name"] { display: none; }
 .frame-sparkle [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--color-ink); stroke-width: 2; stroke-dasharray: 1 9; animation: avatar-sparkle 1.6s ease-in-out infinite; }
 /* Cadres : jamais de stroke-dashoffset animé (tout le SVG et son ombre sont redessinés à chaque image) ; l'étincelle scintille en opacité. */
 @keyframes avatar-sparkle { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* Cadres à identité : tracés (forme du skin) + ornements posés par AvatarFrame le long du contour de chaque forme.
+   Chaque skin n'a qu'à régler ces variables (et au besoin l'épaisseur/l'ombre) pour garder l'identité du cadre dans son style. */
+:root {
+  --frame-saiyan-flame: #ffd21f;
+  --frame-saiyan-core: #fff4b8;
+  --frame-saiyan-edge: #ff9a12;
+  --frame-karmine: #2f7bff;
+  --frame-karmine-light: #d6e6ff;
+  --frame-petal: #ffd51a;
+  --frame-petal-back: #f2a30a;
+  --frame-petal-edge: #8a4a05;
+  --frame-geass: #e3123c;
+  --frame-geass-glow: #ff6b8e;
+  --frame-geass-dark: #4d0518;
+  --frame-glow: 1; /* 0 : le skin supprime les halos (cadres mats) */
+}
+.frame-saiyan [data-ui="avatar-frame-outer"] { stroke: var(--frame-saiyan-edge); stroke-width: 3; filter: drop-shadow(0 0 calc(0.4em * var(--frame-glow)) var(--frame-saiyan-flame)); }
+.frame-saiyan [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--frame-saiyan-core); stroke-width: 1.2; }
+.deco-saiyan .flame-outer { fill: var(--frame-saiyan-flame); stroke: var(--frame-saiyan-edge); stroke-width: 0.9; }
+.deco-saiyan .flame-core { fill: var(--frame-saiyan-core); stroke: none; }
+
+.frame-karmine [data-ui="avatar-frame-outer"] { stroke: var(--frame-karmine); stroke-width: 3.6; filter: drop-shadow(0 0 calc(0.3em * var(--frame-glow)) var(--frame-karmine)); }
+.frame-karmine [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--frame-karmine-light); stroke-width: 1; }
+.deco-karmine path { fill: var(--frame-karmine-light); stroke: var(--frame-karmine); stroke-width: 1.2; stroke-linejoin: miter; }
+
+.frame-tournesol [data-ui="avatar-frame-outer"] { stroke: var(--frame-petal-edge); stroke-width: 3; }
+.deco-tournesol path { stroke: var(--frame-petal-edge); stroke-width: 0.7; }
+.deco-tournesol .petals-back path { fill: var(--frame-petal-back); }
+.deco-tournesol .petals-front path { fill: var(--frame-petal); }
+
+.frame-geass [data-ui="avatar-frame-outer"] { stroke: var(--frame-geass); stroke-width: 3; filter: drop-shadow(0 0 calc(0.45em * var(--frame-glow)) var(--frame-geass)); }
+.frame-geass [data-ui="avatar-frame-inner"] { display: inline; stroke: var(--frame-geass-glow); stroke-width: 0.9; stroke-dasharray: 2 1.2; }
+.deco-geass path { fill: var(--frame-geass); stroke: var(--frame-geass-dark); stroke-width: 1.1; stroke-linejoin: round; }
+
+/* ─── Invocation des cadres (FrameSummon) : couleur par rareté, animations transform/opacity sur dégradés fixes ─── */
+:root {
+  --rarity-r: #4aa8ff;
+  --rarity-sr: #b56bff;
+  --rarity-ssr: #ffc933;
+}
+.summon-stage, .summon-tag { --rarity: var(--rarity-r); }
+:is(.summon-stage, .summon-tag)[data-rarity="SR"] { --rarity: var(--rarity-sr); }
+:is(.summon-stage, .summon-tag)[data-rarity="SSR"] { --rarity: var(--rarity-ssr); }
+.summon-stage {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem;
+  padding: 1rem 0.75rem 0.85rem; border-radius: var(--radius-panel, 1rem);
+  border: 2px solid var(--rarity); background: linear-gradient(to bottom, color-mix(in srgb, var(--rarity) 6%, var(--color-bg)), color-mix(in srgb, var(--rarity) 26%, var(--color-bg)));
+  box-shadow: inset 0 0 1.6rem color-mix(in srgb, var(--rarity) 35%, transparent);
+}
+.summon-avatar { width: 9rem; height: 9rem; }
+.summon-beam {
+  position: absolute; left: 0; bottom: 0; width: 100%; height: 100%; opacity: 0; transform-origin: 50% 100%; transform: scaleY(0);
+  background: radial-gradient(ellipse 42% 100% at 50% 100%, var(--rarity) 0%, color-mix(in srgb, var(--rarity) 40%, transparent) 55%, transparent 100%);
+}
+.summon-stage[data-phase="summoning"] .summon-beam { animation: summon-beam 1.5s ease-in forwards; }
+@keyframes summon-beam { 0% { opacity: 0; transform: scaleY(0.1); } 30% { opacity: 0.9; } 85% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0.6; transform: scaleY(1.05); } }
+.summon-card {
+  display: flex; align-items: center; justify-content: center; width: 5.6rem; height: 7.6rem; border-radius: 0.7rem;
+  border: 3px solid var(--rarity-card-edge, #fff); color: #fff; font-size: 2.6rem;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--rarity) 85%, #fff), var(--rarity) 55%, color-mix(in srgb, var(--rarity) 70%, #000));
+  animation: summon-flip 1.5s cubic-bezier(.3, .1, .3, 1) forwards;
+}
+@keyframes summon-flip { 0% { transform: perspective(500px) rotateY(0) scale(0.7); } 70% { transform: perspective(500px) rotateY(900deg) scale(1.05); } 100% { transform: perspective(500px) rotateY(1080deg) scale(1.25); } }
+.summon-pop { animation: summon-pop 0.6s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes summon-pop { 0% { transform: scale(0.45); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.summon-flash {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 42%, #fff 0, color-mix(in srgb, var(--rarity) 65%, transparent) 38%, transparent 70%);
+  animation: summon-flash 0.7s ease-out both;
+}
+@keyframes summon-flash { 0% { opacity: 1; transform: scale(0.4); } 100% { opacity: 0; transform: scale(1.6); } }
+/* Rayons : seulement pour SR et SSR (un gros calque qui tourne, dégradé conique fixe). */
+.summon-rays { display: none; }
+.summon-stage[data-rarity="SR"] .summon-rays, .summon-stage[data-rarity="SSR"] .summon-rays {
+  display: block; position: absolute; left: 50%; top: 42%; width: 22rem; height: 22rem; margin: -11rem 0 0 -11rem; pointer-events: none; opacity: 0.55;
+  background: repeating-conic-gradient(from 0deg, var(--rarity) 0 7deg, transparent 7deg 22deg);
+  -webkit-mask-image: radial-gradient(circle, #000 5%, transparent 60%); mask-image: radial-gradient(circle, #000 5%, transparent 60%);
+  animation: summon-spin 14s linear infinite;
+}
+.summon-stage[data-rarity="SSR"] .summon-rays { opacity: 0.8; }
+@keyframes summon-spin { to { transform: rotate(360deg); } }
+.summon-result { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+.summon-stars { display: flex; gap: 0.15rem; font-size: 1.35rem; line-height: 1; color: var(--rarity); }
+.summon-star { opacity: 1; display: inline-block; animation: summon-star 0.4s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes summon-star { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.summon-name { display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem; font-weight: 800; color: var(--color-ink); }
+.summon-tag { padding: 0.05rem 0.5rem; border-radius: 0.4rem; font-size: 0.85rem; font-weight: 900; color: #1a1020; background: var(--rarity); }
 /* ─── mini-jeu tier-list ─── */
 /* Couleurs des étages, du plus haut (1) au plus bas (6) : classes bg-tier-1, text-tier-1, border-tier-1… */
 @theme static {

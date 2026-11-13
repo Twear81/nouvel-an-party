@@ -355,3 +355,12 @@ html[data-skin="league-of-legends"] [data-ui="countdown"][data-low="true"] [data
   html[data-skin="league-of-legends"] [data-ui="host-button"]:hover { color: #f0e6d2; box-shadow: inset 0 0 0 2px #c8aa6e, inset 0 0 0.8rem rgb(200 170 110 / 0.3); }
   html[data-skin="league-of-legends"] [data-ui="choice"]:not(:disabled):hover { border-color: #c8aa6e; color: #f0e6d2; }
 }
+
+/* Cadres à identité (saiyan, karmine, tournesol, geass) : teintes du skin ; les formes viennent d'AvatarFrame */
+html[data-skin="league-of-legends"] {
+  --frame-saiyan-flame: #f0c85a; --frame-saiyan-edge: #8a6a2a; --frame-saiyan-core: #fff3c8;
+  --frame-karmine: #2e86e8; --frame-karmine-light: #f0e6d2;
+  --frame-petal: #d8bf73; --frame-petal-back: #a68240; --frame-petal-edge: #5a4318;
+  --frame-geass: #b0183a; --frame-geass-glow: #e06080; --frame-geass-dark: #37091a;
+  --frame-glow: 1;
+}
