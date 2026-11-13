@@ -12,7 +12,7 @@ import { useFinalReveal } from "../net/useFinalReveal";
 import { playersWithProfile } from "../net/helpers";
 import { ANCHORS } from "../theme/ceremonie-assets";
 import { PlacedSouvenir } from "./scene/Souvenirs";
-import { CountUp, fireConfetti, Fireworks, HonorBoard, PlayerAvatar, Podium, PodiumSlot, RoomSet, Star, useSfxTimeline, type HonorRow } from "../ui";
+import { CountUp, fireConfetti, Fireworks, HonorBoard, PlayerAvatar, Podium, PodiumSlot, RoomSet, Star, useMusiqueScene, useSfxTimeline, type HonorRow } from "../ui";
 
 interface Ranked { id: string; profile: Profile; score: number; stars: number[]; base: number }
 
@@ -62,6 +62,8 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
     return list;
   }, [timeline, k]);
   useSfxTimeline(total > 0 ? base : null, sfx);
+  // Musique d'avant-combat pendant la révélation, puis celle du 1er dès qu'il apparaît couronné (fichiers de l'organisateur).
+  useMusiqueScene(total === 0 ? null : celebrating ? "final.premier" : "final.musique");
 
   // Confettis maison à la révélation du 1er (une seule fois, jamais au rechargement d'un classement terminé).
   const fired = useRef(false);

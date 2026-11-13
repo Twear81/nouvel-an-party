@@ -1,7 +1,7 @@
 // Adresse (hachée par Vite) de chaque fichier du catalogue. Sous Bun (tests unitaires) `import.meta.glob` n'existe pas : aucune adresse.
 function load(): Record<string, string> {
   try {
-    return import.meta.glob<string>("./*.{ogg,wav}", { eager: true, import: "default", query: "?url" });
+    return import.meta.glob<string>("./*.{ogg,wav,mp3}", { eager: true, import: "default", query: "?url" });
   } catch {
     return {};
   }

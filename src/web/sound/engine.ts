@@ -45,6 +45,8 @@ const readMuted = (): boolean => {
 export class SoundEngine {
   private mediasPrets = false;
   private ambiance = false;
+  /** Musique imposée par un écran (ex. classement final) : prioritaire sur l'ambiance du lobby. */
+  private musiqueScene: NomSon | null = null;
   private musique: { source: AudioBufferSourceNode; gain: GainNode; url: string; volume: number } | null = null;
   private musiqueTrace: string | null = null;
   private musiqueVersion = 0;
@@ -192,14 +194,22 @@ export class SoundEngine {
     this.syncMusique();
   }
 
+  /** Musique de fond d'un écran ; `null` rend la main à l'ambiance (fondu croisé dans les deux cas). */
+  setMusiqueScene(nom: NomSon | null) {
+    if (this.musiqueScene === nom) return;
+    this.musiqueScene = nom;
+    this.syncMusique();
+  }
+
   /** Alias conservé pour les planches d’écoute et les intégrations existantes. */
   setLobby(actif: boolean) { this.setAmbiance(actif); }
 
   private syncMusique() {
-    const actif = this.isTv && this.ambiance && this.gesture && !this.muted && !this.paused;
-    const def = actif ? resolveSound("lobby.musique", this.skin, this.files) : null;
+    const nom: NomSon | null = this.musiqueScene ?? (this.ambiance ? "lobby.musique" : null);
+    const actif = this.isTv && nom !== null && this.gesture && !this.muted && !this.paused;
+    const def = actif && nom ? resolveSound(nom, this.skin, this.files) : null;
     if (this.silent) {
-      if (def && this.musiqueTrace !== def.url) (window.__sfx ??= []).push({ nom: "lobby.musique", skin: this.skin, fichier: def.url });
+      if (def && nom && this.musiqueTrace !== def.url) (window.__sfx ??= []).push({ nom, skin: this.skin, fichier: def.url });
       this.musiqueTrace = def?.url ?? null;
       return;
     }

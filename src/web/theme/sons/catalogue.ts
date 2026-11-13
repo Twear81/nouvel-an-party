@@ -5,7 +5,7 @@ import type { SkinId } from "../../../shared/skins";
 import ambiances from "./ambiances.json";
 
 export interface SonDef {
-  /** Fichier embarqué de ce dossier. */
+  /** Fichier embarqué de ce dossier ; `""` = rien de livré, le son n'existe que si l'organisateur dépose le sien (config/medias/sons/). */
   fichier: string;
   /** Volume de base 0–1 (multiplié par le réglage `volume_sons` et par l'option `volume`). */
   volume: number;
@@ -49,6 +49,9 @@ export const SONS = {
   "ceremonie.gagnant": { fichier: "bravo.ogg", volume: 0.7 },
   "final.tambour": { fichier: "roulement.ogg", volume: 0.7 },
   "final.compteur": { fichier: "tic.ogg", volume: 0.3 },
+  // Musiques du classement final, fournies par l'organisateur : final.musique pendant la révélation, final.premier pour le 1er.
+  "final.musique": { fichier: "", volume: 0.42 },
+  "final.premier": { fichier: "", volume: 0.6 },
   "transition.entree": { fichier: "whoosh-entree.ogg", volume: 0.4 },
   "transition.sortie": { fichier: "whoosh-sortie.ogg", volume: 0.4 },
   "applaudissements": { fichier: "applaudissements.ogg", volume: 0.6 },

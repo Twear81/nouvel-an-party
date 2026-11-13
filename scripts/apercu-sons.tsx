@@ -43,6 +43,8 @@ const QUAND: Record<NomSon, string> = {
   "final.fanfare": "Le 1er du classement final est révélé (juste après le long roulement).",
   "final.tambour": "Roulement de tambour avant la révélation du 1er (rejoué en boucle pendant l'attente).",
   "final.compteur": "Tic du score qui défile au classement final, de plus en plus aigu.",
+  "final.musique": "Musique du classement final, en boucle pendant toute la révélation (fichier de l'organisateur).",
+  "final.premier": "Musique du 1er, dès qu'il apparaît couronné dans la TV (fichier de l'organisateur).",
   "ceremonie.souvenir": "Cérémonie : un souvenir de la partie se pose dans la pièce.",
   "ceremonie.enveloppe": "Cérémonie : l'enveloppe d'un bonus glisse jusqu'au centre.",
   "ceremonie.tic": "Cérémonie : un tic de la machine à sous ou du projecteur (ralentit avec elle).",
@@ -69,7 +71,7 @@ const GROUPES: { titre: string; noms: NomSon[] }[] = [
   { titre: "Manche", noms: ["manche.intro", "reponse.recue", "reponse.toutes", "temps.ajoute", "pause", "reprise"] },
   { titre: "Chrono", noms: ["chrono.tic", "chrono.fin", "minuit.tic", "minuit.fete"] },
   { titre: "Résultats", noms: ["resultats.arrivee", "roulement", "tension", "applaudissements", "echec.trombone", "points.gagnes"] },
-  { titre: "Cérémonie et classement final", noms: ["ceremonie.souvenir", "ceremonie.enveloppe", "ceremonie.tic", "ceremonie.flash", "ceremonie.etoile", "ceremonie.gagnant", "final.compteur", "final.tambour", "final.fanfare"] },
+  { titre: "Cérémonie et classement final", noms: ["ceremonie.souvenir", "ceremonie.enveloppe", "ceremonie.tic", "ceremonie.flash", "ceremonie.etoile", "ceremonie.gagnant", "final.musique", "final.compteur", "final.tambour", "final.fanfare", "final.premier"] },
   { titre: "Transitions", noms: ["transition.entree", "transition.sortie"] },
   { titre: "Interface et verdicts", noms: ["ui.clic", "bonne.reponse", "mauvaise.reponse"] },
 ];
