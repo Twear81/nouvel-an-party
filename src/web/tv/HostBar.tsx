@@ -47,11 +47,11 @@ export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot
               {paused ? <PlayIcon /> : <PauseIcon />}
               {paused ? "Reprendre" : "Pause"}
             </Button>
-            <Button data-ui="host-button" data-testid="host-skip" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={skip}>
+            {!midnight && <Button data-ui="host-button" data-testid="host-skip" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={skip}>
               <SkipIcon />
               Passer
-            </Button>
-            {phase === "playing" && (
+            </Button>}
+            {phase === "playing" && !midnight && (
               <Button data-ui="host-button" data-testid="host-addtime" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={() => void actions.addTime(10).catch(() => {})}>
                 <ClockIcon />
                 +10 s
