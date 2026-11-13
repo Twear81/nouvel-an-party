@@ -77,7 +77,7 @@ export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
           {screen}
         </motion.div>
       </AnimatePresence></PauseZoom>}
-      {host && (snapshot.phase !== "lobby" || snapshot.midnight) && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || (snapshot.phase === "playing" && !!round?.interlude)} />}
+      {host && (snapshot.phase !== "lobby" || snapshot.midnight) && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || snapshot.phase === "ceremony" || snapshot.phase === "final" || (snapshot.phase === "playing" && !!round?.interlude)} />}
       <SoundBadge visible={snapshot.phase === "lobby"} />
       <PausedOverlay show={snapshot.paused} big />
       {snapshot.midnight && <MidnightOverlay midnight={snapshot.midnight} />}

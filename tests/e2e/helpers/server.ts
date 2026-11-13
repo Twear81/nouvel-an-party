@@ -15,6 +15,8 @@ export interface ServerOptions {
   /** Active la cérémonie dans les tests dédiés (courte par défaut). */
   outro?: boolean;
   ceremonyTimeScale?: number;
+  /** Facteur sur la durée du classement final (défaut du fixture : 0,5 ; 1 = durée réelle). */
+  finalTimeScale?: number;
   /** Durée du chrono de chaque mini-jeu (s). Défaut du fixture : 8. */
   duree?: number;
   /** Utilise le vrai dossier config/ (tous les mini-jeux, plafonds compris) avec seulement partie.yaml de test. Pour les captures. */
@@ -103,7 +105,7 @@ export async function createServer(opts: ServerOptions = {}): Promise<TestServer
       logs = "";
       const p = spawn("bun", ["src/server/index.ts", "--config", configDir, "--data", dataDir, "--no-open"], {
         cwd: ROOT,
-        env: { ...process.env, PARTY_HTTP_PORT: String(httpPort), PARTY_HTTPS_PORT: String(httpsPort), PARTY_CEREMONY_TIME_SCALE: String(opts.ceremonyTimeScale ?? 0.03) },
+        env: { ...process.env, PARTY_HTTP_PORT: String(httpPort), PARTY_HTTPS_PORT: String(httpsPort), PARTY_CEREMONY_TIME_SCALE: String(opts.ceremonyTimeScale ?? 0.03), PARTY_FINAL_TIME_SCALE: String(opts.finalTimeScale ?? 0.5) },
         stdio: ["ignore", "pipe", "pipe"],
       });
       proc = p;

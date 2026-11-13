@@ -116,7 +116,11 @@ export function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
     case "ceremony":
       return <CeremonyPhone snapshot={snapshot} />;
     case "final": {
-      if (!finalReveal.done) {
+      // Son rang n'apparaît qu'une fois sa conversion d'étoiles finie sur la TV ; un spectateur attend la fin.
+      const order = snapshot.finalReveal?.ranking ?? playersWithProfile(snapshot).filter((p) => snapshot.finalReveal?.playerIds.includes(p.id)).sort((a, b) => b.score - a.score).map((p) => p.id);
+      const myIndex = order.indexOf(me.id);
+      const myRankShown = myIndex >= 0 ? finalReveal.elapsed >= (finalReveal.timeline.revealedAtMs[myIndex] ?? Infinity) : finalReveal.done;
+      if (!myRankShown) {
         return (
           <Center testId="phone-final-wait">
             <WatchingEyes />

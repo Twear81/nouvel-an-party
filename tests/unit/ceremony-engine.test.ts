@@ -51,6 +51,20 @@ describe("moteur de cérémonie", () => {
     t.engine.skip(); t.clock.advance(1_000_000);
     expect(t.engine.snapshot(null).players).toEqual(final.players);
   });
+  it("le classement final garde les étoiles de la cérémonie et son classement, sauvegardés avec lui", () => {
+    const t = ceremony();
+    const info = t.engine.snapshot(null).ceremony!;
+    t.clock.advance(1_000_000);
+    const final = t.engine.snapshot(null);
+    const reveal = final.finalReveal!;
+    const stars: Record<string, number[]> = {};
+    for (const a of info.awards) for (const id of a.winners) (stars[id] ??= []).push(a.points);
+    expect(reveal.stars ?? {}).toEqual(stars);
+    expect(reveal.ranking).toEqual([...final.players].sort((a, b) => b.score - a.score || 0).map((p) => p.id).filter((id) => reveal.playerIds.includes(id)));
+    // Score de base = score final moins les étoiles.
+    for (const p of final.players) expect(p.score - (stars[p.id] ?? []).reduce((a, b) => a + b, 0)).toBe(info.scoresBefore[p.id] ?? 0);
+    expect(t.persistence.data!.finalReveal).toEqual(reveal);
+  });
   it("fige les étapes en pause, Passer avance d'une étape tout en restant en pause", () => {
     const t = ceremony();
     t.engine.pause();
@@ -95,7 +109,7 @@ describe("moteur de cérémonie", () => {
 });
 
 it("final : Pause fige la révélation et Passer rejoint l'instant suivant", async () => {
-  const { finalRevealElapsed, finalRevealTimeline } = await import("../../src/shared/final-reveal");
+  const { finalRevealElapsed, finalTimelineOf } = await import("../../src/shared/final-reveal");
   const t = ceremony(); t.clock.advance(1_000_000);
   const reveal = () => t.engine.snapshot(null).finalReveal!;
   t.engine.pause();
@@ -107,10 +121,10 @@ it("final : Pause fige la révélation et Passer rejoint l'instant suivant", asy
   while (t.engine.snapshot(null).phase === "ceremony") t.engine.skip();
   expect(finalRevealElapsed(reveal(), t.clock.now())).toBe(0);
   t.engine.pause(); t.clock.advance(5000); t.engine.skip();
-  expect(finalRevealElapsed(reveal(), t.clock.now())).toBe(finalRevealTimeline(reveal().playerIds.length).steps[0]!);
+  expect(finalRevealElapsed(reveal(), t.clock.now())).toBe(finalTimelineOf(reveal()).beats[1]!.startMs);
   expect(t.engine.snapshot(null).paused).toBe(true);
   t.engine.resume(); t.clock.advance(10);
-  expect(finalRevealElapsed(reveal(), t.clock.now())).toBe(finalRevealTimeline(reveal().playerIds.length).steps[0]! + 10);
+  expect(finalRevealElapsed(reveal(), t.clock.now())).toBe(finalTimelineOf(reveal()).beats[1]!.startMs + 10);
 });
 
 it("un crash après résultats ne recompte ni la manche ni ses gains", () => {

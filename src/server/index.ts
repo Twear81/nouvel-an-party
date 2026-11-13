@@ -50,6 +50,7 @@ async function main() {
     joinUrl,
     awardCategories,
     ceremonyTimeScale: Number(process.env.PARTY_CEREMONY_TIME_SCALE ?? 1),
+    finalTimeScale: Number(process.env.PARTY_FINAL_TIME_SCALE ?? 1),
     onChange: broadcast,
     persistence: filePersistence(paths.data),
     dejaVu: fileDejaVu(paths.data),

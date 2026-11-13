@@ -42,7 +42,14 @@ Déroulé d'une manche
     resultats.arrivee     les résultats arrivent
     points.gagnes         fin de la révélation, les points sont gagnés
 Fin de partie et scènes
-    final.fanfare         fanfare du classement final
+    final.fanfare         fanfare du classement final (au moment où le 1er est révélé)
+    final.tambour         roulement de tambour avant le 1er (rejoué en boucle pendant l'attente)
+    ceremonie.souvenir    un souvenir se pose dans la pièce
+    ceremonie.enveloppe   l'enveloppe d'un bonus glisse jusqu'au centre
+    ceremonie.tic         tic de la machine à sous et du projecteur
+    ceremonie.flash       le projecteur s'arrête sur le gagnant
+    ceremonie.etoile      une étoile se pose (cérémonie) ou se convertit en points (classement final)
+    ceremonie.gagnant     bravo pour le gagnant du bonus
     transition.entree     scène de changement d'univers : entrée
     transition.sortie     scène de changement d'univers : sortie
 Pour les mini-jeux

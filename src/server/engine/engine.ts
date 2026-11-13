@@ -6,12 +6,12 @@
 // Une manche « interlude » saute uniquement son annonce de manche, jamais l'ouverture de la partie.
 import { randomBytes, randomUUID } from "node:crypto";
 import type { RoundContext, RoundOutcome } from "../../minigames/contract";
-import { ceremonyElapsed, ceremonyTimeline, ceremonyStepAt, revealedAwards, revealedSouvenirs, type CeremonyInfo, type Keepsake, type RoundSummary } from "../../shared/ceremony";
+import { ceremonyElapsed, ceremonyTimeline, ceremonyStepAt, revealedAwards, revealedSouvenirs, type Award, type CeremonyInfo, type Keepsake, type RoundSummary } from "../../shared/ceremony";
 import { DEFAULT_AWARD_CATEGORIES, type AwardCategoryContent } from "../outro-content";
 import { drawAwards, chooseSouvenirs, type OutroSettings } from "./awards";
 import { pruneKeepsakes, sanitizeHistory, sanitizeStats, sanitizeOpinions, sanitizeKeepsakes } from "./history";
 import { activeNow } from "../../shared/clock";
-import { finalRevealElapsed, finalRevealTimeline, type FinalRevealInfo } from "../../shared/final-reveal";
+import { finalRevealElapsed, finalTimelineOf, type FinalRevealInfo } from "../../shared/final-reveal";
 import { midnightYear, nextOccurrence, type MidnightInfo } from "../../shared/midnight";
 import { profileSchema } from "../../shared/schemas";
 import { shuffle } from "../../shared/shuffle";
@@ -95,6 +95,8 @@ export interface EngineOptions {
   awardCategories?: AwardCategoryContent[];
   /** Durées réduites pour les parcours E2E, 1 en soirée. */
   ceremonyTimeScale?: number;
+  /** Idem pour le classement final (1 en soirée). */
+  finalTimeScale?: number;
 }
 
 interface PlayerRecord {
@@ -272,8 +274,9 @@ export class GameEngine {
     if (this.phase === "final" && this.finalReveal) {
       const info = this.finalReveal;
       const elapsed = finalRevealElapsed(info, this.clock.now());
-      const timeline = finalRevealTimeline(info.playerIds.length);
-      const next = [...timeline.steps, timeline.durationMs].find((at) => at > elapsed);
+      const timeline = finalTimelineOf(info);
+      // « Passer » saute à l'étape suivante (un joueur à la fois), pas à la sous-étape.
+      const next = [...timeline.beats.map((b) => b.startMs), timeline.durationMs].find((at) => at > elapsed);
       if (next !== undefined) info.startedAt -= next - elapsed;
       this.save(); this.changed();
     } else if (this.phase === "ceremony") this.skipCeremony();
@@ -477,10 +480,22 @@ export class GameEngine {
     } else this.nextRound();
   }
 
-  private beginFinal(playerIds: PlayerId[], souvenirs: Keepsake[] = []) {
+  private beginFinal(playerIds: PlayerId[], souvenirs: Keepsake[] = [], awards: Award[] = []) {
     this.phase = "final";
     this.paused = false;
-    this.finalReveal = { startedAt: this.clock.now(), playerIds, ...(souvenirs.length ? { souvenirs } : {}) };
+    // Classement figé ici : la TV, les téléphones et la chronologie partagée s'appuient sur le même ordre.
+    const ranking = playerIds.filter((id) => this.players.has(id))
+      .sort((a, b) => this.players.get(b)!.score - this.players.get(a)!.score
+        || (this.players.get(a)!.profile?.name ?? "").localeCompare(this.players.get(b)!.profile?.name ?? ""));
+    const stars: Record<PlayerId, number[]> = {};
+    for (const award of awards) for (const id of award.winners) if (ranking.includes(id) && award.points > 0) (stars[id] ??= []).push(award.points);
+    const configuredScale = this.opts.finalTimeScale ?? 1;
+    this.finalReveal = {
+      startedAt: this.clock.now(), playerIds, ranking,
+      ...(Object.keys(stars).length ? { stars } : {}),
+      ...(configuredScale !== 1 && Number.isFinite(configuredScale) && configuredScale > 0 ? { timeScale: Math.max(0.01, configuredScale) } : {}),
+      ...(souvenirs.length ? { souvenirs } : {}),
+    };
     this.freezeForMidnight();
     this.save();
     this.changed();
@@ -549,7 +564,7 @@ export class GameEngine {
     // Affectation depuis les scores initiaux, jamais d'addition rejouable après un crash.
     for (const id of info.playerIds) { const p = this.players.get(id); if (p) p.score = finalScores[id] ?? p.score; }
     this.ceremony = null;
-    this.beginFinal(info.playerIds, info.souvenirs);
+    this.beginFinal(info.playerIds, info.souvenirs, info.awards);
   }
 
   private ceremonyView(viewer: PlayerId | null): CeremonyInfo | null {

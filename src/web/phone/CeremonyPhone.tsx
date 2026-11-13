@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { GameSnapshot } from "../../shared/types";
-import { Panel, WatchingEyes } from "../ui";
+import { Panel, Star, WatchingEyes } from "../ui";
 
 export function CeremonyPhone({ snapshot }: { snapshot: GameSnapshot }) {
   const info = snapshot.ceremony;
@@ -12,6 +12,6 @@ export function CeremonyPhone({ snapshot }: { snapshot: GameSnapshot }) {
   }, [latest?.id]);
   return <div data-testid="phone-ceremony" data-step={info?.step?.kind ?? "intro"} className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 text-center">
     <WatchingEyes /><h1 className="font-display text-3xl text-gold-gradient">Regarde la TV !</h1>
-    {latest && <Panel data-testid="phone-award" data-award={latest.id} className="w-full p-5"><p className="text-5xl">{latest.emoji}</p><h2 className="font-display text-3xl">{latest.title}</h2><p className="mt-2 font-num text-4xl text-accent">+{latest.points}</p><p className="mt-2 text-ink-muted">{latest.statLabel}</p></Panel>}
+    {latest && <Panel data-testid="phone-award" data-award={latest.id} className="flex w-full flex-col items-center p-5"><Star size={5} /><p className="mt-2 text-5xl">{latest.emoji}</p><h2 className="font-display text-3xl">{latest.title}</h2><p className="mt-2 text-ink-muted">{latest.statLabel}</p></Panel>}
   </div>;
 }

@@ -1,6 +1,6 @@
 // Sections « Chrono » et « Écrans TV » : lobby, final, et le chrono des 10 dernières secondes sous chaque skin.
 import { useEffect, useMemo, useState } from "react";
-import { FINAL_ENTRY_MS, finalRevealTimeline } from "../../src/shared/final-reveal";
+import { finalRevealTimeline } from "../../src/shared/final-reveal";
 import type { SkinId } from "../../src/shared/skins";
 import type { GameSnapshot, RoundInfo } from "../../src/shared/types";
 import { play } from "../../src/web/sound/engine";
@@ -39,10 +39,13 @@ const SCORES_FINAUX = [1450, 1280, 1190, 860, 740, 520, 410, 230];
 
 function SceneFinal({ env }: { env: Env }) {
   const joueurs = useMemo(() => env.joueurs.map((p, i) => ({ ...p, score: SCORES_FINAUX[i]! })), [env.joueurs]);
-  const duree = finalRevealTimeline(joueurs.length).durationMs + FINAL_ENTRY_MS + 3000;
+  // Classement figé et deux étoiles pour le 6e, une pour le 2e : de quoi voir la conversion.
+  const ranking = joueurs.map((p) => p.id);
+  const stars = { [joueurs[5]!.id]: [120, 120], [joueurs[1]!.id]: [120] };
+  const duree = finalRevealTimeline(ranking.map((id) => stars[id]?.length ?? 0)).durationMs + 3000;
   const snapshot = useMemo<GameSnapshot>(() => ({
     ...snapshotDeBase("final", { joueurs, skin: env.skin, paused: env.pause }),
-    finalReveal: { startedAt: T0, playerIds: joueurs.map((p) => p.id) },
+    finalReveal: { startedAt: T0, playerIds: ranking, ranking, stars },
   }), [joueurs, env.skin, env.pause]);
   const { definirDuree, depart } = env;
   useEffect(() => definirDuree(duree), [duree, definirDuree]);

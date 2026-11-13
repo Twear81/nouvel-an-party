@@ -100,7 +100,7 @@ export interface CeremonyStep {
 /** Durées (ms) de chaque étape, avant application de `timeScale`. */
 export const CEREMONY_TIMING = {
   introMs: 3500,
-  souvenirMs: 5000,
+  souvenirMs: 6500,
   provisoireMs: 8000,
   rouletteMs: 4500,
   carteMs: 3000,

@@ -40,6 +40,14 @@ export const SONS = {
   "points.gagnes": { fichier: "points.ogg", volume: 0.5, variation: 15 },
   // Fin de partie et scènes
   "final.fanfare": { fichier: "fanfare.ogg", volume: 0.8 },
+  // Cérémonie des bonus et classement final : réutilisent des sons existants (voir docs/mise-en-scene.md, sons manquants)
+  "ceremonie.souvenir": { fichier: "jeton.ogg", volume: 0.6 },
+  "ceremonie.enveloppe": { fichier: "whoosh-entree.ogg", volume: 0.5 },
+  "ceremonie.tic": { fichier: "tic.ogg", volume: 0.42, variation: 8 },
+  "ceremonie.flash": { fichier: "boum.ogg", volume: 0.6 },
+  "ceremonie.etoile": { fichier: "points.ogg", volume: 0.6, variation: 10 },
+  "ceremonie.gagnant": { fichier: "bravo.ogg", volume: 0.7 },
+  "final.tambour": { fichier: "roulement.ogg", volume: 0.7 },
   "transition.entree": { fichier: "whoosh-entree.ogg", volume: 0.4 },
   "transition.sortie": { fichier: "whoosh-sortie.ogg", volume: 0.4 },
   "applaudissements": { fichier: "applaudissements.ogg", volume: 0.6 },
