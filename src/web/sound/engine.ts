@@ -7,6 +7,7 @@
 import { SKINS } from "../../shared/skins";
 import type { NomSon } from "../theme/sons/catalogue";
 import { allSounds, resolveSound, type SonResolu } from "./resolve";
+import { maintenirValeur } from "./automation";
 
 export type SoundState = "locked" | "on" | "muted";
 
@@ -247,7 +248,7 @@ export class SoundEngine {
     this.musique = null;
     if (!ancienne || !this.ctx) return;
     const t = this.ctx.currentTime;
-    ancienne.gain.gain.cancelAndHoldAtTime(t);
+    maintenirValeur(ancienne.gain.gain, t);
     ancienne.gain.gain.linearRampToValueAtTime(0, t + 0.8);
     ancienne.source.stop(t + 0.85);
   }
@@ -259,7 +260,7 @@ export class SoundEngine {
     if (!this.musique) return;
     const volume = this.musique.volume;
     const gain = this.musique.gain.gain;
-    gain.cancelAndHoldAtTime(t);
+    maintenirValeur(gain, t);
     gain.linearRampToValueAtTime(volume * 0.25, t + 0.06);
     gain.setValueAtTime(volume * 0.25, this.musiqueBaisseJusqua);
     gain.linearRampToValueAtTime(volume, this.musiqueBaisseJusqua + 0.6);
