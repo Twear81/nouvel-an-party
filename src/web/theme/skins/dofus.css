@@ -210,3 +210,12 @@ html[data-skin="dofus"] [data-ui="choice"][data-selected="true"] { animation: do
 html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-shape"],
 html[data-skin="dofus"] [data-ui="countdown"][data-variant="heart"][data-low="true"] [data-ui="countdown-fill"] { animation: dofus-beat 0.8s ease-in-out infinite; }
 
+
+/* Cadres à identité (saiyan, karmine, tournesol, geass) : teintes du skin ; les formes viennent d'AvatarFrame */
+html[data-skin="dofus"] {
+  --frame-saiyan-flame: #ffb52e; --frame-saiyan-edge: #7a3a05; --frame-saiyan-core: #fff0a0;
+  --frame-karmine: #3a78d8; --frame-karmine-light: #e3ecff;
+  --frame-petal: #eacb37; --frame-petal-back: #c88e1e; --frame-petal-edge: #5c3a0a;
+  --frame-geass: #c8102e; --frame-geass-glow: #ea5569; --frame-geass-dark: #2a0710;
+  --frame-glow: 0.4;
+}

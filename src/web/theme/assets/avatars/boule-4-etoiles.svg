@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="b" cx="0.35" cy="0.3" r="0.85">
+      <stop offset="0" stop-color="#ffe27a"/>
+      <stop offset="0.45" stop-color="#ffa21a"/>
+      <stop offset="1" stop-color="#d9610a"/>
+    </radialGradient>
+  </defs>
+  <circle cx="64" cy="64" r="58" fill="url(#b)" stroke="#a63f05" stroke-width="3"/>
+  <!-- quatre étoiles rouges -->
+  <g fill="#d6141f" stroke="#8d0a12" stroke-width="1.2" stroke-linejoin="round">
+    <polygon points="0,-16 4.7,-6.5 15.2,-5 7.6,2.4 9.4,12.9 0,8 -9.4,12.9 -7.6,2.4 -15.2,-5 -4.7,-6.5" transform="translate(64 41) scale(0.62)"/>
+    <polygon points="0,-16 4.7,-6.5 15.2,-5 7.6,2.4 9.4,12.9 0,8 -9.4,12.9 -7.6,2.4 -15.2,-5 -4.7,-6.5" transform="translate(41 64) scale(0.62)"/>
+    <polygon points="0,-16 4.7,-6.5 15.2,-5 7.6,2.4 9.4,12.9 0,8 -9.4,12.9 -7.6,2.4 -15.2,-5 -4.7,-6.5" transform="translate(87 64) scale(0.62)"/>
+    <polygon points="0,-16 4.7,-6.5 15.2,-5 7.6,2.4 9.4,12.9 0,8 -9.4,12.9 -7.6,2.4 -15.2,-5 -4.7,-6.5" transform="translate(64 87) scale(0.62)"/>
+  </g>
+  <!-- reflet -->
+  <ellipse cx="42" cy="30" rx="16" ry="9" fill="#fff" opacity=".45" transform="rotate(-35 42 30)"/>
+</svg>

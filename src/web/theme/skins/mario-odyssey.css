@@ -303,3 +303,8 @@ html[data-skin="mario-odyssey"] [data-ui="choice"]:active, html[data-skin="mario
 
 /* avatar : disque intérieur cerclé de blanc comme les pastilles du jeu */
 html[data-skin="mario-odyssey"] [data-ui="avatar-face"] { box-shadow: inset 0 0 0 0.06em #ffffff, 0 0.05em 0.12em rgb(120 0 10 / 0.35); }
+
+/* Cadres à identité (saiyan, karmine, tournesol, geass) : teintes du skin ; les formes viennent d'AvatarFrame */
+html[data-skin="mario-odyssey"] {
+  --frame-saiyan-flame: #ffc400; --frame-saiyan-edge: #d86a00; --frame-saiyan-core: #fff6a0; --frame-karmine: #1f6fd0; --frame-karmine-light: #ffffff; --frame-petal: #ffe21a; --frame-petal-back: #ff9d00; --frame-petal-edge: #8a3d00; --frame-geass: #d81f26; --frame-geass-dark: #5a0a10; --frame-glow: 0.3;
+}

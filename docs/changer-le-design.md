@@ -34,11 +34,30 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 
 ### Avatars, cadres, couleurs
 - `AVATARS` : ajouter `{ id, label, emoji }`. L'`id` est enregistré dans le profil : ne pas renommer un id existant en cours de soirée.
-  Pour utiliser des images à la place des emoji, adapter `PlayerAvatar.tsx` (une seule branche à changer).
-- `FRAMES` : ajouter `{ id, label, className }` puis écrire la classe `.frame-<nom>` dans `theme.css`
+  Vérifier que l'emoji existe dans Twemoji 15 (police embarquée : un emoji plus récent s'afficherait en carré).
+  **Avatar à image** (ce qui n'a pas d'emoji : chou-fleur, tiramisu, boule à 4 étoiles) : déposer un SVG statique carré
+  (viewBox 128, sans animation) dans `src/web/theme/assets/avatars/`, le déclarer dans `src/web/theme/avatar-images.ts`
+  (clé = id) et mettre `image: true` sur l'entrée de `AVATARS` ; `emoji` reste obligatoire (repli des textes et de la
+  signature Overwatch). `PlayerAvatar` affiche l'image à la place de l'emoji (même encombrement) : choix, aperçus,
+  TV et skins en profitent. Les images sont dans un module à part pour que les tests (qui importent `profile-options.ts`) ne chargent pas de SVG.
+- `FRAMES` : ajouter `{ id, label, className, rarity }` puis écrire la classe `.frame-<nom>` dans `theme.css`
   (`--p` = couleur du joueur ; traits SVG `avatar-frame-outer` / `avatar-frame-inner`, coordonnées sur 100).
   Le skin choisit la silhouette via les jetons `--avatar-*` : voir [le contrat des avatars](skins.md#avatars-et-cadres--contrat-commun).
   Ne pas redessiner le portrait dans le profil : les choix et aperçus réutilisent `PlayerAvatar`.
+  Un cadre à ornements (flammes, pétales, sceaux) les déclare dans `Decor` d'`AvatarFrame.tsx` : ils sont posés le long du
+  contour de chaque forme (cercle, carré, hexagone) et colorés par des variables `--frame-*` que chaque skin peut régler
+  (voir [skins.md](skins.md#avatars-et-cadres--contrat-commun)). Ces ornements sont fixes : l'invocation anime ses calques CSS
+  en `transform` / `opacity`, sans redessiner le SVG du portrait.
+- **Invocation (gacha)** : le téléphone ne propose pas de liste de cadres. `FrameSummon` (`src/web/ui/FrameSummon.tsx`)
+  tire un cadre : « Invoquer » puis « Relancer », animation d'environ 1,5 s (lumière et carte, couleur par rareté), puis le
+  cadre apparaît sur l'avatar. Rareté de chaque cadre = champ `rarity` de `FRAMES` (`R` : aucun, pointillés, double ;
+  `SR` : or, néon, Bleu Karmine, pétales de tournesol ; `SSR` : étincelles, Aura Super Saiyan, Sceau du Geass). Chances
+  `RARITY_RATES` = 60 % R, 30 % SR, 10 % SSR (puis cadre au hasard dans la rareté) ; étoiles `RARITY_STARS` (3 / 4 / 5).
+  Les couleurs de rareté sont `--rarity-r|sr|ssr` dans `theme.css`. Le tirage utilise `Math.random` côté téléphone (choix de
+  profil, validé par le schéma côté serveur) ; vibration courte au SR/SSR sur Android.
+  **Tests** : `localStorage["summon-force"] = "<id du cadre>"` impose le prochain tirage ; l'E2E utilise
+  `summonFrame(page, id)` (`tests/e2e/helpers/party.ts`). `data-testid` : `frame-summon` (`data-phase` = idle | summoning | done),
+  `frame-summon-button`, `frame-result` (`data-frame`, `data-rarity`), `frame-name`. `frame-summon` porte aussi `data-frame`.
 - `COLORS` : liste de couleurs hex.
 
 ## Où est chaque écran
@@ -54,7 +73,7 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 | TV classement final (révélation, podium, confettis) | `src/web/tv/FinalScreen.tsx` |
 | Contrôles du maître du jeu (Pause, Passer, +10 s, Lobby : bande fine toujours visible en bas à droite) | `src/web/tv/HostBar.tsx` |
 | Routage téléphone + lobby/intro/résultats/final | `src/web/phone/PhoneApp.tsx` |
-| Création / édition du profil | `src/web/phone/ProfileEditor.tsx` |
+| Création / édition du profil (avatar, couleur, invocation du cadre) | `src/web/phone/ProfileEditor.tsx`, `src/web/ui/FrameSummon.tsx` |
 | Mini-jeu « Qui est le plus… ? » | `src/minigames/qui-est-le-plus/views.tsx` |
 | Mini-jeu « Ceci ou Cela » (deux réponses face à face, camps en résultats) | `src/minigames/ceci-ou-cela/views.tsx` |
 | Mini-jeu « Culture gênante » (interlude : une scène par fichier, `Accroche`, `Bascule`, `Question`, `Reveal`, `Phone`) | `src/minigames/culture-genante/` |

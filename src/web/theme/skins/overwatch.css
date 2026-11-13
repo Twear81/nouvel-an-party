@@ -417,3 +417,12 @@ html[data-skin="overwatch"] [data-ui="countdown"][data-low="true"][data-variant=
 
 /* L’encre italique dépasse la chasse : le rognage doit garder la dernière lettre et ses jambages. */
 html[data-skin="overwatch"] :is(.truncate, .line-clamp-2, .text-gold-gradient) { padding-inline-end: 0.18em; padding-block: 0.1em; }
+
+/* Cadres à identité (saiyan, karmine, tournesol, geass) : teintes du skin ; les formes viennent d'AvatarFrame */
+html[data-skin="overwatch"] {
+  --frame-saiyan-flame: #ff9f1c; --frame-saiyan-edge: #c46a00; --frame-saiyan-core: #fff1c4;
+  --frame-karmine: #2e9bff; --frame-karmine-light: #eaf7ff;
+  --frame-petal: #ffdc51; --frame-petal-back: #ff9f1c; --frame-petal-edge: #735015;
+  --frame-geass: #ff2d55; --frame-geass-glow: #ff8aa0; --frame-geass-dark: #5a122c;
+  --frame-glow: 1;
+}

@@ -69,7 +69,8 @@ redéfinit pas.
 | `result-bar` | `ResultBar` (barre de résultat animée) | `data-highlight`, partie `result-bar-fill` |
 | `countdown` | `Countdown` | `data-low`, `data-variant` (voir « Chrono »), `--p` = part restante (0 → 1) |
 | `avatar` | `PlayerAvatar` | `data-frame`, `data-dimmed`, parties `avatar-face` (portrait : forme, fond), `avatar-frame` (SVG), `avatar-frame-outer`, `avatar-frame-inner`, `avatar-badge` |
-| `avatar-option`, `frame-option` | choix du profil | `data-selected` ; les portraits et aperçus réutilisent `PlayerAvatar` |
+| `avatar-option` | choix de l'avatar du profil | `data-selected` ; les aperçus réutilisent `PlayerAvatar` |
+| `frame-summon` | invocation du cadre (gacha) sur le téléphone | `data-phase`, `data-rarity` ; parties `summon-stage`, `summon-card`, `summon-beam`, `summon-rays`, `summon-flash`, `summon-result` (`data-frame`, `data-rarity`), `rarity-tag` |
 | `remove-player` | croix de retrait d'un joueur dans le lobby TV | action distincte des cartes de choix ; fond uni rouge vif (Overwatch) ou rouge sombre (LoL) |
 | `text-field`, `text-field-shell` | champs de pseudo, mot et phrase ; enveloppe des préfixes et compteurs | `:focus`, `::placeholder` ; garder les bordures d'état (`border-good`…) |
 | `animated-number` | grand chiffre animé | le skin peut régler son ombre sans changer le mouvement |
@@ -107,16 +108,32 @@ Sur le téléphone, le chrono garde une forme compacte (barre) habillée par le 
 ### Avatars et cadres : contrat commun
 Le profil conserve ses identifiants d'avatar et de cadre ; un changement de skin ne les modifie pas.
 `PlayerAvatar` affiche le portrait prédéfini et `AvatarFrame` trace le décor, sans connaître les skins.
-Pour remplacer les emojis par d'autres portraits, modifier le contenu de `PlayerAvatar` : les choix du profil,
-les aperçus des six cadres et les écrans de jeu en profitent ensemble.
+Pour remplacer les emojis par d'autres portraits, modifier le contenu de `PlayerAvatar` (déjà prévu pour les avatars à image :
+`avatar-images.ts`) : les choix du profil, l'invocation des cadres et les écrans de jeu en profitent ensemble.
 
 Le skin définit sa silhouette avec `--avatar-radius`, `--avatar-clip` et les trois commutateurs
 `--avatar-circle`, `--avatar-square`, `--avatar-hexagon` (`inline` pour la forme choisie, `none` pour les autres).
 Par défaut : cercle, rayon `50%`, aucun découpage. Dofus, Rocket League et Plague Tale emploient le carré
 arrondi (`.2em`), Overwatch l'hexagone, LoL et Mario le cercle. Portrait, cadre et boutons du profil suivent ces jetons.
 Les tracés SVG normalisés suivent toutes les tailles (`xs` à `2xl`). Les effets `.frame-*` dessinent les traits
-extérieur/intérieur : ne pas ajouter de masque radial ni faire tourner la silhouette. Les pointillés et étincelles
-avancent le long du tracé. Le badge reste à l'extérieur du portrait, sans être coupé.
+extérieur/intérieur : ne pas ajouter de masque radial ni faire tourner la silhouette. Les pointillés épousent le tracé
+et les étincelles scintillent en opacité. Le badge reste à l'extérieur du portrait, sans être coupé.
+
+**Cadres à identité** (dix cadres au total : `none`, `dashed`, `double`, `gold`, `neon`, `sparkle` + quatre nouveaux). Les quatre nouveaux
+respectent ce contrat : ils s'adaptent aux trois formes (cercle, carré arrondi, hexagone) sans que les skins aient à les redessiner.
+- `saiyan` (Aura Super Saiyan) : trait or et flammes dorées fixes de deux hauteurs autour du contour.
+- `geass` (Sceau du Geass) : trait rouge pointillé en double et quatre oiseaux rouges stylisés aux diagonales.
+- `karmine` (Bleu Karmine) : double filet bleu Karmine, sobre, quatre losanges aux points cardinaux.
+- `tournesol` (Pétales de tournesol) : deux couronnes de pétales jaune/orangé, trait brun.
+Les ornements sont tracés par `Decor` dans `AvatarFrame.tsx` : un groupe par forme (`data-avatar-shape`), affiché par les mêmes
+commutateurs `--avatar-circle|square|hexagon` que les traits ; leurs positions suivent le contour réel de la forme (cercle, carré
+ou hexagone), donc le skin qui change de silhouette change aussi leur disposition. L'identité par skin passe par des variables
+(`--frame-saiyan-flame|edge|core`, `--frame-karmine`, `--frame-karmine-light`, `--frame-petal`, `--frame-petal-back`, `--frame-petal-edge`,
+`--frame-geass`, `--frame-geass-glow`, `--frame-geass-dark`, `--frame-glow` pour l'intensité des halos) : valeurs par défaut dans `theme.css`,
+surcharge en fin de chaque `skins/<id>.css` (ex. Dofus : flammes orangées à contour brun, halos réduits ; Plague Tale : teintes ternies ;
+LoL : flammes or hextech et filet parchemin ; Rocket League : flammes de boost ; Overwatch : bleu et orange vifs ; Mario : couleurs franches à contour épais).
+Un nouveau skin règle ces variables ; s'il ne le fait pas, le thème de base s'applique. Ces ornements restent fixes ; l'invocation
+anime des calques CSS en `transform` / `opacity` sans redessiner les tracés SVG.
 
 ### Animations
 - **Changement de skin** : scène de la pièce synchronisée par le serveur, après les résultats de Culture gênante.
@@ -139,7 +156,7 @@ avancent le long du tracé. Le badge reste à l'extérieur du portrait, sans êt
 Pour vérifier les téléphones iPhone ou Firefox :
 `CAPTURES_SKIN=<id> CAPTURES_DIR=$PWD/captures/<id>/webkit bunx playwright test skins-captures --project=webkit --workers=1`
 (remplacer `webkit` par `firefox` selon le moteur). La TV reste un Chromium, forcé sur le même skin.
-`13-avatars-skins.spec.ts` vérifie les six cadres et leur conservation après rechargement sur les trois
+`13-avatars-skins.spec.ts` invoque chacun des dix cadres (tirage forcé) et vérifie leur conservation après rechargement sur les trois
 moteurs ; ses captures des cadres et du profil 360×640 sont dans `test-results/`.
 
 Les sauvegardes antérieures restent utilisables : les skins retirés sont écartés de l'ordre sauvegardé ; un ancien
