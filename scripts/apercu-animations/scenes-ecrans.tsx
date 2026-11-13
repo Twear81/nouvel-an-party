@@ -39,9 +39,9 @@ const SCORES_FINAUX = [1450, 1280, 1190, 860, 740, 520, 410, 230];
 
 function SceneFinal({ env }: { env: Env }) {
   const joueurs = useMemo(() => env.joueurs.map((p, i) => ({ ...p, score: SCORES_FINAUX[i]! })), [env.joueurs]);
-  // Classement figé et deux étoiles pour le 6e, une pour le 2e : de quoi voir la conversion.
+  // Classement figé et deux étoiles pour le 6e (le dernier à 3 joueurs), une pour le 2e : de quoi voir la conversion.
   const ranking = joueurs.map((p) => p.id);
-  const stars = { [joueurs[5]!.id]: [120, 120], [joueurs[1]!.id]: [120] };
+  const stars = { [joueurs[Math.min(5, joueurs.length - 1)]!.id]: [120, 120], [joueurs[1]!.id]: [120] }; // le 6e (ou le dernier à 3 joueurs)
   const duree = finalRevealTimeline(ranking.map((id) => stars[id]?.length ?? 0)).durationMs + 3000;
   const snapshot = useMemo<GameSnapshot>(() => ({
     ...snapshotDeBase("final", { joueurs, skin: env.skin, paused: env.pause }),
