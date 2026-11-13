@@ -2,6 +2,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync, readdirSync } from "node:fs";
 import net from "node:net";
+import YAML from "yaml";
 import os from "node:os";
 import path from "node:path";
 
@@ -58,13 +59,18 @@ function prepareConfig(tmp: string, opts: ServerOptions): string {
     const f = path.join(dir, file);
     writeFileSync(f, readFileSync(f, "utf8").replace(new RegExp(`^${key}:.*$`, "m"), `${key}: ${value}`));
   };
-  if (opts.minuit) {
-    const m = opts.minuit;
-    const t = new Date(Date.now() + m.dans * 1000);
-    const pad = (n: number) => String(n).padStart(2, "0");
+  if (opts.minuit || opts.outro !== undefined) {
     const file = path.join(dir, "partie.yaml");
-    const base = readFileSync(file, "utf8").replace(/^minuit:[\s\S]*$/m, "");
-    writeFileSync(file, `${base}minuit:\n  actif: true\n  heure: "${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}"\n  duree_compte_a_rebours: ${m.compteARebours ?? 12}\n  reprise_auto: ${m.repriseAuto ?? 0}\n`);
+    const settings = YAML.parse(readFileSync(file, "utf8"));
+    if (opts.minuit) {
+      const m = opts.minuit;
+      const t = new Date(Date.now() + m.dans * 1000);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      settings.minuit = { ...settings.minuit, actif: true, heure: `${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`,
+        duree_compte_a_rebours: m.compteARebours ?? 12, reprise_auto: m.repriseAuto ?? 0 };
+    }
+    if (opts.outro !== undefined) settings.outro = { ...settings.outro, actif: opts.outro };
+    writeFileSync(file, YAML.stringify(settings));
   }
   if (opts.introSeconds !== undefined) patch("partie.yaml", "intro_secondes", opts.introSeconds);
   if (opts.duree !== undefined) {

@@ -50,7 +50,9 @@ Un seul langage (TypeScript), un seul process : le serveur Bun sert le front ET 
   TV et téléphones partagent la cadence de `src/shared/final-reveal.ts` via `useFinalReveal` : les téléphones
   gardent « Regarde la TV ! » jusqu'à la fin de l'entrée du dernier portrait révélé. Un rechargement de la TV
   ou d'un téléphone reprend au bon moment au lieu de relancer le classement. Il s'agit d'une synchronisation
-  d'affichage : les scores cumulés restent publics, comme pendant les manches. Le final terminé conserve le
+  d'affichage : les scores cumulés restent publics, comme pendant les manches. Pause et Passer
+  s'appliquent aussi au classement, via `finalRevealElapsed` ; les souvenirs déjà révélés restent dans
+  `finalReveal.souvenirs` pour conserver le décor. Le final terminé conserve le
   comportement de sauvegarde existant : après un redémarrage serveur, retour au lobby avec les profils et scores.
   Un nouvel invité arrivé pendant le podium reste spectateur. La première synchronisation d'horloge précède
   l'inscription réseau des écrans, pour éviter qu'une horloge locale en avance dévoile les rangs au rechargement.
@@ -70,14 +72,15 @@ Brique générique du moteur (`engine.ts`, section « Minuit » ; réglée par `
 [configuration.md](configuration.md#minuit)). `snapshot.midnight` vaut `null` toute la soirée, puis
 `{ targetAt, phase: "countdown" | "celebrate", year }` pendant minuit ; la TV et les téléphones affichent alors
 `MidnightOverlay` (`src/web/ui/Midnight.tsx`) par-dessus tout, calé sur `targetAt` avec `serverNow()`.
-- **Déclenchement** : le moteur vise la **prochaine occurrence** de `heure` (heure locale du PC, `clock.now()` donc
-  testable avec `FakeClock`) et démarre le compte à rebours à `heure - duree_compte_a_rebours`. Un serveur lancé
-  *dans* la fenêtre affiche le temps restant ; lancé *après* minuit il ne déclenche rien avant la nuit suivante
-  (donc une seule fois par nuit). Un minuteur de veille revérifie au plus toutes les 30 s.
+- **Déclenchement** : par défaut (`uniquement_nouvel_an: true`), le moteur vise le **prochain 1er janvier** à `heure`
+  (heure locale du PC, `clock.now()` donc testable avec `FakeClock`). Le compte à rebours démarre à
+  `targetAt - duree_compte_a_rebours`, donc le 31 décembre pour l'heure habituelle `00:00`. Un serveur lancé
+  *dans* la fenêtre affiche le temps restant ; lancé *après* minuit, il attend l'année suivante. Le mode répétition
+  (`uniquement_nouvel_an: false`) vise aujourd'hui ou demain, une seule occurrence par nuit. Un minuteur de veille
+  revérifie au plus toutes les 30 s.
 - **Pause** : réutilise la pause existante (`pause()`), donc `TimerGroup` fige chronos de manche et scènes de
-  transition, `input()` est refusé. Au lobby et à l'écran final il n'y a rien à figer (seul l'affichage change) ; la
-  révélation finale, animée depuis son départ serveur, est décalée de la durée de minuit à la fin pour reprendre où
-  elle en était. Pendant minuit : Passer, +10 s et l'avance automatique des résultats (« Continuer ») sont
+  transition, `input()` est refusé. La cérémonie et la révélation finale utilisent la même pause : leur horloge active reste figée,
+  sans ajouter deux fois la durée de minuit à la reprise. Au lobby, seul l'affichage change. Pendant minuit : Passer, +10 s et l'avance automatique des résultats (« Continuer ») sont
   ignorés ; l'hôte peut toujours revenir au lobby. Le skin est forcé à `null` (thème de base, bleu).
 - **Fin** : pendant `countdown`, Reprendre est ignoré ; pendant `celebrate`, le clic de l'hôte (même bouton que la
   pause) ou `reprise_auto` secondes après minuit relance. Si **c'est minuit qui a mis en pause**
@@ -87,7 +90,8 @@ Brique générique du moteur (`engine.ts`, section « Minuit » ; réglée par `
 - **Sauvegarde** : `save.json` porte `midnight: { targetAt }` tant que minuit est en cours (pas écrit au lobby si
   une partie interrompue y attend sa reprise). Après un crash, le compte à rebours se retrouve par le calcul de
   l'heure ; une célébration est reprise si moins de `max(reprise_auto, 60 s)` se sont écoulées depuis minuit, et la
-  partie reprise (`resumeSave`) se fige aussitôt dessous.
+  partie reprise (`resumeSave`) se fige aussitôt dessous. En mode annuel, un ancien `targetAt` quotidien qui ne tombe
+  pas le 1er janvier est ignoré ; une célébration du Nouvel An sauvegardée reste reprenable.
 - **Sons** (TV) : `minuit.tic` (une fois par seconde sur les 10 dernières) et `minuit.fete` (+ applaudissements) via
   `useGlobalSfx`, fonction pure `midnightStep` dans `src/web/sound/events.ts`.
 

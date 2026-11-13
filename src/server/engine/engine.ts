@@ -36,6 +36,8 @@ export interface EngineSettings {
 }
 
 export interface MidnightSettings {
+  /** true = seulement le 1er janvier ; absent/false = chaque nuit (répétitions et anciens appelants). */
+  newYearOnly?: boolean;
   /** Heure locale du PC, « HH:MM » ou « HH:MM:SS ». */
   time: string;
   /** Durée du compte à rebours affiché avant l'heure (s). */
@@ -413,6 +415,7 @@ export class GameEngine {
     if (scene.kind === "closing") {
       this.phase = "final";
       this.finalReveal = { startedAt: this.clock.now(), playerIds: scene.playerIds };
+      this.freezeForMidnight();
       this.save();
       this.changed();
     } else this.nextRound();
@@ -722,7 +725,8 @@ export class GameEngine {
   // Générique : à `heure - duree`, la partie se met en pause (même mécanisme que la pause de l'hôte) et les écrans
   // affichent le compte à rebours ; à l'heure, phase « celebrate » ; l'hôte (Reprendre) ou `reprise_auto` relance.
   // Règle de déclenchement : on vise la PROCHAINE occurrence de l'heure ; le compte à rebours démarre dès qu'on est dans
-  // sa fenêtre (un serveur lancé 20 s avant minuit affiche 0:20). Lancé après minuit, rien ne se passe avant la nuit suivante.
+  // sa fenêtre (un serveur lancé 20 s avant minuit affiche 0:20). Par défaut, l'occurrence est le prochain 1er janvier ;
+  // les répétitions peuvent autoriser chaque nuit. Lancé après minuit, aucun rattrapage hors sauvegarde valide.
   // Après un crash, la célébration en cours est reprise tant que `max(reprise_auto, 60 s)` ne s'est pas écoulé.
 
   private initMidnight() {
@@ -731,7 +735,9 @@ export class GameEngine {
     const saved = this.savedMidnight;
     this.savedMidnight = null;
     const now = this.clock.now();
-    if (saved && now < saved.targetAt + Math.max(cfg.autoResumeSeconds, 60) * 1000) {
+    const savedDate = saved ? new Date(saved.targetAt) : null;
+    const allowedDate = !cfg.newYearOnly || (savedDate !== null && savedDate.getMonth() === 0 && savedDate.getDate() === 1);
+    if (saved && allowedDate && now < saved.targetAt + Math.max(cfg.autoResumeSeconds, 60) * 1000) {
       this.beginMidnight(saved.targetAt);
       return;
     }
@@ -742,7 +748,7 @@ export class GameEngine {
     const cfg = this.opts.settings.midnight;
     if (!cfg || this.midnight) return;
     const now = this.clock.now();
-    const targetAt = nextOccurrence(now, cfg.time);
+    const targetAt = nextOccurrence(now, cfg.time, cfg.newYearOnly);
     if (now >= targetAt - cfg.countdownSeconds * 1000) this.beginMidnight(targetAt);
     else this.scheduleMidnight();
   }
@@ -780,7 +786,7 @@ export class GameEngine {
     let delay: number;
     if (!m) {
       // En attente : on revérifie au plus toutes les 30 s (veille du PC, changement d'heure).
-      delay = Math.min(30_000, nextOccurrence(now, cfg.time) - cfg.countdownSeconds * 1000 - now);
+      delay = Math.min(30_000, nextOccurrence(now, cfg.time, cfg.newYearOnly) - cfg.countdownSeconds * 1000 - now);
     } else if (m.phase === "countdown") delay = m.targetAt - now;
     else if (cfg.autoResumeSeconds > 0) delay = m.targetAt + cfg.autoResumeSeconds * 1000 - now;
     else return;

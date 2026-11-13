@@ -18,6 +18,7 @@ Un fichier `partie.yaml` absent ou vide utilise les valeurs par défaut. Une fau
 | `intro_secondes` | `4` | Durée de l'écran d'annonce avant chaque manche |
 | `volume_sons` | `0.8` | Volume général des sons de la TV, de `0` (muet) à `1`. Le bouton haut-parleur de la barre de l'hôte coupe et remet le son pendant la partie. Les sons se remplacent sans recompiler : voir [Sons](#sons) |
 | `minuit.actif` | `true` | Compte à rebours de minuit (voir [Minuit](#minuit)) |
+| `minuit.uniquement_nouvel_an` | `true` | Réservé au passage au 1er janvier ; `false` autorise une répétition à une autre date |
 | `minuit.heure` | `"00:00"` | Heure **locale du PC** qui fait tourner le jeu, `"HH:MM"` ou `"HH:MM:SS"` |
 | `minuit.duree_compte_a_rebours` | `60` | Secondes avant minuit où la partie se met en pause et le compte à rebours démarre (3 à 600) |
 | `minuit.reprise_auto` | `120` | Secondes après minuit avant la reprise automatique ; `0` = seulement quand l'hôte clique |
@@ -33,17 +34,21 @@ dure 9 s ; les changements d'univers après Culture gênante durent 4 s et la so
 Ces scènes utilisent les durées partagées du thème et se pilotent aussi avec Pause/Reprendre/Passer.
 
 ### Minuit
-Le soir du 31, un peu avant `minuit.heure`, la partie se met **en pause toute seule** : chronos figés, et la TV comme les
+Le soir du 31 décembre, un peu avant `minuit.heure`, la partie se met **en pause toute seule** : chronos figés, et la TV comme les
 téléphones affichent un grand compte à rebours (mm:ss, puis les 10 dernières secondes une à une), puis « Bonne année 2027 ! »
 avec feu d'artifice, confettis et fanfare. La barre de l'hôte reste utilisable : **Reprendre** relance la partie exactement
-où elle en était (ou **Continuer** au lobby et sur l'écran final, où il n'y a rien à reprendre). Sans clic, la reprise est
+où elle en était (ou **Continuer** au lobby). La cérémonie et le classement final restent également figés pendant minuit. Sans clic, la reprise est
 automatique `reprise_auto` secondes après minuit.
 - Vérifier l'horloge du PC (heure et fuseau) : c'est elle qui décide.
-- Le compte à rebours ne se déclenche qu'une fois par nuit. Si le serveur est lancé **après** minuit, rien ne se passe
-  avant la nuit suivante ; lancé pendant le compte à rebours, il affiche le temps restant.
+- Par défaut (`uniquement_nouvel_an: true`), le compte à rebours vise le **prochain 1er janvier**, à l'heure locale configurée.
+  Il reste silencieux les autres nuits. Un serveur lancé **après** ce minuit attend l'année suivante ; lancé le
+  31 décembre pendant le compte à rebours, il affiche le temps restant. Après un crash, une célébration déjà sauvegardée
+  du Nouvel An peut reprendre comme avant.
 - Si l'hôte avait mis la partie en pause avant minuit, la reprise automatique la laisse en pause (il reprend lui-même) ; son
   clic sur Reprendre la relance.
-- Pour répéter : mettre `heure` quelques minutes plus tard (ex. `"21:07"`), relancer, puis remettre `"00:00"`.
+- Pour répéter à une autre date : mettre `uniquement_nouvel_an: false` et `heure` quelques minutes plus tard
+  (ex. `"21:07"`), puis relancer. Remettre ensuite `uniquement_nouvel_an: true` et `heure: "00:00"` pour la soirée.
+  Le mode répétition autorise une occurrence par nuit.
 - Sons : `minuit.tic` et `minuit.fete`, remplaçables comme les autres (voir [Sons](#sons)).
 
 ### Sons
@@ -66,6 +71,7 @@ ordre: melange
 intro_secondes: 4
 ip: auto
 minuit:
+  uniquement_nouvel_an: true
   heure: "00:00"
   duree_compte_a_rebours: 60
   reprise_auto: 120

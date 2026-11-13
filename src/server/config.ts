@@ -23,12 +23,14 @@ export const settingsSchema = z.object({
   /** Compte à rebours de minuit : la partie se met en pause toute seule (docs/configuration.md). */
   minuit: z.object({
     actif: z.boolean().default(true),
+    /** Limiter au 1er janvier ; false permet les répétitions à une autre date. */
+    uniquement_nouvel_an: z.boolean().default(true),
     /** Heure locale du PC serveur, « HH:MM » ou « HH:MM:SS ». */
     heure: z.string().refine((v) => parseClockTime(v) !== null, "attendu « HH:MM » (ex. \"00:00\")").default("00:00"),
     duree_compte_a_rebours: z.number().int().min(3).max(600).default(60),
     /** Secondes après minuit avant la reprise automatique ; 0 = seulement quand l'hôte clique. */
     reprise_auto: z.number().int().nonnegative().default(120),
-  }).default({ actif: true, heure: "00:00", duree_compte_a_rebours: 60, reprise_auto: 120 }),
+  }).default({ actif: true, uniquement_nouvel_an: true, heure: "00:00", duree_compte_a_rebours: 60, reprise_auto: 120 }),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 

@@ -17,12 +17,16 @@ export function parseClockTime(value: string): number | null {
   return h < 24 && min < 60 && s < 60 ? h * 3600 + min * 60 + s : null;
 }
 
-/** Prochaine occurrence (strictement après `now`) de l'heure locale `time` : aujourd'hui si elle n'est pas passée, sinon demain. */
-export function nextOccurrence(now: number, time: string): number {
+/** Prochaine occurrence locale : le 1er janvier en mode annuel, sinon aujourd'hui ou demain (répétitions). */
+export function nextOccurrence(now: number, time: string, newYearOnly = false): number {
   const secs = parseClockTime(time) ?? 0;
   const d = new Date(now);
+  if (newYearOnly) d.setFullYear(d.getFullYear(), 0, 1);
   d.setHours(Math.floor(secs / 3600), Math.floor(secs / 60) % 60, secs % 60, 0);
-  if (d.getTime() <= now) d.setDate(d.getDate() + 1);
+  if (d.getTime() <= now) {
+    if (newYearOnly) d.setFullYear(d.getFullYear() + 1);
+    else d.setDate(d.getDate() + 1);
+  }
   return d.getTime();
 }
 
