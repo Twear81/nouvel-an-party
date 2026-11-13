@@ -54,6 +54,8 @@ questions:
 ```
 Une bonne consigne a **quelques réponses évidentes** que plusieurs personnes auront en tête (« Un fruit », « Une boisson de minuit »). Trop vague (« Un mot ») : personne ne tombe d'accord. Trop fermée (« La capitale de la France ») : tout le monde marque, aucun suspense.
 
+Chaque consigne peut avoir un `theme:` facultatif (ex. `theme: bouffe`) : le tirage évite d'enchaîner deux consignes du même thème.
+
 ## Conseils
 - Gardez entre 15 et 25 consignes : les manches sont tirées au hasard parmi elles.
 - `reponses: 3` rend le jeu plus généreux et plus long à lire sur la TV ; à réserver aux groupes nombreux.

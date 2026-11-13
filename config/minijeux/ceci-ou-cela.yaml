@@ -44,6 +44,7 @@ questions:
   # --- Dilemmes à deux réponses (majorité) ---
   - texte: "Plutôt…"
     choix: [Chat, Chien]
+    theme: animaux
   - texte: "À 2 h du matin, tu es plutôt :"
     choix: [Au lit, Dernier debout]
     theme: soiree
@@ -60,14 +61,19 @@ questions:
     choix: [Demain, Jamais]
     theme: voyage
   # --- Oui / Non (majorité) ---
-  - "L'ananas sur la pizza ?"
-  - "Tu tiendras ta résolution jusqu'à février ?"
-  - "Tu serais capable de chanter au karaoké ce soir ?"
+  - texte: "L'ananas sur la pizza ?"
+    theme: bouffe
+  - texte: "Tu tiendras ta résolution jusqu'à février ?"
+    theme: vie
+  - texte: "Tu serais capable de chanter au karaoké ce soir ?"
+    theme: musique
   # --- Mode {joueur} : on devine sa réponse ---
   - texte: "Est-ce que {joueur} a déjà pleuré devant un anime, un dessin animé ou un k-drama ?"
     theme: emotions
-  - "Est-ce que {joueur} chante sous la douche ?"
-  - "Est-ce que {joueur} a déjà raté un train ou un avion ?"
+  - texte: "Est-ce que {joueur} chante sous la douche ?"
+    theme: musique
+  - texte: "Est-ce que {joueur} a déjà raté un train ou un avion ?"
+    theme: voyage
   - texte: "Dernière part de tiramisu, personne n'ose. {joueur}…"
     choix: [La prend, La laisse]
     theme: bouffe

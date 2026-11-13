@@ -38,21 +38,35 @@ points:
 # Gardez-les courtes (une ligne sur la TV, deux sur un téléphone).
 # Maximum conseillé : 25 questions (les manches sont tirées au hasard parmi elles).
 questions:
-  - "Qui est le meilleur cuisinier ?"
-  - "Qui est le meilleur danseur ?"
-  - "Qui est le meilleur conducteur ?"
-  - "Qui est le meilleur au karaoké ?"
-  - "Qui est le meilleur public pour une blague nulle ?"
-  - "Qui est le meilleur pour garder un secret ?"
-  - "Qui est le meilleur perdant ?"
-  - "Qui est le meilleur pour tenir l'alcool ?"
-  - "Qui est le meilleur menteur ?"
-  - "Qui est le meilleur pour s'habiller ?"
-  - "Qui est le meilleur à Mario Kart ?"
-  - "Qui est le meilleur coloc ?"
-  - "Qui est le meilleur pour faire la fête jusqu'au bout ?"
+  - texte: "Qui est le meilleur cuisinier ?"
+    theme: bouffe
+  - texte: "Qui est le meilleur danseur ?"
+    theme: musique
+  - texte: "Qui est le meilleur conducteur ?"
+    theme: voyage
+  - texte: "Qui est le meilleur au karaoké ?"
+    theme: musique
+  - texte: "Qui est le meilleur public pour une blague nulle ?"
+    theme: amitie
+  - texte: "Qui est le meilleur pour garder un secret ?"
+    theme: amitie
+  - texte: "Qui est le meilleur perdant ?"
+    theme: jeu
+  - texte: "Qui est le meilleur pour tenir l'alcool ?"
+    theme: soiree
+  - texte: "Qui est le meilleur menteur ?"
+    theme: excuses
+  - texte: "Qui est le meilleur pour s'habiller ?"
+    theme: vie
+  - texte: "Qui est le meilleur à Mario Kart ?"
+    theme: jeu-video
+  - texte: "Qui est le meilleur coloc ?"
+    theme: vie
+  - texte: "Qui est le meilleur pour faire la fête jusqu'au bout ?"
+    theme: soiree
   - texte: "Qui serait là à 3 h du matin si ça va mal ?"
     duree: 75
+    theme: amitie
   - texte: "À qui prêterais-tu 500 € sans reçu ?"
     theme: argent
   - texte: "Qui survit le plus longtemps dans un film d'horreur ?"

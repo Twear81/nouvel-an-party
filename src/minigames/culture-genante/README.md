@@ -75,5 +75,7 @@ Pour une question précise, `accroche: { rigolo: "...", serieux: "..." }` impose
 
 Conseils : réponses de 40 caractères maximum (ce sont de gros boutons sur les téléphones) ; **vérifiez les bonnes réponses** (elles se discutent à 1 h du matin) ; l'humour noir vise la situation et les invités présents, jamais un groupe de personnes. Mettez les textes entre guillemets (surtout avec « : » ou « ? »). Une question tirée n'est pas rejouée dans la partie.
 
+Chaque question peut avoir un `theme:` facultatif (ex. `theme: bouffe`) : le tirage évite d'enchaîner deux questions du même thème.
+
 ## Changer la mise en scène (pour les développeurs)
 Chaque scène est un composant séparé, sans logique de jeu (tout vient du serveur via `pub.stage`) : `Accroche.tsx` (festif), `Bascule.tsx` (rupture), `Question.tsx` (sérieux), `Reveal.tsx` (résultats, `revealSeconds`), `Phone.tsx` (téléphones), `Serious.tsx` (décor sombre et chrono sobre). Les couleurs et la typo du mode sérieux sont dans `src/web/theme/theme.css` (section `culture-genante` : `serious-*`, `font-serious`). L'écran étant un interlude, la TV affiche `Tv` en plein écran, sans l'en-tête ni le chrono habituels (voir `docs/creer-un-mini-jeu.md`).

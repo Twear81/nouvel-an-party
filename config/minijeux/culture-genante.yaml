@@ -84,14 +84,18 @@ questions:
   - texte: "Quelle est la capitale de l'Australie ?"
     reponses: ["Canberra", "Sydney"]
     commentaire: "Sydney est la plus grande ville, mais la capitale, c'est Canberra."
+    theme: voyage
   - texte: "Quel est le plus grand pays d'Afrique par sa superficie ?"
     reponses: ["L'Algérie", "RD Congo", "Le Nigeria", "L'Égypte"]
+    theme: voyage
   - texte: "Quel pays est le plus peuplé du monde aujourd'hui ?"
     reponses: ["L'Inde", "La Chine", "Les États-Unis"]
     commentaire: "L'Inde a dépassé la Chine en 2023."
+    theme: voyage
   - texte: "Quel animal dort le plus ?"
     reponses: ["Le koala", "Le paresseux", "Le chat", "Toi, le 1er janvier"]
     commentaire: "Environ 20 heures par jour pour le koala. Toi, ça va dépendre de ce soir."
+    theme: animaux
   - texte: "Quel animal fait des crottes en forme de cube ?"
     reponses: ["Le wombat", "Le koala", "Le capybara", "Le paresseux"]
     commentaire: "Le wombat : ça évite que ses crottes roulent, il les utilise pour marquer son territoire."
@@ -109,6 +113,7 @@ questions:
   - texte: "Combien de planètes compte le système solaire ?"
     estimation: 8
     commentaire: "Pluton n'est plus une planète depuis 2006."
+    theme: science
   - texte: "Combien de fois par jour un adulte pète-t-il en moyenne ?"
     estimation: 14
     unite: "fois"
@@ -128,11 +133,14 @@ questions:
   - texte: "Quel animal tue le plus d'humains chaque année ?"
     reponses: ["Le moustique", "Le requin", "L'hippopotame", "Tonton au volant après minuit"]
     commentaire: "Le moustique, très loin devant. Tonton est en embuscade."
+    theme: animaux
   - texte: "Quelle est la première cause de mortalité dans le monde ?"
     reponses: ["Les maladies du cœur", "Les requins", "Les accidents de trottinette", "Le gluten"]
+    theme: sante
   - texte: "Combien de temps vit en moyenne un hamster ?"
     reponses: ["2 à 3 ans", "8 ans", "15 ans"]
     commentaire: "Prends-en soin, c'est court."
+    theme: animaux
   - texte: "Quelle est l'espérance de vie à la naissance en France, en années ?"
     estimation: 83
     unite: "ans"
@@ -142,6 +150,8 @@ questions:
     estimation: 8
     unite: "milliards"
     commentaire: "Et vous voilà coincés avec les mêmes dans cette pièce."
+    theme: voyage
   - texte: "Qui a inventé le feu d'artifice ?"
     reponses: ["La Chine", "L'Italie", "Alfred Nobel", "Ton beau-frère et son rosé"]
     commentaire: "Les Chinois, avec la poudre. Ton beau-frère a seulement perfectionné les dégâts."
+    theme: soiree

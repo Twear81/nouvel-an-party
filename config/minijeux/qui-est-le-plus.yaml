@@ -30,29 +30,51 @@ points:
 # Mettez les questions entre guillemets si elles contiennent ": " ou " #".
 # Maximum conseillé : 25 questions (les manches sont tirées au hasard parmi elles).
 questions:
-  - "Qui finirait le plat entier en disant « j'en reprends juste un peu » ?"
-  - "Qui sera le premier à s'endormir ce soir ?"
-  - "Qui sera le dernier debout ce soir ?"
-  - "Qui va pleurer en faisant les voeux de minuit ?"
-  - "Qui va oublier sa résolution avant le 3 janvier ?"
-  - "Qui va monter sur la table pour danser ?"
-  - "Qui est le plus susceptible d'embrasser n'importe qui à minuit ?"
-  - "Qui va ouvrir le champagne en arrosant tout le monde ?"
-  - "Qui est le plus susceptible d'arriver en retard à son propre mariage ?"
-  - "Qui répond « j'arrive dans 5 minutes » en étant encore chez lui ?"
-  - "Qui est le plus drôle quand il a bu ?"
-  - "Qui danse le plus mal ?"
-  - "Qui chante au karaoké sans qu'on lui demande ?"
-  - "Qui ronfle sûrement le plus ?"
-  - "Qui passe le plus de temps sur son téléphone ?"
-  - "Qui sera le premier à envoyer un message qu'il regrettera demain ?"
-  - "Qui aurait le plus de mal à garder un secret ?"
-  - "Qui serait le premier à paniquer dans un film d'horreur ?"
-  - "Qui est le plus susceptible de manger les restes à 4h du matin ?"
-  - "Qui gagnerait au loto et disparaîtrait sans prévenir ?"
+  - texte: "Qui finirait le plat entier en disant « j'en reprends juste un peu » ?"
+    theme: bouffe
+  - texte: "Qui sera le premier à s'endormir ce soir ?"
+    theme: soiree
+  - texte: "Qui sera le dernier debout ce soir ?"
+    theme: soiree
+  - texte: "Qui va pleurer en faisant les voeux de minuit ?"
+    theme: emotions
+  - texte: "Qui va oublier sa résolution avant le 3 janvier ?"
+    theme: vie
+  - texte: "Qui va monter sur la table pour danser ?"
+    theme: musique
+  - texte: "Qui est le plus susceptible d'embrasser n'importe qui à minuit ?"
+    theme: soiree
+  - texte: "Qui va ouvrir le champagne en arrosant tout le monde ?"
+    theme: soiree
+  - texte: "Qui est le plus susceptible d'arriver en retard à son propre mariage ?"
+    theme: vie
+  - texte: "Qui répond « j'arrive dans 5 minutes » en étant encore chez lui ?"
+    theme: excuses
+  - texte: "Qui est le plus drôle quand il a bu ?"
+    theme: soiree
+  - texte: "Qui danse le plus mal ?"
+    theme: musique
+  - texte: "Qui chante au karaoké sans qu'on lui demande ?"
+    theme: musique
+  - texte: "Qui ronfle sûrement le plus ?"
+    theme: corps
+  - texte: "Qui passe le plus de temps sur son téléphone ?"
+    theme: telephone
+  - texte: "Qui sera le premier à envoyer un message qu'il regrettera demain ?"
+    theme: telephone
+  - texte: "Qui aurait le plus de mal à garder un secret ?"
+    theme: amitie
+  - texte: "Qui serait le premier à paniquer dans un film d'horreur ?"
+    theme: fiction
+  - texte: "Qui est le plus susceptible de manger les restes à 4h du matin ?"
+    theme: bouffe
+  - texte: "Qui gagnerait au loto et disparaîtrait sans prévenir ?"
+    theme: argent
   - texte: "Qui sera la plus grande surprise de 2027 ?"
     duree: 40
-  - "Qui lance « on se fait un truc un de ces quatre » sans jamais rien organiser ?"
+    theme: vie
+  - texte: "Qui lance « on se fait un truc un de ces quatre » sans jamais rien organiser ?"
+    theme: amitie
   - texte: "Qui serait le plus insupportable avec 1 million d'euros ?"
     theme: argent
   - texte: "Qui mourrait en premier dans un k-drama, d'une maladie mystérieuse au dernier épisode ?"

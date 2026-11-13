@@ -47,6 +47,8 @@ questions:
 
 La question doit pouvoir se « classer » : « Qui est le meilleur… », « Qui danse le mieux ? », « Qui ferait le meilleur président ? ». S est toujours le haut du classement. Gardez-les **courtes** : une ligne sur la TV, deux sur un téléphone.
 
+Chaque question peut avoir un `theme:` facultatif (ex. `theme: bouffe`) : le tirage évite d'enchaîner deux questions du même thème.
+
 ## Conseils
 - Une vingtaine de questions (25 au maximum) suffisent : elles sont tirées au hasard.
 - Durée : une manche dure environ `duree` + 15 s de révélation, souvent moins car elle s'arrête quand tout le monde a fini.
