@@ -107,6 +107,9 @@ animations CSS ; les ressorts `motion` finissent leur course (utiliser le curseu
 
 Liens de revue à ajouter à l’adresse de `captures/animations/index.html` (fonctionnent aussi sans recharger le fichier) :
 
+- `#scene=ecrans/ceremonie&n=8&tel=360x640` : la cérémonie de fin entière (souvenirs, classement provisoire sans score,
+  enveloppe, roulette, projecteur, étoiles, cuillère, duo), puis enchaîner avec `#scene=ecrans/final` pour le classement final.
+  Deux téléphones : ils reçoivent la carte de leur bonus seulement quand il est révélé sur la TV.
 - `#scene=ecrans/minuit&n=8&tel=360x640` : 15 secondes jusqu’au passage au 1er janvier 2027, puis « Bonne année », sur la
   vraie TV et un téléphone de 360 × 640. Le curseur permet de revoir les dernières secondes ; Continuer reprend le lobby.
   Cet aperçu reprend le thème de base, comme le déclenchement réel de minuit.
