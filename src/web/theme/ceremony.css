@@ -1,0 +1,79 @@
+/* Mise en scène de la fin : coordonnées sur l'image de référence, jetons visuels remplaçables. */
+.ceremony-room {
+  --ceremony-veil: #06102bd9; --ceremony-paper: #fff2b9; --ceremony-paper-ink: #38261e;
+  --ceremony-night: #07112da3; --ceremony-frame: #b78a45; --ceremony-frame-edge: #65452b;
+  --ceremony-label: #061329ed; --ceremony-glow: #ffe6a0; --ceremony-card: #081b45f5;
+  --ceremony-name-size: 1.4cqw; --ceremony-title-size: 3.5cqw; --ceremony-body-size: 1.8cqw;
+  position: absolute; inset: 0; overflow: hidden; isolation: isolate; container-type: size;
+  color: var(--color-ink); background: var(--color-bg); font-family: var(--font-sans);
+}
+.ceremony-background, .ceremony-night { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ceremony-night { background: var(--ceremony-night); }
+.ceremony-night::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 45% 65%, transparent 12%, var(--ceremony-veil)); opacity: .65; }
+.ceremony-window { position: absolute; overflow: hidden; }
+.ceremony-window-left { left: 66.3%; top: 31.5%; width: 3.8%; height: 30%; }
+.ceremony-window-right { left: 89.5%; top: 25%; width: 8.3%; height: 46%; }
+.ceremony-window > div { font-size: .4rem; }
+.ceremony-jukebox { position: absolute; left: 70%; top: 46%; width: 13%; height: 34%; background: radial-gradient(ellipse, color-mix(in srgb, var(--color-hot) 45%, transparent), transparent 70%); animation: ceremony-glow 2s ease-in-out infinite alternate; }
+.ceremony-keepsake { position: absolute; width: 6.5%; aspect-ratio: 1; }
+.ceremony-keepsake-dessin { left: 82%; top: 31%; transform: rotate(3deg); }
+.ceremony-keepsake-objet { left: 43%; top: 73%; }
+.ceremony-keepsake-post-it { left: 48%; top: 40%; transform: rotate(-7deg); }
+.ceremony-drawing { width: 100%; height: 100%; background: var(--color-paper); border: .45cqw solid var(--ceremony-frame); outline: .12cqw solid var(--ceremony-frame-edge); display: flex; flex-direction: column; padding: .25cqw; }
+.ceremony-drawing canvas { width: 100%; min-height: 0; flex: 1; object-fit: contain; }
+.ceremony-drawing > span { text-align: center; color: var(--ceremony-paper-ink); font-weight: 700; font-size: .85em; }
+.ceremony-object, .ceremony-postit { height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; gap: .5cqw; }
+.ceremony-object { color: var(--color-ink); background: var(--ceremony-label); border-radius: .5cqw; padding: .5cqw; }
+.ceremony-object > span { font-size: 3cqw; line-height: 1.1; }
+.ceremony-postit { color: var(--ceremony-paper-ink); background: var(--ceremony-paper); padding: .65cqw; }
+.ceremony-keepsake { font-size: .5cqw; }
+.ceremony-keepsake .ceremony-object > span { font-size: 1.7cqw; }
+.ceremony-keepsake small { font-size: .55cqw; }
+.ceremony-title { position: absolute; top: 3%; left: 8%; width: 84%; text-align: center; font-family: var(--font-display); font-size: var(--ceremony-title-size); line-height: 1.08; text-shadow: 0 .2cqw .5cqw var(--color-bg); }
+.ceremony-subtitle { display: block; margin-top: .65cqw; font-family: var(--font-sans); font-size: var(--ceremony-body-size); color: var(--color-accent); }
+.ceremony-card { position: absolute; top: 16%; left: 18%; width: 64%; min-height: 31%; padding: 1.4cqw 2.5cqw; background: var(--ceremony-card); border: .12cqw solid var(--color-accent); border-radius: 1.1cqw; text-align: center; box-shadow: 0 1cqw 3cqw var(--ceremony-veil); }
+.ceremony-card h2 { font-family: var(--font-display); font-size: 3.2cqw; line-height: 1.1; }
+.ceremony-card p { margin-top: .7cqw; font-size: var(--ceremony-body-size); }
+.ceremony-award-emoji { font-size: 3.7cqw; line-height: 1.25; }
+.ceremony-winners { font-family: var(--font-display); font-size: 2.5cqw; color: var(--color-accent); }
+.ceremony-winners small { display: block; font: 1.4cqw var(--font-sans); margin-top: .3cqw; }
+.ceremony-raven { position: absolute; z-index: 2; width: 15%; left: 42%; top: 9%; pointer-events: none; }
+.ceremony-raven img { display: block; width: 100%; height: auto; }
+.ceremony-moon { position: absolute; right: 4%; top: 9%; font-size: 6cqw; pointer-events: none; }
+.ceremony-spoon { position: absolute; width: 10%; right: 8%; top: 22%; transform: rotate(-12deg); }
+.ceremony-souvenir-focus { position: absolute; left: 34%; top: 17%; width: 32%; height: 40%; font-size: 1.4cqw; }
+.ceremony-souvenir-focus .ceremony-object > span { font-size: 9cqw; }
+.ceremony-souvenir-focus .ceremony-postit { padding: 2cqw; }
+.ceremony-souvenir-focus small { font-size: 1.3cqw; }
+.ceremony-talent-focus { left: 3%; top: 17%; width: 23%; height: 36%; }
+.ceremony-visitor { position: absolute; width: 21%; text-align: center; transform: translate(-50%, -50%); }
+.ceremony-portrait { display: flex; align-items: center; justify-content: center; }
+.ceremony-visitor-name { display: block; margin-top: .7cqw; padding: .25cqw .3cqw; border-radius: .4cqw; background: var(--ceremony-label); font-size: var(--ceremony-name-size); line-height: 1.25; font-weight: 700; white-space: nowrap; }
+.ceremony-visitor-score { font-family: var(--font-num); font-size: 1.8cqw; color: var(--color-accent); background: var(--ceremony-label); border-radius: .4cqw; padding: 0 .6cqw; }
+.ceremony-spotlight { position: absolute; left: 0; width: 20%; height: 48%; top: 40%; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--ceremony-glow) 45%, transparent)); clip-path: polygon(48% 0, 52% 0, 100% 100%, 0 100%); pointer-events: none; }
+.ceremony-duo-link { position: absolute; height: .25cqw; transform-origin: left center; background: var(--color-accent); pointer-events: none; }
+.ceremony-roulette { position: relative; height: 12cqh; overflow: hidden; margin: .7cqw 0; background: var(--color-bg); border-radius: .6cqw; }
+.ceremony-roulette::after { content: ""; position: absolute; inset: 0; border: .2cqw solid var(--color-accent); border-radius: inherit; }
+.ceremony-reel-item { height: 12cqh; display: flex; align-items: center; justify-content: center; gap: 1cqw; font-family: var(--font-display); font-size: 2.9cqw; }
+.ceremony-final-board { position: absolute; left: 3%; top: 17%; width: 30%; padding: 1.2cqw; background: var(--ceremony-card); border: .1cqw solid var(--color-accent); border-radius: .8cqw; }
+.ceremony-final-row { display: flex; align-items: center; gap: .7cqw; min-height: 4cqh; font-size: 1.35cqw; }
+.ceremony-final-row strong { flex: 1; min-width: 0; white-space: nowrap; }
+.ceremony-final-row > span:first-child { width: 2cqw; color: var(--color-accent); font-family: var(--font-num); }
+.ceremony-final-row > span:last-child { color: var(--color-accent); font-family: var(--font-num); }
+.ceremony-podium { position: absolute; display: flex; align-items: flex-end; justify-content: center; gap: 1cqw; left: 34%; width: 44%; bottom: 11%; }
+.ceremony-podium-place { width: 31%; text-align: center; }
+.ceremony-podium-player { min-height: 19cqh; display: flex; align-items: center; justify-content: flex-end; flex-direction: column; gap: .5cqw; }
+.ceremony-podium-name { display: block; max-width: 100%; white-space: normal; overflow-wrap: anywhere; padding: .2cqw .4cqw; background: var(--ceremony-label); border-radius: .3cqw; font-size: 1.35cqw; font-weight: 700; }
+.ceremony-podium-block { border-radius: .6cqw .6cqw 0 0; background: linear-gradient(120deg, var(--color-hot), var(--color-bg-2)); color: var(--color-ink); border: .1cqw solid var(--color-line); font: 3.3cqw var(--font-display); }
+.ceremony-podium-place[data-place="1"] .ceremony-podium-block { height: 20cqh; background: linear-gradient(130deg, var(--color-accent-strong), var(--color-accent-deep)); color: var(--color-accent-ink); }
+.ceremony-podium-place[data-place="2"] .ceremony-podium-block { height: 14cqh; }
+.ceremony-podium-place[data-place="3"] .ceremony-podium-block { height: 10cqh; }
+.ceremony-final-spectator { position: absolute; width: 17%; text-align: center; }
+.ceremony-final-spectator .ceremony-visitor-name { font-size: 1.2cqw; }
+.ceremony-final-spectator .ceremony-spoon { top: 15%; right: -5%; width: 40%; }
+.ceremony-tv-winner { position: absolute; left: 37.6%; top: 34.4%; width: 14.5%; height: 13.5%; display: flex; align-items: center; justify-content: center; background: var(--color-bg-3); border: .15cqw solid var(--color-accent); }
+@keyframes ceremony-glow { from { opacity: .35; } to { opacity: 1; } }
+
+/* Seuls ces petits calques sont animés ; les feux et lumières se figent pendant la pause serveur. */
+.ceremony-raven, .ceremony-spotlight { will-change: transform; }
+.ceremony-room[data-paused="true"] *, .ceremony-room[data-paused="true"] *::after { animation-play-state: paused !important; }

@@ -4,8 +4,9 @@
 
 Direction confirmée par l'organisateur, réalisée par lots. Le retrait GunZ/photos, l'attente pendant le final,
 l'ouverture de la pièce, les transitions après Culture gênante et la sortie avant le podium sont intégrés.
-Les statistiques, souvenirs de partie et la cérémonie finale enrichie restent à réaliser ; le moteur de sons (TV seulement) est livré,
-les sons propres aux skins et aux mini-jeux viennent ensuite. La rotation livrée est décrite dans [skins.md](skins.md).
+Les statistiques des manches, les souvenirs et la cérémonie finale enrichie sont réalisés sur la branche de travail :
+les quatre bonus prolongent la sortie de la TV, puis le classement se révèle dans la même pièce en mode nuit.
+Le moteur de sons (TV seulement) et les sons des mini-jeux sont livrés. La rotation livrée est décrite dans [skins.md](skins.md).
 
 Le décor de la pièce a été validé par l'organisateur le **10 novembre 2026** :
 [illustration de référence](../src/web/theme/assets/piece-reference.png). La [maquette animée](maquettes/piece.html)
@@ -208,3 +209,42 @@ pour qu'une reprise ne les compte pas deux fois. Les contenus secrets restent da
 Pour le lot moteur : tests de pause, reprise, passage, retour lobby, crash aux frontières, absence d'interlude,
 épuisement du contenu et absence de double comptage. Puis parcours Playwright avec rechargement TV/téléphones,
 huit joueurs et petits écrans. Recette finale sur le PC, les vrais téléphones et le wifi prévu, hors ligne.
+
+### Statistiques et souvenirs fournis par les jeux
+
+Les jeux de choix transmettent les avis réellement enregistrés : cible de Qui est le plus, choix de Ceci ou cela,
+vote de chaque phrase de Split the room, étage de chaque invité dans Tier list. Les réponses de Comme les autres
+utilisent les mêmes groupes que le calcul des points, y compris la tolérance aux fautes et les réponses multiples.
+Une absence ne devient jamais un avis. Les choix modifiables comptent uniquement les changements après un premier choix valide.
+
+Dessin raté garde les votes des dessins non vides, une copie allégée de chaque œuvre incomprise et le dessin le plus voté.
+Chaque trait conserve ses extrémités ; le souvenir reste sous 24 Ko. Le Bon Prix propose l'objet dont les estimations
+s'écartent le plus du vrai prix. Culture gênante garde la mauvaise réponse la plus partagée en QCM ; sans erreur,
+aucun post-it n'est inventé.
+
+Simon et Pierre-feuille-ciseaux comptent les appuis acceptés. Le Compte à rebours compte l'arrêt volontaire comme un appui :
+sa durée visée ne représente pas un réflexe. Les temps de réaction disponibles viennent des QCM de Culture gênante,
+mesurés sur le téléphone et déjà bornés par le jeu ; aucune durée n'est déduite de la latence réseau.
+
+### Cérémonie et classement dans la pièce
+
+Le déroulé validé le 13 novembre 2026 conserve la pièce de référence : souvenirs (dessin encadré au mur,
+objet sur la table, post-it près de la TV), classement provisoire, puis quatre bonus tirés avec une roulette visible.
+Le corbeau apporte les enveloppes ; la carte se retourne, le projecteur cherche le gagnant et son portrait bondit.
+Les deux gagnants du Duo improbable sont reliés ; le Talent incompris ressort son dessin et Merci pour les travaux
+fait apparaître la cuillère à tiramisu. Les scores affichés ajoutent uniquement les bonus déjà révélés.
+
+La nuit tombe pour le classement final. Les portraits quittent la table du dernier au quatrième, puis occupent
+le podium devant la cheminée ; le dernier retrouve le pouf et la cuillère. Le portrait couronné du premier apparaît
+dans la TV dessinée, avec lumières du jukebox, feu d'artifice aux fenêtres et confettis maison.
+Le tableau final conserve les huit rangs et scores, tandis que les téléphones attendent la révélation de leur rang.
+Les souvenirs restent posés dans le décor. Pause et Passer utilisent la même horloge serveur pendant ces deux phases.
+
+Les composants sont `ui/RoomCeremony.tsx`, `ui/CeremonyRoom.tsx` et `tv/FinalScreen.tsx` ; les coordonnées et jetons
+visuels se trouvent dans `theme/ceremony.css`. Le décor n'est pas repeint : un voile nuit et des lumières distinctes
+préservent sa géométrie. Corbeau et cuillère sont des images SVG fixes, importées comme sprites ; aucun tracé SVG
+n'est animé. Les dessins sont peints une fois sur canvas. Les calques mobiles utilisent seulement transform/opacity.
+
+Revue hors ligne : `bun run apercu:animations`, puis **Écrans TV → Souvenirs et bonus** ou **Classement final**,
+avec huit invités et téléphone 360×640. Le curseur permet de revoir chaque souvenir et chaque bonus.
+Les données de cette galerie sont fictives ; la partie réelle utilise exclusivement l'historique du moteur.

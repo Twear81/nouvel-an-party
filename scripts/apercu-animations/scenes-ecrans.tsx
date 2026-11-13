@@ -1,5 +1,6 @@
 // Sections « Chrono » et « Écrans TV » : lobby, final, et le chrono des 10 dernières secondes sous chaque skin.
 import { useEffect, useMemo, useState } from "react";
+import { SOUVENIRS_DEMO } from "./scenes-ceremonie";
 import { FINAL_ENTRY_MS, finalRevealTimeline } from "../../src/shared/final-reveal";
 import type { SkinId } from "../../src/shared/skins";
 import type { GameSnapshot, RoundInfo } from "../../src/shared/types";
@@ -42,7 +43,7 @@ function SceneFinal({ env }: { env: Env }) {
   const duree = finalRevealTimeline(joueurs.length).durationMs + FINAL_ENTRY_MS + 3000;
   const snapshot = useMemo<GameSnapshot>(() => ({
     ...snapshotDeBase("final", { joueurs, skin: env.skin, paused: env.pause }),
-    finalReveal: { startedAt: T0, playerIds: joueurs.map((p) => p.id) },
+    finalReveal: { startedAt: T0, playerIds: joueurs.map((p) => p.id), souvenirs: SOUVENIRS_DEMO },
   }), [joueurs, env.skin, env.pause]);
   const { definirDuree, depart } = env;
   useEffect(() => definirDuree(duree), [duree, definirDuree]);

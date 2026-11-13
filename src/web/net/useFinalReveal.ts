@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { finalRevealTimeline, type FinalRevealInfo } from "../../shared/final-reveal";
+import { finalRevealElapsed, finalRevealTimeline, type FinalRevealInfo } from "../../shared/final-reveal";
 import { serverNow } from "./socket";
 
 /** État d'animation uniquement : le départ et les participants viennent du moteur, y compris après rechargement. */
@@ -9,7 +9,7 @@ export function useFinalReveal(reveal: FinalRevealInfo | null) {
   const read = () => {
     if (startedAt === undefined) return { step: 0, done: false };
     const timeline = finalRevealTimeline(playerCount);
-    const elapsed = serverNow() - startedAt;
+    const elapsed = finalRevealElapsed(reveal!, serverNow());
     return { step: timeline.steps.filter((at) => elapsed >= at).length, done: elapsed >= timeline.durationMs };
   };
   const [state, setState] = useState(read);
@@ -22,14 +22,14 @@ export function useFinalReveal(reveal: FinalRevealInfo | null) {
     const timeline = finalRevealTimeline(playerCount);
     let timer: ReturnType<typeof setTimeout> | undefined;
     const tick = () => {
-      const elapsed = serverNow() - startedAt;
+      const elapsed = finalRevealElapsed(reveal!, serverNow());
       setState({ step: timeline.steps.filter((at) => elapsed >= at).length, done: elapsed >= timeline.durationMs });
       const next = [...timeline.steps, timeline.durationMs].find((at) => at > elapsed);
-      if (next !== undefined) timer = setTimeout(tick, next - elapsed);
+      if (next !== undefined && reveal?.pausedSince == null) timer = setTimeout(tick, next - elapsed);
     };
     tick();
     return () => clearTimeout(timer);
-  }, [startedAt, playerCount]);
+  }, [startedAt, playerCount, reveal?.pausedMs, reveal?.pausedSince]);
 
   return state;
 }

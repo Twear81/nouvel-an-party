@@ -13,7 +13,7 @@ const present = (players: PublicPlayer[]) => new Set(players.filter((p) => p.pro
 
 /** Ambiance continue entre les manches ; la sortie laisse la place à la fanfare finale. */
 export function ambianceActive(snapshot: GameSnapshot | null): boolean {
-  return snapshot !== null && snapshot.phase !== "final" && !(snapshot.phase === "transition" && snapshot.transition?.kind === "closing");
+  return snapshot !== null && snapshot.phase !== "final" && snapshot.phase !== "ceremony" && !(snapshot.phase === "transition" && snapshot.transition?.kind === "closing");
 }
 
 /** Hauteur du « pop » de réponse : monte à chaque réponse, plafonnée. */
@@ -41,7 +41,6 @@ export function diffSnapshots(prev: GameSnapshot | null, next: GameSnapshot): Sf
     if (next.phase === "transition" && next.transition?.kind !== "opening") out.push({ nom: "transition.entree" });
     if (next.phase === "intro") out.push({ nom: "manche.intro" });
     if (next.phase === "results") out.push({ nom: "resultats.arrivee" });
-    if (next.phase === "final") out.push({ nom: "final.fanfare" });
   } else if (next.phase === "playing" && prev.round && next.round && prev.round.index === next.round.index) {
     const before = prev.round.progress;
     const after = next.round.progress;
