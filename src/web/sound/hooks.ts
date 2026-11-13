@@ -99,4 +99,3 @@ export function useSfxAt(heureMs: number | null, nom: NomSon, options?: PlayOpti
 export function useSfxTimeline(depuisMs: number | null, liste: readonly { à: number; son: NomSon; options?: PlayOptions }[]) {
   useSchedule(depuisMs === null ? [] : chronologie(depuisMs, liste));
 }
-

@@ -16,3 +16,6 @@ Les sons ne sont pas modifiés dans ce lot.
 - Specs Chromium `comme-les-autres.spec.ts` et `split-the-room.spec.ts` : 3 réussis ; Comme les autres revérifié avec le cas de saisie refusée et le verrouillage après rechargement.
 - Galerie à huit joueurs, thème de base et six skins : 14 comparaisons des deux bords, écart maximal de 0 px, retraits intérieurs identiques entre cadre et bandeau ; couronne du dessin entièrement au-dessus de la feuille ; champs réellement désactivés. Simon également regardé à trois joueurs.
 - Captures regardées ; spec exploratoire supprimé avant commit. Suite complète volontairement non relancée à la demande de l’organisateur.
+
+Après cette revue ciblée, la [validation finale du 13 novembre](bilan-sons-animations.md#validation-finale-avant-fusion)
+couvre l’ensemble des tests avant fusion.

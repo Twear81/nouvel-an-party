@@ -1,7 +1,10 @@
 # Bilan du lot sons et corrections visuelles — 12 novembre 2026
 
-Branche : `feat/sons-animations`. Travail local, sans push ni fusion dans `main`.
+Branche de réalisation : `feat/sons-animations`. Travail local, sans push.
 Les profils Firefox non suivis ont été conservés. Aucun fichier de `src/server/engine` n’a été modifié.
+
+Le lot a été validé par l’organisateur le 13 novembre 2026, avec demande de fusion locale dans `main`.
+La [validation finale](#validation-finale-avant-fusion) couvre aussi les retouches visuelles et musicales.
 
 **Complément du 13 novembre :** six ambiances musicales originales accompagnent désormais les changements de skin
 pendant toute la partie. Après remplacement des deux thèmes de menu, le catalogue complet compte 37 Ogg,
@@ -22,8 +25,8 @@ la [planche complète](../captures/sons/index.html) conserve tous les autres bru
 Vérifications ciblées : TypeScript, 25 tests unitaires audio, cinq E2E audio Chromium (dont décodage WebAudio réel
 et surcharge musicale d’un skin), aperçus en `file://` sans erreur ni requête HTTP. Le scénario WebAudio a été
 relancé seul après correction du chemin de sa fixture sous Node. Suite complète non relancée, conformément à la demande.
-Mesures des trois exports : `captures/sons/retouches-mesures.json`. La qualité artistique des trois remplacements
-reste à valider à l’écoute ; les niveaux et la durée ont été contrôlés.
+Mesures des trois exports : `captures/sons/retouches-mesures.json`. Les trois remplacements ont ensuite été
+validés à l’écoute par l’organisateur ; les niveaux et la durée ont été contrôlés.
 
 ## Sons
 
@@ -109,7 +112,7 @@ Chaque suffixe de skin existe dans `captures/corrections/avant/` et `apres/` ; `
 Fichiers visuels : `theme.css`, les quatre CSS de skins concernés, `PlayerAvatar.tsx`, `ResultsScreen.tsx`,
 `FinalScreen.tsx`, vues Simon et Dessin raté, `drawing.tsx`. PFC : vues, galerie, README et tests unitaires / E2E.
 
-## Vérification
+## Vérification du premier lot
 
 - `bun run build:web` : validé, **31 fichiers Ogg embarqués**. La version Windows n’a pas été reconstruite dans ce lot.
 - `bun run typecheck` : validé.
@@ -132,3 +135,28 @@ Fichiers visuels : `theme.css`, les quatre CSS de skins concernés, `PlayerAvata
 Règle conservée : trois rejeux autorisés, puis tirage au sort à l’égalité suivante ; si personne ne choisit, le lancer
 est tiré au sort immédiatement. Seuls les duels encore indécis rejouent. L’organisateur a confirmé le 12 novembre 2026 de conserver ces règles. Aucun changement de règle n’a été fait
 dans cette correction de présentation.
+
+## Validation finale avant fusion
+
+Le 13 novembre 2026, après validation visuelle et sonore de l’organisateur :
+
+- `bun run typecheck` : validé.
+- `bun run test` : **546 réussis, 0 échec**.
+- Compilation web de la version finale : validée par le lancement E2E ; **37 fichiers Ogg embarqués**.
+- Ensemble des scénarios E2E : **120 réussis, 42 ignorés, 0 échec**. Répartition : Chromium 84, Firefox 18,
+  WebKit 18. Les 42 ignorés sont les captures conditionnelles `skins-captures`, désactivées dans la suite standard.
+- `git diff --check main` : validé après retrait de deux lignes vides superflues en fin de fichier.
+
+La commande `bun run test:e2e --workers=2` a terminé 117 scénarios sans échec avant une interruption par
+`SIGTERM`. Seuls les trois scénarios WebKit restants ont été repris, sur la même version compilée :
+
+```sh
+E2E_SKIP_BUILD=1 bun run test:e2e tests/e2e/14-transitions.spec.ts:16 tests/e2e/culture-genante.spec.ts:54 tests/e2e/dessin-rate.spec.ts:17 tests/e2e/skins-captures.spec.ts --project=webkit --workers=1
+```
+
+Cette reprise a terminé avec **3 réussis, 14 captures conditionnelles ignorées, 0 échec**. Le bilan cumulé couvre
+tous les scénarios permanents ; aucun test fonctionnel n’a été exclu. Les navigateurs ont été exécutés avec les
+permissions nécessaires, leur démarrage étant bloqué par le confinement du premier lancement.
+Les journaux de la reprise et des derniers contrôles TypeScript / unitaires sont dans `captures/validation-finale/`.
+
+La reconstruction Windows et l’essai sur la TV avec les téléphones restent pour une autre session, comme demandé.

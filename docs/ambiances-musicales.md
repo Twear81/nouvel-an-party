@@ -74,3 +74,6 @@ nouvelles boucles en WebAudio (112 et 87 s), avec fondu puis arrêt complet ; la
 deux galeries s’ouvrent hors ligne, sans erreur ni requête HTTP. Les empreintes des quatre autres ambiances sont
 identiques à celles du commit précédent. Aucun changement du moteur ; les six E2E du lot précédent n’ont pas
 été relancés pour ce remplacement de fichiers audio. Mesures spécifiques : `captures/sons-menus/mesures.json`.
+
+L’organisateur a ensuite validé les deux thèmes de menu. La [validation finale du 13 novembre](bilan-sons-animations.md#validation-finale-avant-fusion)
+couvre l’ensemble des tests avant fusion, sur cette version des ambiances.
