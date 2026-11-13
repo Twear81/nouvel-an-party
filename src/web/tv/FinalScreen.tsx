@@ -168,11 +168,13 @@ function ConversionCard({ player, beat, elapsed, k, rank, shared }: { player: Ra
   const landed = useLanded(starsDone, starIndex, k);
   const shown = player.base + player.stars.slice(0, landed).reduce((a, b) => a + b, 0);
   const counting = phase !== "advance";
+  // Podium monté (3 premiers) : la carte se tient au-dessus des marches pour ne pas couvrir ceux déjà installés.
+  const high = (beat.rank ?? 0) < 3;
   return (
     <motion.div data-testid="final-card" data-player={player.id} data-phase={phase} data-rank={rank}
       initial={{ opacity: 0, x: "-18rem", scale: 0.6 }} animate={{ opacity: 1, x: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.85, transition: { duration: Math.max(0.05, 0.25 * k) } }}
       transition={{ type: "spring", stiffness: 110, damping: 15 }}
-      className="absolute left-[40%] top-[28%] flex w-[30rem] flex-col items-center gap-2">
+      className={`absolute left-[40%] ${high ? "top-[2%]" : "top-[28%]"} flex w-[30rem] flex-col items-center gap-2`}>
       {/* Étoiles gagnées à la cérémonie : elles partent une à une */}
       <div className="flex h-[5rem] items-center justify-center gap-1" data-testid="final-card-stars" data-remaining={player.stars.length - consumed}>
         {player.stars.slice(consumed).map((_, j) => <Star key={j} size={4.4} />)}
