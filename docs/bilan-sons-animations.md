@@ -4,7 +4,8 @@ Branche : `feat/sons-animations`. Travail local, sans push ni fusion dans `main`
 Les profils Firefox non suivis ont été conservés. Aucun fichier de `src/server/engine` n’a été modifié.
 
 **Complément du 13 novembre :** six ambiances musicales originales accompagnent désormais les changements de skin
-pendant toute la partie. Le catalogue complet compte 37 Ogg, 5 830 849 octets. [Sélection, sources et vérifications](ambiances-musicales.md).
+pendant toute la partie. Après remplacement des deux thèmes de menu, le catalogue complet compte 37 Ogg,
+6 507 940 octets. [Sélection, sources et vérifications](ambiances-musicales.md).
 
 ## Retouches après écoute de l’organisateur
 

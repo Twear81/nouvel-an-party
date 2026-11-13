@@ -13,16 +13,17 @@ Vorbis 96 kbit/s, stéréo 48 kHz. Métadonnées, liens exacts et droits : `ambi
 | Fichier | Source et auteur | Original | Droits |
 |---|---|---|---|
 | `ambiance-dofus.ogg` | [Guillaume Pladys / Ankama — lecteur et téléchargement Angom8](https://angom8.net/musiques-dofus/) | `Astrub` | Propriétaire — Ankama |
-| `ambiance-overwatch.ogg` | [Derek Duke / Blizzard — album Lúcio offert, copie archivée](https://archive.org/details/Synaesthesia-Auditiva) | `Rejuvenescência — Synaesthesia Auditiva` | Propriétaire — Blizzard Entertainment |
+| `ambiance-overwatch.ogg` | [Sam Cardon / Blizzard — bande originale 2016, copie publique KHInsider](https://downloads.khinsider.com/game-soundtracks/album/overwatch-soundtrack/01.%2520Overture.mp3) | `Overture` | Propriétaire — Blizzard Entertainment / Sam Cardon |
 | `ambiance-league-of-legends.ogg` | [Riot Games Music Team — ZIP officiel offert, conservé par Internet Archive](https://web.archive.org/web/20150201000000id_/http://l3cdn.riotgames.com/MusicOfLoL/The_Music_of_League_of_Legends_Volume_1.zip) | `Tales Of The Rift` | Propriétaire — Riot Games |
-| `ambiance-rocket-league.ogg` | [TheFatRat — téléchargement de l’artiste](https://www.thefatrat.com/release/infinite-power) | `Infinite Power!` | Propriétaire — TheFatRat / Pharisade LTD |
+| `ambiance-rocket-league.ogg` | [Mike Ault / Psyonix — bande originale 2015, copie publique archivée](https://archive.org/details/Rocket_League_OST_Vol1) | `Rocket League Theme` | Propriétaire — Psyonix / Mike Ault |
 | `ambiance-mario-odyssey.ogg` | [The Super Mario Players feat. Kate Davis — site officiel Nintendo](https://www.nintendo.co.jp/switch/aaaca/) | `Jump Up, Super Star! (Short ver.)` | Propriétaire — Nintendo |
 | `ambiance-plague-tale.ogg` | [Olivier Deriviere — extrait du lecteur public du compositeur](https://olivierderiviere.com/album/a-plague-tale-innocence-a-plague-tale/) | `A Plague Tale (A Plague Tale: Innocence)` | Propriétaire — Olivier Deriviere / ayants droit du jeu |
 
-Pour TheFatRat, les [conditions du téléchargement](https://www.thefatrat.com/terms-and-conditions) n’accordent pas
-de licence d’intégration dans un jeu. L’extrait reste identifié comme propriétaire dans cette version privée,
-conformément à la demande de l’organisateur ; sa disponibilité en MP3 ne constitue pas une licence de jeu.
-Les deux albums gratuits Blizzard et Riot restent eux aussi propriétaires. L’extrait de Plague Tale est le
+Overwatch et Rocket League utilisent les enregistrements originaux de leurs thèmes principaux classiques,
+confirmés dans les publications officielles de [Blizzard](https://playoverwatch.bandcamp.com/album/overwatch-collectors-edition-soundtrack)
+et [Psyonix](https://www.rocketleague.com/news/vinyl-collection-available-for-pre-order).
+Ces deux bandes originales commerciales restent propriétaires, comme l’album gratuit de Riot. La disponibilité
+d’une copie publique ne constitue pas une licence de redistribution. L’extrait de Plague Tale est le
 fichier de 60 s fourni par le lecteur public du compositeur, et non l’album commercial de Bandcamp.
 
 ## Bruitages et musique d’accueil
