@@ -1,6 +1,31 @@
 # Licences des sons
 
-Tous les fichiers sont embarqués et fonctionnent hors ligne. Aucun extrait propriétaire n’est fourni.
+Tous les fichiers sont embarqués et fonctionnent hors ligne. Les bruitages libres ci-dessous sont accompagnés,
+depuis le 13 novembre 2026 et sur demande explicite de l’organisateur, de six extraits musicaux propriétaires
+pour la version locale destinée à sa soirée privée. Les licences libres des bruitages ne couvrent pas ces musiques.
+
+## Ambiances originales des univers
+
+Les extraits sont découpés, raccordés par fondu croisé d’une seconde, normalisés à −24 LUFS puis exportés en
+Vorbis 96 kbit/s, stéréo 48 kHz. Métadonnées, liens exacts et droits : `ambiances.json` ; traitement et empreintes :
+`provenance-ambiances.json`. Aucun droit de redistribution ou d’exploitation publique dans un jeu n’est revendiqué.
+
+| Fichier | Source et auteur | Original | Droits |
+|---|---|---|---|
+| `ambiance-dofus.ogg` | [Guillaume Pladys / Ankama — lecteur et téléchargement Angom8](https://angom8.net/musiques-dofus/) | `Astrub` | Propriétaire — Ankama |
+| `ambiance-overwatch.ogg` | [Derek Duke / Blizzard — album Lúcio offert, copie archivée](https://archive.org/details/Synaesthesia-Auditiva) | `Rejuvenescência — Synaesthesia Auditiva` | Propriétaire — Blizzard Entertainment |
+| `ambiance-league-of-legends.ogg` | [Riot Games Music Team — ZIP officiel offert, conservé par Internet Archive](https://web.archive.org/web/20150201000000id_/http://l3cdn.riotgames.com/MusicOfLoL/The_Music_of_League_of_Legends_Volume_1.zip) | `Tales Of The Rift` | Propriétaire — Riot Games |
+| `ambiance-rocket-league.ogg` | [TheFatRat — téléchargement de l’artiste](https://www.thefatrat.com/release/infinite-power) | `Infinite Power!` | Propriétaire — TheFatRat / Pharisade LTD |
+| `ambiance-mario-odyssey.ogg` | [The Super Mario Players feat. Kate Davis — site officiel Nintendo](https://www.nintendo.co.jp/switch/aaaca/) | `Jump Up, Super Star! (Short ver.)` | Propriétaire — Nintendo |
+| `ambiance-plague-tale.ogg` | [Olivier Deriviere — extrait du lecteur public du compositeur](https://olivierderiviere.com/album/a-plague-tale-innocence-a-plague-tale/) | `A Plague Tale (A Plague Tale: Innocence)` | Propriétaire — Olivier Deriviere / ayants droit du jeu |
+
+Pour TheFatRat, les [conditions du téléchargement](https://www.thefatrat.com/terms-and-conditions) n’accordent pas
+de licence d’intégration dans un jeu. L’extrait reste identifié comme propriétaire dans cette version privée,
+conformément à la demande de l’organisateur ; sa disponibilité en MP3 ne constitue pas une licence de jeu.
+Les deux albums gratuits Blizzard et Riot restent eux aussi propriétaires. L’extrait de Plague Tale est le
+fichier de 60 s fourni par le lecteur public du compositeur, et non l’album commercial de Bandcamp.
+
+## Bruitages et musique d’accueil
 
 Crédits : **« Oculus Audio Pack 01 » — Oculus VR, LLC, © 2015**, sous [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 Source originale : https://developers.meta.com/vr/downloads/package/oculus-audio-pack-1/ ;

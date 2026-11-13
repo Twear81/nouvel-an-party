@@ -2,8 +2,10 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { SoundEngine } from "../../src/web/sound/engine";
 
 // Doubles WebAudio : vérifier les courses de décodage et les changements de morceau sans carte son.
-const fichiers = ["lobby.musique.ogg", "dofus/lobby.musique.ogg", "overwatch/lobby.musique.ogg"];
+const fichiers = ["lobby.musique.ogg", "dofus/lobby.musique.ogg", "overwatch/lobby.musique.ogg", "roulement.ogg", "manche.intro.ogg"];
 let demarrages: number[], arrets: number[], rampes: number[];
+let paliers: { valeur: number; instant: number }[];
+let horloge: number;
 let debloquer: () => void;
 let attendreDofus: boolean;
 let terminerDofus: () => void;
@@ -14,7 +16,7 @@ class Parametre {
   value = 0;
   cancelAndHoldAtTime() {}
   linearRampToValueAtTime(v: number) { rampes.push(v); }
-  setValueAtTime() {}
+  setValueAtTime(valeur: number, instant: number) { paliers.push({ valeur, instant }); }
 }
 class Gain {
   gain = new Parametre();
@@ -22,8 +24,10 @@ class Gain {
   disconnect() {}
 }
 class Source {
-  buffer: { repere: number } | null = null;
+  buffer: { repere: number; duration: number } | null = null;
   loop = false;
+  playbackRate = { value: 1 };
+  detune = { value: 0 };
   connect(noeud: unknown) { return noeud; }
   disconnect() {}
   start() { demarrages.push(this.buffer!.repere); }
@@ -31,7 +35,7 @@ class Source {
 }
 class Contexte {
   state = "running";
-  currentTime = 0;
+  get currentTime() { return horloge; }
   destination = {};
   createGain() { return new Gain(); }
   createBufferSource() { return new Source(); }
@@ -39,13 +43,14 @@ class Contexte {
   resume() { return Promise.resolve(); }
   decodeAudioData(octets: ArrayBuffer) {
     const repere = new Uint8Array(octets)[0]!;
-    if (repere === 1 && attendreDofus) return new Promise((r) => { terminerDofus = () => r({ repere }); });
-    return Promise.resolve({ repere });
+    const buffer = { repere, duration: repere === 3 ? 10 : 1 };
+    if (repere === 1 && attendreDofus) return new Promise((r) => { terminerDofus = () => r(buffer); });
+    return Promise.resolve(buffer);
   }
 }
 
 beforeEach(() => {
-  demarrages = []; arrets = []; rampes = []; attendreDofus = false;
+  demarrages = []; arrets = []; rampes = []; paliers = []; horloge = 0; attendreDofus = false;
   const globals: Record<string, unknown> = {
     document: { documentElement: { dataset: { app: "tv" } } },
     navigator: { webdriver: false },
@@ -80,6 +85,18 @@ async function lancer() {
 }
 
 describe("ambiance musicale de la TV", () => {
+  it("un jingle court ne relève pas la musique avant la fin d’un roulement, même pendant un changement d’univers", async () => {
+    const moteur = await lancer();
+    debloquer(); await laisserPasser();
+    moteur.play("roulement"); await laisserPasser();
+    horloge = 1;
+    moteur.play("manche.intro"); await laisserPasser();
+    expect(paliers.at(-1)?.instant).toBe(10);
+    moteur.setSkin("dofus"); await laisserPasser();
+    expect(paliers.at(-1)?.instant).toBe(10);
+    expect(paliers.at(-1)?.valeur).toBeCloseTo(0.3 * 0.25);
+    moteur.setAmbiance(false);
+  });
   it("attend un geste, garde une boucle unique, croise les fondus et revient au morceau général", async () => {
     const moteur = await lancer();
     expect(demarrages).toEqual([]);

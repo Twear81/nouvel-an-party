@@ -11,6 +11,11 @@ export interface SfxCall {
 
 const present = (players: PublicPlayer[]) => new Set(players.filter((p) => p.profile && p.connected).map((p) => p.id));
 
+/** Ambiance continue entre les manches ; la sortie laisse la place à la fanfare finale. */
+export function ambianceActive(snapshot: GameSnapshot | null): boolean {
+  return snapshot !== null && snapshot.phase !== "final" && !(snapshot.phase === "transition" && snapshot.transition?.kind === "closing");
+}
+
 /** Hauteur du « pop » de réponse : monte à chaque réponse, plafonnée. */
 export const popRate = (done: number) => 1 + Math.min(Math.max(done, 1) - 1, 10) * 0.06;
 

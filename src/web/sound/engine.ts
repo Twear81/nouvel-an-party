@@ -43,11 +43,12 @@ const readMuted = (): boolean => {
 
 export class SoundEngine {
   private mediasPrets = false;
-  private lobby = false;
+  private ambiance = false;
   private musique: { source: AudioBufferSourceNode; gain: GainNode; url: string; volume: number } | null = null;
   private musiqueTrace: string | null = null;
   private musiqueVersion = 0;
   private musiqueEnChargement: string | null = null;
+  private musiqueBaisseJusqua = 0;
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private files: string[] = [];
@@ -184,14 +185,17 @@ export class SoundEngine {
     this.setMuted(!this.muted);
   }
 
-  /** Configure l’ambiance ; un geste explicite sur la TV est requis, même si le lobby est déjà affiché. */
-  setLobby(actif: boolean) {
-    this.lobby = actif;
+  /** Configure l’ambiance continue ; un geste explicite sur la TV reste requis. */
+  setAmbiance(actif: boolean) {
+    this.ambiance = actif;
     this.syncMusique();
   }
 
+  /** Alias conservé pour les planches d’écoute et les intégrations existantes. */
+  setLobby(actif: boolean) { this.setAmbiance(actif); }
+
   private syncMusique() {
-    const actif = this.isTv && this.lobby && this.gesture && !this.muted && !this.paused;
+    const actif = this.isTv && this.ambiance && this.gesture && !this.muted && !this.paused;
     const def = actif ? resolveSound("lobby.musique", this.skin, this.files) : null;
     if (this.silent) {
       if (def && this.musiqueTrace !== def.url) (window.__sfx ??= []).push({ nom: "lobby.musique", skin: this.skin, fichier: def.url });
@@ -222,7 +226,13 @@ export class SoundEngine {
       source.buffer = buffer;
       source.loop = true;
       gain.gain.value = 0;
-      gain.gain.linearRampToValueAtTime(def.volume, this.ctx.currentTime + 1.2);
+      const maintenant = this.ctx.currentTime;
+      const encoreBas = this.musiqueBaisseJusqua > maintenant;
+      gain.gain.linearRampToValueAtTime(def.volume * (encoreBas ? 0.25 : 1), maintenant + (encoreBas ? Math.min(1.2, this.musiqueBaisseJusqua - maintenant) : 1.2));
+      if (encoreBas) {
+        gain.gain.setValueAtTime(def.volume * 0.25, this.musiqueBaisseJusqua);
+        gain.gain.linearRampToValueAtTime(def.volume, this.musiqueBaisseJusqua + 0.6);
+      }
       source.connect(gain).connect(this.master);
       source.onended = () => { source.disconnect(); gain.disconnect(); };
       // L’ancienne boucle reste audible jusqu’au décodage, puis les deux fondus se croisent.
@@ -243,14 +253,16 @@ export class SoundEngine {
   }
 
   private duckMusique(duree: number) {
-    if (!this.musique || !this.ctx) return;
-    const volume = this.musique.volume;
+    if (!this.ctx) return;
     const t = this.ctx.currentTime;
+    this.musiqueBaisseJusqua = Math.max(this.musiqueBaisseJusqua, t + Math.max(duree, 0.1));
+    if (!this.musique) return;
+    const volume = this.musique.volume;
     const gain = this.musique.gain.gain;
     gain.cancelAndHoldAtTime(t);
     gain.linearRampToValueAtTime(volume * 0.25, t + 0.06);
-    gain.setValueAtTime(volume * 0.25, t + Math.max(duree, 0.1));
-    gain.linearRampToValueAtTime(volume, t + Math.max(duree, 0.1) + 0.6);
+    gain.setValueAtTime(volume * 0.25, this.musiqueBaisseJusqua);
+    gain.linearRampToValueAtTime(volume, this.musiqueBaisseJusqua + 0.6);
   }
 
   // ── Chargement
@@ -301,7 +313,7 @@ export class SoundEngine {
       source.onended = () => gain.disconnect();
       source.start();
       // Les jingles prennent la place de la musique ; les petits clics ne font pas pomper le mixage.
-      if (["partie.lancement", "manche.intro", "resultats.arrivee", "final.fanfare", "boum"].includes(nom)) this.duckMusique(buffer.duration / source.playbackRate.value);
+      if (["partie.lancement", "manche.intro", "resultats.arrivee", "final.fanfare", "boum", "roulement", "tension", "applaudissements"].includes(nom)) this.duckMusique(buffer.duration / source.playbackRate.value);
     });
   }
 }

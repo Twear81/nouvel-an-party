@@ -1,6 +1,8 @@
 # Signatures à déposer par l’organisateur
 
-Ces propositions concernent des sons propriétaires : **aucun n’a été téléchargé ni intégré au dépôt**.
+Ces propositions concernent des bruitages de signature propriétaires : **aucun de ces bruitages n’a été téléchargé ni intégré au dépôt**.
+Les six ambiances musicales originales ont en revanche été ajoutées le 13 novembre 2026 sur demande explicite de
+l’organisateur : [sélection, sources et écoute](ambiances-musicales.md).
 L’organisateur choisit et fournit l’extrait pour sa soirée. Les liens renvoient aux jeux officiels ; les moments
 indiqués permettent de retrouver le son dans une partie / un replay personnel, sans confondre un téléchargement
 public avec une licence libre.
@@ -27,10 +29,10 @@ Pour Simon, garder un échantillon de **do4** si l’on remplace `simon.note` : 
 
 ## Musiques d’ambiance par univers
 
-Le moteur sait maintenant sélectionner `lobby.musique` selon le skin affiché et changer de morceau en fondu.
-Les originaux des jeux sont à fournir par l’organisateur ; ils ne sont pas inclus dans les sources ni les aperçus.
-Sans fichier propre au skin, la boucle jazz générale reste utilisée. La sélection entre originaux et alternatives
-libres, ainsi que l’éventuelle présence musicale pendant les mini-jeux, restent à confirmer avec l’organisateur.
+Le moteur sélectionne `lobby.musique` selon le skin affiché et change de morceau en fondu. Les six univers ont déjà
+une ambiance originale embarquée et incluse dans les aperçus. Elle continue pendant les mini-jeux et leurs résultats.
+Les chemins ci-dessous permettent de remplacer cette sélection. Les extraits restent propriétaires et réservés
+au périmètre privé décrit dans [ambiances-musicales.md](ambiances-musicales.md).
 
 | Univers | Ambiance à chercher dans le jeu / la bande-son officielle | Fichier à déposer dans `config/medias/sons/` |
 |---|---|---|

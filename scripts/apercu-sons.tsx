@@ -19,7 +19,7 @@ sound.start({ sansReseau: true });
 
 /** Quand le jeu joue ce son (écrit à la main d'après events.ts, useGlobalSfx.ts et les mini-jeux). */
 const QUAND: Record<NomSon, string> = {
-  "lobby.musique": "Boucle jazz du lobby (63 s) : démarre au clic, fondus et baisse pendant les jingles.",
+  "lobby.musique": "Ambiance continue : jazz à l’accueil, musique originale de l’univers pendant la partie. Changer le skin fait changer la musique en fondu.",
   "applaudissements": "Public au gain des points : bref, discret, après la révélation.",
   "tension": "Riser de deux secondes avant le dessin gagnant.",
   "echec.trombone": "Trombone acoustique : l’imposteur s’en sort (chute amicale).",

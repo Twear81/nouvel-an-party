@@ -334,7 +334,7 @@ volume/hauteur réglables, séquences réelles, skins).
 
 | Nom logique | Quand |
 |---|---|
-| `lobby.musique` | ambiance jazz en boucle, au premier geste sur la TV ; fondu à la sortie |
+| `lobby.musique` | jazz à l’accueil, ambiance originale du skin pendant les manches ; changement en fondu |
 | `tension`, `applaudissements`, `echec.trombone` | riser de 2 s, public après verdict, chute au trombone |
 | `joueur.rejoint`, `joueur.quitte`, `partie.lancement` | lobby, lancement de la partie |
 | `manche.intro` | annonce d'une manche |
@@ -351,15 +351,20 @@ barré dans le coin du lobby d'ici là). Le bouton haut-parleur de la barre de l
 `volume_sons` dans `partie.yaml` règle le volume général. Dans les E2E, l'état se lit sur `data-sound` (`locked`, `on`, `muted`)
 des éléments `sound-state` et `host-sound`.
 
-La musique du lobby est pilotée par `sound.setLobby(actif)` dans `useGlobalSfx` : cet appel configure l’intention,
+La musique est pilotée par `sound.setAmbiance(actif)` dans `useGlobalSfx` (`setLobby` reste un alias) : cet appel configure l’intention,
 mais ne joue rien au montage. Il faut un geste dans la page courante. Le moteur garde une seule boucle, annule un
-décodage encore en cours si l’on quitte le lobby, applique les fondus et le ducking (volume à 25 % pendant un jingle).
+décodage encore en cours si l’on quitte l’ambiance, applique les fondus et le ducking (volume à 25 % pendant les jingles,
+roulements, montées de tension et applaudissements). Plusieurs sons superposés gardent la baisse jusqu’à la dernière fin.
 Pause et bouton muet arrêtent la boucle en fondu ; retour au lobby / reprise après geste la relancent. Les sons
 ponctuels continuent à passer par les hooks existants. Le roulement dure exactement 2 s pour conserver les vitesses
 et les chronologies des révélations. Simon utilise un piano échantillonné do4, transposé en mi4, sol4 et do5 (tempérament égal).
 La résolution de la boucle utilise le skin affiché, y compris `?skin=` en développement. Un fichier
 `config/medias/sons/<skin>/lobby.musique.ogg` remplace la boucle générale. Un changement de skin attend le décodage
 du nouveau morceau puis croise les fondus ; une requête devenue obsolète ne démarre jamais une ancienne boucle.
-Sans remplacement pour le skin, le morceau général reste utilisé. Le ducking reprend le volume du morceau en cours.
+Les six skins possèdent une ambiance embarquée ; sans définition ou remplacement pour un skin, le morceau général reste utilisé.
+La boucle continue entre intro, jeu, résultats et scènes de changement d’univers. Le skin du snapshot déclenche le changement
+au moment de la bascule serveur dans la scène, sans redémarrer aux changements d’écran. La sortie et le classement final
+arrêtent l’ambiance pour laisser la place à la fanfare. Le ducking reprend le volume du morceau en cours, y compris si
+le nouveau morceau termine son décodage pendant un jingle. Sources et périmètre privé : [ambiances-musicales.md](ambiances-musicales.md).
 La planche permet de lancer / arrêter la vraie boucle du lobby et d’écouter cet accord. Les niveaux cibles, sources,
 licences et traitements sont documentés dans `src/web/theme/sons/LICENCES.md` et `provenance.json`.

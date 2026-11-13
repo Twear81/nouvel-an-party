@@ -2,6 +2,7 @@
 // (l'organisateur dépose un fichier du même nom pour remplacer un son sans recompiler).
 // Les fichiers sont dans ce dossier ; leur adresse est résolue par `urls.ts`. Licences : LICENCES.md.
 import type { SkinId } from "../../../shared/skins";
+import ambiances from "./ambiances.json";
 
 export interface SonDef {
   /** Fichier embarqué de ce dossier. */
@@ -59,7 +60,8 @@ export const isNomSon = (v: string): v is NomSon => Object.prototype.hasOwnPrope
 /**
  * Remplacements propres à un habillage (docs/skins.md), ex :
  *   "rocket-league": { "chrono.fin": { fichier: "rl-but.ogg", volume: 0.8 } }
- * (le fichier est à déposer dans ce dossier). Vide pour l'instant : les sons des skins viendront plus tard,
- * l'organisateur peut déjà les remplacer via config/medias/sons/<skin>/.
+ * Les ambiances originales sont décrites dans ambiances.json ; les surcharges de l’organisateur restent prioritaires.
  */
-export const SONS_PAR_SKIN: Partial<Record<SkinId, Partial<Record<NomSon, SonDef>>>> = {};
+export const SONS_PAR_SKIN: Partial<Record<SkinId, Partial<Record<NomSon, SonDef>>>> = Object.fromEntries(
+  ambiances.map(({ skin, fichier, volume }) => [skin, { "lobby.musique": { fichier, volume } }]),
+);

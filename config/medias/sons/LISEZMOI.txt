@@ -22,7 +22,7 @@ de l'hôte coupe tout). Un fichier remplaçant garde le volume de base du son d'
 NOMS LOGIQUES
 -------------
 Lobby
-    lobby.musique         musique en boucle (raccord sans silence, volume bas)
+    lobby.musique         jazz à l’accueil, ambiance originale de chaque skin pendant la partie
     joueur.rejoint        un joueur rejoint
     joueur.quitte         un joueur quitte ou se déconnecte
     partie.lancement      la partie démarre
@@ -61,11 +61,12 @@ Mini-jeux : pierre-feuille-ciseaux, simon, qui-est-le-plus, le-bon-prix, compte-
 Écouter tous les sons : "bun run apercu:sons" puis ouvrir captures/sons/index.html (planche autonome, hors ligne).
 
 La musique attend le premier clic sur la TV ; elle ne joue jamais au chargement. Elle entre en fondu (1,2 s),
-sort au lancement / en pause / au bouton muet (0,8 s), et baisse pendant les jingles. Une nouvelle ouverture
+continue pendant les manches, sort à la fin / en pause / au bouton muet (0,8 s), et baisse pendant les jingles
+et les révélations. Une nouvelle ouverture
 ou un rechargement demande à nouveau un geste. Aucun son sur les téléphones.
 La boucle suit le skin affiché et change en fondu si celui-ci change. Une musique déposée dans le dossier du skin
-est prioritaire ; sans musique propre au skin, la musique générale reste utilisée. Pour les musiques originales
-des jeux, l’organisateur fournit lui-même les fichiers : aucun extrait propriétaire n’est embarqué.
+est prioritaire sur la musique embarquée. Les six univers ont déjà leur ambiance originale pour la version privée
+de la soirée, à la demande de l’organisateur. Ces extraits restent propriétaires ; voir les crédits pour leurs sources.
 Crédits des sons embarqués : LICENCES-SONS.md dans la version portable, src/web/theme/sons/LICENCES.md dans les sources.
 Signatures de jeux à déposer soi-même : SIGNATURES-SONORES.md dans la version portable,
-ou docs/signatures-sonores.md dans les sources (aucun extrait propriétaire fourni).
+ou docs/signatures-sonores.md dans les sources (bruitages de signature non fournis ; ambiances musicales intégrées).

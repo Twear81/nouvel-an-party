@@ -73,7 +73,46 @@ test("la musique attend un geste, reste unique, et le rechargement reste silenci
   expect(await sfx(tv)).toEqual([]);
 });
 
-test("WebAudio réel : fichiers décodables, boucle unique, fondu de sortie", async ({ party }) => {
+test("l’ambiance suit chaque univers et continue entre le jeu et les résultats", async ({ party }) => {
+  test.setTimeout(120_000);
+  const { tv } = party;
+  const phones = await party.addPhones("Alice", "Bob");
+  await party.startGame({ "ceci-ou-cela": 4, "culture-genante": 1 });
+  const pistes = () => tv.evaluate(() => (window.__sfx ?? []).filter((s) => s.nom === "lobby.musique"));
+  let changements = 0;
+  for (let manche = 0; manche < 6; manche++) {
+    const jeu = tv.getByTestId("tv-playing");
+    await expect(jeu).toBeVisible();
+    const skin = await tv.locator("html").getAttribute("data-skin");
+    await expect.poll(async () => (await pistes()).at(-1)?.skin).toBe(skin);
+    expect((await pistes()).at(-1)?.fichier).toContain(`/ambiance-${skin}-`);
+    const nombre = (await pistes()).length;
+    const interlude = await jeu.getAttribute("data-interlude") === "true";
+    await tv.getByTestId("host-skip").click();
+    await expect(tv.getByTestId("tv-results")).toBeVisible();
+    expect((await pistes()).length).toBe(nombre);
+    await tv.getByTestId("host-skip").click();
+    if (manche === 5) {
+      await expect(tv.getByTestId("tv-transition")).toHaveAttribute("data-kind", "closing");
+      await tv.getByTestId("host-skip").click();
+      await expect(tv.getByTestId("tv-final")).toBeVisible();
+      expect((await pistes()).length).toBe(nombre); // pas de reprise du jazz pendant la sortie
+    } else if (interlude) {
+      await expect(tv.getByTestId("tv-transition")).toHaveAttribute("data-kind", "skin");
+      // La bascule serveur au milieu de la scène change aussi la piste, sans attendre la prochaine intro.
+      await expect(tv.locator("html")).not.toHaveAttribute("data-skin", skin!);
+      const suivant = await tv.locator("html").getAttribute("data-skin");
+      await expect.poll(async () => (await pistes()).at(-1)?.skin).toBe(suivant);
+      expect((await pistes()).length).toBe(nombre + 1);
+      await tv.getByTestId("host-skip").click();
+      changements++;
+    }
+  }
+  expect(changements).toBeGreaterThanOrEqual(1);
+  for (const p of phones) expect(await sfx(p.page)).toEqual([]);
+});
+
+test("WebAudio réel : fichiers décodables, ambiance continue, fondu de sortie", async ({ party }) => {
   const {tv} = party;
   // Un morceau court permet de distinguer le fichier du skin de la boucle jazz de 63 secondes.
   const dir = path.join(path.dirname(party.server.dataDir), "config", "medias", "sons", "dofus");
@@ -109,6 +148,14 @@ test("WebAudio réel : fichiers décodables, boucle unique, fondu de sortie", as
   expect(await tv.evaluate(()=>(window as any).__audioRevue.boucles)).toBe(1);
   await party.addPhones('Alice','Bob');
   await party.startGame({'ceci-ou-cela':1});
+  // Un changement d’écran dans le même univers ne coupe pas la boucle.
+  expect(await tv.evaluate(()=>(window as any).__audioRevue.boucles)).toBe(1);
+  expect(await tv.evaluate(()=>(window as any).__audioRevue.arrets)).toBe(0);
+  await party.answerRound();
+  await expect(tv.getByTestId('tv-results')).toBeVisible();
+  expect(await tv.evaluate(()=>(window as any).__audioRevue.boucles)).toBe(1);
+  await party.continueAll();
+  await expect(tv.getByTestId('tv-transition')).toHaveAttribute('data-kind','closing');
   await expect.poll(()=>tv.evaluate(()=>(window as any).__audioRevue.arrets)).toBe(1);
   expect(await tv.evaluate(()=>(window as any).__audioRevue.fondus)).toBeGreaterThanOrEqual(2);
 });

@@ -5,10 +5,11 @@ import path from "node:path";
 import { settingsSchema } from "../../src/server/config";
 import { listSoundFiles } from "../../src/server/static/sons";
 import type { GameSnapshot, PublicPlayer, RoundInfo } from "../../src/shared/types";
-import { chronoStep, CHRONO_INITIAL, diffSnapshots, pointsSoundAt, popRate } from "../../src/web/sound/events";
+import { SKINS } from "../../src/shared/skins";
+import { ambianceActive, chronoStep, CHRONO_INITIAL, diffSnapshots, pointsSoundAt, popRate } from "../../src/web/sound/events";
 import { chronologie, delaiAvant } from "../../src/web/sound/planifier";
 import { findOverride, resolveSound } from "../../src/web/sound/resolve";
-import { SONS, type SonDef } from "../../src/web/theme/sons/catalogue";
+import { SONS, SONS_PAR_SKIN, type SonDef } from "../../src/web/theme/sons/catalogue";
 
 const fakeUrl = (f: string) => `/assets/${f}`;
 
@@ -50,9 +51,18 @@ describe("résolution des sons", () => {
   });
 
   it("tous les fichiers du catalogue existent dans le thème", () => {
-    for (const def of Object.values(SONS) as SonDef[]) {
+    const definitions = [...Object.values(SONS), ...Object.values(SONS_PAR_SKIN).flatMap((sons) => Object.values(sons ?? {}))] as SonDef[];
+    for (const def of definitions) {
       if (def.fichier) expect(existsSync(path.join(import.meta.dir, "../../src/web/theme/sons", def.fichier))).toBe(true);
     }
+  });
+
+  it("chaque univers possède sa propre ambiance et les surcharges musicales restent prioritaires", () => {
+    const pistes = SKINS.map((skin) => resolveSound("lobby.musique", skin, [], fakeUrl)!.url);
+    expect(new Set(pistes).size).toBe(SKINS.length);
+    expect(pistes).not.toContain(resolveSound("lobby.musique", null, [], fakeUrl)!.url);
+    expect(resolveSound("lobby.musique", "dofus", ["dofus/lobby.musique.mp3"], fakeUrl)?.url).toBe("/medias/sons/dofus/lobby.musique.mp3");
+    expect(resolveSound("lobby.musique", "overwatch", ["lobby.musique.ogg"], fakeUrl)?.url).toBe("/medias/sons/lobby.musique.ogg");
   });
 });
 
@@ -109,6 +119,13 @@ const snap = (over: Partial<GameSnapshot> = {}): GameSnapshot => ({
 const names = (calls: { nom: string }[]) => calls.map((c) => c.nom);
 
 describe("sons globaux : seulement sur changement", () => {
+  it("l’ambiance accompagne le lobby, les manches et les changements d’univers, puis s’arrête à la sortie", () => {
+    expect(ambianceActive(null)).toBe(false);
+    for (const phase of ["lobby", "intro", "playing", "results"] as const) expect(ambianceActive(snap({ phase }))).toBe(true);
+    for (const kind of ["opening", "skin"] as const) expect(ambianceActive(snap({ phase: "transition", transition: { kind } as never }))).toBe(true);
+    expect(ambianceActive(snap({ phase: "transition", transition: { kind: "closing" } as never }))).toBe(false);
+    expect(ambianceActive(snap({ phase: "final" }))).toBe(false);
+  });
   it("rien au premier snapshot (rechargement de la TV)", () => {
     expect(diffSnapshots(null, snap({ phase: "final", players: [player("a")] }))).toEqual([]);
   });

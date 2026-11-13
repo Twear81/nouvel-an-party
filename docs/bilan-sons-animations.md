@@ -3,6 +3,9 @@
 Branche : `feat/sons-animations`. Travail local, sans push ni fusion dans `main`.
 Les profils Firefox non suivis ont été conservés. Aucun fichier de `src/server/engine` n’a été modifié.
 
+**Complément du 13 novembre :** six ambiances musicales originales accompagnent désormais les changements de skin
+pendant toute la partie. Le catalogue complet compte 37 Ogg, 5 830 849 octets. [Sélection, sources et vérifications](ambiances-musicales.md).
+
 ## Retouches après écoute de l’organisateur
 
 La [comparaison sonore avant / après](../captures/sons-retouches/index.html) isole les trois remplacements ;
@@ -11,9 +14,9 @@ la [planche complète](../captures/sons/index.html) conserve tous les autres bru
 - `roulement` : caisse claire seule en crescendo, exactement 2 s, sans cymbale ; −21,10 LUFS, pic −8,45 dBTP.
 - `bonne.reponse` : double ding de sonnette de comptoir, 1,1 s ; −19,04 LUFS, pic −3,33 dBTP.
 - `pfc.choc` : impact physique de combat, 0,4 s ; −20,25 LUFS, pic −3,72 dBTP.
-- Musique : résolution selon le skin affiché, y compris le skin forcé en développement, fondu croisé entre morceaux,
-  annulation des décodages devenus obsolètes. Aucun nouveau morceau n’est intégré en attendant le choix de l’organisateur
-  entre originaux à fournir et alternatives libres ; le périmètre lobby / partie reste à préciser.
+- Musique au 12 novembre : résolution selon le skin affiché, y compris le skin forcé en développement, fondu croisé
+  entre morceaux et annulation des décodages devenus obsolètes. Le choix des morceaux et du périmètre a été confirmé
+  le 13 novembre ; les six ambiances et leur lecture pendant les manches sont maintenant intégrées.
 
 Vérifications ciblées : TypeScript, 25 tests unitaires audio, cinq E2E audio Chromium (dont décodage WebAudio réel
 et surcharge musicale d’un skin), aperçus en `file://` sans erreur ni requête HTTP. Le scénario WebAudio a été
@@ -43,7 +46,8 @@ restent à valider par l’organisateur dans [la planche](../captures/sons/index
 Fichiers : `src/web/theme/sons/`, `src/web/sound/engine.ts`, `useGlobalSfx.ts`, vues Simon / Imposteur / Dessin raté,
 `scripts/apercu-sons.tsx`, `scripts/preparer-sons.py`. Les sources, traitements et empreintes sont dans
 [provenance.json](../src/web/theme/sons/provenance.json). Les notices de licence accompagnent aussi la version portable
-(`scripts/build-release.ts`). Aucun son propriétaire n’est fourni ; les propositions pour les six skins sont dans
+(`scripts/build-release.ts`). Le lot de bruitages décrit ici est libre ; les ambiances ajoutées le 13 novembre
+sont propriétaires. Les propositions de bruitages de signature pour les six skins sont dans
 [signatures-sonores.md](signatures-sonores.md).
 
 | Nom logique | Fichier embarqué | Source | Licence |
