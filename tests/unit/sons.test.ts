@@ -125,7 +125,6 @@ describe("sons globaux : seulement sur changement", () => {
     for (const kind of ["opening", "skin"] as const) expect(ambianceActive(snap({ phase: "transition", transition: { kind } as never }))).toBe(true);
     expect(ambianceActive(snap({ phase: "transition", transition: { kind: "closing" } as never }))).toBe(false);
     expect(ambianceActive(snap({ phase: "final" }))).toBe(false);
-    expect(ambianceActive(snap({ phase: "ceremony" }))).toBe(false);
   });
   it("rien au premier snapshot (rechargement de la TV)", () => {
     expect(diffSnapshots(null, snap({ phase: "final", players: [player("a")] }))).toEqual([]);
@@ -147,7 +146,7 @@ describe("sons globaux : seulement sur changement", () => {
     expect(names(diffSnapshots(snap({ phase: "transition", transition: { kind: "opening" } as never }), snap({ phase: "intro", round: round() })))).toEqual(["transition.sortie", "manche.intro"]);
     expect(names(diffSnapshots(snap({ phase: "playing", round: round() }), snap({ phase: "results", round: round() })))).toEqual(["resultats.arrivee"]);
     expect(names(diffSnapshots(snap({ phase: "results", round: round() }), snap({ phase: "transition", transition: { kind: "skin" } as never })))).toEqual(["transition.entree"]);
-    expect(names(diffSnapshots(snap({ phase: "transition", transition: { kind: "closing" } as never }), snap({ phase: "final" })))).toEqual(["transition.sortie"]);
+    expect(names(diffSnapshots(snap({ phase: "transition", transition: { kind: "closing" } as never }), snap({ phase: "final" })))).toEqual(["transition.sortie", "final.fanfare"]);
   });
 
   it("chaque réponse reçue fait un pop de plus en plus aigu, la dernière ajoute la complétion", () => {

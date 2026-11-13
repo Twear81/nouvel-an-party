@@ -101,10 +101,3 @@ tests/unit/          ← tests du moteur et des mini-jeux (bun test)
 tests/e2e/           ← tests navigateur (Playwright)
 scripts/             ← dev et build de la release
 ```
-
-### Fin de soirée
-
-Les questions déjà jouées restent en mémoire d'une partie à l'autre (`data/deja-vu.json`). La fin de partie
-retrouve la pièce avec les souvenirs des manches et quatre bonus, puis le classement de nuit. Les textes des
-catégories se personnalisent dans `config/outro.yaml` ; le réglage des bonus et de minuit se trouve dans
-`config/partie.yaml`. Voir [configuration](docs/configuration.md) et [mise en scène](docs/mise-en-scene.md).

@@ -252,8 +252,6 @@ export class Party {
     return page.getByTestId(testId).evaluate((root) => {
       const out: string[] = [];
       for (const el of [root, ...root.querySelectorAll<HTMLElement>("*")] as HTMLElement[]) {
-        // Les calques décoratifs (étincelles aux fenêtres, cadres…) peuvent être recadrés volontairement.
-        if (el.closest('[aria-hidden="true"]')) continue;
         const cs = getComputedStyle(el);
         if (cs.textOverflow === "ellipsis") continue;
         const clipsY = cs.overflowY !== "visible" && el.scrollHeight > el.clientHeight + 2;

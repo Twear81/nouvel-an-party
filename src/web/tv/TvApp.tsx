@@ -63,10 +63,9 @@ export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
       break;
   }
 
-  const roomScene = snapshot.phase === "transition" || snapshot.phase === "ceremony" || snapshot.phase === "final";
   return (
     <TvStage phase={snapshot.phase}>
-      {roomScene ? screen : <PauseZoom paused={snapshot.paused}><AnimatePresence mode="wait">
+      {snapshot.phase === "transition" ? screen : <PauseZoom paused={snapshot.paused}><AnimatePresence mode="wait">
         <motion.div
           key={`${snapshot.phase}-${round?.index ?? ""}`}
           className="flex min-h-0 flex-1 flex-col"
@@ -78,7 +77,7 @@ export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
           {screen}
         </motion.div>
       </AnimatePresence></PauseZoom>}
-      {host && (snapshot.phase !== "lobby" || snapshot.midnight) && <HostBar snapshot={snapshot} actions={actions} overlay={roomScene || (snapshot.phase === "playing" && !!round?.interlude)} />}
+      {host && (snapshot.phase !== "lobby" || snapshot.midnight) && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || (snapshot.phase === "playing" && !!round?.interlude)} />}
       <SoundBadge visible={snapshot.phase === "lobby"} />
       <PausedOverlay show={snapshot.paused} big />
       {snapshot.midnight && <MidnightOverlay midnight={snapshot.midnight} />}

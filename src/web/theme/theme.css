@@ -12,7 +12,6 @@
 @import "./skins/mario-odyssey.css";
 @import "./skins/plague-tale.css";
 @import "./room.css";
-@import "./ceremony.css";
 /* Tailwind ne regarde pas hors de src/web par défaut : on lui indique les écrans des mini-jeux. */
 @source "../../minigames";
 

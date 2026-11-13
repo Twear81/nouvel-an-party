@@ -69,7 +69,6 @@ emojis, le texte passe à la police suivante. Un nouveau skin doit garder ce pre
 | Routage TV (phases, pause, bande du maître) | `src/web/tv/TvApp.tsx` |
 | Minuit : compte à rebours + « Bonne année » (TV et téléphones, thème de base) et feu d'artifice | `src/web/ui/Midnight.tsx`, `src/web/ui/Fireworks.tsx` (keyframes `firework-spark` dans `theme.css`) |
 | TV lobby (QR, joueurs avec bouton « retirer », 7 boules de cristal, réglage des manches) | `src/web/tv/Lobby.tsx`, `src/web/ui/DragonBalls.tsx` |
-| Cérémonie, souvenirs, podium de nuit (géométrie, couleurs, calques) | `src/web/ui/RoomCeremony.tsx`, `src/web/ui/CeremonyRoom.tsx`, `src/web/theme/ceremony.css`, `assets/ceremonie/` |
 | TV annonce de manche | `src/web/tv/IntroScreen.tsx` |
 | Pièce : ouverture, changement d'univers et sortie | `src/web/ui/RoomTransition.tsx`, `src/web/ui/RoomSignature.tsx`, `src/web/theme/room.css`, `src/shared/transitions.ts` |
 | TV manche en cours (en-tête + chrono) ; un jeu interlude s'affiche en plein écran, sans cadre | `src/web/tv/PlayingScreen.tsx` |

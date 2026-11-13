@@ -3,7 +3,7 @@
 // (docs/changer-le-design.md). Les couleurs sont propres à chaque dessin (ce sont des objets, pas des couleurs du thème).
 
 /** Côté du canvas d'une forme, en pixels (affichée à `CONFETTI_SIZE / CONFETTI_SCALAR` px : net même sur la TV). */
-export const CONFETTI_SIZE = 32;
+export const CONFETTI_SIZE = 56;
 /** Échelle globale passée à canvas-confetti : appliquée aux seules formes maison (tir séparé) ; les formes génériques gardent leur taille. */
 export const CONFETTI_SCALAR = 1.6;
 /** Part des particules qui prennent une forme maison (le reste garde les formes génériques, à leur taille d'origine). */

@@ -12,7 +12,6 @@ import { horloge } from "./apercu-animations/horloge";
 import { creerJoueurs, type NombreJoueurs } from "./apercu-animations/joueurs";
 import type { TaillePhone } from "./apercu-animations/panneaux";
 import { SCENES_COMPOSANTS } from "./apercu-animations/scenes-composants";
-import { SCENES_CEREMONIE } from "./apercu-animations/scenes-ceremonie";
 import { SCENES_CHRONO, SCENES_ECRANS } from "./apercu-animations/scenes-ecrans";
 import { scenesDesJeux } from "./apercu-animations/scenes-jeux";
 import { SCENES_VALIDATION } from "./apercu-animations/scenes-validation";
@@ -25,7 +24,7 @@ window.fetch = ((entree: RequestInfo | URL, init?: RequestInit) => {
   return url.startsWith("/medias") ? Promise.resolve(new Response(null, { status: 404 })) : fetchReel(entree, init);
 }) as typeof fetch;
 
-const SCENES: Scene[] = [...SCENES_COMPOSANTS, ...SCENES_CHRONO, ...SCENES_ECRANS, ...SCENES_VALIDATION, ...SCENES_CEREMONIE, ...scenesDesJeux()];
+const SCENES: Scene[] = [...SCENES_COMPOSANTS, ...SCENES_CHRONO, ...SCENES_ECRANS, ...SCENES_VALIDATION, ...scenesDesJeux()];
 const SECTIONS: { id: Scene["section"]; titre: string }[] = [
   { id: "composants", titre: "Composants" },
   { id: "chrono", titre: "Chrono" },
