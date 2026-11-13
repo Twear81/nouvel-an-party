@@ -83,6 +83,7 @@ describe("loadConfig", () => {
       port_https: 3443,
       ip: "auto",
       ouvrir_navigateur: true,
+      volume_sons: 0.8,
     });
     expect(games).toHaveLength(2);
   });

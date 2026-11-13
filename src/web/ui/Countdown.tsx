@@ -1,7 +1,7 @@
 // Chrono calculé depuis la deadline serveur (horloge corrigée). Même encombrement pour toutes les variantes de la TV ;
 // seule la structure change selon le skin (docs/skins.md, « Chrono ») et le dessin fin est dans le fichier du skin.
 // Sur le téléphone : toujours une barre compacte. `--p` (part restante, 1 → 0) est posé sur [data-ui="countdown"].
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import type { RoundInfo } from "../../shared/types";
 import type { SkinId } from "../../shared/skins";
 import { serverNow } from "../net/socket";
@@ -41,6 +41,20 @@ const RING_LENGTH = 276.46; // 2π × rayon 44
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
+/**
+ * Chiffre du chrono. Dans les 5 dernières secondes il « bat » à chaque seconde (la clé relance l'animation CSS) :
+ * le chiffre seul grossit de `amp` puis revient, à l'intérieur de sa boîte (qui garde son encombrement : un `transform`
+ * ne déplace rien) ; à 3-2-1 il tremble en plus. Le conteneur du chiffre, lui, ne bouge jamais.
+ */
+function Digits({ seconds, low, amp = 1.15, children }: { seconds: number; low: boolean; amp?: number; children?: ReactNode }) {
+  const style = low ? ({ "--beat": amp, animation: `${seconds <= 3 ? "countdown-beat-shake" : "countdown-beat"} 0.6s ease-out` } as CSSProperties) : undefined;
+  return (
+    <span key={seconds} data-ui="countdown-digits" className="inline-block" style={style}>
+      {children ?? seconds}
+    </span>
+  );
+}
+
 export function Countdown({ round, size = "tv", answeredCount, waitingCount }: Props) {
   const remaining = useRemainingMs(round);
   const skin = useSkin();
@@ -59,7 +73,7 @@ export function Countdown({ round, size = "tv", answeredCount, waitingCount }: P
     "data-low": low ? "true" : "false",
     style: { "--p": part } as CSSProperties,
   };
-  const numClass = `font-num tabular-nums ${low ? "text-bad animate-pulse-soft" : "text-accent"}`;
+  const numClass = `font-num tabular-nums transition-colors duration-500 ${low ? "text-bad" : "text-accent"}`;
 
   if (variant === "bar") {
     const big = size === "tv";
@@ -72,7 +86,7 @@ export function Countdown({ round, size = "tv", answeredCount, waitingCount }: P
             style={{ width: `${part * 100}%` }}
           />
         </div>
-        <span data-ui="countdown-num" className={`text-right ${numClass} ${big ? "w-24 text-5xl" : "w-10 text-xl"}`}>{seconds}</span>
+        <span data-ui="countdown-num" className={`text-right ${numClass} ${big ? "w-24 text-5xl" : "w-10 text-xl"}`}><Digits seconds={seconds} low={low} amp={big ? 1.15 : 1.2} /></span>
       </div>
     );
   }
@@ -90,7 +104,7 @@ export function Countdown({ round, size = "tv", answeredCount, waitingCount }: P
           <svg data-ui="countdown-fill" viewBox="0 0 100 92" aria-hidden className="absolute h-full transition-[clip-path] duration-100 ease-linear" style={{ clipPath: "inset(calc((1 - var(--p)) * 100%) 0 0 0)" }}>
             <path d={HEART} className={`stroke-ink ${low ? "fill-bad" : "fill-hot"}`} strokeWidth="3" />
           </svg>
-          <span data-ui="countdown-num" className={`relative text-5xl text-ink ${low ? "animate-pulse-soft" : ""} font-num tabular-nums`}>{seconds}</span>
+          <span data-ui="countdown-num" className={`relative text-5xl text-ink font-num tabular-nums`}><Digits seconds={seconds} low={low} /></span>
         </div>
       );
     case "hex":
@@ -99,7 +113,7 @@ export function Countdown({ round, size = "tv", answeredCount, waitingCount }: P
           <svg data-ui="countdown-shape" viewBox="0 0 120 100" aria-hidden className="absolute h-full">
             <polygon points="30,0 90,0 120,50 90,100 30,100 0,50" className={low ? "fill-bad" : "fill-ink"} />
           </svg>
-          <span data-ui="countdown-num" className={`relative font-num text-6xl tabular-nums ${low ? "text-bg animate-pulse-soft" : "text-bg"}`}>{seconds}</span>
+          <span data-ui="countdown-num" className={`relative font-num text-6xl tabular-nums text-bg`}><Digits seconds={seconds} low={low} /></span>
         </div>
       );
     case "ring":
@@ -119,7 +133,7 @@ export function Countdown({ round, size = "tv", answeredCount, waitingCount }: P
               style={{ strokeDashoffset: `calc(${RING_LENGTH} * (1 - var(--p)))`, transform: "rotate(-90deg)", transformOrigin: "50% 50%" }}
             />
           </svg>
-          <span data-ui="countdown-num" className={`relative text-5xl ${numClass}`}>{seconds}</span>
+          <span data-ui="countdown-num" className={`relative text-5xl ${numClass}`}><Digits seconds={seconds} low={low} /></span>
           <span data-ui="countdown-cartouche" aria-hidden className="absolute bottom-0 left-1/2 h-[1.1rem] w-[3.2rem] -translate-x-1/2 rounded-chip bg-bg" />
         </div>
       );
@@ -128,7 +142,7 @@ export function Countdown({ round, size = "tv", answeredCount, waitingCount }: P
       return (
         <div {...common} className={`${box} gap-0`}>
           <span data-ui="countdown-side" data-side="left" className="flex h-full w-[4.5rem] items-center justify-center rounded-l-btn bg-cool font-num text-4xl text-bg">{answeredCount ?? "–"}</span>
-          <span data-ui="countdown-num" className={`flex h-full flex-1 items-center justify-center bg-bg-2 text-5xl ${low ? "text-bad animate-pulse-soft" : "text-ink"} font-num tabular-nums`}>{m}:{pad2(seconds % 60)}</span>
+          <span data-ui="countdown-num" className={`flex h-full flex-1 items-center justify-center bg-bg-2 text-5xl transition-colors duration-500 ${low ? "text-bad" : "text-ink"} font-num tabular-nums`}><Digits seconds={seconds} low={low} amp={1.08}>{m}:{pad2(seconds % 60)}</Digits></span>
           <span data-ui="countdown-side" data-side="right" className="flex h-full w-[4.5rem] items-center justify-center rounded-r-btn bg-hot font-num text-4xl text-bg">{waitingCount ?? "–"}</span>
         </div>
       );
@@ -137,7 +151,7 @@ export function Countdown({ round, size = "tv", answeredCount, waitingCount }: P
       return (
         <div {...common} className={box}>
           <span data-ui="countdown-shape" className={`flex h-[6rem] w-[6rem] items-center justify-center rounded-full ${low ? "bg-bad" : "bg-gold"}`}>
-            <span data-ui="countdown-num" className={`font-num text-5xl tabular-nums text-accent-ink ${low ? "animate-pulse-soft" : ""}`}>{seconds}</span>
+            <span data-ui="countdown-num" className={`font-num text-5xl tabular-nums text-accent-ink`}><Digits seconds={seconds} low={low} /></span>
           </span>
         </div>
       );

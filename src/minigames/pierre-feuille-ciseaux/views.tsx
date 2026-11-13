@@ -4,7 +4,8 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { AVATAR_REM, CheckIcon, Choice as ChoiceCard, CloseIcon, fireConfetti, PlayerAvatar, SkipIcon, type AvatarSize } from "../../web/ui";
+import { AVATAR_REM, CheckIcon, Choice as ChoiceCard, CloseIcon, fireConfetti, haptique, PlayerAvatar, SkipIcon, WaitingDots, type AvatarSize } from "../../web/ui";
+import { useSfxSequence, type SonDecale } from "../../web/ui/sfxSequence";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { roundLabel, type Choice } from "./bracket";
 import type { MatchView, Priv, Pub, Results } from "./game";
@@ -82,7 +83,7 @@ function Hand({ mode, choice, picked, em, side, outcome }: { mode: "pick" | "rev
           ?
         </motion.span>
       ) : (
-        <motion.span key="shown" className="leading-none" initial={{ scale: 0.2, rotate: -20 * tilt }} animate={{ scale: [0.2, 1.3, 1], rotate: 0 }} transition={{ duration: 0.45 }}>
+        <motion.span key="shown" className="leading-none" initial={{ scale: 0.2, rotate: -20 * tilt, x: `${-0.9 * tilt}em` }} animate={{ scale: [0.2, 1.3, 1], rotate: 0, x: "0em" }} transition={{ duration: 0.45 }}>
           {choice == null ? "💤" : HANDS[choice].emoji}
         </motion.span>
       )}
@@ -285,12 +286,17 @@ function DuelTile({ m, index, size, mode, winsNeeded, playerById, final }: { m: 
     const outcome = mode === "reveal" && showOutcome ? sideOutcome(m, s) : null;
     const choice = m.last ? (s === 0 ? m.last.a : m.last.b) : null;
     return (
-      <div className="flex min-w-0 flex-1 flex-col items-center gap-2">
+      <motion.div
+        data-outcome-side={outcome ?? ""}
+        animate={outcome === "win" ? { y: [0, -28, 0, -12, 0], scale: [1, 1.12, 1] } : outcome === "lose" ? { rotate: [0, -5, 4, -2, 0], y: [0, 8, 0] } : { y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="flex min-w-0 flex-1 flex-col items-center gap-2"
+      >
         <PlayerAvatar profile={p?.profile ?? null} size={t.avatar} dimmed={outcome === "lose"} className={outcome === "win" ? "drop-shadow-[0_0_1.5rem_var(--color-accent)]" : ""} />
         <span className={`w-full truncate text-center font-extrabold leading-tight ${t.name} ${outcome === "win" ? "text-accent" : ""}`}>{p?.profile?.name}</span>
         <Pips won={before[s]} needed={winsNeeded} size={size === "xl" ? "lg" : "md"} />
         <Hand mode={mode} choice={choice} picked={m.picked[s]} em={t.hand} side={s} outcome={outcome} />
-      </div>
+      </motion.div>
     );
   };
 
@@ -299,7 +305,7 @@ function DuelTile({ m, index, size, mode, winsNeeded, playerById, final }: { m: 
       data-testid={`pfc-duel-${index}`}
       data-outcome={showOutcome && m.last ? m.last.result : ""}
       initial={{ opacity: 0, scale: 0.7, y: 30 }}
-      animate={tie && showOutcome ? { opacity: 1, scale: 1, y: 0, x: [0, -12, 12, -8, 8, 0] } : { opacity: 1, scale: 1, y: 0 }}
+      animate={tie && showOutcome ? { opacity: 1, scale: 1, y: 0, x: [0, -12, 12, -8, 8, 0] } : showOutcome && mode === "reveal" ? { opacity: 1, scale: [1, 1.04, 1], y: 0 } : { opacity: 1, scale: 1, y: 0 }}
       transition={{ delay: mode === "pick" ? index * 0.08 : 0, type: "spring", stiffness: 170, damping: 15 }}
       className={`relative flex min-w-0 items-center gap-3 rounded-card border-[0.25rem] p-4 ${final ? "border-accent bg-accent/10 shadow-glow" : "border-line bg-surface"}`}
     >
@@ -315,7 +321,7 @@ function DuelTile({ m, index, size, mode, winsNeeded, playerById, final }: { m: 
         </motion.div>
         {showOutcome && m.last && (tie || m.byChance || m.last.random) && (
           <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`whitespace-nowrap rounded-chip px-3 py-0.5 font-bold ${size === "sm" ? "text-base" : "text-2xl"} ${tie ? "bg-warn/20 text-warn" : "bg-surface-strong text-ink"}`}>
-            {m.byChance || m.last.random ? "🎲 Au sort" : tie ? "Égalité !" : ""}
+            {m.byChance || m.last.random ? "🎲 Au sort" : tie ? "Égalité ! On rejoue" : ""}
           </motion.span>
         )}
       </div>
@@ -351,15 +357,15 @@ function StageTitle({ pub }: { pub: Pub }) {
   if (pub.step === "draw") title = "Tirage au sort";
   else if (pub.step === "done") title = "Champion !";
   else title = roundLabel(pub.roundCount, pub.round);
-  const replay = pub.throwNo > 0 && (pub.step === "pick" || pub.step === "reveal");
+  const replay = pub.step === "pick" && (pub.bracket[pub.round] ?? []).some((m) => m.active && m.ties > 0);
   return (
     <div className="flex shrink-0 items-center justify-center gap-5">
       <motion.h1 key={title} initial={{ opacity: 0, y: -20, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} data-testid="pfc-stage" className={`font-display leading-none ${final || pub.step === "done" ? "text-7xl text-gold-gradient" : "text-5xl text-ink"}`}>
         {title}
       </motion.h1>
       {replay && (
-        <motion.span key={`r${pub.throwNo}`} initial={{ scale: 0, rotate: -10 }} animate={{ scale: 1, rotate: -4 }} className="rounded-chip bg-warn px-5 py-1 font-display text-3xl text-accent-ink">
-          {pub.winsNeeded > 1 ? `Lancer ${pub.throwNo + 1}` : "On rejoue !"}
+        <motion.span data-testid="pfc-replay" key={`r${pub.throwNo}`} initial={{ scale: 0, rotate: -10 }} animate={{ scale: 1, rotate: -4 }} className="rounded-chip bg-warn px-5 py-1 font-display text-3xl text-accent-ink">
+          Égalité ! On rejoue
         </motion.span>
       )}
       <span className="rounded-chip bg-surface-strong px-4 py-1 text-2xl font-bold text-ink-muted">{pub.variant}</span>
@@ -367,10 +373,31 @@ function StageTitle({ pub }: { pub: Pub }) {
   );
 }
 
+/** Sons de l'arbre qui se dessine : une carte qui se pose par colonne, aux mêmes délais que `MatchCard` (intro). */
+const sonsTirage = (roundCount: number): SonDecale[] => Array.from({ length: roundCount }, (_, r) => ({ at: Math.round((0.3 + r * 0.35) * 1000), son: "carte.pose" as const, options: { rate: 1 + r * 0.12 } }));
+
+/** Sons de la révélation d'un lancer, calés sur REVEAL_AT / OUTCOME_AT (mêmes constantes que les mains). */
+function sonsLancer(pub: Pub): SonDecale[] {
+  const duels = (pub.bracket[pub.round] ?? []).filter((m) => m.last !== null);
+  const tie = duels.some((m) => m.last?.result === "tie" && !m.byChance);
+  const final = pub.round === pub.roundCount - 1;
+  return [
+    { at: 0, son: "roulement", options: { rate: 1.5 } },
+    { at: REVEAL_AT, son: "pfc.choc" },
+    tie ? { at: OUTCOME_AT, son: "pfc.egalite" } : { at: OUTCOME_AT, son: final ? "boum" : "bonne.reponse" },
+    ...(!tie && final ? [{ at: OUTCOME_AT + 150, son: "bonne.reponse" as const }] : []),
+  ];
+}
+
 const Tv = ({ pub, playerById }: MiniGameViewProps<Pub>) => {
   useEffect(() => {
     if (pub.step === "done" && pub.champion) fireConfetti("big");
   }, [pub.step, pub.champion]);
+  useSfxSequence(pub.step === "draw" ? "draw" : null, sonsTirage(pub.roundCount));
+  useSfxSequence(pub.step === "reveal" ? `${pub.round}-${pub.throwNo}` : null, sonsLancer(pub));
+  useSfxSequence(pub.step === "advance" ? `adv-${pub.round}` : null, [{ at: 350, son: "carte.pose" }, { at: 500, son: "jeton.pose" }]);
+  useSfxSequence(pub.step === "done" ? "done" : null, [{ at: 500, son: "boum" }, { at: 700, son: "bonne.reponse" }]);
+  useSfxSequence(pub.step === "pick" ? `${pub.round}-${pub.throwNo}` : null, [{ at: 0, son: "ui.clic" }]);
   if (pub.roundCount === 0) return <div className="flex flex-1 items-center justify-center text-5xl text-ink-muted">Il faut au moins 2 joueurs</div>;
   const final = pub.round === pub.roundCount - 1;
   let body: ReactNode;
@@ -428,7 +455,7 @@ function FaceOff({ m, me, playerById, winsNeeded, step }: { m: MatchView; me: st
         </div>
       </div>
       {step === "pick" && m.ties > 0 && (
-        <motion.div key={m.ties} initial={{ scale: 0 }} animate={{ scale: 1 }} className="rounded-chip bg-warn px-4 py-0.5 font-display text-base text-accent-ink">
+        <motion.div data-testid="pfc-replay" key={m.ties} initial={{ scale: 0 }} animate={{ scale: 1 }} className="rounded-chip bg-warn px-4 py-0.5 font-display text-base text-accent-ink">
           Égalité ! On rejoue
         </motion.div>
       )}
@@ -473,6 +500,9 @@ function PhoneReveal({ m, me }: { m: MatchView; me: string }) {
   const show = useAfter(OUTCOME_AT);
   const outcome = sideOutcome(m, mySide);
   const choiceOf = (s: 0 | 1) => (s === 0 ? m.last!.a : m.last!.b);
+  useEffect(() => {
+    if (show) haptique(outcome === "win" ? 60 : outcome === "lose" ? 220 : 30);
+  }, [show, outcome]);
   const text = outcome === "win" ? "Gagné !" : outcome === "lose" ? "Perdu…" : "Égalité !";
   const tone = outcome === "win" ? "text-good" : outcome === "lose" ? "text-bad" : "text-warn";
   return (
@@ -483,7 +513,7 @@ function PhoneReveal({ m, me }: { m: MatchView; me: string }) {
         <Hand mode="reveal" choice={choiceOf(oppSide)} em={4} side={1} outcome={show ? sideOutcome(m, oppSide) : null} />
       </div>
       {show && (
-        <motion.div initial={{ scale: 0.3, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 260, damping: 12 }} className={`font-display text-5xl ${tone}`}>
+        <motion.div initial={{ scale: 0.3, opacity: 0, rotate: outcome === "lose" ? 8 : -8 }} animate={{ scale: [0.3, 1.25, 1], opacity: 1, rotate: 0 }} transition={{ duration: 0.5, ease: "easeOut" }} className={`font-display text-5xl ${tone}`}>
           {text}
         </motion.div>
       )}
@@ -519,6 +549,7 @@ function StatusBanner({ priv, me, playerById, roundCount }: { priv: Priv; me: st
       <motion.div data-testid="pfc-phone-through" data-bye={priv.bye ? "true" : "false"} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex shrink-0 items-center justify-center gap-3 rounded-card border-2 border-good bg-good/15 px-4 py-2">
         <PlayerAvatar profile={p?.profile ?? null} size="sm" badge={priv.bye ? <SkipIcon /> : <CheckIcon />} />
         <span className="font-display text-2xl text-good">{priv.bye ? "Qualifié d'office" : "Qualifié !"}</span>
+        <WaitingDots className="text-good" />
       </motion.div>
     );
   }

@@ -11,6 +11,8 @@
     "typecheck": "tsc --noEmit",
     "captures:skin": "playwright test skins-captures --project=chromium",
     "apercu:transitions": "bun scripts/construire-apercu-transitions.ts",
+    "apercu:sons": "bun scripts/construire-apercu-sons.ts",
+    "apercu:animations": "bun scripts/construire-apercu-animations.ts",
     "test": "bun test tests/unit",
     "test:e2e": "playwright test"
   },

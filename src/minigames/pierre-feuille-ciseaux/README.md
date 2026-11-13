@@ -61,3 +61,5 @@ variantes:
 
 ## Désactiver le jeu
 Mettre `actif: false` en haut du fichier.
+
+La TV et les deux téléphones concernés annoncent **« Égalité ! On rejoue »** au nouveau choix. Les autres duels déjà décidés attendent. La galerie propose deux scènes dédiées : égalité et rejeu. Les règles restent identiques : `rejouer_max` autorise trois rejeux par défaut ; au-delà, le duel est tiré au sort. Si personne ne joue, le lancer est tranché au sort immédiatement.

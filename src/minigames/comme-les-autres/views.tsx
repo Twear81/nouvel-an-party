@@ -3,7 +3,7 @@
 // Téléphone : un champ + un bouton qui change d'état (Envoyer → Envoyé → Renvoyer si on modifie).
 import { motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnsweredCount, AnsweredRoster, Button, CheckIcon, fireConfetti, fit, PlayerAvatar, SelectedBadge, typo } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, Button, CheckIcon, fireConfetti, fit, haptique, PlayerAvatar, Pop, SelectedBadge, typo, useSfxOnChange } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { AnswerGroup, Priv, Pub, Results } from "./game";
 
@@ -62,26 +62,27 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
   const [sending, setSending] = useState(false);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Au rechargement, la vue privée peut arriver après le premier rendu.
+  // La vue privée confirme le texte accepté, y compris si elle arrive après le premier rendu.
   const restored = useRef(sent !== null);
   useEffect(() => {
     if (restored.current || !priv?.answers.length) return;
     restored.current = true;
-    setValues((v) => (v.some((x) => x) ? v : fields.map((i) => priv.answers[i] ?? "")));
+    setValues(fields.map((i) => priv.answers[i] ?? ""));
     setSent(signature(priv.answers));
   }, [priv?.answers.join("\n")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const current = signature(values);
-  const dirty = JSON.stringify(current) !== JSON.stringify(sent ?? []);
-  const state: "empty" | "ready" | "sent" = sent && !dirty ? "sent" : current.length === 0 && !sent ? "empty" : "ready";
+  const dirty = sent === null && current.length > 0;
+  const state: "empty" | "ready" | "sent" = sent ? "sent" : current.length === 0 ? "empty" : "ready";
 
   const submit = async () => {
     if (!dirty || sending) return;
     (document.activeElement as HTMLElement | null)?.blur(); // referme le clavier : on voit le bouton passer à "Envoyé"
     setSending(true);
+    haptique(25);
     try {
       await sendInput({ answers: current });
-      setSent(current);
+      // Seule la vue privée confirme une réponse acceptée ; un texte invalide reste corrigeable.
     } catch {
       /* l'erreur s'affiche déjà dans PhoneApp ; le bouton reste disponible pour réessayer */
     } finally {
@@ -107,10 +108,11 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
         {fields.map((i) => {
           const done = state === "sent" && !!values[i]?.trim();
           return (
-            <div key={i} data-ui="text-field-shell" className="relative">
+            <div key={i} data-ui="text-field-shell" data-sent={sent !== null} className="relative rounded-btn">
               {n > 1 && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-display text-xl text-accent">{i + 1}</span>}
               <input
                 data-ui="text-field"
+                disabled={sent !== null || sending}
                 ref={(el) => {
                   refs.current[i] = el;
                 }}
@@ -153,14 +155,14 @@ const Phone = ({ pub, priv, round, players, sendInput }:MiniGameViewProps<Pub, P
         </motion.div>
       ) : (
         <Button data-testid="answer-send" type="submit" size="lg" block disabled={state === "empty" || sending} className="shrink-0">
-          {sent ? "Renvoyer" : "Envoyer"}
+          Envoyer
         </Button>
       )}
 
       {/* Qui a déjà répondu : les avatars s'allument comme sur la TV */}
       <div data-testid="phone-answered" className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 overflow-hidden pb-2">
         <span data-testid="phone-answered-count" className="font-num text-2xl text-ink-muted">
-          <span className="text-accent">{answered}</span> / {writers.length}
+          <Pop value={answered} className="text-accent">{answered}</Pop> / {writers.length}
         </span>
         <div className="flex flex-wrap justify-center gap-2">
           {writers.map((p) => {
@@ -250,6 +252,16 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
   const lastStep = 1 + multi.length;
   const biggestFiredRef = useRef(false);
 
+  // Sons calés sur les mêmes étapes que l'animation (le `step` avance avec REVEAL_FIRST_MS / REVEAL_STEP_MS) :
+  // un clic grave pour les réponses isolées, un « bravo » de plus en plus aigu à chaque groupe, un roulement avant le plus grand.
+  useSfxOnChange(step, (_avant, apres) => {
+    if (apres === 1) return multi.length === 0 ? "mauvaise.reponse" : { nom: "ui.clic", options: { rate: 0.7 } };
+    if (apres > 1 && apres < lastStep) return { nom: "bonne.reponse", options: { rate: 0.85 + (apres - 2) * 0.1, volume: 0.6 } };
+    if (apres === lastStep && lastStep > 1) return { nom: "bonne.reponse", options: { rate: 1.1 } };
+    return null;
+  });
+  useSfxOnChange(step, (_avant, apres) => (multi.length > 0 && apres === lastStep - 1 && apres >= 1 ? "roulement" : null));
+
   useEffect(() => {
     if (!results) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -328,7 +340,7 @@ const PhoneResults = ({ results, snapshot, playerById }: MiniGameViewProps<Pub, 
       {mine.map((g) => {
         const others = g.playerIds.filter((id) => id !== myId);
         return (
-          <div key={g.label} data-testid="phone-group" data-size={g.playerIds.length} className={`flex items-center gap-3 rounded-card border-2 px-4 py-2.5 ${others.length ? (g.biggest ? "border-accent bg-accent/15" : "glass border-line") : "border-line bg-surface opacity-60"}`}>
+          <motion.div key={g.label} initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 220, damping: 16 }} data-testid="phone-group" data-size={g.playerIds.length} className={`flex items-center gap-3 rounded-card border-2 px-4 py-2.5 ${others.length ? (g.biggest ? "border-accent bg-accent/15" : "glass border-line") : "border-line bg-surface opacity-60"}`}>
             <span className="min-w-0 flex-1 truncate text-left font-display text-xl">{g.biggest && "👑 "}{g.label}</span>
             <div className="flex shrink-0 -space-x-2">
               {others.slice(0, 4).map((id) => (
@@ -336,7 +348,7 @@ const PhoneResults = ({ results, snapshot, playerById }: MiniGameViewProps<Pub, 
               ))}
             </div>
             {others.length > 4 && <span className="shrink-0 text-sm font-bold text-ink-muted">+{others.length - 4}</span>}
-          </div>
+          </motion.div>
         );
       })}
     </div>

@@ -30,7 +30,8 @@ async function playTournament(party: Party, phones: Phone[], opts: { tie?: boole
               tied.add(p.name);
             } else if (pair === tiePair) {
               // Rejeu : le téléphone l'annonce.
-              await expect(p.page.getByText("Égalité ! On rejoue")).toBeVisible();
+              await expect(p.t("pfc-replay")).toHaveText("Égalité ! On rejoue");
+              await expect(party.tv.getByTestId("pfc-replay")).toHaveText("Égalité ! On rejoue");
             }
           }
           await p.t(`pfc-choice-${choice}`).click({ timeout: 2_000 }).catch(() => {});

@@ -16,6 +16,13 @@ test.describe("Comme les autres", () => {
     // Le bouton est inactif tant que le champ est vide.
     await expect(a!.t("answer-send")).toBeDisabled();
 
+    // Une saisie refusée ne verrouille pas le champ.
+    await a!.t("answer-input-0").fill("!!!");
+    await a!.t("answer-send").click();
+    await expect(a!.t("answer-send")).toBeEnabled();
+    await expect(a!.t("answer-input-0")).toBeEnabled();
+    await expect(tv.getByTestId("tv-answered-count")).toContainText("0 / 4");
+
     // Alice envoie, la TV allume son avatar sans révéler la réponse.
     await a!.t("answer-input-0").fill("Fromage");
     await a!.t("answer-send").click();
@@ -23,12 +30,11 @@ test.describe("Comme les autres", () => {
     await expect(tv.getByTestId("tv-answered-count")).toContainText("1 / 4");
     await expect(tv.getByTestId("tv-playing")).not.toContainText("Fromage");
 
-    // Elle modifie sa réponse : le bouton repasse en "Renvoyer", puis revient à "Envoyé".
-    await a!.t("answer-input-0").fill("Beurre");
-    await expect(a!.t("answer-send")).toHaveText("Renvoyer");
-    await a!.t("answer-input-0").fill("Les fromages !");
-    await a!.t("answer-send").click();
-    await expect(a!.t("answer-sent")).toBeVisible();
+    // L’envoi verrouille les champs, y compris après un rechargement.
+    await expect(a!.t("answer-input-0")).toBeDisabled();
+    await a!.page.reload();
+    await expect(a!.t("answer-input-0")).toBeDisabled();
+    await expect(a!.t("answer-input-0")).toHaveValue("Fromage");
 
     // Bob (accents/pluriel/article ignorés) et Chloé donnent la même réponse ; David est tout seul.
     await b!.t("answer-input-0").fill("un FROMAGE");

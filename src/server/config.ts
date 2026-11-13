@@ -17,6 +17,8 @@ export const settingsSchema = z.object({
   /** "auto" ou une IP forcée si la détection choisit la mauvaise carte réseau. */
   ip: z.string().default("auto"),
   ouvrir_navigateur: z.boolean().default(true),
+  /** Volume général des sons de la TV (0 = muet, 1 = plein). */
+  volume_sons: z.number().min(0).max(1).default(0.8),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 

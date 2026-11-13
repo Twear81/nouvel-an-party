@@ -1,8 +1,8 @@
 // Écrans du "Bon prix" : vitrine sur la TV, pavé numérique sur le téléphone, révélation sur un axe de prix.
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
-import { useState } from "react";
-import { AnsweredCount, AnsweredRoster, Button, CheckIcon, fit, NumPad, ordinal, SelectedBadge, typo } from "../../web/ui";
+import { useEffect, useRef, useState } from "react";
+import { AnsweredCount, AnsweredRoster, Button, CheckIcon, fit, haptique, NumPad, ordinal, Pop, SelectedBadge, typo } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { centsToDraft, draftToCents, formatCents, formatDraft, pressKey } from "./amount";
 import type { Priv, Pub, Results } from "./game";
@@ -50,6 +50,13 @@ const Phone = ({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>) => {
   const validated = sent !== null && cents === sent;
   const shown = draft === "" ? "0" : formatDraft(draft);
 
+  // Petite secousse quand le prix est validé (jamais au montage).
+  const wasValidated = useRef(validated);
+  useEffect(() => {
+    if (validated && !wasValidated.current) haptique(40);
+    wasValidated.current = validated;
+  }, [validated]);
+
   const submit = () => {
     if (cents !== null && !validated) void sendInput({ cents }).catch(() => {});
   };
@@ -73,9 +80,11 @@ const Phone = ({ pub, priv, sendInput }: MiniGameViewProps<Pub, Priv>) => {
         data-validated={validated ? "true" : "false"}
         className={`glass relative flex h-[4.75rem] shrink-0 items-center justify-center gap-2 rounded-card border-2 px-4 ${validated ? "border-good" : "border-transparent"}`}
       >
-        <span className={`font-display leading-none ${draft === "" ? "text-ink-muted/50" : ""}`} style={{ fontSize: `${fit(`${shown} €`, 19, 1.7, 3.4)}rem` }}>
-          {shown}
-        </span>
+        <Pop value={draft} scale={1.08}>
+          <span className={`font-display leading-none ${draft === "" ? "text-ink-muted/50" : ""}`} style={{ fontSize: `${fit(`${shown} €`, 19, 1.7, 3.4)}rem` }}>
+            {shown}
+          </span>
+        </Pop>
         {/* Curseur clignotant tant que le prix n'est pas validé */}
         {!validated && <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }} className="-ml-1 h-10 w-[0.2rem] rounded bg-accent" />}
         <span className="font-display text-3xl leading-none text-accent">€</span>
@@ -125,10 +134,10 @@ const PhoneResults = ({ results, snapshot }: MiniGameViewProps<Pub, Priv, Result
             <span className="font-display text-2xl text-ink">{formatCents(mine.cents)}</span>
           </div>
           <p className={`font-display text-2xl ${mine.points > 0 ? "text-good" : "text-bad"}`}>{mine.exact ? "Pile le bon prix ! 🎯" : gapLabel(mine.diff)}</p>
-          <p className="text-xl font-bold">
+          <Pop appear scale={mine.rank === 1 ? 1.4 : 1.15} className="text-xl font-bold">
             {mine.rank === 1 ? "👑 " : ""}
             {ordinal(mine.rank)} sur {results.ranking.length}
-          </p>
+          </Pop>
         </>
       ) : (
         <p className="text-xl text-ink-muted">Tu n'as pas répondu</p>

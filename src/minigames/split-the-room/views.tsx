@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { cleanText } from "../../shared/clean-text";
-import { AnsweredCount, AnsweredRoster, Button, CheckIcon, Choice, DuelGauge, fireConfetti, PlayerAvatar, SelectedBadge, typo, VoteDots } from "../../web/ui";
+import { AnsweredCount, AnsweredRoster, Button, CheckIcon, Choice, DuelGauge, fireConfetti, haptique, PlayerAvatar, Pop, SelectedBadge, typo, useSfxOnChange, VoteDots, WatchingEyes } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results, Verdict } from "./game";
 
@@ -90,6 +90,8 @@ function TvWrite({ pub, round, players }: Props) {
 
 function TvVote({ pub }: Props) {
   const ending = pub.ending ?? "";
+  // Une nouvelle phrase claque sur la table.
+  useSfxOnChange(pub.index, "transition.entree", { volume: 0.8, rate: 1.15 });
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-between gap-4 text-center">
       <span data-testid="tv-sentence-index" className="rounded-chip bg-surface-strong px-5 py-1 font-display text-3xl text-accent">
@@ -124,10 +126,10 @@ function Gauge({ sequence, shown }: { sequence: boolean[]; shown: number }) {
     <div className="flex w-full max-w-[100rem] flex-col gap-3">
       <div className="flex items-end justify-between font-display">
         <span data-testid="tv-gauge-yes" className="text-[7rem] leading-none text-good">
-          {yes} <span className="text-5xl">OUI</span>
+          <Pop value={yes}>{yes}</Pop> <span className="text-5xl">OUI</span>
         </span>
         <span data-testid="tv-gauge-no" className="text-[7rem] leading-none text-bad">
-          <span className="text-5xl">NON</span> {no}
+          <span className="text-5xl">NON</span> <Pop value={no}>{no}</Pop>
         </span>
       </div>
       <DuelGauge data-testid="tv-gauge" className="h-20 w-full" left={n ? yes / n : 0} right={n ? no / n : 0} />
@@ -139,6 +141,16 @@ function TvReveal({ pub, playerById }: Props) {
   const n = pub.sequence.length;
   const { shown, verdict, author } = useRevealClock(n);
   const v = pub.verdict ?? "none";
+  // Sons calés sur la même horloge que l'animation : un tic par vote (aigu = OUI, grave = NON), roulement sur les derniers
+  // votes (il dure ~2 s et finit à l'instant du verdict), verdict, puis l'auteur démasqué.
+  const rollAt = Math.max(1, n - 3);
+  useSfxOnChange(shown, (_avant, apres) => (apres >= 1 && pub.sequence[apres - 1] ? { nom: "ui.clic", options: { rate: 1.35 } } : { nom: "ui.clic", options: { rate: 0.75 } }));
+  useSfxOnChange(shown, (_avant, apres) => (n > 1 && apres === rollAt ? "roulement" : null));
+  useSfxOnChange(verdict, (_avant, apres) =>
+    !apres ? null : v === "perfect" ? "bonne.reponse" : v === "unanimous" ? "mauvaise.reponse" : v === "split" ? { nom: "bonne.reponse", options: { volume: 0.6, rate: 0.9 } } : null,
+  );
+  useSfxOnChange(verdict, (_avant, apres) => (apres && v === "perfect" ? { nom: "bonne.reponse", options: { rate: 1.4, volume: 0.7 } } : null));
+  useSfxOnChange(author, (_avant, apres) => (!apres ? null : pub.authorGain > 0 ? "points.gagnes" : "ui.clic"));
   useEffect(() => {
     if (!verdict) return;
     if (v === "perfect") fireConfetti("big");
@@ -155,15 +167,19 @@ function TvReveal({ pub, playerById }: Props) {
       <div className="glass w-full max-w-[100rem] rounded-card px-12 py-5 [&_p]:line-clamp-3">
         <Sentence start={pub.start} ending={ending} size={3.5} />
       </div>
-      {n > 0 ? <Gauge sequence={pub.sequence} shown={shown} /> : <p className="text-5xl text-ink-muted">Personne n'a voté…</p>}
+      {n > 0 ? (
+        <motion.div animate={verdict && v === "perfect" ? { scale: [1, 1.06, 1] } : { scale: 1 }} transition={{ duration: 0.5 }} className="flex w-full justify-center">
+          <Gauge sequence={pub.sequence} shown={shown} />
+        </motion.div>
+      ) : <p className="text-5xl text-ink-muted">Personne n'a voté…</p>}
       <div className="flex min-h-[11rem] w-full flex-col items-center justify-start gap-4">
         {verdict && (
           <motion.p
             data-testid="tv-verdict"
             data-verdict={v}
             initial={{ opacity: 0, scale: 0.4 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 10 }}
+            animate={v === "perfect" ? { opacity: 1, scale: [0.4, 1.3, 1], rotate: [0, -3, 3, 0] } : { opacity: 1, scale: 1 }}
+            transition={v === "perfect" ? { duration: 0.7 } : { type: "spring", stiffness: 200, damping: 10 }}
             className={`font-display text-7xl ${VERDICT_TONE[v]}`}
           >
             {VERDICT_TEXT[v]}
@@ -171,7 +187,9 @@ function TvReveal({ pub, playerById }: Props) {
         )}
         {author && (
           <motion.div data-testid="tv-reveal-author" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-6">
-            <PlayerAvatar profile={authorProfile} size="lg" badge={<span aria-hidden>🎭</span>} className="drop-shadow-[0_0_1.5rem_var(--color-accent)]" />
+            <motion.div initial={{ scale: 0.3, rotate: -20 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 220, damping: 10 }}>
+              <PlayerAvatar profile={authorProfile} size="lg" badge={<span aria-hidden>🎭</span>} className="drop-shadow-[0_0_1.5rem_var(--color-accent)]" />
+            </motion.div>
             <span className="max-w-[40rem] whitespace-nowrap font-display text-5xl text-accent">{authorProfile?.name}</span>
             {pub.authorGain > 0 && (
               <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 12 }} className="rounded-chip bg-gold px-5 py-2 font-display text-5xl text-accent-ink shadow-glow">
@@ -194,12 +212,13 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
   const [draft, setDraft] = useState(sent ?? "");
   const [busy, setBusy] = useState(false);
   const typed = cleanText(draft);
-  const isSent = sent !== null && typed === sent;
-  const canSend = !busy && !isSent && (typed !== "" || sent !== null);
+  const isSent = sent !== null;
+  const canSend = !busy && !isSent && typed !== "";
 
   const submit = () => {
     if (!canSend) return;
     setBusy(true);
+    haptique(25);
     void sendInput({ text: draft })
       .catch(() => {})
       .finally(() => setBusy(false));
@@ -208,11 +227,12 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center gap-3 pb-3">
       <h1 className="shrink-0 text-balance text-center text-2xl font-extrabold leading-tight min-[400px]:text-3xl">{typo(pub.start)}</h1>
-      <div data-ui="text-field-shell" className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
+      <div data-ui="text-field-shell" data-sent={isSent} className={`relative min-h-[7rem] max-h-[16rem] flex-1 rounded-card border-2 transition-colors ${isSent ? "border-good bg-good/10" : "border-line bg-surface"}`}>
         <textarea
           data-ui="text-field"
           data-testid="split-input"
-          value={draft}
+          disabled={isSent || busy}
+          value={sent ?? draft}
           maxLength={pub.maxLength}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -233,8 +253,8 @@ function PhoneWrite({ pub, priv, sendInput }: Props) {
           <SelectedBadge tone="good" size="md" className="pointer-events-none absolute bottom-2 left-4" />
         )}
       </div>
-      <Button data-testid="split-send" data-sent={isSent} variant={isSent ? "good" : "primary"} size="lg" block disabled={!canSend && !isSent} onClick={submit} className="shrink-0">
-        {isSent ? <span className="inline-flex items-center gap-2">Envoyé <CheckIcon /></span> : typed === "" && sent !== null ? "Retirer" : sent !== null ? "Modifier" : "Envoyer"}
+      <Button data-testid="split-send" data-sent={isSent} variant={isSent ? "good" : "primary"} size="lg" block disabled={!canSend} onClick={submit} className="shrink-0">
+        {isSent ? <span className="inline-flex items-center gap-2">Envoyé <Pop appear><CheckIcon /></Pop></span> : "Envoyer"}
       </Button>
     </div>
   );
@@ -270,7 +290,10 @@ function PhoneVote({ pub, priv, sendInput }: Props) {
                   tone={yes ? "good" : "bad"}
                   selected={selected}
                   state={vote !== null && !selected ? "faded" : "idle"}
-                  onClick={() => void sendInput({ vote: yes }).catch(() => {})}
+                  onClick={() => {
+                    haptique();
+                    void sendInput({ vote: yes }).catch(() => {});
+                  }}
                   checkClassName="absolute right-4 top-4"
                   className="min-h-[5rem] flex-1 px-10 py-6 font-display text-5xl tracking-wide"
                 >
@@ -298,7 +321,10 @@ function PhoneReveal({ pub, priv, snapshot, playerById }: Props) {
         {typo(pub.start)} {typo(ending)}
       </p>
       {!verdict ? (
-        <p data-testid="reveal-wait" className="font-display text-3xl text-accent">Regarde la TV !</p>
+        <>
+          <WatchingEyes />
+          <p data-testid="reveal-wait" className="font-display text-3xl text-accent">Regarde la TV !</p>
+        </>
       ) : (
         <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} data-testid="reveal-result" data-verdict={v} className="flex flex-col items-center gap-3">
           <p className={`font-display text-3xl leading-tight ${VERDICT_TONE[v]}`}>{VERDICT_TEXT[v]}</p>

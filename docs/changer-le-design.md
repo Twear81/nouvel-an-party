@@ -15,7 +15,7 @@ ils emploient les classes Tailwind issues du thème (`bg-surface`, `text-accent`
 ### Palette
 Dans `theme.css`, modifier les variables `--color-*` :
 `bg` / `bg-2` / `bg-3` (fonds de nuit), `surface` (verre), `ink` / `ink-muted` (textes), `accent*` (or champagne),
-`hot` (rose), `cool`, `good` / `bad` / `warn` (états), `qr-dark` / `qr-light` (QR code, garder un fort contraste).
+`hot` (bleu électrique dans le thème de base), `cool`, `good` / `bad` / `warn` (états), `qr-dark` / `qr-light` (QR code, garder un fort contraste).
 Les dégradés (`--gradient-bg`, `--gradient-gold`…) sont construits à partir de ces couleurs.
 Classes disponibles : `bg-bg`, `text-ink`, `text-ink-muted`, `bg-accent`, `text-accent`, `bg-gold`, `bg-night`, `glass`, `text-gold-gradient`…
 
@@ -71,6 +71,23 @@ elle réutilise les composants du jeu et propose lecture, pause et déplacement 
 
 Le jeu change d'habillage au fil de la soirée (6 skins qui imitent des interfaces de jeux vidéo) : tout est dans [skins.md](skins.md). En bref : `SkinProvider` (`src/web/theme/skin.tsx`) pose `html[data-skin]` ; **un fichier CSS par skin** (`src/web/theme/skins/<id>.css`) redéfinit les jetons puis habille les composants via leurs marqueurs `data-ui` (`panel`, `button`, `choice`, `result-bar`, `countdown`, `avatar`, `score-row`…, tableau dans skins.md). Pour qu'un écran soit habillable : n'utiliser que les composants de `src/web/ui` et les classes du thème ; une zone neuve et récurrente reçoit son `data-ui` (et ses `data-*` d'état) dans le composant, jamais de style de skin dans un mini-jeu.
 
+## Galerie des animations
+
+`bun run apercu:animations` construit `captures/animations/index.html` (non commité) : un fichier autonome, ouvrable depuis
+le disque, sans serveur ni réseau. Il rejoue **chaque animation et son son** isolément, avec les vrais écrans du jeu
+(`TvScreens`, `PhoneScreen`, vues `Tv` / `TvResults` / `Phone` des mini-jeux) et une horloge locale qui remplace `serverNow`
+(`imposerHorloge`, `src/web/net/socket.ts`). Menu à gauche (Composants, Chrono, Écrans TV, Mini-jeux), barre de contrôle en
+haut : Pause / Rejouer, curseur de temps sur les scènes chronométrées (révélations calées sur `resultsAt`), habillage (thème
+de base + 6 skins), 3 ou 8 joueurs (pseudos de 16 caractères), taille du téléphone, bouton son (le premier clic déverrouille
+l'audio). Un lien `#scene=jeu/imposteur/vote&skin=dofus&n=8` ouvre une scène précise. La pause fige l'horloge et les
+animations CSS ; les ressorts `motion` finissent leur course (utiliser le curseur pour examiner un instant).
+
+Les manches de démonstration sont **jouées par la vraie logique du jeu** (`game.ts` dans le faux contexte de
+`tests/unit/helpers/minigame-ctx.ts`, config réelle de `config/minijeux/`) : elles restent justes si le jeu change.
+Pour ajouter un mini-jeu : une entrée dans `DEMOS` (`scripts/apercu-animations/demos.ts`) = des étapes cumulatives
+(`intro`, `jeu`, `resultats`…) dont les `agir(s)` font `s.input(joueur, payload)` / `s.advance(ms)` ; `repondre` alimente le bouton
+« Faire répondre le suivant ». Le code de la galerie est dans `scripts/apercu-animations/`.
+
 ## Composants réutilisables (`src/web/ui/`)
 - `Button`, `ConfirmDialog` (confirmation dans le style du jeu, jamais `window.confirm`), `Icons` (icônes SVG : pause, passer, accueil…), `Panel` (carte en verre, prop `title` facultative), `PlayerAvatar` (avatar + cadre + couleur, tailles `xs`→`2xl`, `AVATAR_REM` = taille en rem).
 - `Choice` : carte de choix cliquable du téléphone (réponse, vote, camp, oui / non). Props `selected`, `state` (`idle` / `correct` / `wrong` / `faded`), `keyLabel` (A, B…), `tone` (`glass` par défaut, `cool` / `hot` / `good` / `bad` pleins, `plain`, `flat` sans relief ni anneau), `radius` (`card` / `btn`), `showCheck` (faux pour les petits boutons serrés), ✓ intégré quand `selected` (taille / position via `checkSize`, `checkTone`, `checkClassName`) ; la mise en page vient de `className`. Marqueurs `choice`, `choice-key`, `choice-label`, `choice-check`. Ne plus écrire de `motion.button` de choix à la main.
@@ -84,6 +101,8 @@ Le jeu change d'habillage au fil de la soirée (6 skins qui imitent des interfac
 - `NumPad` : pavé numérique du téléphone (virgule optionnelle, touches sans effet grisées, ton `serious`) ; la logique de saisie (`pressKey`) reste dans le mini-jeu.
 - `VoteDots` : pastilles anonymes de progression d'un vote + compteur.
 - `typo`, `fit` (taille de police selon la longueur du texte), `ordinal` (« 1er », « 2e ») : typographie et mise en forme du contenu, dans `typo.ts`.
+- **Vie et feedbacks** (`Pop.tsx`, `haptique.ts`) : `Pop` (`value` : petit rebond à chaque changement, `appear` : rebond à l'apparition, `scale`), `CountUp` (`value`, `duration`, `prefix` : nombre qui défile depuis 0), `FlyingPoints` (`value`, `delay` : « +N » fantôme qui jaillit et s'envole, dans un parent `relative`, ne pas le mettre dans un élément lu par les E2E), `WaitingDots` (trois points qui rebondissent : attente), `WatchingEyes` (👀 « regarde la TV »), `useChanged(valeur)` (vrai quand une valeur du snapshot vient de changer, jamais au montage : base de tout effet « ça vient d'arriver » qui ne doit pas se rejouer au rechargement), `haptique(ms)` (vibration Android, ignorée ailleurs ; déjà appelée par `Button` et `Choice`). Tout en `transform` / `opacity`.
+- Feedbacks intégrés : `Button` s'enfonce au toucher (ressort) et fait un pop quand il passe de grisé à actif ; `Choice` fait un pop à la sélection et `SelectedBadge` arrive en tournant ; `AnsweredRoster` saute avec un anneau d'éclat quand un joueur répond ; `ResultBar` et `DuelGauge` glissent (`translateX`, jamais `width`) ; `Panel` entre en fondu (`animate-rise`, classe de thème) ; `Countdown` fait battre le **chiffre seul** (`Digits`, marqueur `countdown-digits`, amplitude ≤ 1,15, tremblement à 3-2-1) dans sa boîte fixe : ne jamais animer la boîte du chrono. Classes de thème : `animate-rise`, `animate-breathe`. `prefers-reduced-motion` reste ignoré (voir `docs/skins.md`).
 Un mini-jeu ne doit utiliser que ces composants + les classes du thème.
 
 ## Dimensions
@@ -99,3 +118,13 @@ Un mini-jeu ne doit utiliser que ces composants + les classes du thème.
 - **Animations fluides** (TV comme téléphones) : n'animer que `transform` et `opacity` ; pas de propriété SVG ou de peinture animée (`stroke-dashoffset`, `width`, `box-shadow`…), pas de `filter`/`mix-blend-mode` sur un grand calque, pas de recalage d'animation à chaque image. Détails et mesure : [Performance des scènes](mise-en-scene.md#performance-des-scènes).
 - **Téléphones modestes (ex. iPhone XR à la batterie usée)** : jamais de flou (`glass`, `backdrop-filter`) au-dessus d'un élément animé — le flou serait recalculé à chaque image ; le fond par défaut est donc figé sur téléphone (`<Backdrop still />` dans `PhoneStage`), et un skin qui anime son fond n'utilise pas de flou. Pas d'animation infinie de `stroke-dashoffset`, `box-shadow` ou `filter` sur un élément toujours visible (cadres d'avatar : scintillement en `opacity`).
 - **Temps de réaction** : prendre l'instant du toucher avec `eventTime(e.timeStamp, performance.now())` (`src/shared/clock.ts`), pas `performance.now()` dans le gestionnaire : un téléphone lent à traiter l'événement ne doit pas être pénalisé.
+
+Les textes à dégradé / ellipse qui contiennent des jambages réservent leur encre via `glyph-safe`.
+`PlayerAvatar` accepte `crowned` et `crownDelay` : la couronne est ancrée et proportionnelle au portrait, pour les
+résultats et le podium. La couronne du dessin gagnant est au-dessus du carré réel, avec une place réservée pour laisser la feuille entièrement visible.
+Les règles de camps des skins excluent `selected-badge` et `choice-check` : une pastille de validation reste pleine.
+
+Les écrans TV partagent `--spacing-tv-gutter` (marge extérieure) et `--spacing-tv-panel` (retrait intérieur).
+Cadre de jeu, en-tête, bande des points et titres suivent cette grille, même sous un skin.
+Les champs texte envoyés de Comme les autres et Split the Room sont réellement désactivés et leur enveloppe porte
+`data-sent="true"` : fond atténué, texte grisé et coche de validation conservée.

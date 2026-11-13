@@ -1,4 +1,5 @@
 // Avatar d'un joueur : avatar prédéfini + couleur + cadre. Taille en rem, donc proportionnelle sur la TV.
+import { motion } from "motion/react";
 import type { CSSProperties, ReactNode } from "react";
 import type { Profile } from "../../shared/types";
 import { avatarById, frameById } from "../theme/profile-options";
@@ -14,9 +15,11 @@ interface Props {
   /** Pastille en bas à droite (✓, +100…). */
   badge?: ReactNode;
   className?: string;
+  crowned?: boolean;
+  crownDelay?: number;
 }
 
-export function PlayerAvatar({ profile, size = "md", dimmed, badge, className = "" }: Props) {
+export function PlayerAvatar({ profile, size = "md", dimmed, badge, crowned = false, crownDelay = 0.5, className = "" }: Props) {
   const px = AVATAR_REM[size];
   const style = {
     width: `${px}rem`,
@@ -39,6 +42,9 @@ export function PlayerAvatar({ profile, size = "md", dimmed, badge, className = 
         )}
       </div>
       <AvatarFrame className={frameById(profile?.frame ?? "none").className} />
+      {crowned && <motion.span aria-hidden data-ui="crown" className="avatar-crown"
+        initial={{ y: -90, opacity: 0, rotate: -35, scale: 0.5 }} animate={{ y: 0, opacity: 1, rotate: -16, scale: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 11, delay: crownDelay }}>👑</motion.span>}
       {badge != null && (
         <div data-ui="avatar-badge" className="absolute -bottom-[0.2em] -right-[0.2em] flex min-h-[2.8em] min-w-[2.8em] items-center justify-center rounded-full border-[0.15em] border-bg bg-gold px-[0.5em] text-[1.6em] font-bold leading-none text-accent-ink">
           {badge}

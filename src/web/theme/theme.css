@@ -29,6 +29,8 @@
 }
 
 @theme static {
+  --spacing-tv-gutter: 3.5rem;
+  --spacing-tv-panel: 2rem;
   /* ── Fonds (thème de base, hors skins : bleu Karmine Corp) */
   --color-bg: #040b1e;
   --color-bg-2: #08194a;
@@ -38,15 +40,15 @@
   --color-line: rgb(255 255 255 / 0.16);
 
   /* ── Textes */
-  --color-ink: #f7f2ff;
+  --color-ink: #f2f7ff;
   --color-ink-muted: #a9bbe0;
 
-  /* ── Accents (or champagne, rose, bleu glacé) */
+  /* ── Accents (or champagne, bleu électrique, bleu glacé) */
   --color-accent: #f6cd72;
   --color-accent-strong: #ffe3a3;
   --color-accent-deep: #c8933a;
   --color-accent-ink: #2b1a02;
-  --color-hot: #ff4f9a;
+  --color-hot: #287bff;
   --color-cool: #5ad1ff;
 
   /* ── États */
@@ -104,10 +106,19 @@
   --animate-wiggle: wiggle 1.4s ease-in-out infinite;
   --animate-nudge: nudge 1s ease-in-out infinite;
   --animate-attention: attention 1.8s ease-in-out infinite;
+  --animate-rise: rise 0.4s ease-out backwards;
+  --animate-breathe: breathe 4s ease-in-out infinite;
 }
 
 @keyframes twinkle { 0%, 100% { opacity: 0.15; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
 @keyframes float { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(4%, -6%, 0); } }
+/* Entrée douce d'un panneau (opacité + translation) et respiration lente (QR code, halo). */
+@keyframes rise { from { opacity: 0; transform: translate3d(0, 1.2rem, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+/* Chrono : battement du chiffre à chaque seconde des 5 dernières (taille de la boîte inchangée : on ne touche qu'au chiffre
+   lui-même, --beat = amplitude) ; à 3-2-1, il tremble en plus. */
+@keyframes countdown-beat { 0% { transform: scale(var(--beat, 1.15)); } 45%, 100% { transform: scale(1); } }
+@keyframes countdown-beat-shake { 0% { transform: scale(var(--beat, 1.15)) rotate(-4deg); } 20% { transform: scale(var(--beat, 1.15)) rotate(4deg); } 40% { transform: scale(1.04) rotate(-2deg); } 60%, 100% { transform: scale(1) rotate(0); } }
 @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 /* Panneau d'alerte « cheap » : le ⚠️ se dandine, le 👉 pointe, le cadre respire (doux, pas de stroboscope). */
 @keyframes wiggle { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
@@ -291,3 +302,33 @@ html[data-skin] {
   --color-shade: color-mix(in srgb, color-mix(in oklab, var(--color-bg) 30%, #000) 62%, transparent);
 }
 /* ─── fin mini-jeu culture-genante ─── */
+
+/* Texte susceptible de déborder de son encre : conserver le rythme des lignes, réserver les jambages et l’italique. */
+@utility glyph-safe {
+  padding-block: 0.12em;
+  margin-block: -0.12em;
+  padding-inline: 0.16em;
+}
+/* Couronne ancrée au portrait, proportionnelle à sa taille et indépendante de la silhouette du cadre. */
+.avatar-crown { position: absolute; left: -18%; top: -48%; z-index: 10; font-size: 6.2em; line-height: 1.2; pointer-events: none; }
+/* Le dessin carré porte sa décoration : elle suit le cadre réel, même dans une colonne très large. */
+.drawing-crown { position: absolute; left: 50%; bottom: calc(100% + 0.3em); translate: -50% 0; z-index: 10; font-size: clamp(3.5rem, 25cqw, 5rem); line-height: 1; }
+.drawing-crown::before { content: ""; position: absolute; inset: -10%; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 55%, transparent), transparent); }
+
+/* Même grille sur tous les habillages : bord du cadre, titre, contenu et bande des points. */
+html[data-app="tv"] [data-ui="game-frame"] { padding-inline: 0; }
+html[data-app="tv"] :is([data-ui="game-frame-title"], [data-ui="game-frame-body"]) { padding-inline: var(--spacing-tv-panel); }
+/* Réponse envoyée : vrai contrôle désactivé, atténué, sans signal de saisie active. */
+html [data-ui="text-field-shell"][data-sent="true"] {
+  background: color-mix(in srgb, var(--color-surface-strong) 75%, var(--color-ink-muted));
+  border-color: color-mix(in srgb, var(--color-line) 70%, var(--color-ink-muted));
+  box-shadow: none;
+}
+html [data-ui="text-field"]:disabled {
+  background: transparent;
+  background-image: none;
+  color: var(--color-ink);
+  -webkit-text-fill-color: var(--color-ink);
+  opacity: 0.65;
+  cursor: not-allowed;
+}

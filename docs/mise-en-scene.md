@@ -4,8 +4,8 @@
 
 Direction confirmée par l'organisateur, réalisée par lots. Le retrait GunZ/photos, l'attente pendant le final,
 l'ouverture de la pièce, les transitions après Culture gênante et la sortie avant le podium sont intégrés.
-Les statistiques, souvenirs de partie et la cérémonie finale enrichie restent à réaliser ; le son viendra en dernier,
-exclusivement sur la TV. La rotation livrée est décrite dans [skins.md](skins.md).
+Les statistiques, souvenirs de partie et la cérémonie finale enrichie restent à réaliser ; le moteur de sons (TV seulement) est livré,
+les sons propres aux skins et aux mini-jeux viennent ensuite. La rotation livrée est décrite dans [skins.md](skins.md).
 
 Le décor de la pièce a été validé par l'organisateur le **10 novembre 2026** :
 [illustration de référence](../src/web/theme/assets/piece-reference.png). La [maquette animée](maquettes/piece.html)
@@ -200,7 +200,10 @@ pour qu'une reprise ne les compte pas deux fois. Les contenus secrets restent da
 3. Chronologie générique et rotation aux frontières, d'abord avec des scènes simples.
 4. Ouverture et six variantes visuelles de changement, partageant la même pièce.
 5. Résumés/souvenirs, distinctions et cérémonie finale.
-6. Sons et réglage du mixage, exclusivement sur la TV.
+6. Sons et réglage du mixage, exclusivement sur la TV. **Moteur livré** (`src/web/sound/`, catalogue dans
+   `src/web/theme/sons/`, sons CC0 de Kenney, sons globaux de la partie et des scènes) ; mode d'emploi dans
+   [creer-un-mini-jeu.md](creer-un-mini-jeu.md#sons-tv-uniquement). Restent à faire : les sons propres aux skins (via
+   `SONS_PAR_SKIN` ou `config/medias/sons/<skin>/`), les sons des mini-jeux et la recette d'écoute sur la vraie TV.
 
 Pour le lot moteur : tests de pause, reprise, passage, retour lobby, crash aux frontières, absence d'interlude,
 épuisement du contenu et absence de double comptage. Puis parcours Playwright avec rechargement TV/téléphones,

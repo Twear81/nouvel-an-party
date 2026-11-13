@@ -2,7 +2,8 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useGame } from "../net/useGame";
 import { SkinProvider } from "../theme/skin";
-import { PausedOverlay, ReconnectBanner, RoomTransition, roomReference, TvStage } from "../ui";
+import { useGlobalSfx } from "../sound/useGlobalSfx";
+import { PausedOverlay, ReconnectBanner, RoomTransition, roomReference, SoundBadge, TvStage } from "../ui";
 import { FinalScreen } from "./FinalScreen";
 import { HostBar } from "./HostBar";
 import { IntroScreen } from "./IntroScreen";
@@ -22,8 +23,9 @@ export function TvApp() {
   );
 }
 
-function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
+export function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
   const { snapshot, connected, host, actions } = game;
+  useGlobalSfx(snapshot);
 
   if (!snapshot) {
     return (
@@ -72,6 +74,7 @@ function TvScreens({ game }: { game: ReturnType<typeof useGame> }) {
         </motion.div>
       </AnimatePresence>}
       {host && snapshot.phase !== "lobby" && <HostBar snapshot={snapshot} actions={actions} overlay={snapshot.phase === "transition" || (snapshot.phase === "playing" && !!round?.interlude)} />}
+      <SoundBadge visible={snapshot.phase === "lobby"} />
       <PausedOverlay show={snapshot.paused} big />
       <ReconnectBanner show={!connected} />
     </TvStage>

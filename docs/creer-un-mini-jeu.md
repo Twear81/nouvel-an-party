@@ -109,6 +109,8 @@ Si `config/minijeux/<id>.yaml` est absent, le jeu est désactivé avec un averti
 - **Unit** (`tests/unit/<id>.test.ts`) : testez `game.ts` sans réseau avec un faux `ctx` (`rng` fixe, `setTimeout` qui stocke les callbacks pour les déclencher à la main, `players` factices) : `start` → `onPlay` → `input` → `finish`. Vérifiez surtout la validation des `payload` invalides, les égalités, les joueurs absents et le calcul des points.
 - **E2E** (`tests/e2e`) : une partie complète avec plusieurs faux téléphones : lobby, une manche de votre jeu, résultats, classement.
 
+- **Galerie des animations** : ajouter la démo du jeu dans `scripts/apercu-animations/demos.ts` (étapes jouées par la vraie logique du jeu, voir [changer-le-design.md](changer-le-design.md#galerie-des-animations)), puis `bun run apercu:animations` pour regarder et écouter chaque étape, révélation comprise.
+
 ## 7. Exemple complet : « Plus rapide »
 Principe : après un délai aléatoire, un gros **GO** apparaît. Le premier à toucher son écran gagne. Le temps est **mesuré sur le téléphone** avec `performance.now()` à partir de l'affichage du GO, puis envoyé : la latence wifi ne favorise personne. Points par rang.
 
@@ -291,3 +293,78 @@ une dernière manche qui ferme un univers mène directement à la sortie. Pendan
 | Joueurs de la manche | `ctx.players` côté serveur, `round.participants` côté écrans ; connectés maintenant : `ctx.isConnected` |
 | Heure de début des résultats | `round.resultsAt` (heure serveur, `null` avant la phase résultats) ; heure serveur côté écran : `serverNow()` (`src/web/net/socket.ts`) |
 | Tester sans moteur | `makeCtx()` (`tests/unit/helpers/minigame-ctx.ts`) : `ctx.advance(ms)` fait avancer le temps, `ctx.finishCountdown()` saute à la fin du chrono |
+
+## Sons (TV uniquement)
+
+Le moteur `src/web/sound/` (WebAudio) joue les sons **sur la TV seulement** : sur un téléphone tout est un no-op,
+aucun fichier n'est téléchargé. Les sons globaux (joueur qui rejoint, annonce de manche, pop à chaque réponse, tics et buzzer
+du chrono, pause, résultats, « points gagnés », fanfare, whoosh des scènes) sont déjà joués par `useGlobalSfx` dans `TvApp` :
+un mini-jeu n'a rien à faire pour eux. Il ajoute seulement ses sons propres, avec les hooks exportés par `src/web/ui` :
+
+```tsx
+import { useSfx, useSfxOnChange, useSfxAt, useSfxTimeline } from "../../web/ui";
+
+const play = useSfx();                               // play("ui.clic", { volume: 0.5, rate: 1.2 })
+useSfxOnChange(pub.step, "ui.clic");                 // quand `pub.step` change (jamais au montage)
+useSfxOnChange(pub.lives, (avant, apres) => (apres < avant ? "mauvaise.reponse" : null));
+useSfxAt(round.resultsAt === null ? null : round.resultsAt + 2000, "bonne.reponse");   // à une heure serveur
+useSfxTimeline(round.resultsAt, [{ à: 0, son: "roulement" }, { à: 2.5, son: "points.gagnes" }]); // « à N secondes »
+```
+
+- **Pas de son au montage** : une TV qui recharge en pleine manche ne doit rien rejouer. `useSfxOnChange` ignore la valeur
+  initiale ; `useSfxAt` / `useSfxTimeline` ne jouent pas un instant déjà passé de plus de ~1 s au montage, s'annulent
+  au démontage et se suspendent pendant la pause. Ne pas appeler `play()` directement dans le corps d'un composant ni dans un
+  `useEffect` qui s'exécute au montage.
+- Les révélations se calent sur `round.resultsAt` (mêmes constantes que l'animation, comme pour `revealSeconds`).
+- Rien n'est joué en pause (sauf le son de pause lui-même) ; sous Playwright (`navigator.webdriver`) rien ne sort, les sons
+  demandés sont notés dans `window.__sfx` (utile pour un test E2E).
+- Options de `play` : `volume` (multiplicateur), `rate` (vitesse, 1 = normale), `detune` (centièmes de ton), `variation`
+  (± centièmes tirés au hasard ; déjà réglée dans le catalogue pour les sons fréquents), `ignorePause`.
+- Un son qui revient souvent doit rester discret (volume bas, `variation`).
+
+**Catalogue** : `src/web/theme/sons/catalogue.ts` (dans le thème : remplaçable) associe un nom logique à un fichier et un volume,
+avec des remplacements possibles par skin (`SONS_PAR_SKIN`). Pour un nouveau son : copier le fichier (court, `.ogg`, CC0 ou
+libre de droits) dans `src/web/theme/sons/`, le déclarer dans le catalogue, l'ajouter à `LICENCES.md` et à
+`config/medias/sons/LISEZMOI.txt`. L'organisateur peut remplacer n'importe quel son sans recompiler en déposant
+`config/medias/sons/<nom-logique>.(mp3|ogg|wav)`, ou `config/medias/sons/<skin>/<nom-logique>.*` pour un seul univers
+(priorité : dossier du skin, fichier général, catalogue du skin, catalogue par défaut ; `src/web/sound/resolve.ts`).
+
+Écouter tous les sons : `bun run apercu:sons` puis ouvrir `captures/sons/index.html` (planche autonome : un ▶ par son,
+volume/hauteur réglables, séquences réelles, skins).
+
+| Nom logique | Quand |
+|---|---|
+| `lobby.musique` | jazz à l’accueil, ambiance originale du skin pendant les manches ; changement en fondu |
+| `tension`, `applaudissements`, `echec.trombone` | riser de 2 s, public après verdict, chute au trombone |
+| `joueur.rejoint`, `joueur.quitte`, `partie.lancement` | lobby, lancement de la partie |
+| `manche.intro` | annonce d'une manche |
+| `reponse.recue`, `reponse.toutes` | une réponse de plus (hauteur montante), tout le monde a répondu |
+| `chrono.tic`, `chrono.fin`, `temps.ajoute` | 5 dernières secondes, zéro, « +10 s » de l'hôte |
+| `pause`, `reprise` | pause de l'hôte |
+| `resultats.arrivee`, `points.gagnes` | arrivée des résultats, fin de la révélation (`revealSeconds`) |
+| `final.fanfare` | phase finale |
+| `transition.entree`, `transition.sortie` | scènes de changement d'univers |
+| `ui.clic`, `bonne.reponse`, `mauvaise.reponse`, `roulement` | à disposition des mini-jeux (double ding, buzzer, caisse claire seule de 2 s) |
+
+Autoplay : Chromium refuse le son avant un geste ; le premier clic ou la première touche sur la TV le débloque (haut-parleur
+barré dans le coin du lobby d'ici là). Le bouton haut-parleur de la barre de l'hôte (ou la touche M) coupe le son ;
+`volume_sons` dans `partie.yaml` règle le volume général. Dans les E2E, l'état se lit sur `data-sound` (`locked`, `on`, `muted`)
+des éléments `sound-state` et `host-sound`.
+
+La musique est pilotée par `sound.setAmbiance(actif)` dans `useGlobalSfx` (`setLobby` reste un alias) : cet appel configure l’intention,
+mais ne joue rien au montage. Il faut un geste dans la page courante. Le moteur garde une seule boucle, annule un
+décodage encore en cours si l’on quitte l’ambiance, applique les fondus et le ducking (volume à 25 % pendant les jingles,
+roulements, montées de tension et applaudissements). Plusieurs sons superposés gardent la baisse jusqu’à la dernière fin.
+Pause et bouton muet arrêtent la boucle en fondu ; retour au lobby / reprise après geste la relancent. Les sons
+ponctuels continuent à passer par les hooks existants. Le roulement dure exactement 2 s pour conserver les vitesses
+et les chronologies des révélations. Simon utilise un piano échantillonné do4, transposé en mi4, sol4 et do5 (tempérament égal).
+La résolution de la boucle utilise le skin affiché, y compris `?skin=` en développement. Un fichier
+`config/medias/sons/<skin>/lobby.musique.ogg` remplace la boucle générale. Un changement de skin attend le décodage
+du nouveau morceau puis croise les fondus ; une requête devenue obsolète ne démarre jamais une ancienne boucle.
+Les six skins possèdent une ambiance embarquée ; sans définition ou remplacement pour un skin, le morceau général reste utilisé.
+La boucle continue entre intro, jeu, résultats et scènes de changement d’univers. Le skin du snapshot déclenche le changement
+au moment de la bascule serveur dans la scène, sans redémarrer aux changements d’écran. La sortie et le classement final
+arrêtent l’ambiance pour laisser la place à la fanfare. Le ducking reprend le volume du morceau en cours, y compris si
+le nouveau morceau termine son décodage pendant un jingle. Sources et périmètre privé : [ambiances-musicales.md](ambiances-musicales.md).
+La planche permet de lancer / arrêter la vraie boucle du lobby et d’écouter cet accord. Les niveaux cibles, sources,
+licences et traitements sont documentés dans `src/web/theme/sons/LICENCES.md` et `provenance.json`.

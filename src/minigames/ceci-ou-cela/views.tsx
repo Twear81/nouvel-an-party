@@ -1,7 +1,8 @@
 // Écrans de "Ceci ou Cela" : deux réponses face à face (couleurs neutres bleu / rose : ce n'est pas "bien / mal").
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { motion } from "motion/react";
-import { AnsweredCount, AnsweredRoster, CheckIcon, Choice, fit, PlayerAvatar, typo } from "../../web/ui";
+import { useEffect } from "react";
+import { AnsweredCount, AnsweredRoster, CheckIcon, Choice, fireConfetti, fit, haptique, PlayerAvatar, typo, useSfxTimeline, type NomSon } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 
@@ -58,8 +59,15 @@ const Tv = ({ pub, round, playerById, players }: MiniGameViewProps<Pub>) => {
             </span>
           </motion.div>
         ))}
-        <div className="absolute left-1/2 top-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[0.4rem] border-bg bg-gold font-display text-4xl text-accent-ink shadow-glow">
-          VS
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <motion.div
+            initial={{ scale: 0, rotate: -90 }}
+            animate={{ scale: [0, 1.4, 1], rotate: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="flex h-24 w-24 items-center justify-center rounded-full border-[0.4rem] border-bg bg-gold font-display text-4xl text-accent-ink shadow-glow"
+          >
+            VS
+          </motion.div>
         </div>
       </div>
 
@@ -106,7 +114,10 @@ const Phone = ({ pub, priv, sendInput, playerById }: MiniGameViewProps<Pub, Priv
               tone={i === 0 ? "cool" : "hot"}
               selected={selected}
               state={choice !== null && !selected ? "faded" : "idle"}
-              onClick={() => void sendInput({ choice: i }).catch(() => {})}
+              onClick={() => {
+                haptique();
+                void sendInput({ choice: i }).catch(() => {});
+              }}
               className="min-h-[6rem] flex-1 px-4"
             >
               <span className="text-balance break-words font-display leading-tight" style={{ fontSize: `${fit(label, 17, 1.5, 3.75)}rem` }}>
@@ -141,7 +152,8 @@ function Camp({ index, label, ids, winner, tie, total, results, playerById }: { 
       data-testid={`camp-${index}`}
       data-winner={winner ? "true" : "false"}
       initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: lit || total === 0 ? 1 : 0.5, y: 0, scale: winner ? 1.02 : 1 }}
+      animate={{ opacity: lit || total === 0 ? 1 : 0.5, y: 0, scale: winner ? [1, 1.06, 1.02] : 1 }}
+      transition={{ delay: winner ? 0.6 : 0, duration: 0.6 }}
       className={`flex min-h-0 flex-1 flex-col items-center gap-3 rounded-card border-[0.3rem] p-5 ${lit ? `${tone.soft} ${tone.glow}` : "border-line bg-surface"}`}
     >
       <div className={`w-full rounded-btn px-4 py-3 text-center ${tone.solid}`}>
@@ -172,9 +184,25 @@ function Camp({ index, label, ids, winner, tie, total, results, playerById }: { 
   );
 }
 
-const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) => {
+function TvResults({ results, round, playerById }: MiniGameViewProps<Pub, Priv, Results>) {
+  const total = results ? results.picks[0].length + results.picks[1].length : 0;
+  const most = results ? Math.max(results.picks[0].length, results.picks[1].length) : 0;
+  const hasWinner = !!results && results.winner !== null;
+  const explainAt = Math.max(EXPLAIN_DELAY_S, AVATAR_FIRST_S + Math.max(0, most - 1) * AVATAR_STEP_S + 0.3);
+  // Sons calés sur les constantes de l'animation : un clic par paire d'avatars qui arrivent, puis le verdict.
+  useSfxTimeline(
+    results ? round.resultsAt : null,
+    [
+      ...Array.from({ length: most }, (_, i) => ({ à: AVATAR_FIRST_S + i * AVATAR_STEP_S, son: "ui.clic" as NomSon, options: { rate: 0.9 + Math.min(i, 8) * 0.07, volume: 0.6 } })),
+      { à: explainAt, son: (total === 0 ? "mauvaise.reponse" : "bonne.reponse") as NomSon },
+    ],
+  );
+  useEffect(() => {
+    if (!hasWinner) return;
+    const id = setTimeout(() => fireConfetti("small"), explainAt * 1000);
+    return () => clearTimeout(id);
+  }, [hasWinner, explainAt]);
   if (!results) return null;
-  const total = results.picks[0].length + results.picks[1].length;
   const tie = results.winner === null && total > 0;
   const target = results.targetId ? playerById(results.targetId) : undefined;
   let explain: string;
@@ -198,7 +226,7 @@ const TvResults = ({ results, playerById }: MiniGameViewProps<Pub, Priv, Results
       </motion.p>
     </div>
   );
-};
+}
 
 const PhoneResults = ({ results, snapshot }: MiniGameViewProps<Pub, Priv, Results>) => {
   const myId = snapshot.me?.id;

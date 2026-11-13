@@ -10,7 +10,7 @@ import { useGame, type GameActions } from "../net/useGame";
 import { useRevealed } from "../net/useReveal";
 import { useFinalReveal } from "../net/useFinalReveal";
 import { SkinProvider } from "../theme/skin";
-import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, Panel, PhoneStage, PlayerAvatar, ReconnectBanner } from "../ui";
+import { Button, Countdown, fireConfetti, ordinal, PausedOverlay, Panel, PhoneStage, PlayerAvatar, Pop, ReconnectBanner, WaitingDots, WatchingEyes } from "../ui";
 import { ProfileEditor } from "./ProfileEditor";
 import { useWakeLock } from "./useWakeLock";
 
@@ -58,7 +58,7 @@ interface ScreenProps {
   onEdit: () => void;
 }
 
-function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
+export function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
   const round = snapshot.round;
   const finalReveal = useFinalReveal(snapshot.finalReveal);
 
@@ -79,7 +79,7 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
               ))}
             </div>
           )}
-          <p className="animate-pulse-soft text-ink-muted">En attente du lancement…</p>
+          <p className="flex items-center gap-3 text-ink-muted">En attente du lancement <WaitingDots /></p>
           <Button data-testid="edit-profile" variant="secondary" onClick={onEdit}>
             Modifier mon profil
           </Button>
@@ -89,7 +89,7 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
     case "transition":
       return (
         <Center testId="phone-transition-wait">
-          <span aria-hidden className="text-8xl">👀</span>
+          <WatchingEyes />
           <h1 className="font-display text-3xl text-gold-gradient">Regarde la TV !</h1>
         </Center>
       );
@@ -115,7 +115,7 @@ function PhoneScreen({ snapshot, me, actions, onEdit }: ScreenProps) {
       if (!finalReveal.done) {
         return (
           <Center testId="phone-final-wait">
-            <span aria-hidden className="text-8xl">👀</span>
+            <WatchingEyes />
             <h1 className="font-display text-3xl text-gold-gradient">Regarde la TV !</h1>
           </Center>
         );
@@ -150,7 +150,7 @@ const LATE_TEXT = "Tu joues à la prochaine manche";
 function Late({ testId }: { testId?: string }) {
   return (
     <Center testId={testId}>
-      <span className="text-6xl">⏳</span>
+      <motion.span aria-hidden animate={{ rotate: [0, 0, 180, 180, 360] }} transition={{ duration: 3, repeat: Infinity, times: [0, 0.3, 0.45, 0.8, 1], ease: "easeInOut" }} className="inline-block text-6xl">⏳</motion.span>
       <h1 className="font-display text-3xl text-gold-gradient">{LATE_TEXT}</h1>
       <p className="text-ink-muted">Tu es arrivé en cours de manche. Regarde la TV !</p>
     </Center>
@@ -197,9 +197,7 @@ function ResultsPhone({ snapshot, round, me, actions }: Pick<ScreenProps, "snaps
   if (!revealed) {
     return (
       <Center testId="phone-results">
-        <motion.span data-testid="phone-reveal-wait" animate={{ scale: [1, 1.15, 1], rotate: [-6, 6, -6] }} transition={{ duration: 1.4, repeat: Infinity }} className="text-8xl">
-          👀
-        </motion.span>
+        <WatchingEyes testId="phone-reveal-wait" />
         <h1 className="font-display text-3xl text-gold-gradient">Regarde la TV !</h1>
       </Center>
     );
@@ -222,8 +220,8 @@ function ResultsPhone({ snapshot, round, me, actions }: Pick<ScreenProps, "snaps
       </div>
       <div className="shrink-0 pb-3">
         {done ? (
-          <Panel data-testid="waiting-others" className="py-5 text-center text-xl font-bold text-ink-muted animate-pulse-soft">
-            En attente des autres ({doneCount}/{waiting.length})
+          <Panel data-testid="waiting-others" className="flex items-center justify-center gap-3 py-5 text-center text-xl font-bold text-ink-muted">
+            En attente des autres (<Pop value={doneCount}>{doneCount}</Pop>/{waiting.length}) <WaitingDots />
           </Panel>
         ) : (
           <Button

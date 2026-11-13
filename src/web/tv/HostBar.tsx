@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import type { GameSnapshot } from "../../shared/types";
 import type { GameActions } from "../net/useGame";
-import { Button, ClockIcon, ConfirmDialog, HomeIcon, PauseIcon, PlayIcon, SkipIcon } from "../ui";
+import { Button, ClockIcon, ConfirmDialog, HomeIcon, PauseIcon, PlayIcon, SkipIcon, SpeakerIcon, SpeakerOffIcon, useSoundState } from "../ui";
+import { sound } from "../sound/engine";
 
 /** `overlay` : barre posée par-dessus l'écran (interlude plein écran, le jeu occupe toute la TV et laisse le coin libre). */
 export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot; actions: GameActions; overlay?: boolean }) {
   const [confirmLobby, setConfirmLobby] = useState(false);
+  const soundState = useSoundState();
   const { phase, paused } = snapshot;
   const inGame = phase === "transition" || phase === "intro" || phase === "playing" || phase === "results";
 
@@ -47,7 +49,10 @@ export function HostBar({ snapshot, actions, overlay }: { snapshot: GameSnapshot
             )}
           </>
         )}
-        <Button data-ui="host-button" data-testid="host-lobby" variant="secondary" size="sm" className="ml-3 flex items-center gap-2 !px-4 !py-1.5" onClick={() => setConfirmLobby(true)}>
+        <Button data-ui="host-button" data-testid="host-sound" data-sound={soundState} aria-label="Son" variant="secondary" size="sm" className="ml-3 flex items-center !px-4 !py-1.5" onClick={() => sound.toggleMuted()}>
+          {soundState === "on" ? <SpeakerIcon /> : <SpeakerOffIcon />}
+        </Button>
+        <Button data-ui="host-button" data-testid="host-lobby" variant="secondary" size="sm" className="flex items-center gap-2 !px-4 !py-1.5" onClick={() => setConfirmLobby(true)}>
           <HomeIcon />
           Lobby
         </Button>

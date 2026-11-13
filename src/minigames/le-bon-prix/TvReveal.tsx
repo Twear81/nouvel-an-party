@@ -1,7 +1,7 @@
 // Résultats TV du "Bon prix" : les prix des joueurs arrivent sur un axe, roulement de tambour, le vrai prix tombe, puis les écarts.
 import { motion } from "motion/react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { fireConfetti, PlayerAvatar } from "../../web/ui";
+import { fireConfetti, PlayerAvatar, useSfxTimeline } from "../../web/ui";
 import type { MiniGameViewProps } from "../views-contract";
 import { formatCents } from "./amount";
 import type { GuessResult, Priv, Pub, Results } from "./game";
@@ -122,7 +122,7 @@ function GuessMarker({ g, left, big, stage, playerById }: { g: GuessResult; left
   );
 }
 
-export function TvResults({ results, playerById }: MiniGameViewProps<Pub, Priv, Results>) {
+export function TvResults({ results, playerById, round }: MiniGameViewProps<Pub, Priv, Results>) {
   const [stage, setStage] = useState<Stage>("guesses");
   const [shown, setShown] = useState(0);
   const box = useBox();
@@ -130,6 +130,22 @@ export function TvResults({ results, playerById }: MiniGameViewProps<Pub, Priv, 
   const n = ranking.length;
   const hasResults = results != null;
   const exactWin = ranking[0]?.exact ?? false;
+
+  // Sons calés sur les mêmes constantes REVEAL que l'animation : un jeton par prix, roulement, impact du vrai prix, éclat final.
+  const tDrumS = (REVEAL.first + n * REVEAL.step + REVEAL.beforeDrum) / 1000;
+  const tPriceS = tDrumS + REVEAL.drum / 1000;
+  const tDoneS = tPriceS + REVEAL.price / 1000;
+  useSfxTimeline(
+    round.resultsAt,
+    !hasResults || n === 0
+      ? []
+      : [
+          ...Array.from({ length: n }, (_, i) => ({ à: (REVEAL.first + (i + 1) * REVEAL.step) / 1000, son: "jeton.pose" as const, options: { rate: 0.9 + i * 0.07 } })),
+          { à: tDrumS, son: "roulement", options: { rate: 2 / (REVEAL.drum / 1000) } },
+          { à: tPriceS + 0.5, son: "boum" },
+          { à: tDoneS, son: exactWin ? "bonne.reponse" : "carte.pose" },
+        ],
+  );
 
   // Les prix arrivent un par un, du plus éloigné au plus proche : le suspense monte.
   useEffect(() => {

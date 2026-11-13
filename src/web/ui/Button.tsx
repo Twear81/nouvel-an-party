@@ -1,5 +1,7 @@
 // Bouton de base. Variantes : primary (or), secondary (verre), danger, ghost. Tailles pensées pour le pouce (phone) ou la TV.
-import { motion, type HTMLMotionProps } from "motion/react";
+import { motion, useAnimationControls, type HTMLMotionProps } from "motion/react";
+import { useEffect, useRef } from "react";
+import { haptique } from "./haptique";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost" | "good" | "bad";
 type Size = "sm" | "md" | "lg" | "xl" | "hero";
@@ -27,11 +29,25 @@ export interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
   block?: boolean;
 }
 
-export function Button({ variant = "primary", size = "md", block, className = "", children, ...rest }: ButtonProps) {
+export function Button({ variant = "primary", size = "md", block, className = "", children, onClick, ...rest }: ButtonProps) {
+  // Enfoncement au toucher (ressort : il rebondit au relâchement) ; grisé -> actif : petit « pop ».
+  const controls = useAnimationControls();
+  const wasDisabled = useRef(rest.disabled);
+  useEffect(() => {
+    if (wasDisabled.current && !rest.disabled) void controls.start({ scale: [1, 1.12, 0.97, 1], transition: { duration: 0.45, ease: "easeOut" } });
+    wasDisabled.current = rest.disabled;
+  }, [rest.disabled, controls]);
   return (
     <motion.button
-      whileTap={{ scale: 0.95, y: 3 }}
-      whileHover={rest.disabled ? undefined : { scale: 1.03 }}
+      animate={controls}
+      whileTap={rest.disabled ? undefined : { scale: 0.94, y: 3, transition: { type: "spring", stiffness: 600, damping: 20 } }}
+      // Survol court et sans rebond : un ressort qui oscille rend le bouton « instable » au moment du clic.
+      whileHover={rest.disabled ? undefined : { scale: 1.03, transition: { duration: 0.12, ease: "easeOut" } }}
+      transition={{ type: "spring", stiffness: 500, damping: 11 }}
+      onClick={(e) => {
+        haptique(12);
+        onClick?.(e);
+      }}
       type="button"
       data-ui="button"
       data-variant={variant}

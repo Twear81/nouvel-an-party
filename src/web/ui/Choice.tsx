@@ -3,6 +3,7 @@
 // choice-check). Le contenu (texte, avatar + pseudo…) est libre ; la mise en page (hauteur, flex-1) vient de `className`.
 import { motion, type HTMLMotionProps } from "motion/react";
 import type { ReactNode } from "react";
+import { haptique } from "./haptique";
 import { SelectedBadge } from "./SelectedBadge";
 
 export type ChoiceState = "idle" | "correct" | "wrong" | "faded";
@@ -55,6 +56,7 @@ export function Choice({
   checkClassName = "absolute right-3 top-3",
   className = "",
   children,
+  onClick,
   ...rest
 }: ChoiceProps) {
   const faded = state === "faded";
@@ -63,7 +65,14 @@ export function Choice({
       type="button"
       aria-pressed={selected}
       whileTap={rest.disabled ? undefined : { scale: 0.96 }}
-      animate={{ scale: selected ? 1.02 : 1, opacity: faded ? 0.45 : 1 }}
+      initial={false}
+      // Choisi : pop (dépasse puis se pose) ; les autres s'atténuent.
+      animate={{ scale: selected ? [1, 1.08, 1.02] : 1, opacity: faded ? 0.45 : 1 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      onClick={(e) => {
+        haptique(15);
+        onClick?.(e);
+      }}
       {...rest}
       data-ui="choice"
       data-tone={tone}

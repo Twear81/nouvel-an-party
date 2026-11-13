@@ -4,7 +4,7 @@
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { eventTime } from "../../shared/clock";
-import { CheckIcon, NumPad, SelectedBadge } from "../../web/ui";
+import { CheckIcon, haptique, NumPad, SelectedBadge } from "../../web/ui";
 import type { MiniGameViewProps } from "../views-contract";
 import type { Priv, Pub } from "./game";
 import { draftToValue, formatNumber, pressKey } from "./number";
@@ -55,6 +55,7 @@ function QcmPhone({ pub, priv, round, sendInput }: MiniGameViewProps<Pub, Priv>)
     if (answered(priv)) return;
     // Instant réel du toucher : un téléphone lent à traiter l'événement n'est pas pénalisé.
     const ms = shownAt.current === null ? 0 : Math.max(0, eventTime(timeStamp, performance.now()) - shownAt.current);
+    haptique(25);
     void sendInput({ choice: i, ms }).catch(() => {});
   };
 

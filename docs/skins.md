@@ -28,6 +28,10 @@ Bilan du chantier et validation : [skins-suivi.md](skins-suivi.md).
   ne force pas la visite de tous les univers. Une surprise en dernière manche mène directement à la sortie.
 - Après le dernier jeu, la sortie de la TV revient au thème de base avant le classement final.
 
+L’ambiance musicale suit le même skin, au moment de la bascule serveur dans la scène. Chaque univers possède une
+boucle originale embarquée ; elle continue entre intro, jeu et résultats. L’accueil garde le jazz et la sortie
+arrête l’ambiance pour la fanfare finale. Sources et écoute : [ambiances-musicales.md](ambiances-musicales.md).
+
 ## Architecture front
 - `html[data-skin="<id>"]` porte le skin courant (posé par `SkinProvider`, `src/web/theme/skin.tsx`, à partir du
   snapshot). `useSkin()` donne l'id aux composants qui ont une variante de structure (chrono, fond).

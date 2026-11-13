@@ -16,6 +16,7 @@ Un fichier `partie.yaml` absent ou vide utilise les valeurs par défaut. Une fau
 | `duree_cible_minutes` | `60` | Durée visée : sert à proposer, sur l'écran de lancement, un nombre de manches par défaut (chaque mini-jeu au moins une fois). Le réglage reste modifiable sur la TV |
 | `ordre` | `melange` | `melange` : on alterne les mini-jeux ; `groupe` : toutes les manches d'un mini-jeu à la suite |
 | `intro_secondes` | `4` | Durée de l'écran d'annonce avant chaque manche |
+| `volume_sons` | `0.8` | Volume général des sons de la TV, de `0` (muet) à `1`. Le bouton haut-parleur de la barre de l'hôte coupe et remet le son pendant la partie. Les sons se remplacent sans recompiler : voir [Sons](#sons) |
 | `port_http` | `3000` | Port HTTP (la TV : `http://localhost:3000/tv`) |
 | `port_https` | `3443` | Port HTTPS pour les téléphones (`https://<IP>:3443/play`) |
 | `ip` | `auto` | `auto` : détection de l'IP wifi. Sinon une IP forcée (ex. `"192.168.1.42"`) si le QR code pointe vers la mauvaise carte réseau |
@@ -26,6 +27,15 @@ Le nombre de manches par mini-jeu n'est **pas** dans ce fichier : il se choisit 
 `intro_secondes` concerne seulement l'annonce de chaque manche. L'installation dans la pièce en début de partie
 dure 9 s ; les changements d'univers après Culture gênante durent 4 s et la sortie avant le podium 2,4 s.
 Ces scènes utilisent les durées partagées du thème et se pilotent aussi avec Pause/Reprendre/Passer.
+
+### Sons
+Les sons sortent uniquement de la TV (jamais des téléphones). Les navigateurs interdisent le son tant qu'on n'a pas cliqué : la TV
+affiche un haut-parleur barré dans le coin du lobby jusqu'au premier clic ou à la première touche. Le jour J, cliquer une fois sur la TV.
+
+Pour remplacer un son sans recompiler, déposer un fichier `.mp3`, `.ogg` ou `.wav` portant le **nom logique** du son dans
+`config/medias/sons/` (ex. `config/medias/sons/chrono.fin.mp3`), ou dans `config/medias/sons/<skin>/` pour un seul univers
+(ex. `config/medias/sons/rocket-league/chrono.fin.ogg`). La liste des noms est dans `config/medias/sons/LISEZMOI.txt`.
+Les sons fournis sont des sons libres (CC0) de Kenney : voir `src/web/theme/sons/LICENCES.md`.
 
 ### Plafonner les manches d'un jeu : `manches_max`
 Dans le yaml de **n'importe quel** mini-jeu, `manches_max: 3` (entier ≥ 1, optionnel, placé juste après `actif`) limite le nombre de manches que le lobby propose pour ce jeu (le « sur N » est le plus petit de `manches_max` et du nombre de questions disponibles). Utile pour qu'un jeu long ne prenne pas toute la soirée. Pour un jeu surprise, cela plafonne le nombre de surprises. Sans la ligne, pas de plafond.

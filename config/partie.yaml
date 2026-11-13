@@ -12,6 +12,10 @@ ordre: melange
 # Durée de l'écran d'annonce avant chaque manche
 intro_secondes: 4
 
+# Volume général des sons de la TV, de 0 (muet) à 1. Le bouton haut-parleur de la barre de l'hôte coupe/remet le son.
+# Pour remplacer un son : voir config/medias/sons/LISEZMOI.txt
+volume_sons: 0.8
+
 # Réseau (à ne changer que si nécessaire)
 port_http: 3000
 port_https: 3443

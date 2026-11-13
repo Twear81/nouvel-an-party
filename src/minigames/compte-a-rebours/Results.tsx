@@ -2,7 +2,7 @@
 // du plus éloigné au plus proche ; le dernier à tomber (le plus proche) gagne. Le classement se remplit en même temps.
 import { motion } from "motion/react";
 import { useEffect } from "react";
-import { fireConfetti, Panel, PlayerAvatar } from "../../web/ui";
+import { fireConfetti, Panel, PlayerAvatar, useSfxTimeline } from "../../web/ui";
 import type { MiniGameViewProps } from "../views-contract";
 import type { Priv, Pub, Results } from "./game";
 import { AXIS_W_REM, LABEL_W_REM, LANE_REM, layoutLanes, STEM_OFFSET_REM } from "./layout";
@@ -41,7 +41,19 @@ const axisRange = (ranking: Entry[]) => Math.max(1500, Math.ceil((Math.max(...ra
 /** Pas des graduations : au plus ~8 intervalles, lisibles à 4 m. */
 const tickStep = (range: number) => [500, 1000, 2000, 5000].find((s) => (2 * range) / s <= 8) ?? 5000;
 
-export const TvResults = ({ results, playerById }: Props) => {
+/** Sons de la révélation : un impact par joueur qui tombe (le ressort touche l'axe ~0,35 s après `landAt`), roulement avant le gagnant. */
+function sonsRevelation(results: Results | null) {
+  if (!results) return [];
+  const n = results.ranking.length;
+  if (n === 0) return [{ à: 0.4, son: "mauvaise.reponse" as const }];
+  const order = landingOrder(results.ranking);
+  const drops = order.map((_, k) => ({ à: landAt(k, n) + 0.35, son: (k === n - 1 ? "boum" : "jeton.pose") as "boum" | "jeton.pose", options: { rate: k === n - 1 ? 0.9 : 0.9 + k * 0.04 } }));
+  const suspense = n >= 2 ? [{ à: landAt(n - 2, n) + 0.5, son: "roulement" as const, options: { rate: 0.85 } }] : [];
+  return [...suspense, ...drops, { à: landAt(n - 1, n) + WINNER_FX_DELAY_S, son: "bonne.reponse" as const }];
+}
+
+export const TvResults = ({ results, playerById, round }: Props) => {
+  useSfxTimeline(round.resultsAt, sonsRevelation(results));
   useEffect(() => {
     if (!results?.ranking.length) return;
     const n = results.ranking.length;

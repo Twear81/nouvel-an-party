@@ -151,6 +151,7 @@ export default defineMiniGame<Cfg, Item, State>({
   start: (item) => ({ question: item.text, answers: new Map() }),
 
   input(state, playerId, payload, ctx) {
+    if (state.answers.has(playerId)) return; // une réponse envoyée est définitive
     const raw = (payload as { answers?: unknown } | null)?.answers;
     if (!Array.isArray(raw)) return;
     const seen = new Set<string>();
@@ -164,9 +165,8 @@ export default defineMiniGame<Cfg, Item, State>({
       cleaned.push(text);
       if (cleaned.length >= ctx.cfg.reponses) break;
     }
-    // Pas de réponse valable : on retire la réponse précédente (le joueur peut se rétracter).
-    if (cleaned.length === 0) state.answers.delete(playerId);
-    else state.answers.set(playerId, cleaned);
+    if (cleaned.length === 0) return;
+    state.answers.set(playerId, cleaned);
     checkAllAnswered(state, ctx);
   },
 

@@ -37,6 +37,9 @@ try {
   writeFileSync(assetsFile, stub); // on remet le fichier vide d'origine
 }
 
+cpSync("docs/signatures-sonores.md", path.join(outDir, "SIGNATURES-SONORES.md"));
+cpSync("src/web/theme/sons/LICENCES.md", path.join(outDir, "LICENCES-SONS.md"));
+cpSync("src/web/theme/sons/licences", path.join(outDir, "licences-sons"), { recursive: true });
 cpSync("config", path.join(outDir, "config"), { recursive: true });
 cpSync("docs/LISEZMOI-release.txt", path.join(outDir, "LISEZMOI.txt"));
 

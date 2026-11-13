@@ -7,7 +7,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { activeNow, eventTime } from "../../shared/clock";
 import type { RoundInfo } from "../../shared/types";
 import { serverNow } from "../../web/net/socket";
-import { Button, ordinal, PlayerAvatar } from "../../web/ui";
+import { Button, haptique, ordinal, PlayerAvatar, Pop, useSfxOnChange, WaitingDots } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { Counter, useFrame } from "./Counter";
 import { GO_LEAD_MS, type Priv, type Pub, type Results } from "./game";
@@ -27,6 +27,10 @@ function useLead(pub: Pub, round: RoundInfo): number {
 
 const Tv = ({ pub, playerById, round }: Props) => {
   const lead = useLead(pub, round);
+  // Sons : la cible tombe, « 3… 2… 1… » (tic de plus en plus aigu), GO, chaque STOP. Jamais au montage.
+  useSfxOnChange(pub.phase, (_avant, apres) => (apres === "announce" ? { nom: "boum", options: { rate: 0.8 } } : apres === "running" ? { nom: "boum", options: { rate: 1.5, volume: 1.2 } } : null));
+  useSfxOnChange(pub.phase === "ready" ? lead : 0, (_avant, apres) => (apres > 0 ? { nom: "ui.clic", options: { rate: 0.8 + (3 - apres) * 0.3, volume: 1.4 } } : null));
+  useSfxOnChange(pub.stoppedIds.length, (avant, apres) => (apres > avant ? { nom: "carte.pose", options: { rate: 1 + Math.min(apres, 8) * 0.06 } } : null));
   return (
     <div data-testid="cabr-tv" data-stage={pub.phase} className="flex min-h-0 flex-1 flex-col items-center justify-between py-2 text-center">
       <div className="flex h-[7rem] items-center">
@@ -73,7 +77,11 @@ const Tv = ({ pub, playerById, round }: Props) => {
             >
               <PlayerAvatar profile={p?.profile ?? null} size="sm" />
               <span className="max-w-[12rem] truncate text-2xl font-bold">{p?.profile?.name}</span>
-              {stopped && <span className="font-display text-2xl text-good">STOP !</span>}
+              {stopped && (
+                <Pop appear scale={1.4} className="font-display text-2xl text-good">
+                  STOP !
+                </Pop>
+              )}
             </div>
           );
         })}
@@ -109,6 +117,7 @@ function StopPad({ pub, round, sendInput }: { pub: Pub; round: RoundInfo; sendIn
     const r = roundRef.current;
     const ms = late.current ? activeNow(r, serverNow()) - (pub.startedAt ?? activeNow(r, serverNow())) : now - t0.current - (r.pausedMs - pausedAtStart.current);
     setSent(true);
+    haptique(80);
     void sendInput({ ms }).catch(() => {
       done.current = false;
       setSent(false);
@@ -142,6 +151,7 @@ function Stopped() {
       <span className="font-display text-9xl text-good">✓</span>
       <span className="font-display text-5xl text-good">Stoppé !</span>
       <span className="text-xl text-ink-muted">Regarde la TV…</span>
+      <WaitingDots className="text-ink-muted" />
     </motion.div>
   );
 }
@@ -173,7 +183,9 @@ const Phone = ({ pub, snapshot, round, sendInput }: Props) => {
     <div data-testid="cabr-phone" data-stage={pub.phase} className="flex flex-1 flex-col items-center justify-center gap-8 pb-10 text-center">
       {target}
       {pub.phase === "ready" ? (
-        <span data-testid="cabr-lead" className="font-display text-[9rem] leading-none">{lead}</span>
+        <motion.span key={lead} data-testid="cabr-lead" initial={{ scale: 1.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.25 }} className="font-display text-[9rem] leading-none">
+          {lead}
+        </motion.span>
       ) : (
         <span className="animate-pulse-soft font-display text-4xl">Prépare ton doigt</span>
       )}

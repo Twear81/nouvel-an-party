@@ -4,7 +4,7 @@ import { TvGameView } from "./GameView";
 
 export function RoundHeader({ round, children }: { round: RoundInfo; children?: React.ReactNode }) {
   return (
-    <header data-ui="round-header" className="flex items-center justify-between gap-8 px-14 pt-8">
+    <header data-ui="round-header" className="flex items-center justify-between gap-8 px-tv-gutter pt-8">
       <div className="flex items-center gap-5">
         {/* Un interlude n'a pas de numéro : le compter dévoilerait sa venue. */}
         {!round.interlude && (
@@ -25,7 +25,7 @@ export function RoundHeader({ round, children }: { round: RoundInfo; children?: 
  */
 export function GameFrame({ title, className = "mb-4 mt-4", children }: { title: string; className?: string; children: React.ReactNode }) {
   return (
-    <section data-ui="game-frame" className={`relative mx-14 flex min-h-0 flex-1 flex-col ${className}`}>
+    <section data-ui="game-frame" className={`relative mx-tv-gutter flex min-h-0 flex-1 flex-col ${className}`}>
       <h2 data-ui="game-frame-title">{title}</h2>
       <div data-ui="game-frame-body" className="flex min-h-0 flex-1 flex-col">
         {children}

@@ -118,7 +118,7 @@ html[data-skin="plague-tale"] [data-ui="game-frame-body"] { padding: 0.4rem 0.6r
 
 /* Camps (cool / hot / good / bad + text-bg) : lignes sombres comme les choix de la maquette, texte lin gros, numéro en liseré.
    cool / good = liseré or ; hot / bad = liseré rouge sang. Les boutons gardent leur style. */
-html[data-skin="plague-tale"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg:is(:not(button), [data-ui="choice"]) {
+html[data-skin="plague-tale"] :is(.bg-cool, .bg-hot, .bg-good, .bg-bad).text-bg:not([data-ui="selected-badge"], [data-ui="choice-check"]):is(:not(button), [data-ui="choice"]) {
   --camp: #e0cb7d;
   color: #f1ead0;
   font-weight: 500;

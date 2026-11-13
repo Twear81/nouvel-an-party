@@ -12,6 +12,7 @@ import { flags, isCompiled, paths } from "./paths";
 import { filePersistence } from "./persistence";
 import { attachSockets, createBroadcaster } from "./socket";
 import { handleHttp } from "./static/serve";
+import { setSoundVolume } from "./static/sons";
 
 async function main() {
   const { settings, games } = loadConfig(paths.config);
@@ -25,6 +26,7 @@ async function main() {
   const cert = await loadOrCreateCert(paths.data, ips.length ? ips : [ip]);
   const joinUrl = `https://${ip}:${joinPort}/play`;
 
+  setSoundVolume(settings.volume_sons);
   const httpServer = http.createServer(handleHttp);
   const httpsServer = https.createServer(cert, handleHttp);
   const io = new Server<ClientToServer, ServerToClient>(httpServer);

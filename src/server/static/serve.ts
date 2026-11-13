@@ -4,6 +4,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import { paths } from "../paths";
 import { embedded } from "./embedded-assets";
+import { SOUNDS_ROUTE, soundListing } from "./sons";
 
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -59,6 +60,9 @@ export async function handleHttp(req: IncomingMessage, res: ServerResponse) {
     res.writeHead(302, { Location: "/play" });
     return res.end();
   }
+
+  // Liste des sons déposés par l'organisateur (config/medias/sons) + volume : lue une fois par la TV.
+  if (pathname === SOUNDS_ROUTE) return send(res, 200, JSON.stringify(soundListing(paths.config)), ".json");
 
   // Images/sons fournis avec la config (config/medias), ex : les objets du "bon prix"
   if (pathname.startsWith("/medias/")) {

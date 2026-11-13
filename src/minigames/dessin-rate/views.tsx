@@ -2,7 +2,7 @@
 // N'utilise que les primitives de src/web/ui et les jetons du thème.
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Choice, fireConfetti, Panel, PlayerAvatar, TrashIcon, typo, UndoIcon, VoteDots } from "../../web/ui";
+import { Choice, CountUp, fireConfetti, haptique, Panel, PlayerAvatar, Pop, TrashIcon, typo, UndoIcon, useSfxOnChange, useSfxTimeline, VoteDots, WatchingEyes, type NomSon } from "../../web/ui";
 import type { MiniGameViewProps, MiniGameViews } from "../views-contract";
 import { Drawing, DrawingPad, PEN_BG } from "./drawing";
 import type { Priv, Pub, Results, ResultCard, TvPub } from "./game";
@@ -142,11 +142,17 @@ function TvVote({ pub }: MiniGameViewProps<Pub>) {
   );
 }
 
-const Tv = (props: MiniGameViewProps<TvPub>) => (
-  <div data-testid="tv-dessin" data-stage={props.pub.step} className="flex min-h-0 flex-1 flex-col">
-    {props.pub.step === "draw" ? <TvDraw {...props} /> : props.pub.step === "gallery" ? <TvGallery {...props} /> : <TvVote {...props} />}
-  </div>
-);
+function Tv(props: MiniGameViewProps<TvPub>) {
+  const { pub } = props;
+  // Sons : étape suivante, chaque dessin de la galerie qui entre (les votes reçus sont déjà joués par le global).
+  useSfxOnChange(pub.step, (avant, apres) => (avant === "draw" ? "transition.entree" : apres === "vote" ? { nom: "ui.clic", options: { rate: 1.3 } } : null));
+  useSfxOnChange(pub.current?.playerId ?? null, (_avant, apres) => (apres ? { nom: "transition.entree", options: { volume: 0.7, rate: 1.1 } } : null));
+  return (
+    <div data-testid="tv-dessin" data-stage={pub.step} className="flex min-h-0 flex-1 flex-col">
+      {pub.step === "draw" ? <TvDraw {...props} /> : pub.step === "gallery" ? <TvGallery {...props} /> : <TvVote {...props} />}
+    </div>
+  );
+}
 
 // ───────────────────────────── Téléphone ─────────────────────────────
 
@@ -196,7 +202,7 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
   return (
     <div data-testid="phone-dessin" data-stage="draw" className="flex min-h-0 flex-1 flex-col gap-2 pb-2">
       <Panel className="flex min-h-[3.5rem] shrink-0 items-center justify-center px-4 py-1.5">
-        <h1 data-testid="draw-word" className={`line-clamp-2 text-balance text-center font-extrabold leading-tight ${word.length > 28 ? "text-xl" : "text-2xl"}`}>
+        <h1 data-testid="draw-word" className={`glyph-safe line-clamp-2 text-balance text-center font-extrabold leading-tight ${word.length > 28 ? "text-xl" : "text-2xl"}`}>
           {word}
         </h1>
       </Panel>
@@ -213,7 +219,10 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
             aria-pressed={color === i}
             data-ui="tool" data-kind="pen"
             data-selected={color === i}
-            onClick={() => setColor(i)}
+            onClick={() => {
+              haptique(8);
+              setColor(i);
+            }}
             className={`${TOOL} ${PEN_BG[i]} ${color === i ? "scale-110 border-accent shadow-glow" : "border-ink/40"}`}
           />
         ))}
@@ -226,16 +235,25 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
             aria-pressed={width === i}
             data-ui="tool" data-kind="width"
             data-selected={width === i}
-            onClick={() => setWidth(i)}
+            onClick={() => {
+              haptique(8);
+              setWidth(i);
+            }}
             className={`${TOOL} bg-surface-strong ${width === i ? "border-accent" : "border-transparent"}`}
           >
             <span className={`rounded-full bg-ink ${i === 0 ? "h-1.5 w-1.5" : "h-3.5 w-3.5"}`} />
           </button>
         ))}
-        <button type="button" data-ui="tool" data-kind="action" data-selected="false" data-testid="draw-undo" aria-label="Annuler le dernier trait" disabled={strokes.length === 0} onClick={() => change(strokes.slice(0, -1), true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
+        <button type="button" data-ui="tool" data-kind="action" data-selected="false" data-testid="draw-undo" aria-label="Annuler le dernier trait" disabled={strokes.length === 0} onClick={() => {
+            haptique(15);
+            change(strokes.slice(0, -1), true);
+          }} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
           <UndoIcon />
         </button>
-        <button type="button" data-ui="tool" data-kind="action" data-selected="false" data-testid="draw-clear" aria-label="Tout effacer" disabled={strokes.length === 0} onClick={() => change([], true)} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
+        <button type="button" data-ui="tool" data-kind="action" data-selected="false" data-testid="draw-clear" aria-label="Tout effacer" disabled={strokes.length === 0} onClick={() => {
+            haptique(25);
+            change([], true);
+          }} className={`${TOOL} border-transparent bg-surface-strong text-xl disabled:opacity-35`}>
           <TrashIcon />
         </button>
       </div>
@@ -246,9 +264,7 @@ function PhoneDraw({ priv, snapshot, sendInput }: Props) {
 function PhoneGallery({ priv }: Props) {
   return (
     <div data-testid="phone-dessin" data-stage="gallery" className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-center">
-      <span className="text-6xl" aria-hidden>
-        📺
-      </span>
+      <WatchingEyes />
       <h1 className="font-display text-4xl text-gold-gradient">Regarde la TV !</h1>
       {priv?.word && <p className="text-lg text-ink-muted">Ton mot : {priv.word}</p>}
     </div>
@@ -275,7 +291,10 @@ function PhoneVote({ pub, priv, sendInput, snapshot }: Props) {
               disabled={blank}
               selected={selected}
               state={blank || (vote !== null && !selected) ? "faded" : "idle"}
-              onClick={() => void sendInput({ target: c.playerId }).catch(() => {})}
+              onClick={() => {
+                haptique();
+                void sendInput({ target: c.playerId }).catch(() => {});
+              }}
               checkTone="accent"
               checkSize="sm"
               checkClassName="absolute right-1 top-1"
@@ -301,7 +320,9 @@ const Phone = (props: Props) => (props.pub.step === "draw" ? <PhoneDraw {...prop
 const FIRST_MS = 1500; // avant le premier dessin
 const STEP_MS = 1900; // entre deux dessins
 const WINNER_MS = 3000; // suspense avant le(s) gagnant(s)
-const SETTLE_MS = 1500; // couronne, confettis, compteur de votes
+const CROWN_DELAY_MS = 500;
+const CROWN_DURATION_MS = 650;
+const SETTLE_MS = Math.max(1500, CROWN_DELAY_MS + CROWN_DURATION_MS); // couronne, confettis, compteur de votes
 
 /** Découpe les dessins : les perdants du moins voté au plus voté, puis le(s) gagnant(s). */
 function split(results: Results) {
@@ -333,7 +354,7 @@ function ResultCaption({ card, props, big, crown, noVotes }: { card: ResultCard;
   const author = props.playerById(card.playerId);
   return (
     <div className={`flex max-w-full shrink-0 flex-col items-center ${big ? "gap-2" : "gap-1"}`}>
-      <span className={`line-clamp-2 text-balance text-center font-extrabold leading-tight ${big ? "text-5xl text-gold-gradient" : "text-2xl"}`}>{typo(card.word)}</span>
+      <span className={`glyph-safe line-clamp-2 text-balance text-center font-extrabold leading-tight ${big ? "text-5xl text-gold-gradient" : "text-2xl"}`}>{typo(card.word)}</span>
       {/* Pseudo puis badge de votes sur deux lignes : le badge « rebondit » à l'arrivée, il ne doit jamais toucher le pseudo. */}
       <div className={`flex max-w-full flex-col items-center ${big ? "gap-4" : "gap-1"}`}>
         <div className="flex max-w-full items-center gap-3">
@@ -367,9 +388,27 @@ function TvResults(props: Props) {
   }, [run, k, steps]);
 
   const done = k >= steps;
+  // Sons calés sur les constantes de la révélation : un clic par dessin, roulement avant le(s) gagnant(s), fanfare au sacre.
+  const times: number[] = [];
+  let acc = 0;
+  for (let j = 0; j < steps; j++) {
+    acc += pauseBefore(j, steps);
+    times.push(acc / 1000);
+  }
+  const winnerAt = times[steps - 1] ?? 0;
+  useSfxTimeline(
+    run ? props.round.resultsAt : null,
+    [
+      ...times.slice(0, -1).map((t, j) => ({ à: t, son: "ui.clic" as NomSon, options: { rate: 0.9 + j * 0.08 } })),
+      { à: Math.max(0, winnerAt - 2), son: "roulement" as NomSon },
+      { à: Math.max(0, winnerAt - 2), son: "tension" as NomSon },
+      { à: winnerAt, son: "bonne.reponse" as NomSon },
+      { à: winnerAt + CROWN_DELAY_MS / 1000, son: "bonne.reponse" as NomSon, options: { rate: 1.3 } },
+    ],
+  );
   useEffect(() => {
     if (!run || !done) return;
-    const t = setTimeout(() => fireConfetti("big"), 500);
+    const t = setTimeout(() => fireConfetti("big"), CROWN_DELAY_MS);
     return () => clearTimeout(t);
   }, [run, done]);
 
@@ -424,13 +463,10 @@ function TvResults(props: Props) {
                   transition={{ type: "spring", stiffness: 150, damping: 13 }}
                   className="relative flex min-h-0 min-w-0 flex-col items-center gap-2"
                 >
-                  <div className="relative min-h-0 w-full flex-1">
-                    <Drawing strokes={c.strokes} className={done ? "ring-[0.5rem] ring-accent" : ""} />
-                    {done && (
-                      <motion.span initial={{ scale: 0, y: 30, rotate: -30 }} animate={{ scale: 1, y: 0, rotate: -14 }} transition={{ delay: 0.3, type: "spring" }} className="absolute -left-4 -top-6 text-[7rem] leading-none drop-shadow-lg" aria-hidden>
-                        👑
-                      </motion.span>
-                    )}
+                  <div className={`relative min-h-0 w-full flex-1 ${done ? "pt-20" : ""}`}>
+                    <Drawing strokes={c.strokes} className={done ? "ring-[0.5rem] ring-accent" : ""} decoration={done && (
+                      <motion.span key="couronne" data-ui="drawing-crown" initial={{ scale: 0, opacity: 0, y: -60, rotate: -30 }} animate={{ scale: 1, opacity: 1, y: 0, rotate: -14 }} transition={{ delay: CROWN_DELAY_MS / 1000, duration: CROWN_DURATION_MS / 1000, type: "spring", bounce: 0.35 }} className="drawing-crown" aria-hidden>👑</motion.span>
+                    )} />
                   </div>
                   <ResultCaption card={c} props={props} big crown={done} />
                 </motion.div>
@@ -473,7 +509,7 @@ function PhoneResults({ results, snapshot }: Props) {
           {results.voted && (
             <p data-testid="my-votes" className={`font-display text-2xl ${won ? "text-accent" : "text-ink"}`}>
               {won ? "👑 " : ""}
-              {votesLabel(mine.votes)}
+              <Pop appear><CountUp value={mine.votes} duration={0.7} /></Pop> vote{mine.votes > 1 ? "s" : ""}
             </p>
           )}
         </>

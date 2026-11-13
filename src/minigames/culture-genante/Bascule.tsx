@@ -3,9 +3,12 @@
 import { motion } from "motion/react";
 import { fitText } from "./Serious";
 
+/** Durée (s) du blanc de noir avant la phrase sérieuse. */
+export const silenceBascule = (seconds: number) => Math.min(0.7, seconds * 0.3);
+
 export function Bascule({ text, seconds }: { text: string; seconds: number }) {
   // Un blanc de noir complet avant la phrase : c'est lui qui fait « le silence ».
-  const silence = Math.min(0.7, seconds * 0.3);
+  const silence = silenceBascule(seconds);
   const size = fitText(text, 80, 3.5, 7, 2);
   return (
     <div data-testid="cg-bascule" className="flex min-h-0 flex-1 items-center justify-center px-16">
