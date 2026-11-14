@@ -4,8 +4,11 @@ import { expect, test } from "./helpers/fixtures";
 import { summonFrame } from "./helpers/party";
 
 // Les cadres doivent garder le choix du joueur sur les deux appareils, quelle que soit la silhouette du skin.
+// Firefox et WebKit : une silhouette de chaque (rond, carré, hexagone) ; Chromium joue les sept. Enchaîner les sept
+// sous WebKit (dix cadres et rechargements chacun) épuise la mémoire du navigateur de test (« Target crashed »).
+const COMPAT = new Set<string | null>([null, "dofus", "overwatch"]);
 for (const skin of [null, ...SKINS]) {
-  test(`avatars : tous les cadres suivent le skin ${skin ?? "base"}`, { tag: "@compat" }, async ({ party }, testInfo) => {
+  test(`avatars : tous les cadres suivent le skin ${skin ?? "base"}`, { tag: COMPAT.has(skin) ? "@compat" : [] }, async ({ party, browserName }, testInfo) => {
     const skinQuery = skin ? `?skin=${skin}` : "";
     await party.tv.goto(`${party.server.tvUrl}${skinQuery}`);
     const { page } = await party.openPhonePage({ viewport: { width: 360, height: 640 } });
@@ -23,7 +26,9 @@ for (const skin of [null, ...SKINS]) {
     const shape = skin === "overwatch" ? "hexagon" : ["dofus", "rocket-league", "plague-tale"].includes(skin ?? "") ? "square" : "circle";
     for (const frame of FRAMES) {
       await summonFrame(page, frame.id);
-      await page.getByTestId("frame-summon").screenshot({ path: testInfo.outputPath(`invocation-${frame.id}.png`), animations: "disabled" });
+      // Capture jointe au rapport, sous Chromium seulement : sous WebKit, des captures d'élément répétées font planter
+      // le navigateur de test (« Target crashed »), alors que les mêmes invocations sans capture passent.
+      if (browserName === "chromium") await page.getByTestId("frame-summon").screenshot({ path: testInfo.outputPath(`invocation-${frame.id}.png`), animations: "disabled" });
       await page.getByTestId("profile-submit").click();
       await expect(page.getByTestId("phone-lobby-ready")).toBeVisible();
       await expect(tile.locator('[data-ui="avatar"]')).toHaveAttribute("data-frame", frame.id);

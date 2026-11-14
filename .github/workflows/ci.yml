@@ -39,6 +39,15 @@ jobs:
       - name: Installer Chromium, Firefox et WebKit pour Playwright
         run: bunx playwright install --with-deps chromium firefox webkit
 
+      # Firefox ne fait tourner WebAudio qu'avec une sortie son : sans elle, son AudioContext reste « suspended »
+      # et la musique de la TV ne démarre jamais (audio-compat.spec.ts). Une sortie muette suffit.
+      - name: Sortie son factice (PulseAudio, sortie muette)
+        run: |
+          sudo apt-get install -y --no-install-recommends pulseaudio
+          pulseaudio -D --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=muette
+          pactl set-default-sink muette
+
       - name: "Tests E2E (les 3 projets : chromium, firefox, webkit)"
         run: bun run test:e2e
 
