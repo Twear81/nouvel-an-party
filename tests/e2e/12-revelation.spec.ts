@@ -53,7 +53,7 @@ test.describe("Révélation des résultats", () => {
     await tv.screenshot({ path: testInfo.outputPath("final-tv.png") });
   });
 
-  test("ni points ni rang avant la fin de l'animation, sur la TV comme sur les téléphones", async ({ party }) => {
+  test("ni points ni rang avant la fin de l'animation, sur la TV comme sur les téléphones", { tag: "@fumee" }, async ({ party }) => {
     const { tv } = party;
     const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
     await party.startGame({ "le-bon-prix": 1 });

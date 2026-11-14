@@ -1,7 +1,7 @@
 import { expect, test } from "./helpers/fixtures";
 
 test.describe("Crash du serveur", () => {
-  test("la partie peut être reprise après un redémarrage, les téléphones se reconnectent seuls", async ({ party }) => {
+  test("la partie peut être reprise après un redémarrage, les téléphones se reconnectent seuls", { tag: "@fumee" }, async ({ party }) => {
     const { tv, server } = party;
     const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
     await party.startGame({ "qui-est-le-plus": 1, "ceci-ou-cela": 1 });

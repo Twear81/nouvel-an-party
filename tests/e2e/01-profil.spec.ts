@@ -17,7 +17,7 @@ test.describe("Profil", () => {
     await expect(party.tv.getByText("crée son profil…")).toBeVisible();
   });
 
-  test("avatar, cadre et couleur choisis apparaissent sur la TV", { tag: "@compat" }, async ({ party }) => {
+  test("avatar, cadre et couleur choisis apparaissent sur la TV", { tag: ["@compat", "@fumee"] }, async ({ party }) => {
     const { page } = await party.openPhonePage();
     await page.getByTestId("profile-name").fill("Camille");
 

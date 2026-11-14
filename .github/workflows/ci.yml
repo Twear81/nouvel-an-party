@@ -1,7 +1,7 @@
 # CI : vérifie chaque push (toutes branches) et chaque pull request.
-# Enchaîne : installation (lockfile figé), typecheck, tests unitaires, build web, tests E2E (Playwright sur Chromium, Firefox et WebKit :
-# les téléphones de la soirée sont des Chrome/Firefox Android et des Safari iPhone).
-# En cas d'échec, le rapport Playwright et les résultats de test sont remontés en artefacts (onglet "Artifacts" du run).
+# Enchaîne : installation (lockfile figé), typecheck, tests unitaires, build web. Rapide (~1 min) et sans hasard.
+# Les tests E2E (Playwright) ne tournent PAS ici : trop longs et instables sur les machines GitHub (pas de son, mémoire
+# de WebKit). Ils se lancent en local avant chaque push : voir « Tests » dans CLAUDE.md et README.md.
 # Déclenchement : automatique à chaque push ou pull request, rien à faire.
 name: CI
 
@@ -12,9 +12,9 @@ on:
 
 jobs:
   test:
-    name: Typecheck, tests et build
+    name: Typecheck, tests unitaires et build
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 15
     steps:
       - name: Récupérer le code
         uses: actions/checkout@v4
@@ -36,28 +36,3 @@ jobs:
       - name: Build web
         run: bun run build:web
 
-      - name: Installer Chromium, Firefox et WebKit pour Playwright
-        run: bunx playwright install --with-deps chromium firefox webkit
-
-      # Firefox ne fait tourner WebAudio qu'avec une sortie son : sans elle, son AudioContext reste « suspended »
-      # et la musique de la TV ne démarre jamais (audio-compat.spec.ts). Une sortie muette suffit.
-      - name: Sortie son factice (PulseAudio, sortie muette)
-        run: |
-          sudo apt-get install -y --no-install-recommends pulseaudio
-          pulseaudio -D --exit-idle-time=-1
-          pactl load-module module-null-sink sink_name=muette
-          pactl set-default-sink muette
-
-      - name: "Tests E2E (les 3 projets : chromium, firefox, webkit)"
-        run: bun run test:e2e
-
-      - name: Remonter le rapport Playwright en cas d'échec
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: |
-            playwright-report/
-            test-results/
-          if-no-files-found: ignore
-          retention-days: 14
