@@ -1,0 +1,20 @@
+# Lancement du jeu en conteneur : docker compose up -d   (mode d'emploi : docs/conteneur.md)
+services:
+  nouvel-an-party:
+    build: .
+    image: nouvel-an-party
+    container_name: nouvel-an-party
+    restart: unless-stopped
+    # Réseau de l'hôte (Linux) : le jeu voit l'IP du PC sur le wifi, le QR code est juste, la TV de ce PC est « hôte ».
+    network_mode: host
+    # Sans réseau host (Docker Desktop Windows/Mac) : commenter la ligne ci-dessus, décommenter ports et PARTY_IP.
+    # ports:
+    #   - "3000:3000"
+    #   - "3443:3443"
+    environment:
+      TZ: Europe/Paris            # minuit est calculé à l'heure locale du conteneur
+      # PARTY_IP: "192.168.1.42"  # IP du PC sur le wifi, pour le QR code (obligatoire sans réseau host)
+      # PARTY_HOST_IPS: "172.17.0.1"  # sans réseau host : la passerelle Docker, pour que la TV de ce PC pilote la partie
+    volumes:
+      - ./data:/jeu/data          # sauvegarde, certificat, questions déjà vues : survivent aux redémarrages
+      - ./config:/jeu/config      # contenu modifiable (questions, sons de l'organisateur…) sans reconstruire l'image

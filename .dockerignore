@@ -1,0 +1,10 @@
+node_modules
+dist
+release
+data
+captures
+test-results
+playwright-report
+.git
+.claude
+*.log
