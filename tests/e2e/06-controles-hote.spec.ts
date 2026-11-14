@@ -9,7 +9,7 @@ const seconds = async (tv: Page) => {
 };
 
 test.describe("Contrôles du maître du jeu", () => {
-  test("pause : écrans figés sur TV et téléphone, le chrono s'arrête puis repart", async ({ party }) => {
+  test("pause : écrans figés sur TV et téléphone, le chrono s'arrête puis repart", { tag: "@fumee" }, async ({ party }) => {
     const { tv } = party;
     // Le format le plus riche doit vérifier la pause quel que soit le skin tiré au sort par le serveur.
     await tv.goto(`${party.server.tvUrl}?skin=rocket-league`);
@@ -38,7 +38,7 @@ test.describe("Contrôles du maître du jeu", () => {
     // Annonce de 60 s : sans « Passer » on y resterait, ce qui prouve que le bouton agit.
     test.use({ serverOptions: { introSeconds: 60 } });
 
-    test("passer : annonce, manche puis résultats puis manche suivante", async ({ party }) => {
+    test("passer : annonce, manche puis résultats puis manche suivante", { tag: "@fumee" }, async ({ party }) => {
       const { tv } = party;
       const [a] = await party.addPhones("Alice", "Bob");
       await party.startGame({ "qui-est-le-plus": 0, "ceci-ou-cela": 2 });

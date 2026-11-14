@@ -1,7 +1,7 @@
 import { expect, test } from "./helpers/fixtures";
 
 test.describe("Partie complète à 3 téléphones", () => {
-  test("une manche de chaque mini-jeu, scores cohérents, classement final", { tag: "@compat" }, async ({ party }) => {
+  test("une manche de chaque mini-jeu, scores cohérents, classement final", { tag: ["@compat", "@fumee"] }, async ({ party }) => {
     const { tv } = party;
     const phones = await party.addPhones("Alice", "Bob", "Chloé");
     const [a, b, c] = phones as [typeof phones[0], typeof phones[0], typeof phones[0]];

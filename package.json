@@ -14,7 +14,8 @@
     "apercu:sons": "bun scripts/construire-apercu-sons.ts",
     "apercu:animations": "bun scripts/construire-apercu-animations.ts",
     "test": "bun test tests/unit",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:fumee": "playwright test --grep @fumee --project=chromium"
   },
   "dependencies": {
     "@fontsource-variable/outfit": "^5.3.0",

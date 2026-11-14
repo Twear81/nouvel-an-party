@@ -1,7 +1,7 @@
 import { expect, test } from "./helpers/fixtures";
 
 test.describe("Reconnexion", () => {
-  test("recharger un téléphone en pleine manche garde le même joueur", { tag: "@compat" }, async ({ party }) => {
+  test("recharger un téléphone en pleine manche garde le même joueur", { tag: ["@compat", "@fumee"] }, async ({ party }) => {
     const { tv } = party;
     const [a, b, c] = await party.addPhones("Alice", "Bob", "Chloé");
     const idsBefore = (await party.tvPlayerIds()).sort();

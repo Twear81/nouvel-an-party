@@ -2,7 +2,7 @@ import { expect, test } from "./helpers/fixtures";
 
 test.describe("Cérémonie de fin", () => {
   test.use({ serverOptions: { outro: true, ceremonyTimeScale: 0.12 } });
-  test("bonus synchronisés, pause, rechargement et classement final", { tag: "@compat" }, async ({ party }) => {
+  test("bonus synchronisés, pause, rechargement et classement final", { tag: ["@compat", "@fumee"] }, async ({ party }) => {
     const phones = await party.addPhones("Alice", "Bob", "Chloé");
     await party.startGame({ "qui-est-le-plus": 1 });
     await expect(party.tv.getByTestId("tv-playing")).toBeVisible();

@@ -118,9 +118,10 @@ On ne teste pas tout, on **automatise ce qui est jouable et critique** :
 - **E2E** (Playwright, fixture `party` : serveur neuf + TV + téléphones simulés, `tests/e2e/helpers/`) : au moins une
   manche complète par mini-jeu (lobby → jeu → résultats → points), plus les parcours critiques (profil, reconnexion,
   crash serveur, contrôles hôte, retardataire, 8 joueurs). Taguer `@compat` ce qui doit aussi passer sous Firefox et
-  WebKit (iPhone) — avec parcimonie, c'est lourd en CI.
+  WebKit (iPhone) — avec parcimonie, c'est lourd. Taguer `@fumee` un test seulement s'il couvre un parcours critique
+  encore non couvert par la fumée (elle doit rester sous 2 minutes).
 - Tests robustes : attendre des états (`toHaveAttribute("data-stage", …)`), jamais des `waitForTimeout` calés sur
-  les animations ; pas de dépendance au timing fin (la CI est chargée).
+  les animations ; pas de dépendance au timing fin (la machine est chargée quand la suite tourne).
 - Lire un texte avec `textContent()`, jamais `innerText()` : le skin (tiré au hasard) peut le passer en capitales.
 
 **Développement d'un mini-jeu : test manuel complet obligatoire en local avec Playwright**, avant de dire que c'est fini.
@@ -135,8 +136,17 @@ On joue le jeu en entier (pas seulement le chemin automatisé) :
    360×640 sans défilement inutile, pas de spoil sur les téléphones pendant la révélation.
 4. Garder dans `tests/e2e/<id>.spec.ts` la partie critique, **supprimer le spec exploratoire** avant de commiter.
 
-Avant chaque commit : `bun run typecheck && bun run test`, plus les specs E2E concernés. Avant de proposer un merge :
-`bun run test:e2e` complet.
+**Les E2E ne tournent PAS dans la CI GitHub** (elle ne fait que typecheck, unitaires et build) : c'est à l'agent de les
+lancer **en local, sur sa branche de dev, avant de pousser**. Rien ne rattrape un oubli.
+
+| Quand | Commande | Durée |
+|---|---|---|
+| Avant chaque commit | `bun run typecheck && bun run test` + les specs E2E du sujet touché (`bunx playwright test <spec> --project=chromium`) | ~1 à 3 min |
+| **Avant chaque push** | les mêmes + `bun run test:e2e:fumee` (8 parcours critiques, Chromium) | +1 min 15 |
+| Avant une fusion dans `main` ou une release | `bun run test:e2e` complet (Chromium, Firefox et WebKit sur `@compat`) | ~18 min |
+
+Un test qui échoue n'est jamais poussé « en espérant » : corriger, ou signaler à l'utilisateur. Un échec isolé sous
+charge se confirme en relançant le spec seul (`--repeat-each=3`) et se mentionne dans le compte rendu.
 
 ## Git
 - **Une branche par feature / bugfix** depuis `main` (regrouper par thème si plus logique) :
@@ -144,7 +154,8 @@ Avant chaque commit : `bun run typecheck && bun run test`, plus les specs E2E co
 - Commits faits par l'agent, messages en français, au format de l'historique : `Mini-jeu Simon`,
   `Moteur : …`, `E2E : …`, `Lobby : …`. **Auteur = l'utilisateur** (identité git du dépôt) : ne jamais signer
   avec Claude, ni en auteur ni en ligne `Co-Authored-By`. Ne jamais commiter de spec exploratoire, captures, `data/`, `release/`.
-- **Jamais de `git push`** (ni tag) sans demande explicite de l'utilisateur.
+- **Jamais de `git push`** (ni tag) sans demande explicite de l'utilisateur, et jamais sans les tests locaux de « Avant
+  chaque push » (voir « Tests ») : la CI ne lance pas les E2E.
 - Merge dans `main` (`--no-ff`, message `Merge <sujet>`) seulement une fois les tests verts et le travail validé
   par l'utilisateur.
 
