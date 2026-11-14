@@ -75,7 +75,8 @@ Si le QR code pointe sur la mauvaise IP, la forcer dans `config/partie.yaml` (`i
 | `bun run apercu:animations` | Génère la galerie qui rejoue chaque animation et son son (composants, chrono, écrans TV, révélations de chaque mini-jeu), hors ligne, dans `captures/animations/index.html` |
 | `bun run typecheck` | Vérification TypeScript |
 | `bun run release` | Construit `release/nouvel-an-party-windows-x64.zip` (fonctionne depuis WSL) |
-| `bun run release -- linux` | Même chose en exécutable Linux, pour tester sous WSL |
+| `bun run release -- linux` | Même chose en exécutable Linux (WSL, serveur) |
+| `docker compose up -d --build` | Le jeu en conteneur Linux : voir [docs/conteneur.md](docs/conteneur.md) |
 
 ## Publier une version
 

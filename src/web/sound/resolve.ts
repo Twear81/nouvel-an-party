@@ -42,7 +42,7 @@ export function resolveSound(
   const override = (skin ? findOverride(fichiers, nom, `${skin}/`) : null) ?? findOverride(fichiers, nom);
   if (override) return { url: OVERRIDE_BASE + override.split("/").map(encodeURIComponent).join("/"), volume: def.volume, variation };
 
-  const url = urlOf(def.fichier);
+  const url = def.fichier ? urlOf(def.fichier) : null; // `""` : rien de livré, seulement le fichier de l'organisateur
   return url ? { url, volume: def.volume, variation } : null;
 }
 

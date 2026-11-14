@@ -99,3 +99,12 @@ export function useSfxAt(heureMs: number | null, nom: NomSon, options?: PlayOpti
 export function useSfxTimeline(depuisMs: number | null, liste: readonly { à: number; son: NomSon; options?: PlayOptions }[]) {
   useSchedule(depuisMs === null ? [] : chronologie(depuisMs, liste));
 }
+
+/**
+ * Musique de fond imposée par un écran tant qu'il est affiché (ex. classement final), à la place de l'ambiance du lobby.
+ * `null` = pas de musique propre. Changer de nom fait un fondu croisé ; la pause et la coupure du son s'appliquent.
+ */
+export function useMusiqueScene(nom: NomSon | null) {
+  useEffect(() => { sound.setMusiqueScene(nom); }, [nom]);
+  useEffect(() => () => sound.setMusiqueScene(null), []);
+}

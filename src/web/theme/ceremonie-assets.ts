@@ -58,7 +58,7 @@ export const ANCHORS = {
   frame: { center: px(411, 203), width: 200 / ROOM_W },
   /** Plateau de la table basse en verre : la cloche du Bon Prix (posée par le bas) et le journal (à plat). */
   bell: { bottom: px(790, 752), width: 128 / ROOM_W },
-  journal: { center: px(905, 748), width: 96 / ROOM_W, tilt: -7 },
+  journal: { center: px(706, 746), width: 100 / ROOM_W, tilt: 8 },
   /** Cheminée : le podium se pose sur le sol devant, centré sur le foyer. */
   podium: { bottom: px(752, 756), width: 560 / ROOM_W },
   /** Jukebox : centre de son halo et rayon (fraction de la largeur). */
@@ -89,7 +89,7 @@ export const HONOR_BOARD = {
   topPct: 29,
   heightPct: 70,
   /** Zone de velours sous la couronne de laurier (mesurée sur `tableau-honneur.png`). */
-  inner: { left: 0.1, right: 0.1, top: 0.215, bottom: 0.1 },
+  inner: { left: 0.105, right: 0.14, top: 0.215, bottom: 0.1 },
   /** Nombre de lignes réservées (huit joueurs au plus). */
   rows: 8,
 } as const;

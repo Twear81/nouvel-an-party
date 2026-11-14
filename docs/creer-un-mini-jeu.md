@@ -303,13 +303,14 @@ du chrono, pause, résultats, « points gagnés », fanfare, whoosh des scènes)
 un mini-jeu n'a rien à faire pour eux. Il ajoute seulement ses sons propres, avec les hooks exportés par `src/web/ui` :
 
 ```tsx
-import { useSfx, useSfxOnChange, useSfxAt, useSfxTimeline } from "../../web/ui";
+import { useMusiqueScene, useSfx, useSfxOnChange, useSfxAt, useSfxTimeline } from "../../web/ui";
 
 const play = useSfx();                               // play("ui.clic", { volume: 0.5, rate: 1.2 })
 useSfxOnChange(pub.step, "ui.clic");                 // quand `pub.step` change (jamais au montage)
 useSfxOnChange(pub.lives, (avant, apres) => (apres < avant ? "mauvaise.reponse" : null));
 useSfxAt(round.resultsAt === null ? null : round.resultsAt + 2000, "bonne.reponse");   // à une heure serveur
 useSfxTimeline(round.resultsAt, [{ à: 0, son: "roulement" }, { à: 2.5, son: "points.gagnes" }]); // « à N secondes »
+useMusiqueScene("final.musique"); // musique de fond propre à l'écran, à la place de l'ambiance du lobby (null = aucune)
 ```
 
 - **Pas de son au montage** : une TV qui recharge en pleine manche ne doit rien rejouer. `useSfxOnChange` ignore la valeur

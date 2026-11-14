@@ -185,6 +185,10 @@ points d'ancrage en % de l'image regroupés dans `src/web/theme/ceremonie-assets
 - **Classement final** (`src/web/tv/FinalScreen.tsx`) : du dernier au 4e, score de base puis conversion des étoiles
   (« ★ +120 »), rangement sur le tableau d'honneur ; podium, roulement, 1er couronné dans l'écran de la TV dessinée,
   feu d'artifice dans les fenêtres, confettis tirés hors du tableau d'honneur (`fireConfetti("big", true)`).
+- **Musiques du final** (`useMusiqueScene`) : `final.musique` en boucle pendant toute la révélation, puis `final.premier`
+  dès que le 1er apparaît couronné dans la TV (fondu croisé). Fournies : « You Say Run » (Yuki Hayashi, My Hero Academia,
+  0 à 122 s) et « All I Do Is Win » (DJ Khaled, 0 à 80 s) ; remplaçables dans `config/medias/sons/` (`final.musique.mp3`…).
+  Le score qui défile fait tiquer `final.compteur`.
 - **Téléphones** : « Regarde la TV » + carte de SON bonus quand il est révélé ; au final, son rang une fois révélé.
 
 ### Des souvenirs compacts

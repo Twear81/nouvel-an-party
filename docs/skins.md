@@ -26,7 +26,10 @@ Bilan du chantier et validation : [skins-suivi.md](skins-suivi.md).
   un nouveau cycle mélangé commence, avec un premier skin différent du précédent.
 - Sans Culture gênante, ou si ses questions s'épuisent, le skin courant reste jusqu'à la fin. Une partie courte
   ne force pas la visite de tous les univers. Une surprise en dernière manche mène directement à la sortie.
-- Après le dernier jeu, la sortie de la TV revient au thème de base avant le classement final.
+- **Le début et la fin de partie sont toujours en thème de base** (`skin: null`), quel que soit le dernier univers :
+  le lobby avant l'ouverture, puis, après le dernier jeu, la sortie de la TV revient au thème de base pour la
+  cérémonie et le classement final (et minuit, qui se déclenche aussi sur le thème de base). Ces écrans n'ont donc
+  pas à être habillés par un skin ; la galerie des animations les affiche aussi en thème de base.
 
 L’ambiance musicale suit le même skin, au moment de la bascule serveur dans la scène. Chaque univers possède une
 boucle originale embarquée ; elle continue entre intro, jeu et résultats. L’accueil garde le jazz et la sortie

@@ -1,6 +1,7 @@
 // Construit la version portable : release/nouvel-an-party/{NouvelAn.exe, config/, LISEZMOI.txt} + un zip.
 // Usage : bun run release            (Windows x64, par défaut)
-//         bun run release -- linux   (exécutable Linux, pratique pour tester sous WSL)
+//         bun run release -- linux   (exécutable Linux : WSL, serveur, conteneur — voir Dockerfile)
+//         bun run release -- linux sans-zip   (dossier seul, sans le zip : construction de l'image Docker)
 import { $ } from "bun";
 import { cpSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -43,6 +44,10 @@ cpSync("src/web/theme/sons/licences", path.join(outDir, "licences-sons"), { recu
 cpSync("config", path.join(outDir, "config"), { recursive: true });
 cpSync("docs/LISEZMOI-release.txt", path.join(outDir, "LISEZMOI.txt"));
 
+if (process.argv.includes("sans-zip")) {
+  console.log(`✔ ${outDir}`);
+  process.exit(0);
+}
 const zip = `release/nouvel-an-party-${target.replace("bun-", "")}.zip`;
 rmSync(zip, { force: true });
 await $`cd release && zip -qr ${path.basename(zip)} nouvel-an-party`;

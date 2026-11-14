@@ -66,6 +66,15 @@ describe("résolution des sons", () => {
   });
 });
 
+describe("musiques du classement final", () => {
+  it("livrées avec le jeu, remplaçables par un fichier de l'organisateur (mp3 compris)", () => {
+    expect(resolveSound("final.musique", null, [], fakeUrl)?.url).toBe("/assets/final-musique.ogg");
+    expect(resolveSound("final.premier", null, [], fakeUrl)?.url).toBe("/assets/final-premier.ogg");
+    expect(resolveSound("final.musique", null, ["final.musique.mp3"], fakeUrl)?.url).toBe("/medias/sons/final.musique.mp3");
+    expect(resolveSound("final.premier", null, ["final.premier.mp3"], fakeUrl)?.url).toBe("/medias/sons/final.premier.mp3");
+  });
+});
+
 describe("liste des sons de l'organisateur", () => {
   it("liste les audios à la racine et dans les dossiers de skin, sans le reste", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "sons-"));

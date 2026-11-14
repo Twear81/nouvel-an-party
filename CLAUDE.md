@@ -23,6 +23,7 @@ Tout le projet (code, commentaires, docs, commits, textes affichés) est **en fr
 | Créer un mini-jeu (contrat `MiniGame`, `ctx`, vues, enregistrement, exemple complet) | [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md) |
 | Design : thème, composants, écrans, règles d'ergonomie mobile | [docs/changer-le-design.md](docs/changer-le-design.md) |
 | `config/partie.yaml`, dossier `data/` | [docs/configuration.md](docs/configuration.md) |
+| Version Linux et conteneur Docker (réseau, variables, volumes) | [docs/conteneur.md](docs/conteneur.md) |
 | Skins (habillages imitant des jeux vidéo) : contrat, marqueurs, rotation | [docs/skins.md](docs/skins.md) |
 | Skins : bilan du chantier, validation, maquette et captures de référence | [docs/skins-suivi.md](docs/skins-suivi.md) |
 | Sons de la TV (moteur, catalogue, hooks `useSfx*`, surcharge par l'organisateur) | [docs/creer-un-mini-jeu.md](docs/creer-un-mini-jeu.md#sons-tv-uniquement) |

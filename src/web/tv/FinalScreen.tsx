@@ -9,10 +9,13 @@ import { FINAL_TIMING, finalPhaseAt, type FinalBeat } from "../../shared/final-r
 import { rankOf } from "../../shared/ranking";
 import type { GameSnapshot, Profile } from "../../shared/types";
 import { useFinalReveal } from "../net/useFinalReveal";
+import { serverNow } from "../net/socket";
+import { sound } from "../sound/engine";
+import { REFRAIN_FINAL_PREMIER_S } from "../theme/sons/catalogue";
 import { playersWithProfile } from "../net/helpers";
 import { ANCHORS } from "../theme/ceremonie-assets";
 import { PlacedSouvenir } from "./scene/Souvenirs";
-import { CountUp, fireConfetti, Fireworks, HonorBoard, PlayerAvatar, Podium, PodiumSlot, RoomSet, Star, useSfxTimeline, type HonorRow } from "../ui";
+import { CountUp, fireConfetti, Fireworks, HonorBoard, PlayerAvatar, Podium, PodiumSlot, RoomSet, Star, useMusiqueScene, useSfxTimeline, type HonorRow } from "../ui";
 
 interface Ranked { id: string; profile: Profile; score: number; stars: number[]; base: number }
 
@@ -47,26 +50,39 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
   // Sons : la fanfare joue à la révélation du 1er (plus à l'arrivée sur l'écran) ; une étoile = un tintement à l'arrivée.
   const base = reveal ? reveal.startedAt + (reveal.pausedMs ?? 0) : null;
   const sfx = useMemo(() => {
-    const list: { à: number; son: "ceremonie.etoile" | "carte.pose" | "final.tambour" | "final.fanfare" | "applaudissements" | "ceremonie.tic"; options?: { rate?: number; volume?: number } }[] = [];
+    const list: { à: number; son: "ceremonie.etoile" | "carte.pose" | "final.tambour" | "final.fanfare" | "applaudissements" | "ceremonie.tic" | "final.compteur"; options?: { rate?: number; volume?: number } }[] = [];
     for (const b of timeline.beats) {
       if (b.kind === "roulement") list.push({ à: b.startMs / 1000, son: "final.tambour" }, { à: (b.startMs + 2300 * k) / 1000, son: "final.tambour" });
       if (b.kind === "joueur" || b.kind === "premier") {
+        // Le score défile : un tic par palier, serrés au début puis espacés (même ralenti que CountUp), de plus en plus aigus.
+        const ticks = 16, countS = (FINAL_TIMING.countMs * k) / 1000;
+        for (let i = 0; i < ticks; i++) list.push({ à: b.countAtMs! / 1000 + countS * (1 - Math.sqrt(1 - i / ticks)), son: "final.compteur", options: { rate: 1 + (i / ticks) * 0.6 } });
         b.starAtMs?.forEach((s, j) => list.push({ à: (s + FINAL_TIMING.starMs * k * 0.72) / 1000, son: "ceremonie.etoile", options: { rate: 1 + j * 0.12 } }));
         if (b.kind === "joueur") list.push({ à: b.settleAtMs! / 1000, son: "carte.pose" });
-        else list.push({ à: b.settleAtMs! / 1000, son: "final.fanfare" }, { à: (b.settleAtMs! + 500 * k) / 1000, son: "applaudissements" });
+        else list.push({ à: (b.settleAtMs! + 300 * k) / 1000, son: "applaudissements" }); // pas de fanfare : « All I Do Is Win » joue déjà
       }
     }
     return list;
   }, [timeline, k]);
   useSfxTimeline(total > 0 ? base : null, sfx);
+  // Musique d'avant-combat pendant la révélation ; celle du 1er part en fondu avec le roulement de tambour (préparée d'avance).
+  const roll = timeline.beats.find((b) => b.kind === "roulement");
+  const musiqueDuPremier = roll ? elapsed >= roll.startMs : celebrating;
+  useMusiqueScene(total === 0 ? null : musiqueDuPremier ? "final.premier" : "final.musique");
+  useEffect(() => { sound.prechargerMusique("final.premier"); }, []);
 
-  // Confettis maison à la révélation du 1er (une seule fois, jamais au rechargement d'un classement terminé).
+  // Confettis sur le refrain du morceau du 1er, en temps réel depuis le début du roulement (la musique n'est pas accélérée par
+  // `timeScale`). Une seule fois, jamais au rechargement tardif d'un classement terminé.
   const fired = useRef(false);
   useEffect(() => {
-    if (!celebrating || fired.current) return;
+    if (!musiqueDuPremier || fired.current || base === null) return;
     fired.current = true;
-    if (elapsed - first!.settleAtMs! < 1500) { fireConfetti("big", true); setTimeout(() => fireConfetti("big", true), 900 * Math.max(k, 0.1)); }
-  }, [celebrating]); // eslint-disable-line react-hooks/exhaustive-deps
+    const depart = base + (roll ? roll.startMs : first!.settleAtMs!);
+    const delai = depart + REFRAIN_FINAL_PREMIER_S * 1000 - serverNow();
+    if (delai < -1500) return;
+    const t = setTimeout(() => fireConfetti("big", true), Math.max(0, delai));
+    return () => clearTimeout(t);
+  }, [musiqueDuPremier]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const rows: HonorRow[] = ranked.map((p, i) => ({ id: p.id, rank: rankLabel(i), profile: p.profile, score: p.score, filled: isRevealed(i) }));
   const tv = ANCHORS.tv;
@@ -112,7 +128,7 @@ export function FinalScreen({ snapshot }: { snapshot: GameSnapshot }) {
                 className="font-display text-ink" style={{ fontSize: "7rem", lineHeight: 1 }}>?</motion.span>
             ) : (
               <motion.div data-testid="podium-1" initial={{ scale: 0.2, opacity: 0, rotate: -12 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 140, damping: 11 }}
-                className="relative flex flex-col items-center">
+                className="relative z-[4] flex flex-col items-center">
                 <PlayerAvatar profile={winner.profile} size="lg" crowned crownDelay={0.35 * Math.max(k, 0.05)} />
                 <div className="absolute top-full mt-3 flex flex-col items-center gap-1">
                   <span className="cer-chip !max-w-[22rem] !text-3xl">{winner.profile.name}</span>

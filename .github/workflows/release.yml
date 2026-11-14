@@ -1,4 +1,5 @@
-# Release : construit la version portable Windows x64 (release/nouvel-an-party-windows-x64.zip).
+# Release : construit les versions portables Windows x64 et Linux x64 (release/nouvel-an-party-{windows,linux}-x64.zip).
+# La version Linux sert aussi à l'image Docker (Dockerfile, docs/conteneur.md).
 # Le zip est toujours disponible en artefact du run. Si le déclencheur est un tag v*, il est aussi publié
 # dans une GitHub Release (notes générées automatiquement).
 # Pour publier une version :
@@ -13,7 +14,10 @@ on:
 
 jobs:
   release:
-    name: Build et publication Windows
+    name: Build et publication ${{ matrix.cible }}
+    strategy:
+      matrix:
+        cible: [windows, linux]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -34,12 +38,12 @@ jobs:
         run: bun run test
 
       - name: Construire la version portable
-        run: bun run release
+        run: bun run release -- ${{ matrix.cible }}
 
       - name: Déposer le zip en artefact du run
         uses: actions/upload-artifact@v4
         with:
-          name: nouvel-an-party-windows
+          name: nouvel-an-party-${{ matrix.cible }}
           path: release/*.zip
           if-no-files-found: error
           retention-days: 30

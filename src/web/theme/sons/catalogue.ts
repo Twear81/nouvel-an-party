@@ -5,7 +5,7 @@ import type { SkinId } from "../../../shared/skins";
 import ambiances from "./ambiances.json";
 
 export interface SonDef {
-  /** Fichier embarqué de ce dossier. */
+  /** Fichier embarqué de ce dossier ; `""` = rien de livré, le son n'existe que si l'organisateur dépose le sien (config/medias/sons/). */
   fichier: string;
   /** Volume de base 0–1 (multiplié par le réglage `volume_sons` et par l'option `volume`). */
   volume: number;
@@ -48,6 +48,10 @@ export const SONS = {
   "ceremonie.etoile": { fichier: "points.ogg", volume: 0.6, variation: 10 },
   "ceremonie.gagnant": { fichier: "bravo.ogg", volume: 0.7 },
   "final.tambour": { fichier: "roulement.ogg", volume: 0.7 },
+  "final.compteur": { fichier: "tic.ogg", volume: 0.3 },
+  // Musiques du classement final (originaux, usage privé : LICENCES.md) : final.musique pendant la révélation, final.premier pour le 1er.
+  "final.musique": { fichier: "final-musique.ogg", volume: 0.36 },
+  "final.premier": { fichier: "final-premier.ogg", volume: 0.5 },
   "transition.entree": { fichier: "whoosh-entree.ogg", volume: 0.4 },
   "transition.sortie": { fichier: "whoosh-sortie.ogg", volume: 0.4 },
   "applaudissements": { fichier: "applaudissements.ogg", volume: 0.6 },
@@ -80,3 +84,9 @@ export const isNomSon = (v: string): v is NomSon => Object.prototype.hasOwnPrope
 export const SONS_PAR_SKIN: Partial<Record<SkinId, Partial<Record<NomSon, SonDef>>>> = Object.fromEntries(
   ambiances.map(({ skin, fichier, volume }) => [skin, { "lobby.musique": { fichier, volume } }]),
 );
+
+/**
+ * Instant (s) où le refrain de `final.premier` démarre dans le fichier livré (« All I Do Is Win » : blanc à 16,5 s, refrain à 18 s).
+ * Les confettis du classement final partent à ce moment-là. À ajuster si l'organisateur remplace le morceau.
+ */
+export const REFRAIN_FINAL_PREMIER_S = 18;

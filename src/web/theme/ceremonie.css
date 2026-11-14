@@ -165,7 +165,7 @@
 
 /* Écran de la télévision dessinée : le 1er y apparaît en grand */
 .cer-tv-screen {
-  position: absolute; display: flex; align-items: center; justify-content: center; overflow: visible; z-index: 3;
+  position: absolute; display: flex; align-items: center; justify-content: center; overflow: visible; /* pas de z-index : l'écran reste derrière les avatars du podium, seul le 1er passe devant */
   background: radial-gradient(closest-side, color-mix(in srgb, var(--color-hot) 70%, var(--color-bg-3)), var(--color-bg-2));
   box-shadow: 0 0 2.5rem .6rem color-mix(in srgb, var(--color-cool) 55%, transparent);
 }

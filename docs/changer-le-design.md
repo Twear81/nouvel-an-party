@@ -99,7 +99,7 @@ Le jeu change d'habillage au fil de la soirée (6 skins qui imitent des interfac
 `bun run apercu:animations` construit `captures/animations/index.html` (non commité) : un fichier autonome, ouvrable depuis
 le disque, sans serveur ni réseau. Il rejoue **chaque animation et son son** isolément, avec les vrais écrans du jeu
 (`TvScreens`, `PhoneScreen`, vues `Tv` / `TvResults` / `Phone` des mini-jeux) et une horloge locale qui remplace `serverNow`
-(`imposerHorloge`, `src/web/net/socket.ts`). Menu à gauche (Composants, Chrono, Écrans TV, Mini-jeux), barre de contrôle en
+(`imposerHorloge`, `src/web/net/socket.ts`). Menu à gauche (Composants, Chrono, Écrans TV, Transitions, Mini-jeux), barre de contrôle en
 haut : Pause / Rejouer, curseur de temps sur les scènes chronométrées (révélations calées sur `resultsAt`), habillage (thème
 de base + 6 skins), 3 ou 8 joueurs (pseudos de 16 caractères), taille du téléphone, bouton son (le premier clic déverrouille
 l'audio). Un lien `#scene=jeu/imposteur/vote&skin=dofus&n=8` ouvre une scène précise. La pause fige l'horloge et les
@@ -107,6 +107,14 @@ animations CSS ; les ressorts `motion` finissent leur course (utiliser le curseu
 
 Liens de revue à ajouter à l’adresse de `captures/animations/index.html` (fonctionnent aussi sans recharger le fichier) :
 
+- `#scene=ecrans/profil&n=8&tel=360x640` : la personnalisation d'un joueur sur le vrai éditeur (pseudo, avatar, couleur, cadre),
+  puis le lobby du téléphone et « Modifier » ; la TV montre son arrivée dans le lobby. « Recommencer à zéro » relance la création.
+- `#scene=transitions/univers&skin=dofus&n=8` : la scène de changement d'univers vers l'habillage choisi en haut ; le menu
+  « Depuis » règle l'univers de départ (le skin de la page bascule à mi-parcours, comme en partie). Aussi `transitions/ouverture`
+  (lobby → pièce → premier univers) et `transitions/sortie` (retour dans la pièce avant la cérémonie).
+- `#scene=ecrans/ceremonie&n=8&tel=360x640` : la cérémonie de fin entière (souvenirs, classement provisoire sans score,
+  enveloppe, roulette, projecteur, étoiles, cuillère, duo), puis enchaîner avec `#scene=ecrans/final` pour le classement final.
+  Deux téléphones : ils reçoivent la carte de leur bonus seulement quand il est révélé sur la TV.
 - `#scene=ecrans/minuit&n=8&tel=360x640` : 15 secondes jusqu’au passage au 1er janvier 2027, puis « Bonne année », sur la
   vraie TV et un téléphone de 360 × 640. Le curseur permet de revoir les dernières secondes ; Continuer reprend le lobby.
   Cet aperçu reprend le thème de base, comme le déclenchement réel de minuit.

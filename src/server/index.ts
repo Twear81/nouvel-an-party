@@ -22,8 +22,9 @@ async function main() {
   const joinPort = Number(process.env.PARTY_JOIN_PORT ?? httpsPort);
 
   const ips = lanIps();
-  const ip = pickIp(settings.ip);
-  const cert = await loadOrCreateCert(paths.data, ips.length ? ips : [ip]);
+  // PARTY_IP (conteneur, réseau particulier) l'emporte sur « ip: » de partie.yaml.
+  const ip = pickIp(process.env.PARTY_IP || settings.ip);
+  const cert = await loadOrCreateCert(paths.data, [...new Set([ip, ...ips])]);
   const joinUrl = `https://${ip}:${joinPort}/play`;
 
   setSoundVolume(settings.volume_sons);
@@ -55,7 +56,9 @@ async function main() {
     persistence: filePersistence(paths.data),
     dejaVu: fileDejaVu(paths.data),
   });
-  attachSockets(io, engine, { hostIps: ips });
+  // PARTY_HOST_IPS : IP supplémentaires traitées comme « la machine hôte » (ex. passerelle Docker sans réseau host).
+  const hostIps = [...ips, ...(process.env.PARTY_HOST_IPS ?? "").split(",").map((s) => s.trim()).filter(Boolean)];
+  attachSockets(io, engine, { hostIps });
 
   await Promise.all([listen(httpServer, httpPort), listen(httpsServer, httpsPort)]);
 
